@@ -1,0 +1,1 @@
+{"host":"example.com","a":["1.2.3.4"],"cname":["alias.example.net"],"txt":["v=spf1"]}

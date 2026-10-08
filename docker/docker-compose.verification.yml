@@ -1,0 +1,11 @@
+services:
+  verification-runner:
+    build:
+      context: ..
+      dockerfile: docker/verification-runner.Dockerfile
+    working_dir: /workspace
+    volumes:
+      - ..:/workspace:ro
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./verification-artifacts:/workspace/ci-artifacts
+    entrypoint: ["/bin/bash", "/workspace/docker/run-verification.sh"]

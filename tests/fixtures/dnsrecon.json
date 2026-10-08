@@ -1,0 +1,5 @@
+[
+  {"type": "A", "name": "www.example.com", "address": "192.0.2.10"},
+  {"type": "CNAME", "name": "api.example.com", "target": "app.example.com."},
+  {"type": "A", "name": "bad.other.net", "address": "198.51.100.20"}
+]

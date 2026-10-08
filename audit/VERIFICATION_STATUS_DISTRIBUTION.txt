@@ -1,0 +1,9 @@
+verified-live: 0
+verified-fixture: 33
+verified-source-read: 2
+asserted: 0
+unknown: 0
+blocked: 0
+
+adapter fixture_provenance synthetic: 33
+adapter fixture_provenance captured: 0

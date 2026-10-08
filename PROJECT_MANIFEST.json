@@ -1,0 +1,853 @@
+{
+  "project": "Aletheia",
+  "manifest_version": "0.7.1",
+  "phase": 7,
+  "status": "phase_7_built_pending_docker_integration",
+  "created_at": "2026-10-08T17:01:00+03:00",
+  "goals": [
+    "Unify external OSINT collectors behind a typed adapter contract.",
+    "Persist a provenance-first entity graph and resumable workflow checkpoints.",
+    "Add ten isolated domain/infrastructure adapters without rewriting upstream tools.",
+    "Enforce legal-only routing and explicit authorization for target-adjacent DNS/recon actions.",
+    "Preserve per-fact provenance: value, tool, source URL, timestamp, confidence.",
+    "Add legal-gated identity, email, and phone adapters without reimplementing upstream tools.",
+    "Prevent credential values from entering Docker argv or Aletheia audit command records.",
+    "Add selected social, geospatial, and image-analysis adapters using official APIs or existing upstream packages.",
+    "Keep biometric/image analysis offline or explicitly credentialed; do not perform person identification against remote databases.",
+    "Add corporate, regulatory-records, and sanctions adapters using verified official/public or licensed APIs.",
+    "Keep sanctions search relevance distinct from identity/match probability and require source verification before legal assertions."
+  ],
+  "phases": {
+    "1": "core graph + checkpoint + adapter framework + Sherlock + theHarvester + ExifTool",
+    "2": "entity resolution + dedup + reporting",
+    "3": "10 domain/infra adapters",
+    "4": "identity/email/phone adapters",
+    "5": "social/geo/image adapters",
+    "6": "corporate/records/sanctions",
+    "7": "benchmarking + web UI + MCP server"
+  },
+  "checkpoints": {
+    "after_adapter": true,
+    "after_failure": true,
+    "after_retry": true,
+    "atomic_manifest_write": true,
+    "handoff_on_stop": true,
+    "after_phase2_resolution": true,
+    "after_report_generation": true,
+    "after_phase3_adapters": true,
+    "after_phase3_validation": true,
+    "after_phase4_adapters": true,
+    "after_phase4_validation": true,
+    "after_phase5_adapters": true,
+    "after_phase5_validation": true,
+    "after_phase6_adapters": true,
+    "after_phase6_validation": true,
+    "after_phase7_adapters": true,
+    "after_phase7_validation": true
+  },
+  "tool_inventory": [
+    {
+      "name": "sherlock",
+      "upstream": "https://github.com/sherlock-project/sherlock",
+      "license": "MIT",
+      "version_pin": "0.16.2",
+      "invocation": "Docker / CLI",
+      "input_types": [
+        "username"
+      ],
+      "output_schema": "normalized finding records from username/site/URL observations",
+      "legal_notes": "Public-site username enumeration only; honor site terms, robots/policy, rate limits, and applicable law. No login/CAPTCHA bypass.",
+      "network": "required",
+      "last_audited": "2026-10-08T18:39:35+03:00",
+      "verification_status": "verified-fixture",
+      "note": "Fixture parser coverage passes; fixture provenance: synthetic; fixture file: tests/fixtures/sherlock.txt. No live container run has occurred.",
+      "fixture_provenance": "synthetic"
+    },
+    {
+      "name": "theHarvester",
+      "upstream": "https://github.com/laramies/theHarvester",
+      "license": "GPL-2.0-only",
+      "version_pin": "4.11.1",
+      "invocation": "Docker / CLI",
+      "input_types": [
+        "domain"
+      ],
+      "output_schema": "normalized host/email/IP/URL observations from selected passive sources",
+      "legal_notes": "Default Phase 1 mode is passive-source collection. Active resolution/scanning is disabled by adapter policy unless an explicit authorized scope is supplied in a future phase.",
+      "network": "required",
+      "last_audited": "2026-10-08T18:39:35+03:00",
+      "verification_status": "verified-fixture",
+      "note": "Fixture parser coverage passes; fixture provenance: synthetic; fixture file: tests/fixtures/theharvester.jsonl. No live container run has occurred.",
+      "fixture_provenance": "synthetic"
+    },
+    {
+      "name": "exiftool",
+      "upstream": "https://exiftool.org/",
+      "license": "Perl Artistic License / GPL-1.0-or-later dual licensing",
+      "version_pin": "13.59",
+      "invocation": "Docker / CLI",
+      "input_types": [
+        "image",
+        "file"
+      ],
+      "output_schema": "metadata observations from local evidence files",
+      "legal_notes": "Local-file metadata extraction only. No network access required by the adapter.",
+      "network": "none",
+      "last_audited": "2026-10-08T18:39:35+03:00",
+      "verification_status": "verified-fixture",
+      "note": "Fixture parser coverage passes; fixture provenance: synthetic; fixture file: tests/fixtures/exiftool.json. No live container run has occurred.",
+      "fixture_provenance": "synthetic"
+    },
+    {
+      "name": "rapidfuzz",
+      "upstream": "https://pypi.org/project/RapidFuzz/",
+      "license": "MIT",
+      "version_pin": "3.14.6",
+      "invocation": "Python library",
+      "input_types": [
+        "normalized entity values"
+      ],
+      "output_schema": "similarity features and composite score",
+      "legal_notes": "Internal computation only; no network access.",
+      "network": "none",
+      "last_audited": "2026-10-08T18:39:35+03:00",
+      "verification_status": "verified-source-read",
+      "note": "Upstream package/version documentation was reviewed; this is an internal dependency, not an adapter parser, and no live adapter execution is implied."
+    },
+    {
+      "name": "reportlab",
+      "upstream": "https://pypi.org/project/reportlab/",
+      "license": "BSD",
+      "version_pin": "5.0.1",
+      "invocation": "Python library",
+      "input_types": [
+        "report payload"
+      ],
+      "output_schema": "PDF report",
+      "legal_notes": "Internal report generation only; no network access.",
+      "network": "none",
+      "last_audited": "2026-10-08T18:39:35+03:00",
+      "verification_status": "verified-source-read",
+      "note": "Upstream package/version documentation was reviewed; this is an internal dependency, not an adapter parser, and no live adapter execution is implied."
+    },
+    {
+      "name": "amass",
+      "upstream": "https://github.com/owasp-amass/amass",
+      "license": "Apache-2.0",
+      "version_pin": "5.1.1",
+      "invocation": "Docker / CLI",
+      "input_types": [
+        "domain"
+      ],
+      "output_schema": "normalized host/IP observations from passive enumeration",
+      "legal_notes": "Passive mode only; active discovery is disabled by wrapper policy.",
+      "network": "required",
+      "last_audited": "2026-10-08T18:39:35+03:00",
+      "verification_status": "verified-fixture",
+      "note": "Fixture parser coverage passes; fixture provenance: synthetic; fixture file: tests/fixtures/amass.txt. No live container run has occurred.",
+      "fixture_provenance": "synthetic"
+    },
+    {
+      "name": "subfinder",
+      "upstream": "https://github.com/projectdiscovery/subfinder",
+      "license": "MIT",
+      "version_pin": "2.17.0",
+      "invocation": "Docker / CLI",
+      "input_types": [
+        "domain"
+      ],
+      "output_schema": "normalized host observations from passive sources",
+      "legal_notes": "Passive subdomain enumeration only; honor source terms and rate limits.",
+      "network": "required",
+      "last_audited": "2026-10-08T18:39:35+03:00",
+      "verification_status": "verified-fixture",
+      "note": "Fixture parser coverage passes; fixture provenance: synthetic; fixture file: tests/fixtures/subfinder.txt. No live container run has occurred.",
+      "fixture_provenance": "synthetic"
+    },
+    {
+      "name": "assetfinder",
+      "upstream": "https://github.com/tomnomnom/assetfinder",
+      "license": "MIT",
+      "version_pin": "0.1.1",
+      "invocation": "Docker / CLI",
+      "input_types": [
+        "domain"
+      ],
+      "output_schema": "normalized host observations",
+      "legal_notes": "Public/passive source discovery; honor source-specific terms.",
+      "network": "required",
+      "last_audited": "2026-10-08T18:39:35+03:00",
+      "verification_status": "verified-fixture",
+      "note": "Fixture parser coverage passes; fixture provenance: synthetic; fixture file: tests/fixtures/assetfinder.txt. No live container run has occurred.",
+      "fixture_provenance": "synthetic"
+    },
+    {
+      "name": "dnsx",
+      "upstream": "https://github.com/projectdiscovery/dnsx",
+      "license": "MIT",
+      "version_pin": "1.3.1",
+      "invocation": "Docker / CLI",
+      "input_types": [
+        "domain"
+      ],
+      "output_schema": "normalized DNS record observations",
+      "legal_notes": "Target-adjacent DNS resolution; explicit authorization required. No brute-force mode.",
+      "network": "required",
+      "last_audited": "2026-10-08T18:39:35+03:00",
+      "verification_status": "verified-fixture",
+      "note": "Fixture parser coverage passes; fixture provenance: synthetic; fixture file: tests/fixtures/dnsx.jsonl. No live container run has occurred.",
+      "fixture_provenance": "synthetic"
+    },
+    {
+      "name": "massdns",
+      "upstream": "https://github.com/blechschmidt/massdns",
+      "license": "GPL-3.0-only",
+      "version_pin": "1.1.0",
+      "invocation": "Docker / CLI",
+      "input_types": [
+        "domain"
+      ],
+      "output_schema": "normalized DNS A observations",
+      "legal_notes": "Target-adjacent DNS resolution; explicit authorization required. Conservative resolver set; no brute-force mode.",
+      "network": "required",
+      "last_audited": "2026-10-08T18:39:35+03:00",
+      "verification_status": "verified-fixture",
+      "note": "Fixture parser coverage passes; fixture provenance: synthetic; fixture file: tests/fixtures/massdns.txt. No live container run has occurred.",
+      "fixture_provenance": "synthetic"
+    },
+    {
+      "name": "dnsrecon",
+      "upstream": "https://github.com/darkoperator/dnsrecon",
+      "license": "GPL-2.0-only",
+      "version_pin": "1.6.3",
+      "invocation": "Docker / CLI",
+      "input_types": [
+        "domain"
+      ],
+      "output_schema": "normalized DNS/certificate observations",
+      "legal_notes": "Standard + CT collection only; explicit authorization required. Broader scan modes disabled.",
+      "network": "required",
+      "last_audited": "2026-10-08T18:39:35+03:00",
+      "verification_status": "verified-fixture",
+      "note": "Fixture parser coverage passes; fixture provenance: synthetic; fixture file: tests/fixtures/dnsrecon.json. No live container run has occurred.",
+      "fixture_provenance": "synthetic"
+    },
+    {
+      "name": "fierce",
+      "upstream": "https://github.com/mschwager/fierce",
+      "license": "GPL-3.0",
+      "version_pin": "1.6.0",
+      "invocation": "Docker / CLI",
+      "input_types": [
+        "domain"
+      ],
+      "output_schema": "normalized host/IP observations from DNS reconnaissance",
+      "legal_notes": "Explicit authorization required. Wide/range/traverse/connect options are not invoked.",
+      "network": "required",
+      "last_audited": "2026-10-08T18:39:35+03:00",
+      "verification_status": "verified-fixture",
+      "note": "Fixture parser coverage passes; fixture provenance: synthetic; fixture file: tests/fixtures/fierce.txt. No live container run has occurred.",
+      "fixture_provenance": "synthetic"
+    },
+    {
+      "name": "shodan",
+      "upstream": "https://developer.shodan.io/api",
+      "license": "MIT (official Python library)",
+      "version_pin": "1.31.0",
+      "invocation": "Docker / official Python library",
+      "input_types": [
+        "domain",
+        "ip"
+      ],
+      "output_schema": "normalized host/IP/domain observations from licensed API responses",
+      "legal_notes": "Read-only API lookup; API key required; honor account terms and quotas.",
+      "network": "required",
+      "last_audited": "2026-10-08T18:39:35+03:00",
+      "verification_status": "verified-fixture",
+      "note": "Fixture parser coverage passes; fixture provenance: synthetic; fixture file: tests/fixtures/shodan.json. No live container run has occurred.",
+      "fixture_provenance": "synthetic"
+    },
+    {
+      "name": "censys",
+      "upstream": "https://docs.censys.com/reference/get-started",
+      "license": "Apache-2.0 (Censys Python tooling/API integration)",
+      "version_pin": "Platform API v3",
+      "invocation": "Docker / HTTPS API",
+      "input_types": [
+        "domain",
+        "ip"
+      ],
+      "output_schema": "normalized host/IP/URL/domain observations from indexed API responses",
+      "legal_notes": "PAT required. Organization ID may be supplied for organization entitlements. Read-only indexed data.",
+      "network": "required",
+      "last_audited": "2026-10-08T18:39:35+03:00",
+      "verification_status": "verified-fixture",
+      "note": "Fixture parser coverage passes; fixture provenance: synthetic; fixture file: tests/fixtures/censys.json. No live container run has occurred.",
+      "fixture_provenance": "synthetic"
+    },
+    {
+      "name": "crt.sh",
+      "upstream": "https://crt.sh/",
+      "license": "Service endpoint; no software license claim",
+      "version_pin": "public endpoint (2026-10-08)",
+      "invocation": "Docker / HTTPS JSON endpoint",
+      "input_types": [
+        "domain"
+      ],
+      "output_schema": "normalized certificate name observations",
+      "legal_notes": "Public CT endpoint only; no authentication bypass or target probing.",
+      "network": "required",
+      "last_audited": "2026-10-08T18:39:35+03:00",
+      "verification_status": "verified-fixture",
+      "note": "Fixture parser coverage passes; fixture provenance: synthetic; fixture file: tests/fixtures/crtsh.json. No live container run has occurred.",
+      "fixture_provenance": "synthetic"
+    },
+    {
+      "name": "maigret",
+      "upstream": "https://github.com/soxoj/maigret",
+      "license": "MIT",
+      "version_pin": "0.6.6",
+      "invocation": "Docker / CLI",
+      "input_types": [
+        "username"
+      ],
+      "output_schema": "normalized claimed-account URL/service observations",
+      "legal_notes": "Public username enumeration only; explicit authorization required; no CAPTCHA/Cloudflare/Tor/I2P bypass modes are exposed.",
+      "network": "required",
+      "last_audited": "2026-10-08T18:39:35+03:00",
+      "verification_status": "verified-fixture",
+      "note": "Fixture parser coverage passes; fixture provenance: synthetic; fixture file: tests/fixtures/maigret.ndjson. No live container run has occurred.",
+      "fixture_provenance": "synthetic"
+    },
+    {
+      "name": "holehe",
+      "upstream": "https://github.com/megadose/holehe",
+      "license": "GPL-3.0-only",
+      "version_pin": "1.61",
+      "invocation": "Docker / CLI",
+      "input_types": [
+        "email"
+      ],
+      "output_schema": "normalized positive account-registration signals",
+      "legal_notes": "Positive public account-registration signals only; explicit authorization required; no login or password-reset completion.",
+      "network": "required",
+      "last_audited": "2026-10-08T18:39:35+03:00",
+      "verification_status": "verified-fixture",
+      "note": "Fixture parser coverage passes; fixture provenance: synthetic; fixture file: tests/fixtures/holehe.txt. No live container run has occurred.",
+      "fixture_provenance": "synthetic"
+    },
+    {
+      "name": "h8mail",
+      "upstream": "https://github.com/khast3x/h8mail",
+      "license": "BSD-3-Clause",
+      "version_pin": "2.5.6",
+      "invocation": "Docker / CLI",
+      "input_types": [
+        "email"
+      ],
+      "output_schema": "normalized service/breach observations",
+      "legal_notes": "Bounded non-premium mode; default reconnaissance providers skipped, password output hidden, local breach files/custom queries/chasing disabled.",
+      "network": "required",
+      "last_audited": "2026-10-08T18:39:35+03:00",
+      "verification_status": "verified-fixture",
+      "note": "Fixture parser coverage passes; fixture provenance: synthetic; fixture file: tests/fixtures/h8mail.json. No live container run has occurred.",
+      "fixture_provenance": "synthetic"
+    },
+    {
+      "name": "hibp",
+      "upstream": "https://haveibeenpwned.com/API/V3",
+      "license": "Service API terms",
+      "version_pin": "API v3",
+      "invocation": "Docker / HTTPS API",
+      "input_types": [
+        "email"
+      ],
+      "output_schema": "normalized breach observations",
+      "legal_notes": "Authenticated breach-account lookup only; API key required; no password retrieval.",
+      "network": "required",
+      "last_audited": "2026-10-08T18:39:35+03:00",
+      "verification_status": "verified-fixture",
+      "note": "Fixture parser coverage passes; fixture provenance: synthetic; fixture file: tests/fixtures/hibp.json. No live container run has occurred.",
+      "fixture_provenance": "synthetic"
+    },
+    {
+      "name": "phoneinfoga",
+      "upstream": "https://github.com/sundowndev/phoneinfoga",
+      "license": "GPL-3.0-only",
+      "version_pin": "2.11.0",
+      "invocation": "Docker / CLI",
+      "input_types": [
+        "phone"
+      ],
+      "output_schema": "normalized phone/carrier/location/service observations",
+      "legal_notes": "Scan command only; explicit authorization required; browser/login workflows not exposed.",
+      "network": "required",
+      "last_audited": "2026-10-08T18:39:35+03:00",
+      "verification_status": "verified-fixture",
+      "note": "Fixture parser coverage passes; fixture provenance: synthetic; fixture file: tests/fixtures/phoneinfoga.txt. No live container run has occurred.",
+      "fixture_provenance": "synthetic"
+    },
+    {
+      "name": "libphonenumber",
+      "upstream": "https://pypi.org/project/phonenumbers/",
+      "license": "Apache-2.0",
+      "version_pin": "9.0.40",
+      "invocation": "Docker / Python runner",
+      "input_types": [
+        "phone"
+      ],
+      "output_schema": "normalized parsing/validation/region/carrier/timezone observations",
+      "legal_notes": "Offline parsing/validation only; no reverse lookup or owner identification.",
+      "network": "none",
+      "last_audited": "2026-10-08T18:39:35+03:00",
+      "verification_status": "verified-fixture",
+      "note": "Fixture parser coverage passes; fixture provenance: synthetic; fixture file: tests/fixtures/libphonenumber.json. No live container run has occurred.",
+      "fixture_provenance": "synthetic"
+    },
+    {
+      "name": "twilio-lookup",
+      "upstream": "https://www.twilio.com/docs/lookup/v2-api",
+      "license": "Proprietary service API",
+      "version_pin": "Lookup v2",
+      "invocation": "Docker / HTTPS API",
+      "input_types": [
+        "phone"
+      ],
+      "output_schema": "normalized Basic Lookup observations",
+      "legal_notes": "Read-only Basic Lookup by default; paid data packages are not requested by the adapter; explicit authorization required.",
+      "network": "required",
+      "last_audited": "2026-10-08T18:39:35+03:00",
+      "verification_status": "verified-fixture",
+      "note": "Fixture parser coverage passes; fixture provenance: synthetic; fixture file: tests/fixtures/twilio-lookup.json. No live container run has occurred.",
+      "fixture_provenance": "synthetic"
+    },
+    {
+      "name": "instaloader",
+      "upstream": "https://github.com/instaloader/instaloader",
+      "license": "MIT",
+      "version_pin": "4.15.3",
+      "invocation": "Docker / Python module",
+      "input_types": [
+        "username"
+      ],
+      "output_schema": "normalized public Instagram profile observations",
+      "legal_notes": "Unauthenticated public-profile metadata only; no login/private profile/session/cookie workflows.",
+      "network": "required",
+      "last_audited": "2026-10-08T18:39:35+03:00",
+      "verification_status": "verified-fixture",
+      "note": "Fixture parser coverage passes; fixture provenance: synthetic; fixture file: tests/fixtures/instaloader.json. No live container run has occurred.",
+      "fixture_provenance": "synthetic"
+    },
+    {
+      "name": "reddit-api",
+      "upstream": "https://www.reddit.com/dev/api/",
+      "license": "Reddit API terms",
+      "version_pin": "Data API v1",
+      "invocation": "Docker / HTTPS OAuth API",
+      "input_types": [
+        "username"
+      ],
+      "output_schema": "normalized public user-overview observations",
+      "legal_notes": "Official OAuth API only; operator credentials required; no target login/private data.",
+      "network": "required",
+      "last_audited": "2026-10-08T18:39:35+03:00",
+      "verification_status": "verified-fixture",
+      "note": "Fixture parser coverage passes; fixture provenance: synthetic; fixture file: tests/fixtures/reddit.json. No live container run has occurred.",
+      "fixture_provenance": "synthetic"
+    },
+    {
+      "name": "youtube-api",
+      "upstream": "https://developers.google.com/youtube/v3",
+      "license": "Google/YouTube API terms",
+      "version_pin": "Data API v3",
+      "invocation": "Docker / HTTPS API",
+      "input_types": [
+        "username"
+      ],
+      "output_schema": "normalized channel metadata observations",
+      "legal_notes": "Official read-only YouTube Data API; API key required; honor quota and terms.",
+      "network": "required",
+      "last_audited": "2026-10-08T18:39:35+03:00",
+      "verification_status": "verified-fixture",
+      "note": "Fixture parser coverage passes; fixture provenance: synthetic; fixture file: tests/fixtures/youtube.json. No live container run has occurred.",
+      "fixture_provenance": "synthetic"
+    },
+    {
+      "name": "overpass",
+      "upstream": "https://overpass-api.de/",
+      "license": "OpenStreetMap data ODbL; Overpass API service",
+      "version_pin": "public API (2026-10-08)",
+      "invocation": "Docker / HTTPS API",
+      "input_types": [
+        "geolocation"
+      ],
+      "output_schema": "normalized named-place and coordinate observations",
+      "legal_notes": "Read-only OSM-derived nearby-place query; no target interaction.",
+      "network": "required",
+      "last_audited": "2026-10-08T18:39:35+03:00",
+      "verification_status": "verified-fixture",
+      "note": "Fixture parser coverage passes; fixture provenance: synthetic; fixture file: tests/fixtures/overpass.json. No live container run has occurred.",
+      "fixture_provenance": "synthetic"
+    },
+    {
+      "name": "suncalc",
+      "upstream": "https://www.npmjs.com/package/suncalc",
+      "license": "BSD-2-Clause",
+      "version_pin": "2.0.2",
+      "invocation": "Docker / Node package",
+      "input_types": [
+        "geolocation"
+      ],
+      "output_schema": "sun-position and daylight-phase calculations",
+      "legal_notes": "Deterministic local calculation; no network or identity inference.",
+      "network": "none",
+      "last_audited": "2026-10-08T18:39:35+03:00",
+      "verification_status": "verified-fixture",
+      "note": "Fixture parser coverage passes; fixture provenance: synthetic; fixture file: tests/fixtures/suncalc.json. No live container run has occurred.",
+      "fixture_provenance": "synthetic"
+    },
+    {
+      "name": "deepface",
+      "upstream": "https://github.com/serengil/deepface",
+      "license": "MIT (package; wrapped model licenses vary)",
+      "version_pin": "0.0.101",
+      "invocation": "Docker / Python package",
+      "input_types": [
+        "image",
+        "file_path"
+      ],
+      "output_schema": "offline face detection observations",
+      "legal_notes": "OpenCV detector path only; no identity recognition, no remote search, no remote model download.",
+      "network": "none",
+      "last_audited": "2026-10-08T18:39:35+03:00",
+      "verification_status": "verified-fixture",
+      "note": "Fixture parser coverage passes; fixture provenance: synthetic; fixture file: tests/fixtures/deepface.json. No live container run has occurred.",
+      "fixture_provenance": "synthetic"
+    },
+    {
+      "name": "insightface",
+      "upstream": "https://github.com/deepinsight/insightface",
+      "license": "MIT (package; model licenses vary)",
+      "version_pin": "2.1",
+      "invocation": "Docker / Python package",
+      "input_types": [
+        "image",
+        "file_path"
+      ],
+      "output_schema": "offline face detection observations",
+      "legal_notes": "Network disabled. Model weights must be operator-provisioned under applicable licenses. No remote identity search.",
+      "network": "none",
+      "last_audited": "2026-10-08T18:39:35+03:00",
+      "verification_status": "verified-fixture",
+      "note": "Fixture parser coverage passes; fixture provenance: synthetic; fixture file: tests/fixtures/insightface.json. No live container run has occurred.",
+      "fixture_provenance": "synthetic"
+    },
+    {
+      "name": "google-vision",
+      "upstream": "https://cloud.google.com/vision/docs",
+      "license": "Apache-2.0 client / Google Cloud service terms",
+      "version_pin": "3.16.0",
+      "invocation": "Docker / Google Cloud Vision API",
+      "input_types": [
+        "image",
+        "file_path"
+      ],
+      "output_schema": "labels/OCR/face-detection observations",
+      "legal_notes": "Operator-supplied images only; explicit assertion and credentials required; no face identity recognition.",
+      "network": "required",
+      "last_audited": "2026-10-08T18:39:35+03:00",
+      "verification_status": "verified-fixture",
+      "note": "Fixture parser coverage passes; fixture provenance: synthetic; fixture file: tests/fixtures/google-vision.json. No live container run has occurred.",
+      "fixture_provenance": "synthetic"
+    },
+    {
+      "name": "sec-edgar",
+      "upstream": "https://www.sec.gov/search-filings/edgar-application-programming-interfaces",
+      "license": "U.S. SEC public EDGAR data",
+      "version_pin": "EDGAR REST APIs",
+      "invocation": "Docker / HTTPS API",
+      "input_types": [
+        "name"
+      ],
+      "output_schema": "company matches and bounded recent filing metadata",
+      "legal_notes": "Public SEC data only; descriptive User-Agent required; no filing submission/private access.",
+      "network": "required",
+      "last_audited": "2026-10-08T18:39:35+03:00",
+      "verification_status": "verified-fixture",
+      "note": "Fixture parser coverage passes; fixture provenance: synthetic; fixture file: tests/fixtures/sec-edgar.json. No live container run has occurred.",
+      "fixture_provenance": "synthetic"
+    },
+    {
+      "name": "gleif",
+      "upstream": "https://www.gleif.org/en/lei-data/gleif-api",
+      "license": "GLEIF open data / API terms",
+      "version_pin": "GLEIF API v1",
+      "invocation": "Docker / HTTPS API",
+      "input_types": [
+        "name"
+      ],
+      "output_schema": "LEI legal-entity records and basic parent relationships",
+      "legal_notes": "Public LEI reference data; fuzzy/parent results are source observations, not automatic identity proof.",
+      "network": "required",
+      "last_audited": "2026-10-08T18:39:35+03:00",
+      "verification_status": "verified-fixture",
+      "note": "Fixture parser coverage passes; fixture provenance: synthetic; fixture file: tests/fixtures/gleif.json. No live container run has occurred.",
+      "fixture_provenance": "synthetic"
+    },
+    {
+      "name": "opencorporates",
+      "upstream": "https://api.opencorporates.com/documentation/API-Reference",
+      "license": "OpenCorporates API terms / dataset licence",
+      "version_pin": "REST API v0.4.8",
+      "invocation": "Docker / HTTPS API",
+      "input_types": [
+        "name"
+      ],
+      "output_schema": "company/entity search records",
+      "legal_notes": "API token required; respect plan quotas and licensing; website scraping is not used.",
+      "network": "required",
+      "last_audited": "2026-10-08T18:39:35+03:00",
+      "verification_status": "verified-fixture",
+      "note": "Fixture parser coverage passes; fixture provenance: synthetic; fixture file: tests/fixtures/opencorporates.json. No live container run has occurred.",
+      "fixture_provenance": "synthetic"
+    },
+    {
+      "name": "opensanctions",
+      "upstream": "https://api.opensanctions.org/docs",
+      "license": "OpenSanctions dataset/API terms",
+      "version_pin": "OpenSanctions API",
+      "invocation": "Docker / HTTPS API",
+      "input_types": [
+        "name",
+        "email",
+        "domain"
+      ],
+      "output_schema": "sanctions-scoped search results",
+      "legal_notes": "API key and permitted dataset license required; search relevance is not identity probability.",
+      "network": "required",
+      "last_audited": "2026-10-08T18:39:35+03:00",
+      "verification_status": "verified-fixture",
+      "note": "Fixture parser coverage passes; fixture provenance: synthetic; fixture file: tests/fixtures/opensanctions.json. No live container run has occurred.",
+      "fixture_provenance": "synthetic"
+    },
+    {
+      "name": "courtlistener",
+      "upstream": "https://www.courtlistener.com/api/rest/v3/",
+      "license": "CourtListener terms / source-specific court documents",
+      "version_pin": "REST API v3",
+      "invocation": "Docker / HTTPS API",
+      "input_types": [
+        "name"
+      ],
+      "output_schema": "public court-search result metadata",
+      "legal_notes": "Public API only; no PACER credentials or private/sealed dockets; verify underlying source before legal assertions.",
+      "network": "required",
+      "last_audited": "2026-10-08T18:39:35+03:00",
+      "verification_status": "verified-fixture",
+      "note": "Fixture parser coverage passes; fixture provenance: synthetic; fixture file: tests/fixtures/courtlistener.json. No live container run has occurred.",
+      "fixture_provenance": "synthetic"
+    }
+  ],
+  "phase_1_scope": {
+    "supported_seeds": [
+      "username",
+      "domain",
+      "file_path"
+    ],
+    "graph_store": "SQLite-compatible canonical store for tests/local dev; PostgreSQL schema and Neo4j projection hooks included for deployment",
+    "durable_orchestrator": "checkpointed local DAG runner in Phase 1; Temporal/Celery integration boundary reserved",
+    "reporting": "completed in Phase 2",
+    "benchmarking": "not implemented until Phase 7"
+  },
+  "known_environment_limitations": [
+    "Docker CLI is not installed in the build environment and no /var/run/docker.sock is available; live container build/run tests cannot execute here.",
+    "The Phase 7 integration suite therefore skips 34 Docker tests rather than asserting false success.",
+    "InsightFace requires operator-provisioned model weights because the container intentionally has no network path for model download.",
+    "Production-grade outbound-request auditing for opaque CLI/API collectors still requires enforced egress/proxy telemetry beyond adapter invocation logs.",
+    "The Phase 7 web UI is intentionally unauthenticated for local development and must be placed behind authentication before non-local exposure."
+  ],
+  "phase_2_scope": {
+    "entity_resolution": "type-aware canonical normalization + exact deduplication + conservative fuzzy SAME_AS_CANDIDATE edges",
+    "similarity": "RapidFuzz Jaro-Winkler 0.65 + normalized Levenshtein 0.35",
+    "fuzzy_candidate_threshold": 0.88,
+    "automatic_merge_policy": "exact canonical match only; fuzzy similarity never authorizes merge",
+    "report_formats": [
+      "JSON",
+      "PDF",
+      "GraphML",
+      "STIX 2.1 serialization"
+    ],
+    "integrity": "canonical report content SHA-256 + per-artifact SHA-256",
+    "report_provenance": "claim -> entity -> DERIVED_FROM evidence -> tool/source/timestamp/confidence",
+    "production_note": "PDF is a provenance-preserving technical report, not a jurisdiction-independent guarantee of admissibility."
+  },
+  "phase_3_scope": {
+    "adapters": [
+      "amass",
+      "subfinder",
+      "assetfinder",
+      "dnsx",
+      "massdns",
+      "dnsrecon",
+      "fierce",
+      "shodan",
+      "censys",
+      "crt.sh"
+    ],
+    "passive_or_indexed": [
+      "amass",
+      "subfinder",
+      "assetfinder",
+      "shodan",
+      "censys",
+      "crt.sh"
+    ],
+    "authorization_required": [
+      "dnsx",
+      "massdns",
+      "dnsrecon",
+      "fierce"
+    ],
+    "docker_isolation": "Each new upstream tool has its own dedicated Docker image; GPL tools are kept as separate processes/images.",
+    "credential_handling": "Shodan/Censys secrets are explicit allowlisted environment variables and are not embedded in commands or results; Phase 4 follows the same invariant.",
+    "source_provenance_policy": "Where upstream CLI output lacks per-record URLs, the finding distinguishes collector provenance from primary-source provenance and hashes raw evidence."
+  },
+  "phase_4_scope": {
+    "adapters": [
+      "maigret",
+      "holehe",
+      "h8mail",
+      "hibp",
+      "phoneinfoga",
+      "libphonenumber",
+      "twilio-lookup"
+    ],
+    "identity_policy": "Claimed/positive account signals are retained; negative/error/rate-limited states are excluded from the graph as identity facts.",
+    "email_policy": "No password fields are emitted. HIBP is authenticated breach-account lookup only. h8mail is restricted to a bounded non-premium mode.",
+    "phone_policy": "libphonenumber is offline parsing/validation; PhoneInfoga and Twilio require explicit authorization assertions.",
+    "credential_handling": "Secrets are injected by Docker inherited environment names only; secret values are excluded from command argv, audit records, and result JSON.",
+    "docker_isolation": "Every selected upstream tool has its own Docker image; GPL tools are separate processes/images.",
+    "deferred": [
+      "whatsmyname",
+      "blackbird",
+      "namechk"
+    ],
+    "deferred_reason": {
+      "whatsmyname": "Current upstream project is a community dataset and its bundled checker scripts were removed; implementing a new checker would violate the adapter-not-rewrite boundary.",
+      "blackbird": "Current upstream packaging/version/license was not sufficiently verified to make a truthful pinned adapter in this phase.",
+      "namechk": "Current official API packaging/licensing/entitlement details were not sufficiently verified for a pinned adapter in this phase."
+    }
+  },
+  "validation": {
+    "unit_and_contract_tests": "67 passed, 34 skipped",
+    "integration_tests": "34 skipped because Docker CLI and Docker socket are unavailable",
+    "integration_skip_breakdown": "3 Phase 1 + 10 Phase 3 + 7 Phase 4 + 8 Phase 5 + 5 Phase 6 + 1 Phase 7",
+    "syntax_checks": [
+      "python -m compileall -q app docker",
+      "bash -n docker/build.sh"
+    ],
+    "docker_attempt": {
+      "docker_cli_present": false,
+      "docker_socket_present": false,
+      "build_command": "./docker/build.sh",
+      "build_exit_code": 127,
+      "build_error": "./docker/build.sh: line 4: docker: command not found",
+      "integration_command": "pytest -q -m integration",
+      "integration_result": "34 skipped, 67 deselected"
+    },
+    "security_tests": "passed: authorization gates; secret values excluded from Docker argv/audit records; benchmark quality metrics require labels."
+  },
+  "phase_5_scope": {
+    "adapters": [
+      "instaloader",
+      "reddit-api",
+      "youtube-api",
+      "overpass",
+      "suncalc",
+      "deepface",
+      "insightface",
+      "google-vision"
+    ],
+    "social": [
+      "instaloader",
+      "reddit-api",
+      "youtube-api"
+    ],
+    "geospatial": [
+      "overpass",
+      "suncalc"
+    ],
+    "image": [
+      "deepface",
+      "insightface",
+      "google-vision"
+    ],
+    "biometric_policy": "Detection only. No remote face search, no person-identification claims, and no demographic inference.",
+    "credential_policy": "Reddit, YouTube, and Google Cloud secrets are allowlisted environment variables and excluded from argv/audit command records.",
+    "model_policy": "Offline face adapters never fetch model weights at runtime; model files must be operator-provisioned when required.",
+    "deferred": [
+      "tiktok-research-api",
+      "telegram-public",
+      "sentinel-hub",
+      "tineye",
+      "imagehash",
+      "phash",
+      "face-recognition",
+      "snscrape",
+      "twint-forks"
+    ],
+    "deferred_reason": "Current access/version/license or model-provisioning details were not sufficiently pinned to integrate without guessing or creating replacement implementations."
+  },
+  "phase_6_scope": {
+    "adapters": [
+      "sec-edgar",
+      "gleif",
+      "opencorporates",
+      "opensanctions",
+      "courtlistener"
+    ],
+    "corporate": [
+      "sec-edgar",
+      "gleif",
+      "opencorporates"
+    ],
+    "records": [
+      "sec-edgar",
+      "courtlistener"
+    ],
+    "sanctions": [
+      "opensanctions"
+    ],
+    "authorization_policy": "All Phase 6 network adapters require explicit authorization_assertion and legal_only=true.",
+    "credential_policy": "OpenCorporates and OpenSanctions secrets are allowlisted Docker environment variables; CourtListener token is optional and likewise never placed in argv.",
+    "evidence_policy": "Search results are discovery observations. Sanctions search score is not identity/match probability; court results require review of the underlying legal source.",
+    "deferred": [
+      "aleph",
+      "recap",
+      "pacer",
+      "muckrock",
+      "national-business-registries"
+    ],
+    "deferred_reason": "Exact current endpoint/access/licensing or jurisdiction-specific contracts were not sufficiently verified to implement without guessing. PACER remains paid/credentialed and is not accessed by this phase."
+  },
+  "phase_7_scope": {
+    "benchmarking": "SQLite benchmark_cases + execution_samples; labeled quality metrics and unlabeled execution telemetry are kept distinct.",
+    "leaderboard": "Sorted by labeled recall/precision then observed execution speed; missing quality labels remain null.",
+    "web_ui": "FastAPI root page with local interactive SVG graph, node details, run metadata, and benchmark leaderboard.",
+    "api_endpoints": [
+      "GET /",
+      "GET /v1/investigations/{run_id}/graph",
+      "GET /v1/benchmarks/leaderboard",
+      "POST /v1/benchmarks/cases"
+    ],
+    "mcp_tools": [
+      "investigate",
+      "resume",
+      "manifest",
+      "graph",
+      "benchmark_leaderboard"
+    ],
+    "mcp_transport": "stdio JSON-RPC bridge using the same orchestrator and legal gates.",
+    "production_note": "Authentication, rate-limited remote MCP, PostgreSQL/Neo4j/Elasticsearch/MinIO/Redis production backends remain deployment work; Phase 7 keeps deterministic local stores."
+  }
+}

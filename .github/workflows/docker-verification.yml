@@ -1,0 +1,83 @@
+name: Aletheia Docker Verification
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main ]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  docker-verification:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Set up Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: '3.13'
+          cache: pip
+
+      - name: Install Aletheia test dependencies
+        run: |
+          set -euo pipefail
+          python -m pip install --upgrade pip
+          python -m pip install -e '.[dev]'
+
+      - name: Parser coverage pre-flight
+        run: |
+          set -euo pipefail
+          PYTHONPATH=app python ci/check_parser_coverage.py | tee ci-parser-preflight.txt
+
+      - name: Verify Docker runtime
+        run: |
+          set -euo pipefail
+          docker --version | tee docker-runtime.txt
+          docker info | tee -a docker-runtime.txt
+
+      - name: Build every pinned Aletheia image
+        run: |
+          set -euo pipefail
+          mkdir -p ci-artifacts/docker-integration
+          ./docker/build.sh 2>&1 | tee ci-artifacts/docker-build.log
+
+      - name: Record image IDs and Dockerfile checksums
+        run: |
+          set -euo pipefail
+          {
+            while read -r image; do
+              docker image inspect "$image" --format '{{.Id}} {{.Created}}' | sed "s#^#$image #"
+            done < <(awk '$1=="docker" && $2=="build" { for(i=1;i<=NF;i++) if($i=="-t") print $(i+1) }' docker/build.sh | sort -u)
+            echo '--- Dockerfile SHA256 ---'
+            while read -r file; do
+              sha256sum "$file"
+            done < <(find docker -name Dockerfile -type f | sort)
+          } | tee ci-artifacts/image-ids-and-dockerfile-sha256.txt
+
+      - name: Run full test suite (includes all Docker integration tests)
+        run: |
+          set -o pipefail
+          python -m pytest -q 2>&1 | tee ci-artifacts/pytest-full.log
+
+      - name: Capture raw output for all 34 Docker integration cases
+        if: always()
+        run: |
+          set -euo pipefail
+          python ci/capture_docker_integration.py 2>&1 | tee ci-artifacts/docker-integration/capture.log
+
+      - name: Upload verification evidence
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: aletheia-docker-verification-${{ github.run_id }}
+          path: |
+            ci-artifacts/
+            ci-parser-preflight.txt
+            docker-runtime.txt
+          if-no-files-found: error
+          retention-days: 14

@@ -1,0 +1,37 @@
+services:
+  aletheia-api:
+    build:
+      context: .
+      dockerfile: docker/core.Dockerfile
+    environment:
+      ALETHEIA_DATA_DIR: /data
+      ALETHEIA_LEGAL_ONLY: "true"
+    volumes:
+      - ./data:/data
+      - /var/run/docker.sock:/var/run/docker.sock
+    ports:
+      - "127.0.0.1:8000:8000"
+    command: ["uvicorn", "aletheia.api.app:app", "--host", "0.0.0.0", "--port", "8000"]
+    read_only: true
+    tmpfs:
+      - /tmp
+  postgres:
+    image: postgres:17-alpine
+    profiles: ["future-storage"]
+    environment:
+      POSTGRES_DB: aletheia
+      POSTGRES_USER: aletheia
+      POSTGRES_PASSWORD: change-me
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+  neo4j:
+    image: neo4j:5-community
+    profiles: ["future-storage"]
+    environment:
+      NEO4J_AUTH: neo4j/change-me
+    volumes:
+      - neo4j-data:/data
+
+volumes:
+  postgres-data:
+  neo4j-data:

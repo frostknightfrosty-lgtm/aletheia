@@ -1,0 +1,3 @@
+[+] twitter : account exists
+[-] instagram : not found
+[+] github : registered

@@ -1,0 +1,30 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+docker build -t aletheia/sherlock:0.16.2 docker/sherlock
+docker build -t aletheia/theharvester:4.11.1 docker/theharvester
+docker build -t aletheia/exiftool:13.59 docker/exiftool
+docker build -t aletheia/amass:5.1.1 docker/amass
+docker build -t aletheia/subfinder:2.17.0 docker/subfinder
+docker build -t aletheia/assetfinder:0.1.1 docker/assetfinder
+docker build -t aletheia/dnsx:1.3.1 docker/dnsx
+docker build -t aletheia/massdns:1.1.0 docker/massdns
+docker build -t aletheia/dnsrecon:1.6.3 docker/dnsrecon
+docker build -t aletheia/fierce:1.6.0 docker/fierce
+docker build -t aletheia/shodan:1.31.0 docker/shodan
+docker build -t aletheia/censys:platform-v3 docker/censys
+docker build -t aletheia/crtsh:public-json docker/crtsh
+
+docker build -t aletheia/maigret:0.6.6 docker/maigret
+docker build -t aletheia/holehe:1.61 docker/holehe
+docker build -t aletheia/h8mail:2.5.6 docker/h8mail
+docker build -t aletheia/hibp:api-v3 docker/hibp
+docker build -t aletheia/phoneinfoga:2.11.0 docker/phoneinfoga
+docker build -t aletheia/libphonenumber:9.0.40 docker/libphonenumber
+docker build -t aletheia/twilio-lookup:api-v2 docker/twilio-lookup
+docker build -f docker/core.Dockerfile -t aletheia/core:0.7.0 .
+docker build -f docker/sec-edgar/Dockerfile -t aletheia/sec-edgar:public-api docker/sec-edgar
+docker build -f docker/gleif/Dockerfile -t aletheia/gleif:api-v1 docker/gleif
+docker build -f docker/opencorporates/Dockerfile -t aletheia/opencorporates:api-v0.4.8 docker/opencorporates
+docker build -f docker/opensanctions/Dockerfile -t aletheia/opensanctions:api docker/opensanctions
+docker build -f docker/courtlistener/Dockerfile -t aletheia/courtlistener:api-v3 docker/courtlistener

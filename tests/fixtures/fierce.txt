@@ -1,0 +1,4 @@
+DNS server: 192.0.2.53
+www.example.com resolves to 192.0.2.10
+api.example.com -> 192.0.2.11
+other.example.net should not be treated as scoped output

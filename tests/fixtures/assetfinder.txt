@@ -1,0 +1,4 @@
+www.example.com
+api.example.com.
+WWW.EXAMPLE.COM
+not-a-host
