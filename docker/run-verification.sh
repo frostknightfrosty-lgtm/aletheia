@@ -3,7 +3,7 @@ set -euo pipefail
 cd /workspace
 mkdir -p ci-artifacts
 PYTHONPATH=app python ci/check_parser_coverage.py | tee ci-artifacts/parser-preflight.txt
-./docker/build.sh 2>&1 | tee ci-artifacts/docker-build.log
+bash docker/build.sh 2>&1 | tee ci-artifacts/docker-build.log
 python - <<'PY' | tee ci-artifacts/image-ids-and-dockerfile-sha256.txt
 import re, subprocess
 from pathlib import Path
