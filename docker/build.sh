@@ -22,6 +22,14 @@ docker build -t aletheia/hibp:api-v3 docker/hibp
 docker build -t aletheia/phoneinfoga:2.11.0 docker/phoneinfoga
 docker build -t aletheia/libphonenumber:9.0.40 docker/libphonenumber
 docker build -t aletheia/twilio-lookup:api-v2 docker/twilio-lookup
+docker build -t aletheia/instaloader:4.15.3 docker/instaloader
+docker build -t aletheia/reddit-api:v1 docker/reddit-api
+docker build -t aletheia/youtube-api:v3 docker/youtube-api
+docker build -t aletheia/overpass:public docker/overpass
+docker build -t aletheia/suncalc:2.0.2 docker/suncalc
+docker build -t aletheia/deepface:0.0.101 docker/deepface
+docker build -t aletheia/insightface:2.1 docker/insightface
+docker build -t aletheia/google-vision:3.16.0 docker/google-vision
 docker build -f docker/core.Dockerfile -t aletheia/core:0.7.0 .
 docker build -f docker/sec-edgar/Dockerfile -t aletheia/sec-edgar:public-api docker/sec-edgar
 docker build -f docker/gleif/Dockerfile -t aletheia/gleif:api-v1 docker/gleif
