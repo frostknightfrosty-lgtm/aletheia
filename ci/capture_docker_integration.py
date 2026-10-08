@@ -22,7 +22,7 @@ CASES = [
     ("phase3-censys", "aletheia/censys:platform-v3", ["--health"]),
     ("phase3-crtsh", "aletheia/crtsh:public-json", ["--health"]),
     ("phase4-maigret", "aletheia/maigret:0.6.6", ["--version"]),
-    ("phase4-holehe", "aletheia/holehe:1.61", ["--help"]),
+    ("phase4-holehe", "aletheia/holehe:1.61", ["-c", "from holehe.core import __version__; print(__version__)"]),
     ("phase4-h8mail", "aletheia/h8mail:2.5.6", ["--help"]),
     ("phase4-hibp", "aletheia/hibp:api-v3", ["--health"]),
     ("phase4-phoneinfoga", "aletheia/phoneinfoga:2.11.0", ["version"]),
@@ -56,6 +56,8 @@ def main() -> int:
             if name == "phase1-exiftool":
                 cmd += ["-v", f"{sample}:/work/sample.txt:ro"]
             if name == "phase7-core-import":
+                cmd += ["--entrypoint", "python"]
+            if name == "phase4-holehe":
                 cmd += ["--entrypoint", "python"]
             cmd += [image, *args]
             proc = subprocess.run(cmd, capture_output=True, text=True, timeout=120)
