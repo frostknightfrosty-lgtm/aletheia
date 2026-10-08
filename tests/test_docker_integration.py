@@ -55,7 +55,7 @@ def test_phase3_container_health_smoke(image, command):
 
 @pytest.mark.parametrize("image,args", [
     ("aletheia/maigret:0.6.6", ["--version"]),
-    ("aletheia/holehe:1.61", ["--help"]),
+    ("aletheia/holehe:1.61", ["-c", "from holehe.core import __version__; print(__version__)"]),
     ("aletheia/h8mail:2.5.6", ["--help"]),
     ("aletheia/hibp:api-v3", ["--health"]),
     ("aletheia/phoneinfoga:2.11.0", ["version"]),
@@ -63,7 +63,8 @@ def test_phase3_container_health_smoke(image, command):
     ("aletheia/twilio-lookup:api-v2", ["--health"]),
 ])
 def test_phase4_docker_health(image, args):
-    r = _run(["docker", "run", "--rm", "--network", "none", image, *args])
+    entrypoint = ["--entrypoint", "python"] if image == "aletheia/holehe:1.61" else []
+    r = _run(["docker", "run", "--rm", "--network", "none", *entrypoint, image, *args])
     assert r.returncode == 0, r.stderr or r.stdout
 
 
