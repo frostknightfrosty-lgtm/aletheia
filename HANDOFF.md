@@ -1,3 +1,5 @@
+See docs/PROJECT_DIRECTION.md for the three-tier legal model and breadth strategy — governs Phase 8 and beyond. Default mode is Mode 2 (Personal); Mode 1 (Open) is a single-flag fast path.
+
 > Standing rule: any instruction from the user that is deferred, reinterpreted, or cannot be completed as written must be surfaced in the same response in which the deferral occurs, not in a later audit or checkpoint.
 
 # Aletheia Phase 7 Handoff
