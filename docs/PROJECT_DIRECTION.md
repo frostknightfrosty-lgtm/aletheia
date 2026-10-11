@@ -55,15 +55,15 @@ Group membership is a planning aid for later consolidated adapters. It does not 
 | --- | --- | --- |
 | breach_search | HIBP (current); XposedOrNot (Phase 5b implemented); Hudson Rock and LeakCheck (excluded) | Mixed Tier 2/3; HIBP requires a paid subscription for direct email-account lookups |
 | stealer_log | Hudson Rock (excluded after scoped review) | Official API paths expose compromised credentials; no stable Boolean-only path verified |
-| darkweb_search | osint-darkweb-pkg and DarkNyx (excluded after scoped review); ThreatCluster (source-verified proposal); Vamp Darkweb Intel (rejected) | Exclude credential and criminal-market content; see `NOT_INTEGRATED.md` |
+| darkweb_search | osint-darkweb-pkg, DarkNyx, and ThreatCluster (excluded after scoped review); Vamp Darkweb Intel (rejected) | Exclude credential and criminal-market content; see `NOT_INTEGRATED.md` |
 | username_enum | Sherlock, Maigret (current); Blackbird (excluded after source review); Nexus OSINT (rejected) | Tier 2 |
 | phone_intel | PhoneInfoga, libphonenumber (current) | Tier 1 |
-| people_search | Lullar (excluded after source review); Mr.Holmes (source-verified proposal); OSINT Search Tool (rejected) | Tier 2; constrain to unauthenticated public sources |
-| email_intel | Gravatar (source-verified proposal); GHunt and EmailRep (rejected) | Mixed Tier 1/2; GHunt requires account cookies, EmailRep does not issue new keys |
-| domain_intel | theHarvester, Amass, Subfinder, Assetfinder (current); ONYPHE, IVRE, urlscan.io, RDAP (source-verified proposals) | Mixed Tier 1/2 |
-| social_media | Instaloader, Reddit API, YouTube API (current); Social Analyzer (source-verified proposal); Twint fork and Osintgram (rejected) | Tier 2 for public-profile automation; no login or bypass |
+| people_search | Lullar and Mr.Holmes (excluded after source review); OSINT Search Tool (rejected) | Tier 2; constrain to unauthenticated public sources |
+| email_intel | Gravatar (Phase 5c scoped implementation); GHunt and EmailRep (rejected) | Mixed Tier 1/2; GHunt requires account cookies, EmailRep does not issue new keys |
+| domain_intel | theHarvester, Amass, Subfinder, Assetfinder (current); RDAP (Phase 5c scoped implementation); ONYPHE, IVRE, and urlscan.io (excluded after source review) | Mixed Tier 1/2 |
+| social_media | Instaloader, Reddit API, YouTube API (current); Social Analyzer (excluded after source review); Twint fork and Osintgram (rejected) | Tier 2 for public-profile automation; no login or bypass |
 | geoint | DeepGround, GeoSpy, Picarta (rejected or paid/identity unclear) | Tier 2 proposals; no implementation approved |
-| threat_intel | Shodan (current); ONYPHE and ThreatCluster (source-verified proposals) | Mixed Tier 2/3; ThreatCluster requires source/field screening |
+| threat_intel | Shodan (current); ONYPHE and ThreatCluster (excluded after source review) | Mixed Tier 2/3 |
 | dns_records | DNSX, MassDNS, DNSRecon, Fierce (current) | Tier 1/2; wrapper scope and applicable law still matter |
 | certificate_transparency | crt.sh (current) | Tier 1 |
 | company_registry | SEC EDGAR, GLEIF, OpenCorporates (current) | Mixed Tier 1/3 |

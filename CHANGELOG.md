@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-10-11 — Phase 5c source review decisions
+- Recorded Gravatar and RDAP as narrowly scoped public-data integrations to implement.
+- Excluded ONYPHE per owner decision and excluded Mr.Holmes, IVRE, urlscan, ThreatCluster, and Social Analyzer where terms, source boundaries, or execution models could not be safely constrained.
+- Recorded exact endpoint/scope conditions and official source links in `docs/PHASE_5C_REGISTRY.md`; no live target query or source scan was performed.
+- Latest CI evidence entering this review: run `38172013706`, commit `5a64f428b8479dd497924d9e2c3f3d2acb402eda`.
+
 ## 2026-10-11 — Phase 5b source-review follow-up
 - Docker Verification run `38171111124` succeeded on commit `76cbf765e2d3d2d491c12fea07648e7830b85d2b`: parser preflight 31/31, `110 passed, 1 warning in 12.55s`, capture 32/32, and all capture return codes were 0. Image build, tests, capture, and artifact upload succeeded.
 - Applied the owner's exact source-scope conditions. Hudson Rock's documented username route returns credential fields; DarkNyx has no documented free metadata-only API and prohibits scraping; osint-darkweb-pkg cannot limit its query to the three approved indexes. These remain excluded.

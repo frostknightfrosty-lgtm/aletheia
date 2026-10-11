@@ -88,6 +88,17 @@ evidence:
   - https://com.lullar.com/en/guide/social-media-username-search
 ~~~
 
+### Phase 5c exclusions after source and scope review (2026-10-11)
+
+- **ONYPHE:** excluded by owner decision. The official Free & Web View terms limit the free license to individual use, prohibit commercial reuse, and distinguish paid use for professional/client purposes. No Aletheia integration was added.
+- **Mr.Holmes:** the single upstream tool combines broad lookups with Google dorks, proxy support, and an interactive startup. No supported bounded invocation that excludes those behaviors was verified.
+- **IVRE:** a self-hosted data/recon platform whose useful query results require populated databases and whose active integrations include multiple scanners. It is not a bounded seed lookup without backend and scanning scope expansion.
+- **urlscan:** excluded because its current terms limit use to personal use and restrict commercial endeavors; Aletheia cannot enforce that boundary for every operator/deployment. No scans were submitted.
+- **ThreatCluster:** the free key includes dark-web search/read endpoints and leak-site victim-enrichment routes; no endpoint/schema pair was verified that guarantees a Tier 1–2-only result for Aletheia's general use. Its free plan is also described for personal/evaluation use.
+- **Social Analyzer:** its broad multi-site workflow spans more than 1,000 social websites and uses multiple request/metadata techniques; no per-site allowlist and rate/terms scope was established.
+
+The Phase 5c proposals **Gravatar** and **RDAP** are scoped for implementation only: Gravatar uses the official profile API with the email SHA-256 hash and a curated public-field allowlist; RDAP uses IANA bootstrap data for one exact domain/IP lookup. They remain unverified until their implementations and CI runs are complete. Detailed sources and constraints are in `docs/PHASE_5C_REGISTRY.md`.
+
 ## Future re-addition
 
 The three removed integrations are absent from the current default registry. Any proposal to re-add one requires a new review of current pricing, terms, secrets handling, license, and default behavior. This note does not authorize an implementation.

@@ -1,8 +1,8 @@
 {
   "session_id": "ed6afe65-e113-4a11-8fbf-a90486e06d99",
-  "last_updated": "2026-10-11T20:19:26Z",
-  "last_commit": "76cbf765e2d3d2d491c12fea07648e7830b85d2b",
-  "last_ci_run": "38171111124",
+  "last_updated": "2026-10-11T20:36:28Z",
+  "last_commit": "5a64f428b8479dd497924d9e2c3f3d2acb402eda",
+  "last_ci_run": "38172013706",
   "last_ci_status": "green",
   "current_phase": "Phase 5c — source verification and implementation or rejection",
   "current_task": "Phase 5b source review is complete; begin source verification of each Phase 5c proposal before implementing or rejecting it.",
@@ -12,10 +12,12 @@
     "Stale manifest test count fixed and Docker CI verified green (run 38164845596)",
     "Phase 5b source review: XposedOrNot implemented and verified-fixture; PhoneInfoga existing scope reviewed; LeakCheck, Hudson Rock, DarkNyx, osint-darkweb-pkg, Blackbird, and Lullar excluded",
     "PhoneInfoga scope and documentation verified in Docker CI run 38170483392",
-    "Phase 5b source-review documentation verified in Docker CI run 38171111124"
+    "Phase 5b source-review documentation verified in Docker CI run 38171111124",
+    "Phase 5b exclusion and scoped-review documentation verified in Docker CI run 38172013706",
+    "Phase 5c source review: Gravatar/RDAP scoped for implementation; ONYPHE excluded by owner; Mr.Holmes, IVRE, urlscan, ThreatCluster, Social Analyzer excluded"
   ],
   "pending_phases": [
-    "Phase 5c source verification and implementation or documented rejection",
+    "Phase 5c scoped Gravatar and RDAP implementation",
     "Audit chain",
     "Storage backends",
     "Egress proxy",
@@ -27,7 +29,7 @@
   "open_gates": [
     "User-owned email target required before XposedOrNot live lookup"
   ],
-  "next_action": "Verify each Phase 5c proposal against official upstream source, license, exact invocation, maintenance, cost, and legal scope; implement only sources that pass the documented constraints and reject the rest. Do not live-query XposedOrNot until the user explicitly supplies and authorizes an email target.",
+  "next_action": "Implement the scoped Gravatar and RDAP adapters with fixtures, parser coverage, Docker smoke/capture cases, manifest entries, and CI verification. Do not live-query XposedOrNot until the user explicitly supplies and authorizes an email target.",
   "files_in_flight": [],
-  "notes_for_next_session": "Latest CI run 38171111124 succeeded on commit 76cbf765e2d3d2d491c12fea07648e7830b85d2b (https://github.com/frostknightfrosty-lgtm/aletheia/actions/runs/38171111124). Artifact raw lines: PARSER PREFLIGHT: PASS — 31/31 adapters have parser coverage; 110 passed, 1 warning in 12.55s; DOCKER CAPTURE: PASS — 32/32 cases captured. All 32 results had returncode 0, with 32 stdout/stderr pairs; build, test, capture, and upload steps succeeded. PhoneInfoga scope is reviewed against tag-pinned v2.11.0 official docs/source: local parsing, Google URL generation only, OVH public number-range API; no API credentials are passed, no live scan performed, and parser omission of Google URLs/OVH fields remains deferred. XposedOrNot is verified-fixture only (synthetic fixture), no live API lookup. Hudson Rock excluded: official username endpoint POST /json/v3/search-by-login/usernames returns credential objects with username/password; no Boolean-only endpoint verified. DarkNyx excluded: public search covers leak/onion content, public API is Pro, terms prohibit scraping. osint-darkweb-pkg excluded: searches 17 hardcoded engines and cannot restrict to Ahmia/Torch/OnionLand. Blackbird excluded: current repo has no declared license; Lullar excluded: its checker documents manual URL opening, with no machine API. LeakCheck excluded by owner. No target was queried. Next action: Phase 5c source verification. Earlier artifact folders in repo root remain untracked and must not be staged."
+  "notes_for_next_session": "Latest verified CI run 38172013706 succeeded on commit 5a64f428b8479dd497924d9e2c3f3d2acb402eda (https://github.com/frostknightfrosty-lgtm/aletheia/actions/runs/38172013706). Its artifact reported PARSER PREFLIGHT: PASS — 31/31 adapters have parser coverage; 110 passed, 1 warning in 9.71s; DOCKER CAPTURE: PASS — 32/32 cases captured. All 32 results had returncode 0 and 32 stdout/stderr pairs; build, test, capture, and upload succeeded. Phase 5b exclusion and source-scope outcomes are documented. Phase 5c source checks: Gravatar is limited to a hashed-email public-profile lookup and curated fields; RDAP is limited to exact domain/IP lookups via IANA bootstrap data. ONYPHE was excluded by the owner. Mr.Holmes, IVRE, urlscan, ThreatCluster, and Social Analyzer were excluded due to source/terms/scope constraints; remaining unresolved names were already rejected in the registry. No live target was queried. Next action: implement Gravatar and RDAP separately and verify each via Docker CI. Earlier artifact folders in the repo root remain untracked and must not be staged."
 }

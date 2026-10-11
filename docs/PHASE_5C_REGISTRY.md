@@ -330,3 +330,59 @@ paid_status: paid-only
 ~~~
 
 Official sources: https://docs.picarta.ai/ and https://picarta.ai/terms-conditions.
+
+## Phase 5c scope decisions (2026-10-11)
+
+The following two proposals have a narrow, documented public-data path suitable for implementation. This decision does not imply that their adapters are built or verified; their manifest status remains `unknown` until code, fixtures, and CI evidence exist.
+
+### gravatar — scoped for implementation
+
+`GET https://api.gravatar.com/v3/profiles/{identifier}` accepts the SHA-256 hash of the normalized email address; the API documents the bearer token as optional and notes that profile lookup resolves only the account's primary address. The wrapper scope is limited to one exact email hash and a curated set of public profile fields. It must not transmit the email itself, infer identity from a profile match, or emit fields such as email addresses or phone numbers. The provider says profile data is accessible through its public API; its privacy guidance also says profile-page visibility controls are not API privacy controls, so operator authorization and a caution in the adapter notes remain required.
+
+Sources: https://docs.gravatar.com/sdk/profiles/ ; https://support.gravatar.com/your-profile/visibility-settings/ ; https://support.gravatar.com/privacy-and-security/profile-access/.
+
+### rdap — scoped for implementation
+
+Use only the standard RDAP bootstrap registries published by IANA, then issue one exact `/domain/{domain}` or `/ip/{address}` registration-data lookup to the selected registry. The implementation must not probe the target, enumerate related names or addresses, or query data outside the seed. This is a standards-based lookup rather than a bundled third-party client; use the Python standard library and preserve the registry/record URL as provenance.
+
+Sources: https://www.iana.org/assignments/rdap-dns ; https://data.iana.org/rdap/ipv4.json ; https://data.iana.org/rdap/ipv6.json ; https://www.rfc-editor.org/rfc/rfc9224.html ; https://www.rfc-editor.org/rfc/rfc9082.html.
+
+## Phase 5c exclusions after scope review (2026-10-11)
+
+### mr-holmes — excluded
+
+The upstream describes one broad collection tool that combines public-source lookups with Google dorks and proxy support, and its documented startup is interactive. There is no verified supported invocation that cleanly disables the dorking/proxy features and produces a bounded, machine-readable result for one Aletheia seed. Aletheia will not bundle or invoke the broad tool speculatively.
+
+Source: https://github.com/Lucksi/Mr.Holmes.
+
+### onyphe — excluded by owner decision
+
+The official Free & Web View terms say the free individual license has no commercial reuse right and describe use of output for the customer's own account; the terms also distinguish paid business use for a customer's clients. The owner chose to exclude ONYPHE rather than embed a key-dependent service whose documented free-use boundary does not match Aletheia's general target workflow.
+
+Sources: https://search.onyphe.io/files/cgus-v6.41.pdf ; https://search.onyphe.io/files/onyphecheatsheetfreeview.pdf.
+
+### ivre — excluded
+
+IVRE is a self-hosted network-reconnaissance framework and data platform. Its documented active-recon integrations include Nmap, Masscan, ZGrab2, ZDNS, Nuclei, httpx, dnsx, tlsx, and Dismap; the passive data path ingests operator network sensors. It does not provide a single bounded passive lookup API for a seed without first deploying and populating its data platform. Wrapping it here would either return no useful lookup data or expand scope into active scanning and backend deployment.
+
+Sources: https://github.com/ivre/ivre ; https://github.com/ivre/ivre/blob/master/doc/usage/active-recon.rst ; https://github.com/ivre/ivre/blob/master/doc/overview/principles.rst.
+
+### urlscan — excluded
+
+The API can search existing scans, but urlscan's current terms limit use of the service and its content to personal use and restrict commercial endeavors. This project cannot enforce that restriction for every operator or deployment. The adapter is therefore excluded rather than making the source a default capability. No scans were submitted.
+
+Sources: https://urlscan.io/docs/api/ ; https://urlscan.io/docs/search/ ; https://urlscan.io/terms/.
+
+### threatcluster — excluded
+
+The free key includes read access to dark-web endpoints, unified search that can search the dark web, and victim-enrichment routes that expose leak-site material. The published free plan is for evaluation and personal use, while commercial use and product embedding have separate terms. No documented endpoint-and-schema combination was verified that both fits Aletheia's general use and guarantees exclusion of criminal-provenance content, so this candidate is excluded.
+
+Sources: https://threatcluster.io/pricing ; https://threatcluster.io/about/free-api ; https://threatcluster.io/api/public/v1/docs.
+
+### social-analyzer — excluded
+
+The upstream advertises profile search across more than 1,000 social websites and combines HTTP and WebDriver techniques, metadata extraction, search-engine lookups, and other modules. No maintained, source-specific allowlist with per-site permissions and rate controls was established for a legally bounded Aletheia wrapper. A broad multi-site automation integration is not added.
+
+Sources: https://github.com/qeeqbox/social-analyzer ; https://github.com/qeeqbox/social-analyzer/blob/main/app.py.
+
+The previously rejected proposals remain rejected for the reasons recorded above. Phase 5c has no inferred twentieth proposal. Only Gravatar and RDAP proceed to implementation; urlscan, ONYPHE, IVRE, ThreatCluster, Mr.Holmes, and Social Analyzer are excluded.

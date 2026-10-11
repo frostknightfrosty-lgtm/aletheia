@@ -1,4 +1,4 @@
-# Aletheia Handoff — Phase 5b Source Review Complete
+# Aletheia Handoff — Phase 5c Source Review Decisions
 
 Last updated: 2026-10-11
 
@@ -11,9 +11,9 @@ LeakCheck is excluded by the project owner. Hudson Rock, DarkNyx, and osint-dark
 ## Repository and CI state
 
 - Repository: `frostknightfrosty-lgtm/aletheia`, branch `main`.
-- Latest CI-verified commit: `76cbf765e2d3d2d491c12fea07648e7830b85d2b`.
-- Docker Verification run `38171111124` succeeded on that commit: https://github.com/frostknightfrosty-lgtm/aletheia/actions/runs/38171111124
-- Raw artifact lines: `PARSER PREFLIGHT: PASS — 31/31 adapters have parser coverage`; `110 passed, 1 warning in 12.55s`; `DOCKER CAPTURE: PASS — 32/32 cases captured`. The artifact's `results.json` contained 32 entries, all with return code 0, with 32 `.stdout` and 32 `.stderr` files. Image build, tests, capture, and artifact upload all succeeded. No live phone scan was performed.
+- Latest CI-verified commit: `5a64f428b8479dd497924d9e2c3f3d2acb402eda`.
+- Docker Verification run `38172013706` succeeded on that commit: https://github.com/frostknightfrosty-lgtm/aletheia/actions/runs/38172013706
+- Raw artifact lines: `PARSER PREFLIGHT: PASS — 31/31 adapters have parser coverage`; `110 passed, 1 warning in 9.71s`; `DOCKER CAPTURE: PASS — 32/32 cases captured`. The artifact's `results.json` contained 32 entries, all with return code 0, with 32 `.stdout` and 32 `.stderr` files. Image build, tests, capture, and artifact upload all succeeded. No live phone scan was performed.
 - The XposedOrNot implementation itself was first verified in run `38168341113` on commit `d9b3fe9afc9c7b28be37c8c1a5ae601c481fa59c`, with the same 31/31, 110 passed, and 32/32 evidence.
 - Previous run `38167558342` failed on commit `b74beb866109115b9fc9a312bfdce7110cdbe5c9` only because `tests/test_phase5_adapters.py:26` expected 25 cumulative adapters while the registry now contains 26. The one-line expected-count correction is in the green commit above.
 - The preceding Docker Verification run `38165531894` succeeded on `cd71a0c5753bd8c94ffea5dc6acb27b093ce50b8`: https://github.com/frostknightfrosty-lgtm/aletheia/actions/runs/38165531894
@@ -32,9 +32,16 @@ LeakCheck is excluded by the project owner. Hudson Rock, DarkNyx, and osint-dark
 - PhoneInfoga v2.11.0 scope is reviewed against official tag-pinned docs/source: `phoneinfoga scan -n <number>` runs local parsing, Google search-link generation without result fetching, and the no-key OVH number-range API. Numverify and Google CSE need credentials; Aletheia does not forward any PhoneInfoga credentials. No live scan was made. Current parser does not emit Google URLs or OVH Found/range/city fields; that is a deferred completeness issue.
 - The owner's conditional review requirements for Hudson Rock, DarkNyx, and osint-darkweb-pkg were applied; all three remain excluded because their documented call paths fail the stated conditions. No pending proposal from this group remains active.
 
+## Phase 5c source-review state
+
+- Gravatar and RDAP have narrow public-data scopes documented for implementation. Gravatar will query only the SHA-256 hash of the normalized email via `GET https://api.gravatar.com/v3/profiles/{identifier}` and retain only curated profile fields; it requires an authorization assertion and must not infer identity. RDAP will use the IANA DNS/IPv4/IPv6 bootstrap files for one exact domain or IP lookup, with no probing or enumeration.
+- The owner excluded ONYPHE after review of the Free View terms.
+- Mr.Holmes, IVRE, urlscan, ThreatCluster, and Social Analyzer were excluded after source/scope review; reasons and primary-source links are in `docs/PHASE_5C_REGISTRY.md` and `docs/NOT_INTEGRATED.md`.
+- Proposals without a verified exact upstream remain rejected as recorded in the registry. The proposal list names 19 tools, not 20.
+
 ## Next action
 
-Phase 5b source review is complete. Begin Phase 5c by verifying each proposal's official source, license, exact invocation, maintenance, cost, and legal scope before deciding whether to implement or reject it. PhoneInfoga scope confirmation is complete; its parser completeness gap is documented. Do not perform live XposedOrNot lookups until the user explicitly supplies and authorizes an email target. Keep all verification claims tied to the exact CI run, commit, and raw artifact evidence.
+Implement the scoped Gravatar adapter and RDAP lookup adapter with independent synthetic fixtures, parser tests, Docker smoke tests, capture cases, build targets, and manifest metadata. Push each bounded increment and verify it in the Docker Verification workflow. Afterward continue the audit-chain phase in the directive order. PhoneInfoga's parser completeness gap remains deferred. Do not perform live XposedOrNot lookups until the user explicitly supplies and authorizes an email target. Keep all verification claims tied to the exact CI run, commit, and raw artifact evidence.
 
 ## Known deferred issues
 
