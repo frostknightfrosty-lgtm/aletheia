@@ -1,6 +1,6 @@
 # Phase 5b Adapter Registry
 
-This registry tracks Phase 5b source scope and implementation status; it is not approval to run tools against arbitrary targets. XposedOrNot implementation is in progress and pending CI. PhoneInfoga's existing adapter still needs scope confirmation; Blackbird and Lullar remain unverified proposals. LeakCheck was excluded by the project owner on 2026-10-11. Hudson Rock, osint-darkweb-pkg, and DarkNyx were excluded after their published call paths could not be verified to stay within the project's Tier 1–2 content boundary; see `NOT_INTEGRATED.md`.
+This registry tracks Phase 5b source scope and implementation status; it is not approval to run tools against arbitrary targets. XposedOrNot is implemented and verified-fixture. PhoneInfoga's existing invocation has been checked against v2.11.0 upstream source and scoped to unauthenticated public metadata. Blackbird and Lullar remain unverified proposals. LeakCheck was excluded by the project owner on 2026-10-11. Hudson Rock, osint-darkweb-pkg, and DarkNyx were excluded after their published call paths could not be verified to stay within the project's Tier 1–2 content boundary; see `NOT_INTEGRATED.md`.
 
 ## xposedornot
 
@@ -23,23 +23,30 @@ batch_grouping: breach_search
 
 The endpoint, default response fields, and published rate limit were checked against the official API documentation. CI run [38168341113](https://github.com/frostknightfrosty-lgtm/aletheia/actions/runs/38168341113) passed the synthetic fixture tests and Docker health smoke. The artifact reported `PARSER PREFLIGHT: PASS — 31/31 adapters have parser coverage`, `110 passed, 1 warning in 17.29s`, and `DOCKER CAPTURE: PASS — 32/32 cases captured`; all capture return codes were 0. No live request was made because no authorized email target was supplied. The adapter parses names only; it does not access detailed breach or password endpoints.
 
-## phoneinfoga — existing adapter, scope confirmation proposed
+## phoneinfoga — existing adapter, source scope reviewed
 
 ~~~yaml
 name: phoneinfoga
 input_types: [phone]
-output_schema: PhoneFootprint[]  # country, carrier, line type, web footprints
-invocation: local_python  # CLI plus local REST API
+output_schema: PhoneFootprint[]  # Aletheia parser retains E.164 and selected metadata fields
+version_pin: 2.11.0
+license: GPL-3.0-only
+invocation: "phoneinfoga scan -n <number>"
 requires_key: false
 legal_tier: 1
-legal_notes: "Proposal claims free public resources only. Keep browser/login workflows and target-side actions unavailable."
-fixture_provenance: https://github.com/sundowndev/phoneinfoga
-verification_status: unverified-live
+rate_limit: "One number per Aletheia invocation; upstream OVH rate limit was not stated in the reviewed v2.11.0 docs."
+legal_notes: "Only authorized phone numbers. No REST server, web client, authentication, or host API credentials are passed."
+scope_constraint: "Use only v2.11.0 local parsing, Google search-link generation (no search-result fetch), and the unauthenticated OVH public number-range lookup at https://api.ovh.com/1.0/telephony/number/detailedZones?country={country}. Numverify and Google CSE require credentials and are not forwarded by Aletheia; do not add those keys or plugins to this adapter."
+source_review: "Official v2.11.0 usage, scanner docs, scanner registration/source, and GPL-3.0 license checked. PhoneInfoga itself requires no registration for the scoped no-key behavior. Numverify requires an API-layer account/key; Google CSE requires a Google API key and search-engine ID, with paid requests beyond its free quota."
+fixture_provenance: synthetic; tests/fixtures/phoneinfoga.txt
+verification_status: verified-fixture; no live scan
 enabled_by_default: true
 batch_grouping: phone_intel
 ~~~
 
-PhoneInfoga already exists in the current registry and has fixture coverage, but no live adapter verification is claimed here. This entry proposes confirming its metadata for the new tier model.
+The Aletheia adapter calls only `phoneinfoga scan -n <number>` and its descriptor does not forward any environment variables. The v2.11.0 source registers local, Numverify, Google search, OVH, and Google CSE scanners; upstream documentation says credential-dependent scanners are skipped when unconfigured. The scoped execution therefore has local parsing, URL generation only (Google documents that results are manually opened and are not fetched by that scanner), and a key-free OVH lookup for number-range/city metadata. It does not run the local REST server or web client. No phone-number scan was performed for this review. Sources: [usage](https://github.com/sundowndev/phoneinfoga/blob/v2.11.0/docs/getting-started/usage.md), [scanner documentation](https://github.com/sundowndev/phoneinfoga/blob/v2.11.0/docs/getting-started/scanners.md), [scanner registration](https://github.com/sundowndev/phoneinfoga/blob/v2.11.0/lib/remote/init.go), [OVH request implementation](https://github.com/sundowndev/phoneinfoga/blob/v2.11.0/lib/remote/suppliers/ovh.go), and [license](https://github.com/sundowndev/phoneinfoga/blob/v2.11.0/LICENSE).
+
+Known parser limit: the current Aletheia parser does not emit Google search URLs or OVH's `Found`, number-range, and city fields. This is recorded for a later parser task; it does not change the scoped source behavior or the existing fixture verification claim.
 
 ## blackbird
 

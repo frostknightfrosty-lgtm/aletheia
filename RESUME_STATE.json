@@ -1,11 +1,11 @@
 {
   "session_id": "ed6afe65-e113-4a11-8fbf-a90486e06d99",
-  "last_updated": "2026-10-11T19:49:12Z",
-  "last_commit": "b1295b77022775d537ab96970ce6c163caaad2f0",
-  "last_ci_run": "38169040308",
+  "last_updated": "2026-10-11T20:01:09Z",
+  "last_commit": "2dd83119ba66d15d4a93cdd00533f26c8cb4f79e",
+  "last_ci_run": "38169632277",
   "last_ci_status": "green",
   "current_phase": "Phase 5b — source review and adapter implementation",
-  "current_task": "Continue Phase 5b: verify PhoneInfoga scope, then review Blackbird and Lullar before implementation.",
+  "current_task": "PhoneInfoga scope review is complete; review Blackbird and Lullar upstream source, license, exact invocation, and maintenance before implementation.",
   "current_status": "in_progress",
   "completed_phases": [
     "Original Phases 1–7 baseline (subject to audit gaps documented in HANDOFF.md)",
@@ -27,7 +27,7 @@
   "open_gates": [
     "User-owned email target required before XposedOrNot live lookup"
   ],
-  "next_action": "Review the existing PhoneInfoga implementation and authoritative upstream usage constraints. Then review Blackbird and Lullar upstream source, license, exact invocation, maintenance, and legal scope before implementing any adapter. Do not live-query XposedOrNot until the user explicitly supplies and authorizes an email target.",
+  "next_action": "Review Blackbird and Lullar upstream source, license, exact invocation, maintenance, and legal scope before implementing either adapter. Do not live-query XposedOrNot until the user explicitly supplies and authorizes an email target.",
   "files_in_flight": [],
-  "notes_for_next_session": "Latest CI run 38169040308 succeeded on commit b1295b77022775d537ab96970ce6c163caaad2f0 (https://github.com/frostknightfrosty-lgtm/aletheia/actions/runs/38169040308). Artifact raw lines: PARSER PREFLIGHT: PASS — 31/31 adapters have parser coverage; 110 passed, 1 warning in 11.81s; DOCKER CAPTURE: PASS — 32/32 cases captured. All 32 capture results had returncode 0, including phase4-xposedornot. Docker image build and full test suite passed. XposedOrNot implementation was verified-fixture in preceding run 38168341113; its fixture is synthetic and no live API lookup occurred. Run 38167558342 failed only because the cumulative Phase 5 registry count assertion expected 25 instead of 26; this was corrected in commit d9b3fe9. Hudson Rock, DarkNyx, and osint-darkweb-pkg are excluded after scoped-source review; evidence is in docs/NOT_INTEGRATED.md. A user-owned email target is required before any live XposedOrNot lookup. Next review PhoneInfoga scope, then Blackbird and Lullar source/license/invocation/maintenance. Older CI artifact folders are untracked; do not stage them."
+  "notes_for_next_session": "Latest CI run 38169632277 succeeded on commit 2dd83119ba66d15d4a93cdd00533f26c8cb4f79e (https://github.com/frostknightfrosty-lgtm/aletheia/actions/runs/38169632277). Artifact raw lines: PARSER PREFLIGHT: PASS — 31/31 adapters have parser coverage; 110 passed, 1 warning in 12.40s; DOCKER CAPTURE: PASS — 32/32 cases captured. All 32 capture results had returncode 0. PhoneInfoga scope is reviewed against tag-pinned v2.11.0 official docs and source: local parsing, Google URL generation only, and OVH public number-range API; no API credentials are passed by Aletheia and no live scan was performed. Its parser does not emit Google URLs or OVH Found/range/city fields; recorded as deferred. XposedOrNot is verified-fixture only from run 38168341113; fixture is synthetic and no live API lookup occurred. Run 38167558342 failed only because the cumulative Phase 5 registry count assertion expected 25 instead of 26; this was corrected in commit d9b3fe9. Hudson Rock, DarkNyx, and osint-darkweb-pkg are excluded after scoped-source review; evidence is in docs/NOT_INTEGRATED.md. Next review Blackbird and Lullar source/license/invocation/maintenance before implementation. Older CI artifact folders are untracked; do not stage them."
 }

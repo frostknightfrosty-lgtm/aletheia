@@ -9,6 +9,11 @@
 - Marked XposedOrNot `verified-fixture`; no live API lookup occurred and its fixture remains synthetic.
 - Follow-up run `38169040308` verified the manifest and documentation update with 110 tests passing, parser preflight 31/31, and Docker capture 32/32.
 
+## 2026-10-11 — PhoneInfoga scope review
+- Checked the exact v2.11.0 CLI, scanner registration, scanner docs, OVH endpoint, and GPL-3.0 license from upstream.
+- Recorded the no-key scope (local parsing, Google search-link generation only, OVH public range lookup); Aletheia does not forward PhoneInfoga API credentials. No live phone scan was made.
+- Recorded the current parser's omission of Google URLs and OVH fields as a deferred completeness issue.
+
 ## 2026-10-11 — Phase 5b scoped-source review
 - Verified the documented, no-key XposedOrNot email check route and constrained its proposal to the default, non-detailed response.
 - Excluded Hudson Rock, DarkNyx, and osint-darkweb-pkg from the active Phase 5b registry because their documented access paths could not be verified as stable Tier 1–2-only scopes.
