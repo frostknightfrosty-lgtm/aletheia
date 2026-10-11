@@ -34,3 +34,4 @@ docker build -f docker/gleif/Dockerfile -t aletheia/gleif:api-v1 docker/gleif
 docker build -f docker/opencorporates/Dockerfile -t aletheia/opencorporates:api-v0.4.8 docker/opencorporates
 docker build -f docker/opensanctions/Dockerfile -t aletheia/opensanctions:api docker/opensanctions
 docker build -f docker/courtlistener/Dockerfile -t aletheia/courtlistener:api-v3 docker/courtlistener
+docker build -f docker/gravatar/Dockerfile -t aletheia/gravatar:api-v3 docker/gravatar

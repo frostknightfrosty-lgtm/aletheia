@@ -443,6 +443,29 @@
       "key_cost": "free personal low-volume"
     },
     {
+      "name": "gravatar",
+      "upstream": "https://docs.gravatar.com/sdk/profiles/",
+      "license": "Gravatar Public API terms; no client library bundled",
+      "version_pin": "Gravatar Profiles API v3",
+      "invocation": "Docker / HTTPS API",
+      "input_types": [
+        "email"
+      ],
+      "output_schema": "curated public profile fields for one exact email SHA-256: display name, profile and avatar URLs, location, description, job title, company",
+      "legal_notes": "Authorized email seeds only; only the SHA-256 of the trimmed lowercase email is sent. Contact details, wallets, links, galleries, and verified-account data are dropped inside the container and again in the parser. A profile match is an association signal, not proof of identity. Respect provider rate limits.",
+      "network": "required",
+      "last_audited": "2026-10-11T22:17:04Z",
+      "verification_status": "unknown",
+      "note": "Implemented with synthetic-fixture parser tests, but no CI run has verified this increment yet; fixture file: tests/fixtures/gravatar.json. No live API lookup has occurred.",
+      "fixture_provenance": "synthetic",
+      "legal_tier": 1,
+      "enabled_by_default": true,
+      "disabled_reason": null,
+      "batch_grouping": "email_intel",
+      "requires_key": false,
+      "key_cost": "free; API key optional"
+    },
+    {
       "name": "phoneinfoga",
       "upstream": "https://github.com/sundowndev/phoneinfoga",
       "license": "GPL-3.0-only",

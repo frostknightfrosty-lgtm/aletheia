@@ -1,0 +1,50 @@
+{
+  "hash": "973dfe463ec85785f5f95af5ba3906eedb2d931c24e69824a89ea65dba4e813b",
+  "profile_url": "https://gravatar.com/aletheia-synthetic-test",
+  "avatar_url": "https://0.gravatar.com/avatar/973dfe463ec85785f5f95af5ba3906eedb2d931c24e69824a89ea65dba4e813b",
+  "avatar_alt_text": "Synthetic test avatar",
+  "display_name": "Synthetic Test Profile",
+  "pronouns": "they/them",
+  "location": "Example City",
+  "description": "Synthetic fixture profile for Aletheia parser tests; not a real person.",
+  "job_title": "Test Engineer",
+  "company": "Example Org",
+  "is_organization": false,
+  "verified_accounts": [
+    {
+      "service_type": "example",
+      "service_label": "Example",
+      "service_icon": "https://example.com/icon.svg",
+      "url": "https://example.com/synthetic"
+    }
+  ],
+  "links": [
+    {
+      "label": "Synthetic site",
+      "url": "https://example.com/synthetic-link"
+    }
+  ],
+  "contact_info": {
+    "email": "test@example.com",
+    "home_phone": "+15555550100",
+    "cell_phone": "+15555550101"
+  },
+  "payments": {
+    "links": [],
+    "crypto_wallets": [
+      {
+        "label": "ETH",
+        "address": "0x0000000000000000000000000000000000000000"
+      }
+    ]
+  },
+  "gallery": [
+    {
+      "url": "https://0.gravatar.com/gallery/synthetic",
+      "alt_text": "synthetic"
+    }
+  ],
+  "section_visibility": {
+    "hidden_contact_info": false
+  }
+}

@@ -96,3 +96,8 @@ def test_phase6_docker_health(image,args):
 def test_phase7_core_image_imports():
     r=_run(["docker","run","--rm","--network","none","--entrypoint","python","aletheia/core:0.7.0","-c","import aletheia; print('core import ok')"])
     assert r.returncode==0, r.stderr or r.stdout
+
+
+def test_phase5c_gravatar_container_health():
+    r = _run(["docker", "run", "--rm", "--network", "none", "aletheia/gravatar:api-v3", "--health"])
+    assert r.returncode == 0, r.stderr or r.stdout
