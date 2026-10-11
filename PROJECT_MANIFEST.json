@@ -456,7 +456,7 @@
       "network": "required",
       "last_audited": "2026-10-11T22:48:37Z",
       "verification_status": "verified-fixture",
-      "note": "Synthetic fixture parser tests and Docker health smoke passed in CI run 38179832021 on commit 200ada277886ee961c90c668bfe4aa36fc5f2899 (https://github.com/frostknightfrosty-lgtm/aletheia/actions/runs/38179832021). Raw evidence: PARSER PREFLIGHT: PASS — 32/32 adapters have parser coverage; 119 passed, 1 warning in 12.58s; DOCKER CAPTURE: PASS — 33/33 cases captured. Gravatar case phase5c-gravatar returned 0 with stdout ok (--network none health check). Fixture file: tests/fixtures/gravatar.json. No live API lookup has occurred.",
+      "note": "Synthetic fixture parser tests and Docker health smoke passed in CI run 38179832021 on commit 200ada277886ee961c90c668bfe4aa36fc5f2899 (https://github.com/frostknightfrosty-lgtm/aletheia/actions/runs/38179832021). Raw evidence: PARSER PREFLIGHT: PASS — 32/32 adapters have parser coverage; 119 passed, 1 warning in 12.58s; DOCKER CAPTURE: PASS — 33/33 cases captured. Gravatar case phase5c-gravatar returned 0 with stdout ok (--network none health check). fixture file: tests/fixtures/gravatar.json. No live API lookup has occurred.",
       "fixture_provenance": "synthetic",
       "legal_tier": 1,
       "enabled_by_default": true,
