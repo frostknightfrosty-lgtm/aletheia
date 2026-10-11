@@ -5,7 +5,9 @@
 - Added `*.egg-info/` and `ci-artifacts-*/` to `.gitignore`.
 - Replaced the stale 2026-10-11 pause checkpoint in `HANDOFF.md` and `RESUME_STATE.json`. The Gravatar work had been committed (`200ada2`) after that checkpoint was written but before the state files were updated.
 - Commit `593625bde90aed7b1d5b99d84acf4a995f0538b6` (message `-`, adding `AGENT_SETUP.md`, `AUTONOMOUS_DIRECTIVE.md`, and changelog lines) was a formatting slip in the commit message. It is already on origin, so it was not amended and history was not rewritten.
-- The untracked `_rdap_draft.py` was kept, not deleted, because `phase5c.py` holds only the Gravatar adapter and the draft is the only copy of the RDAP code.
+- The untracked `_rdap_draft.py` was kept, not deleted, because `phase5c.py` holds only the Gravatar adapter and the draft is the only copy of the RDAP code. The owner later retracted the delete instruction.
+- Fixed a bug in my own manifest edit: `5976019` wrote `Fixture file:`, which fails `test_verified_fixture_adapter_notes_name_existing_fixture_file` (lowercase `fixture file: ` required). Caught by the local manifest test before any push and fixed in `131a3f3` as a new commit; the test was not changed.
+- Split `RESUME_STATE.json` `last_commit` (actual HEAD) from the new `last_ci_verified_commit` (latest commit with a green CI run).
 
 ## 2026-10-11 — Phase 5c source review decisions
 - Recorded Gravatar and RDAP as narrowly scoped public-data integrations to implement.
