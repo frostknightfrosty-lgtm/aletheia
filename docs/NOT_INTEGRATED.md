@@ -38,6 +38,39 @@ Current manifest legal notes must state the actual key-cost conditions. In parti
 
 **LeakCheck** is excluded from Phase 5b by the project owner (2026-10-11). It is not integrated. No source was queried and no implementation was attempted. The previous registry proposal's provenance and output behavior were not independently verified.
 
+### Phase 5b exclusions after scoped source review (2026-10-11)
+
+These proposals were reviewed against the project owner's requirement to verify a stable invocation that can be constrained to Tier 1–2 content. The documented call paths did not meet that condition, so they were moved out of the active proposal registry. No adapter was installed or run.
+
+~~~yaml
+name: hudsonrock
+status: excluded
+scope_constraint: "No stable, documented Boolean-only infection-signal API was found. The official API requires an API key; its username route searches compromised credentials, and documented domain/stealer responses include credential objects with username and password fields. Aletheia must not call those endpoints."
+evidence:
+  - https://docs.hudsonrock.com/reference/authentication
+  - https://docs.hudsonrock.com/docs/username-search
+  - https://docs.hudsonrock.com/docs/domain-search
+~~~
+
+~~~yaml
+name: darknyx
+status: excluded
+scope_constraint: "No public metadata-only entity-search API or exact public API endpoint is documented. The free web search covers onion sites, leak dumps, and marketplaces; its legal notice says personal-data masking is incomplete and prohibits scraping. API access is a Pro feature. Aletheia cannot verify a Tier 1–2-only response boundary or use the public page as an undocumented scraper."
+evidence:
+  - https://darknyx.com/
+  - https://darknyx.com/legal/
+~~~
+
+~~~yaml
+name: osint-darkweb-pkg
+status: excluded
+scope_constraint: "The published get_search_results(query) call concurrently queries 17 hardcoded .onion search endpoints, not only Ahmia, Torch, and OnionLand, and returns titles and onion URLs without engine provenance or a supported engine allowlist. A separate scrape_multiple(urls) call fetches onion pages and extracts up to 1200 characters; Aletheia would not call it, and page fetching is not required by the search function itself. The package offers no documented way to restrict its public invocation to the three approved engines. At least its hardcoded Torch endpoint differs from the current address published by Torch's own site, so endpoint ownership/current status cannot be trusted from the package source alone."
+evidence:
+  - https://pypi.org/project/osint-darkweb-pkg/
+  - https://files.pythonhosted.org/packages/source/o/osint-darkweb-pkg/osint_darkweb_pkg-0.1.0.tar.gz (SHA-256: 7a42152d02d3493ec01e8913964e05b4b850107f9be06f50ba89978795463e42; statically inspected; not installed or executed)
+  - https://torch.cx/about/ (current canonical onion address published by Torch)
+~~~
+
 ## Future re-addition
 
 The three removed integrations are absent from the current default registry. Any proposal to re-add one requires a new review of current pricing, terms, secrets handling, license, and default behavior. This note does not authorize an implementation.

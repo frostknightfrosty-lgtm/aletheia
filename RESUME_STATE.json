@@ -1,14 +1,16 @@
 {
   "session_id": "ed6afe65-e113-4a11-8fbf-a90486e06d99",
-  "last_updated": "2026-10-11T18:50:42Z",
-  "last_commit": "f68729f7853a1c706232c0c5b39cc08af2773eae",
-  "last_ci_run": "38164845596",
+  "last_updated": "2026-10-11T19:05:30Z",
+  "last_commit": "cd71a0c5753bd8c94ffea5dc6acb27b093ce50b8",
+  "last_ci_run": "38165531894",
   "last_ci_status": "green",
   "current_phase": "Phase 5b — source review and adapter implementation",
-  "current_task": "Manifest adapter-count fix verified green by Docker Verification run 38164845596; begin Phase 5b with XposedOrNot. LeakCheck is excluded.",
+  "current_task": "Complete the scoped-source review; proceed to XposedOrNot under the documented non-detailed API scope.",
   "current_status": "in_progress",
   "completed_phases": [
-    "Original Phases 1–7 baseline (subject to audit gaps documented in HANDOFF.md)"
+    "Original Phases 1–7 baseline (subject to audit gaps documented in HANDOFF.md)",
+    "Stale manifest test count fixed and Docker CI verified green (run 38164845596)",
+    "Phase 5b scoped-source review: Hudson Rock, DarkNyx, and osint-darkweb-pkg excluded"
   ],
   "pending_phases": [
     "Phase 5b adapter review and implementation",
@@ -22,7 +24,7 @@
     "Documentation and final CI pass"
   ],
   "open_gates": [],
-  "next_action": "Read the project authorities and current Phase 5b registry; source-check and implement XposedOrNot, then commit/push and verify CI before proceeding to HudsonRock.",
+  "next_action": "Implement XposedOrNot using only GET https://api.xposedornot.com/v1/check-email/{email} with details=false; use documented source material for parser coverage and do not live-query until the user provides and authorizes an email target. Commit, push, and verify in CI before proceeding to the next Phase 5b item.",
   "files_in_flight": [],
-  "notes_for_next_session": "LeakCheck was excluded by the project owner on 2026-10-11; do not implement it. Failed run 38162359348 showed a stale assertion in tests/test_project_manifest.py expecting 33 Docker entries after commit 78ba2d0 removed Censys, Twilio Lookup, and Google Vision; both green runs 37861088776 and 37864196375 passed 114 tests. Fix commit f68729f7853a1c706232c0c5b39cc08af2773eae was pushed to main. Docker Verification run 38164845596 is in progress. The three downloaded earlier artifacts are untracked directories in the repository workspace. No new Phase 8 work has started. Docker Verification run 38164845596 succeeded on commit f68729f7853a1c706232c0c5b39cc08af2773eae: parser preflight printed 'PARSER PREFLIGHT: PASS — 30/30 adapters have parser coverage'; pytest printed '108 passed, 1 warning in 11.98s'; capture printed 'DOCKER CAPTURE: PASS — 31/31 cases captured'; build, test, capture, and artifact steps all succeeded. The uploaded artifact included ci-artifacts/docker-integration/results.json with 31 entries. Continue Phase 5b at XposedOrNot; LeakCheck excluded."
+  "notes_for_next_session": "Latest pre-source-review CI run 38165531894 succeeded on commit cd71a0c5753bd8c94ffea5dc6acb27b093ce50b8 (https://github.com/frostknightfrosty-lgtm/aletheia/actions/runs/38165531894). Artifact raw lines: PARSER PREFLIGHT: PASS — 30/30 adapters have parser coverage; 108 passed, 1 warning in 11.93s; DOCKER CAPTURE: PASS — 31/31 cases captured. results.json had 31 entries, all returncode 0. Hudson Rock, DarkNyx, and osint-darkweb-pkg are excluded after scoped-source review; details and evidence are in docs/NOT_INTEGRATED.md. XposedOrNot source docs verify a keyless check-email route with details=false, but no authorized email target was provided for a live call. PhoneInfoga scope confirmation, Blackbird and Lullar reviews remain. Older CI artifact folders remain untracked; do not stage them."
 }

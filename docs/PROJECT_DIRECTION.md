@@ -53,9 +53,9 @@ Group membership is a planning aid for later consolidated adapters. It does not 
 
 | Batch | Members and status | Tier / notes |
 | --- | --- | --- |
-| breach_search | HIBP (current); XposedOrNot (proposed); Hudson Rock (proposed); LeakCheck (excluded) | Mixed Tier 1/3; HIBP requires a paid subscription for direct email-account lookups |
-| stealer_log | Hudson Rock (proposed) | Tier 1 proposal; return infection signals only, never plaintext |
-| darkweb_search | osint-darkweb-pkg, Darknyx (proposed); ThreatCluster (source-verified proposal); Vamp Darkweb Intel (rejected) | Mixed Tier 1/2 proposals; exclude credential and criminal-market content |
+| breach_search | HIBP (current); XposedOrNot (proposed); Hudson Rock and LeakCheck (excluded) | Mixed Tier 2/3; HIBP requires a paid subscription for direct email-account lookups |
+| stealer_log | Hudson Rock (excluded after scoped review) | Official API paths expose compromised credentials; no stable Boolean-only path verified |
+| darkweb_search | osint-darkweb-pkg and DarkNyx (excluded after scoped review); ThreatCluster (source-verified proposal); Vamp Darkweb Intel (rejected) | Exclude credential and criminal-market content; see `NOT_INTEGRATED.md` |
 | username_enum | Sherlock, Maigret (current); Blackbird (proposed); Nexus OSINT (rejected) | Tier 2 |
 | phone_intel | PhoneInfoga, libphonenumber (current) | Tier 1 |
 | people_search | Lullar (proposed); Mr.Holmes (source-verified proposal); OSINT Search Tool (rejected) | Tier 2; constrain to unauthenticated public sources |

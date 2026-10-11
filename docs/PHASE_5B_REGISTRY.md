@@ -1,6 +1,6 @@
 # Phase 5b Adapter Registry
 
-This is a proposal registry, not an implementation or approval to run these tools. Seven proposals remain; all are unverified-live. LeakCheck was excluded by the project owner on 2026-10-11 and is documented in `NOT_INTEGRATED.md`. No Phase 5b adapter code, Docker image, parser, or live run was added by this documentation change.
+This is a proposal registry, not an implementation or approval to run these tools. Four candidates remain here; all are unverified-live. LeakCheck was excluded by the project owner on 2026-10-11. Hudson Rock, osint-darkweb-pkg, and DarkNyx were excluded after their published call paths could not be verified to stay within the project's Tier 1–2 content boundary; see `NOT_INTEGRATED.md`. No Phase 5b adapter code, Docker image, parser, or live run was added by this source review.
 
 ## xposedornot
 
@@ -11,70 +11,16 @@ output_schema: BreachRecord[]  # breach name, year, data classes
 invocation: api
 requires_key: false
 rate_limit: "25/hour, 100/day per IP"
-legal_tier: 1
-legal_notes: "Free public API, no key, ToS permits programmatic querying."
+legal_tier: 2
+legal_notes: "Free community API for personal, low-volume use. Query only an authorized email, obey the published request caps, and do not bulk collect or redistribute breach data."
+scope_constraint: "Use only GET https://api.xposedornot.com/v1/check-email/{email} with details omitted or false. Store only the echoed query email and breach names; do not call analytics, password, or domain endpoints. The documented community endpoint is free and capped at 25 requests/hour and 100/day per IP."
 fixture_provenance: https://xposedornot.com/api_doc
 verification_status: unverified-live
 enabled_by_default: true
 batch_grouping: breach_search
 ~~~
 
-The supplied API documentation URL is a fixture/source lead only; the integration and stated rate limits have not been live-verified.
-
-## hudsonrock
-
-~~~yaml
-name: hudsonrock
-input_types: [email, username, domain, ip]
-output_schema: StealerLogSignal[]  # infection telemetry, boolean signals, no plaintext
-invocation: api
-requires_key: false  # shallow-query proposal
-legal_tier: 1
-legal_notes: "Proposed shallow query returns infection signals only; do not return credentials or tokens."
-fixture_provenance: pending verification
-verification_status: unverified-live
-enabled_by_default: true
-batch_grouping: breach_search
-secondary_batch_grouping: stealer_log
-~~~
-
-No source response or fixture was independently verified in this task. Before any implementation, confirm the free endpoint, data fields, rate limits, terms, and that the shallow response cannot expose plaintext.
-
-## osint-darkweb-pkg
-
-~~~yaml
-name: osint-darkweb-pkg
-input_types: [keyword, domain, email, onion]
-output_schema: DarkWebHit[]  # engine, snippet, onion URL
-invocation: local_python  # proposed local Tor SOCKS5 dependency
-requires_key: false
-legal_tier: 1
-legal_notes: "Proposal claims public Tor index-engine queries. No credentials, criminal-market content, or unlawful access may be collected."
-fixture_provenance: pending verification
-verification_status: unverified-live
-enabled_by_default: true
-batch_grouping: darkweb_search
-~~~
-
-The tool identity, source coverage, license, and boundaries of public/indexed content remain unverified.
-
-## darknyx
-
-~~~yaml
-name: darknyx
-input_types: [keyword, btc, eth, xmr, ip, cve, iban, pgp, onion]
-output_schema: DarkWebEntity[]  # category, snippet, onion URL, ransomware feed
-invocation: api  # proposal says public read-only or self-hosted
-requires_key: false
-legal_tier: 1
-legal_notes: "Proposal claims public read-only entity search. Exclude credentials, stolen tokens, and criminal-market content."
-fixture_provenance: pending verification
-verification_status: unverified-live
-enabled_by_default: true
-batch_grouping: darkweb_search
-~~~
-
-The exact upstream project, API, license, maintenance state, and free access path require verification.
+The endpoint, default response fields, and published rate limit were checked against the official API documentation. No live request was made because no authorized email target was supplied for this check.
 
 ## phoneinfoga — existing adapter, scope confirmation proposed
 

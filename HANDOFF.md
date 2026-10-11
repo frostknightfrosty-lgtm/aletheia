@@ -1,42 +1,38 @@
-# Aletheia Handoff — Phase 5b Startup
+# Aletheia Handoff — Phase 5b Source Review
 
 Last updated: 2026-10-11
 
-## Project direction and boundaries
+## Project boundaries
 
-`docs/PROJECT_DIRECTION.md` is the current strategy authority. It describes the grey posture target, max-power dispatch intent, and the hard exclusion of Tier 4 and Tier 5 sources. The current runtime has not implemented all of those target behaviors. Phase 5b and Phase 5c registries are proposals and must be source-checked before integration. Do not ingest plaintext credentials, stolen tokens, leaked databases, or criminal-market content. Do not add paid-only components.
+`docs/PROJECT_DIRECTION.md` is the current strategy authority. The Tier 4/5 hard floor remains binding: do not register sources that require consent/warrant, expose plaintext credentials or stolen tokens, ingest leaked databases, or collect criminal-market material. Do not add paid-only default components. The Phase 5b/5c registries are proposals until upstream scope, terms, licensing, and invocation are verified.
 
-`docs/NOT_INTEGRATED.md` records exclusions and cost corrections. LeakCheck was excluded from Phase 5b by the project owner on 2026-10-11; no integration or lookup was performed.
+LeakCheck is excluded by the project owner. Hudson Rock, DarkNyx, and osint-darkweb-pkg were moved to `docs/NOT_INTEGRATED.md` after source review could not establish the owner's required stable Tier 1–2-only call path. No code was installed, run, or added for those sources.
 
-## Repository snapshot
+## Repository and CI state
 
-- Repository: `frostknightfrosty-lgtm/aletheia`; local branch: `main`.
-- Local code HEAD before this handoff checkpoint: `78ba2d0f3c9676e388898374e06e1c51b268c3d0`.
-- At startup, local `main` was three commits ahead of `origin/main` (`c6f8749a589cf61625dca2e9c248b8e50961a909`) and the worktree was clean. Those local commits contain project-direction documentation and paid-adapter removals; the current local tree has not yet been tested in CI.
-- Latest Docker Verification run on remote `main`: run `37864196375`, success, commit `c6f8749a589cf61625dca2e9c248b8e50961a909`, [run URL](https://github.com/frostknightfrosty-lgtm/aletheia/actions/runs/37864196375). This does not verify the newer local commits.
-- Latest Live Investigation workflow run: `37864362862`, failure, same remote commit. Its artifact and failure details have not been inspected in this session; do not infer a cause.
-- No Phase 5b additions have been implemented. PhoneInfoga is already present; its scope and metadata need review. No source in this project should be described as verified-live without current CI and raw evidence.
+- Repository: `frostknightfrosty-lgtm/aletheia`, branch `main`.
+- Current committed HEAD at the last CI run: `cd71a0c5753bd8c94ffea5dc6acb27b093ce50b8`.
+- Docker Verification run `38165531894` succeeded on that commit: https://github.com/frostknightfrosty-lgtm/aletheia/actions/runs/38165531894
+- Raw artifact lines: `PARSER PREFLIGHT: PASS — 30/30 adapters have parser coverage`; `108 passed, 1 warning in 11.93s`; `DOCKER CAPTURE: PASS — 31/31 cases captured`. `results.json` contained 31 cases, all with return code 0. This was CI validation of the current pre-source-review commit, not validation of the uncommitted documentation edits.
+- The manifest test fix is commit `f68729f7853a1c706232c0c5b39cc08af2773eae`; its CI run `38164845596` also succeeded.
+- No Phase 5b adapter additions have been implemented. No live investigation has been performed in this work.
 
-## Verification state
+## Phase 5b source-review state
 
-The remote `main` Docker workflow was green at `c6f8749...`; the local tree is ahead and is pending a new push-triggered verification. No local tests were run for the three local commits. The CI run's detailed test summary and artifacts were not independently read in this session. No live OSINT investigation was performed.
+- XposedOrNot's official documentation identifies `GET https://api.xposedornot.com/v1/check-email/{email}` as a no-key community endpoint. The safe proposed scope is to omit `details` or set it false, retaining only breach names and the queried email. Documented caps are 25 requests/hour and 100/day per IP. No live call was made because no authorized email target was supplied.
+- Hudson Rock was excluded: the official username endpoint searches compromised credentials; documented API use requires an API-key header, and official response examples contain username/password fields. No Boolean-only endpoint was verified.
+- DarkNyx was excluded: the free public page searches onion sites, leak dumps, and marketplaces; personal-data masking is explicitly incomplete; the legal terms prohibit scraping; API access is a Pro feature. No public metadata-only endpoint was verified.
+- osint-darkweb-pkg was excluded: PyPI sdist `osint_darkweb_pkg-0.1.0.tar.gz`, SHA-256 `7a42152d02d3493ec01e8913964e05b4b850107f9be06f50ba89978795463e42`, was statically inspected only. Its `get_search_results(query)` path requests 17 hardcoded onion engines and returns titles/URLs; separate `scrape_multiple(urls)` fetches onion pages and extracts up to 1200 characters. It has no documented engine allowlist to restrict the public invocation to Ahmia, Torch, and OnionLand. The package was not installed or executed.
+- LeakCheck remains excluded by owner decision. See `GATES.md` for resolved gates.
+- PhoneInfoga already exists; scope confirmation is still needed before treating the Phase 5b review item as complete.
+- Blackbird and Lullar still require source, license, invocation, and maintenance review before any implementation.
 
-Earlier project audits identify these gaps, which remain unaddressed: no verified-live adapters; synthetic fixture provenance; missing egress proxy; file-backed JSON graph/checkpoint stores rather than production backends; incomplete score/confidence separation; no negative-result records; missing required `--purpose`; and no verifiable hash chain. The SQLite benchmark store is separate from graph/checkpoint persistence.
+## Next action
 
-## Current phase and next action
+Continue Phase 5b in order with XposedOrNot. Preserve the exact route and non-detailed response limit in `docs/PHASE_5B_REGISTRY.md`. Do not perform a live XposedOrNot lookup until the user supplies and authorizes an email target. Keep all live results and verification claims tied to the exact CI run, commit, and raw artifact evidence.
 
-Current phase: Phase 5b, source review and adapter implementation.
+## Known deferred issues
 
-Next: push the local commits together with the startup checkpoint and verify that exact tree in CI. Then source-check the remaining Phase 5b candidates in order, beginning with XposedOrNot. Before any implementation, record an authoritative upstream, license/version, endpoint and rate limit, permitted fields, legal tier, and fixture provenance. Use only documentation-backed or authorized fixtures. Confirm PhoneInfoga's existing legal scope rather than creating a duplicate adapter.
+The broader audit gaps remain: no verified-live adapters, synthetic fixture provenance, no egress proxy, file-backed JSON graph/checkpoint stores, incomplete score/confidence separation, no negative-result records, missing required `--purpose`, and no verifiable audit hash chain. Do not start Phase 8 work until the prescribed earlier phases are complete.
 
-The LeakCheck gate is resolved as excluded. Hudson Rock's [official API docs](https://docs.hudsonrock.com/reference/getting-started) require an API-key header and document optional fields that include employee session cookies; establish a free permitted endpoint and a strict non-secret response scope before considering it. Dark-web proposals require an explicit source and response review against the criminal-content exclusion. Do not add or run them if that boundary cannot be established. Lullar and Blackbird also require upstream/package identity, licensing, and maintenance verification.
-
-## Resume protocol notes
-
-Read `RESUME_STATE.json`, `GATES.md`, this file, and the project authority documents before continuing. `RESUME_STATE.json.last_commit` names the latest source/content commit preceding the bookkeeping checkpoint; Git cannot embed the hash of a commit in a file inside that same commit without a self-referential hash. Treat the checkpoint commit as the current repository snapshot and report both SHAs when needed.
-
-No new Phase 8 work has started.
-
-## Deferred issues
-
-- `tests/test_project_manifest.py:99` hardcodes the adapter count (currently 30). Every future adapter addition or removal will break it. A more robust design is to drop the count assertion and only assert that every manifest adapter has a matching fixture file. Defer to a cleanup pass — not blocking.
+`RESUME_STATE.json` tracks the next action and latest CI result. Downloaded earlier CI artifact directories remain untracked local evidence and must not be staged with source changes.

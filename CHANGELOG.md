@@ -1,5 +1,10 @@
 # Changelog
 
+## 2026-10-11 — Phase 5b scoped-source review
+- Verified the documented, no-key XposedOrNot email check route and constrained its proposal to the default, non-detailed response.
+- Excluded Hudson Rock, DarkNyx, and osint-darkweb-pkg from the active Phase 5b registry because their documented access paths could not be verified as stable Tier 1–2-only scopes.
+- Recorded official-source URLs and the statically inspected PyPI source archive hash in `docs/NOT_INTEGRATED.md`; no candidate package was installed or run.
+
 ## 2026-10-11 — Phase 5b startup checkpoint
 - Created `RESUME_STATE.json` and this handoff checkpoint for the autonomous completion directive.
 - Resolved the LeakCheck gate as excluded, per project-owner decision; no adapter or lookup was created.
