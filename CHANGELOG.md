@@ -13,6 +13,7 @@
 - Checked the exact v2.11.0 CLI, scanner registration, scanner docs, OVH endpoint, and GPL-3.0 license from upstream.
 - Recorded the no-key scope (local parsing, Google search-link generation only, OVH public range lookup); Aletheia does not forward PhoneInfoga API credentials. No live phone scan was made.
 - Recorded the current parser's omission of Google URLs and OVH fields as a deferred completeness issue.
+- Docker Verification run `38170483392` verified the documentation and manifest update: 110 passed, parser preflight 31/31, and Docker capture 32/32 with all return codes 0.
 
 ## 2026-10-11 — Phase 5b scoped-source review
 - Verified the documented, no-key XposedOrNot email check route and constrained its proposal to the default, non-detailed response.
