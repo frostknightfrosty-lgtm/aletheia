@@ -1,5 +1,9 @@
 # Changelog
 
+## 2026-10-11 — XposedOrNot CI follow-up
+- Docker Verification run `38167558342` built all pinned images and captured all 32 cases with return code 0, but the pytest suite exposed a stale cumulative Phase 5 registry-size assertion (`26` actual versus `25` expected).
+- Updated only the expected registry size to 26; no test behavior or assertion was weakened.
+
 ## 2026-10-11 — Phase 5b scoped-source review
 - Verified the documented, no-key XposedOrNot email check route and constrained its proposal to the default, non-detailed response.
 - Excluded Hudson Rock, DarkNyx, and osint-darkweb-pkg from the active Phase 5b registry because their documented access paths could not be verified as stable Tier 1–2-only scopes.

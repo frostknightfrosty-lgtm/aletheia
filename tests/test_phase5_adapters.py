@@ -23,7 +23,7 @@ def test_phase5_registry_contains_seven_new_adapters():
     registry = phase5_adapters()
     expected = {"instaloader", "reddit-api", "youtube-api", "overpass", "suncalc", "deepface", "insightface"}
     assert expected <= set(registry)
-    assert len(registry) == 25
+    assert len(registry) == 26
 
 
 def test_phase5_authorization_gate(monkeypatch, tmp_path):
