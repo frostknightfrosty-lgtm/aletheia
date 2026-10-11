@@ -7,6 +7,7 @@
 ## 2026-10-11 — XposedOrNot fixture verification
 - Docker Verification run `38168341113` on commit `d9b3fe9afc9c7b28be37c8c1a5ae601c481fa59c` passed: 110 tests, parser preflight 31/31, and Docker capture 32/32 with all return codes 0.
 - Marked XposedOrNot `verified-fixture`; no live API lookup occurred and its fixture remains synthetic.
+- Follow-up run `38169040308` verified the manifest and documentation update with 110 tests passing, parser preflight 31/31, and Docker capture 32/32.
 
 ## 2026-10-11 — Phase 5b scoped-source review
 - Verified the documented, no-key XposedOrNot email check route and constrained its proposal to the default, non-detailed response.

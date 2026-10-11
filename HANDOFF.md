@@ -11,9 +11,10 @@ LeakCheck is excluded by the project owner. Hudson Rock, DarkNyx, and osint-dark
 ## Repository and CI state
 
 - Repository: `frostknightfrosty-lgtm/aletheia`, branch `main`.
-- Latest CI-verified commit: `d9b3fe9afc9c7b28be37c8c1a5ae601c481fa59c`.
-- Docker Verification run `38168341113` succeeded on that commit: https://github.com/frostknightfrosty-lgtm/aletheia/actions/runs/38168341113
-- Raw artifact lines: `PARSER PREFLIGHT: PASS — 31/31 adapters have parser coverage`; `110 passed, 1 warning in 17.29s`; `DOCKER CAPTURE: PASS — 32/32 cases captured`. The artifact's `results.json` contained 32 entries, all with return code 0, including `phase4-xposedornot`. The image build and test steps both succeeded. This verifies fixture parsing and container smoke only; no live API lookup was performed.
+- Latest CI-verified commit: `b1295b77022775d537ab96970ce6c163caaad2f0`.
+- Docker Verification run `38169040308` succeeded on that commit: https://github.com/frostknightfrosty-lgtm/aletheia/actions/runs/38169040308
+- Raw artifact lines: `PARSER PREFLIGHT: PASS — 31/31 adapters have parser coverage`; `110 passed, 1 warning in 11.81s`; `DOCKER CAPTURE: PASS — 32/32 cases captured`. The artifact's `results.json` contained 32 entries, all with return code 0, including `phase4-xposedornot`. The image build and test steps both succeeded. This run re-verified the source, manifest, and documentation commit; no live API lookup was performed.
+- The XposedOrNot implementation itself was first verified in run `38168341113` on commit `d9b3fe9afc9c7b28be37c8c1a5ae601c481fa59c`, with the same 31/31, 110 passed, and 32/32 evidence.
 - Previous run `38167558342` failed on commit `b74beb866109115b9fc9a312bfdce7110cdbe5c9` only because `tests/test_phase5_adapters.py:26` expected 25 cumulative adapters while the registry now contains 26. The one-line expected-count correction is in the green commit above.
 - The preceding Docker Verification run `38165531894` succeeded on `cd71a0c5753bd8c94ffea5dc6acb27b093ce50b8`: https://github.com/frostknightfrosty-lgtm/aletheia/actions/runs/38165531894
 - The manifest test fix is commit `f68729f7853a1c706232c0c5b39cc08af2773eae`; its CI run `38164845596` also succeeded.

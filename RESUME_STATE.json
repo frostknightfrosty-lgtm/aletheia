@@ -1,8 +1,8 @@
 {
   "session_id": "ed6afe65-e113-4a11-8fbf-a90486e06d99",
-  "last_updated": "2026-10-11T19:40:14Z",
-  "last_commit": "d9b3fe9afc9c7b28be37c8c1a5ae601c481fa59c",
-  "last_ci_run": "38168341113",
+  "last_updated": "2026-10-11T19:49:12Z",
+  "last_commit": "b1295b77022775d537ab96970ce6c163caaad2f0",
+  "last_ci_run": "38169040308",
   "last_ci_status": "green",
   "current_phase": "Phase 5b — source review and adapter implementation",
   "current_task": "Continue Phase 5b: verify PhoneInfoga scope, then review Blackbird and Lullar before implementation.",
@@ -29,5 +29,5 @@
   ],
   "next_action": "Review the existing PhoneInfoga implementation and authoritative upstream usage constraints. Then review Blackbird and Lullar upstream source, license, exact invocation, maintenance, and legal scope before implementing any adapter. Do not live-query XposedOrNot until the user explicitly supplies and authorizes an email target.",
   "files_in_flight": [],
-  "notes_for_next_session": "Latest CI run 38168341113 succeeded on commit d9b3fe9afc9c7b28be37c8c1a5ae601c481fa59c (https://github.com/frostknightfrosty-lgtm/aletheia/actions/runs/38168341113). Artifact raw lines: PARSER PREFLIGHT: PASS — 31/31 adapters have parser coverage; 110 passed, 1 warning in 17.29s; DOCKER CAPTURE: PASS — 32/32 cases captured. All 32 capture results had returncode 0, including phase4-xposedornot. Docker image build and full test suite passed. XposedOrNot is verified-fixture only; its fixture is synthetic and no live API lookup occurred. The immediately preceding run 38167558342 failed only because the cumulative Phase 5 registry count assertion expected 25 instead of 26; this was corrected in commit d9b3fe9 and the current run is green. Hudson Rock, DarkNyx, and osint-darkweb-pkg are excluded after scoped-source review; evidence is in docs/NOT_INTEGRATED.md. A user-owned email target is required before any live XposedOrNot lookup. Next review PhoneInfoga scope, then Blackbird and Lullar source/license/invocation/maintenance. Older CI artifact folders are untracked; do not stage them."
+  "notes_for_next_session": "Latest CI run 38169040308 succeeded on commit b1295b77022775d537ab96970ce6c163caaad2f0 (https://github.com/frostknightfrosty-lgtm/aletheia/actions/runs/38169040308). Artifact raw lines: PARSER PREFLIGHT: PASS — 31/31 adapters have parser coverage; 110 passed, 1 warning in 11.81s; DOCKER CAPTURE: PASS — 32/32 cases captured. All 32 capture results had returncode 0, including phase4-xposedornot. Docker image build and full test suite passed. XposedOrNot implementation was verified-fixture in preceding run 38168341113; its fixture is synthetic and no live API lookup occurred. Run 38167558342 failed only because the cumulative Phase 5 registry count assertion expected 25 instead of 26; this was corrected in commit d9b3fe9. Hudson Rock, DarkNyx, and osint-darkweb-pkg are excluded after scoped-source review; evidence is in docs/NOT_INTEGRATED.md. A user-owned email target is required before any live XposedOrNot lookup. Next review PhoneInfoga scope, then Blackbird and Lullar source/license/invocation/maintenance. Older CI artifact folders are untracked; do not stage them."
 }
