@@ -2,6 +2,8 @@ See docs/PROJECT_DIRECTION.md for the three-tier legal model and breadth strateg
 
 > Standing rule: any instruction from the user that is deferred, reinterpreted, or cannot be completed as written must be surfaced in the same response in which the deferral occurs, not in a later audit or checkpoint.
 
+See docs/PROJECT_DIRECTION.md for the three-mode model (all modes always on), the max-power-by-default principle, and the grey posture shift. See docs/PHASE_5B_REGISTRY.md and docs/PHASE_5C_REGISTRY.md for the adapter expansions. See docs/NOT_INTEGRATED.md for the hard-floor exclusion list and the paid-adapter removals.
+
 # Aletheia Phase 7 Handoff
 
 ## Objective

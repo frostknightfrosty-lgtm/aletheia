@@ -1,6 +1,6 @@
 # Phase 5 — Social / Geospatial / Image
 
-Phase 5 adds eight adapters while preserving the typed adapter boundary and Phase 1–4 provenance/checkpoint behavior.
+Phase 5 has seven adapters while preserving the typed adapter boundary and Phase 1–4 provenance/checkpoint behavior.
 
 ## Social
 
@@ -17,7 +17,6 @@ Phase 5 adds eight adapters while preserving the typed adapter boundary and Phas
 
 - DeepFace 0.0.101: offline face detection through its OpenCV backend; no identity recognition.
 - InsightFace 2.1: offline face detection when licensed model weights are operator-provisioned; network-disabled by design.
-- Google Cloud Vision 3.16.0: labels, OCR, and face detection for operator-supplied images.
 
 ## Deferred
 
