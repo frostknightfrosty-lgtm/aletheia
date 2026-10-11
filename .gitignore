@@ -10,3 +10,5 @@ data/runs/*
 data/cache/*
 data/evidence/*
 !data/**/.gitkeep
+*.egg-info/
+ci-artifacts-*/
