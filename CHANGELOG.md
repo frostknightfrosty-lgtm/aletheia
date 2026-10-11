@@ -53,6 +53,10 @@
 
 # Changelog
 
+## 2026-10-11 — Pause checkpoint (Gravatar draft in progress)
+- Recorded the latest verified commit/run and the exact state of the incomplete, unverified Gravatar draft in `HANDOFF.md` and `RESUME_STATE.json`.
+- No code, tests, commits, pushes, or CI runs were performed for this checkpoint; current source changes remain local and unverified.
+
 ## 0.6.0 — Phase 6
 - Added SEC EDGAR, GLEIF, OpenCorporates, OpenSanctions, and CourtListener adapters.
 - Added company/legal-entity/LEI/filing/court-case/sanction/jurisdiction graph entity types.
