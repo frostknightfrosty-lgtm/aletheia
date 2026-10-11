@@ -1,50 +1,72 @@
-# Aletheia Handoff — Phase 5c Source Review Decisions
+# Aletheia Handoff — Phase 5c: Gravatar CI-verified, RDAP next
 
-Last updated: 2026-10-11
+Last updated: 2026-10-11T22:50:47Z
 
 ## Project boundaries
 
-`docs/PROJECT_DIRECTION.md` is the current strategy authority. The Tier 4/5 hard floor remains binding: do not register sources that require consent/warrant, expose plaintext credentials or stolen tokens, ingest leaked databases, or collect criminal-market material. Do not add paid-only default components. The Phase 5b/5c registries are proposals until upstream scope, terms, licensing, and invocation are verified.
-
-LeakCheck is excluded by the project owner. Hudson Rock, DarkNyx, and osint-darkweb-pkg were reviewed against the owner's exact endpoint conditions and excluded because their documented interfaces do not provide the required stable, enforceable Tier 1–2 scope. Blackbird and Lullar were also excluded: Blackbird has no declared upstream license, and Lullar documents browser-side URL generation with manual profile opening rather than a supported machine interface. No code was installed, run, or added for these sources.
+`docs/PROJECT_DIRECTION.md` is the current strategy authority. The Tier 4/5 hard floor remains binding: do not register sources that require consent/warrant, expose plaintext credentials or stolen tokens, ingest leaked databases, or collect criminal-market material. Do not add paid-only default components. LeakCheck, Hudson Rock, DarkNyx, osint-darkweb-pkg, Blackbird, Lullar, ONYPHE, Mr.Holmes, IVRE, urlscan, ThreatCluster, and Social Analyzer are excluded (reasons and primary-source links in `docs/NOT_INTEGRATED.md` and `docs/PHASE_5C_REGISTRY.md`). Only Gravatar and RDAP were scoped for Phase 5c implementation. No live lookup has been made against any target.
 
 ## Repository and CI state
 
 - Repository: `frostknightfrosty-lgtm/aletheia`, branch `main`.
-- Latest CI-verified commit: `5a64f428b8479dd497924d9e2c3f3d2acb402eda`.
-- Docker Verification run `38172013706` succeeded on that commit: https://github.com/frostknightfrosty-lgtm/aletheia/actions/runs/38172013706
-- Raw artifact lines: `PARSER PREFLIGHT: PASS — 31/31 adapters have parser coverage`; `110 passed, 1 warning in 9.71s`; `DOCKER CAPTURE: PASS — 32/32 cases captured`. The artifact's `results.json` contained 32 entries, all with return code 0, with 32 `.stdout` and 32 `.stderr` files. Image build, tests, capture, and artifact upload all succeeded. No live phone scan was performed.
-- The XposedOrNot implementation itself was first verified in run `38168341113` on commit `d9b3fe9afc9c7b28be37c8c1a5ae601c481fa59c`, with the same 31/31, 110 passed, and 32/32 evidence.
-- Previous run `38167558342` failed on commit `b74beb866109115b9fc9a312bfdce7110cdbe5c9` only because `tests/test_phase5_adapters.py:26` expected 25 cumulative adapters while the registry now contains 26. The one-line expected-count correction is in the green commit above.
-- The preceding Docker Verification run `38165531894` succeeded on `cd71a0c5753bd8c94ffea5dc6acb27b093ce50b8`: https://github.com/frostknightfrosty-lgtm/aletheia/actions/runs/38165531894
-- The manifest test fix is commit `f68729f7853a1c706232c0c5b39cc08af2773eae`; its CI run `38164845596` also succeeded.
-- XposedOrNot is `verified-fixture`; manifest and registry status cite run `38168341113`. Its source remains limited to the documented no-key `GET https://api.xposedornot.com/v1/check-email/{email}` route with `details` omitted, parsing breach names only. No live API lookup has been performed.
+- Latest CI-verified commit: `200ada277886ee961c90c668bfe4aa36fc5f2899` (`phase-5c: add Gravatar adapter with curated public profile fields`).
+- Docker Verification run `38179832021` succeeded on that commit: https://github.com/frostknightfrosty-lgtm/aletheia/actions/runs/38179832021 (`gh run view --json` returned headSha `200ada27…`, conclusion `success`, event `push`).
+- Raw artifact lines (downloaded with `gh run download` and read this session): `PARSER PREFLIGHT: PASS — 32/32 adapters have parser coverage` (`ci-parser-preflight.txt`); `119 passed, 1 warning in 12.58s` (`ci-artifacts/pytest-full.log`; no failures, errors, or skips); `DOCKER CAPTURE: PASS — 33/33 cases captured` (`ci-artifacts/docker-integration/capture.log`). `results.json` has 33 entries, 0 nonzero return codes, 33 stdout and 33 stderr files. Case `phase5c-gravatar` ran `docker run --rm --network none aletheia/gravatar:api-v3 --health`, return code 0, stdout `ok`.
+- Local commits after the verified commit, NOT pushed and NOT CI-verified when this file was written: `597601960d12de8a5427f628c6ca306e7b595457` (manifest: Gravatar `verified-fixture`, cites run 38179832021), `54b85ef06b6f50d3a9156010328ef123f535c769` (`Add egg-info and ci-artifacts-* to gitignore`), and the state-file commit containing this file (a commit cannot embed its own hash; use `git log -3`). `origin/main` was at `200ada2` when checked.
+- Previous green run: `38172950867` on `ad9676a39cc010a1eafcbb8a4e1001fd9ba5ad87` (31/31 parser, 110 passed, 32/32 capture).
+- Commit `593625bde90aed7b1d5b99d84acf4a995f0538b6` has the message `-`. It added `AGENT_SETUP.md`, `AUTONOMOUS_DIRECTIVE.md`, and four `CHANGELOG.md` lines. The message was a formatting slip; it is already on origin, so history is not rewritten.
+- The downloaded `ci-artifacts-*/` folders (now including `ci-artifacts-38179832021/`) and `app/aletheia_osint.egg-info/` are ignored via `.gitignore` and remain on disk as local evidence. Never stage them.
 
-## Phase 5b source-review state
+### git status snapshot
 
-- XposedOrNot's official documentation identifies `GET https://api.xposedornot.com/v1/check-email/{email}` as a no-key community endpoint. The safe proposed scope is to omit `details` or set it false, retaining only breach names and the queried email. Documented caps are 25 requests/hour and 100/day per IP. No live call was made because no authorized email target was supplied.
-- Hudson Rock was excluded: the official username endpoint searches compromised credentials; documented API use requires an API-key header, and official response examples contain username/password fields. No Boolean-only endpoint was verified.
-- DarkNyx was excluded: the free public page searches onion sites, leak dumps, and marketplaces; personal-data masking is explicitly incomplete; the legal terms prohibit scraping; API access is a Pro feature. No public metadata-only endpoint was verified.
-- osint-darkweb-pkg was excluded: PyPI sdist `osint_darkweb_pkg-0.1.0.tar.gz`, SHA-256 `7a42152d02d3493ec01e8913964e05b4b850107f9be06f50ba89978795463e42`, was statically inspected only. Its `get_search_results(query)` path requests 17 hardcoded onion engines and returns titles/URLs; separate `scrape_multiple(urls)` fetches onion pages and extracts up to 1200 characters. It has no documented engine allowlist to restrict the public invocation to Ahmia, Torch, and OnionLand. The package was not installed or executed.
-- Blackbird's former upstream URL redirects to `antoniaci/blackbird`; repo metadata reports no license and the root has no LICENSE file. Its last push was 2025-07-13. The documented CLI supports `python blackbird.py --username ...`; optional AI and HTML-dump behaviors would not be allowed even if licensing were resolved. No copy was installed or run.
-- Lullar's current official checker page says it generates public profile URLs and asks the visitor to open each one to judge whether it exists. It documents no CLI, machine API, or machine-readable results; the landing page's automatic-checking claims conflict with the dedicated checker instructions. No page was queried with a target username.
-- LeakCheck remains excluded by owner decision. See `GATES.md` for resolved gates.
-- PhoneInfoga v2.11.0 scope is reviewed against official tag-pinned docs/source: `phoneinfoga scan -n <number>` runs local parsing, Google search-link generation without result fetching, and the no-key OVH number-range API. Numverify and Google CSE need credentials; Aletheia does not forward any PhoneInfoga credentials. No live scan was made. Current parser does not emit Google URLs or OVH Found/range/city fields; that is a deferred completeness issue.
-- The owner's conditional review requirements for Hudson Rock, DarkNyx, and osint-darkweb-pkg were applied; all three remain excluded because their documented call paths fail the stated conditions. No pending proposal from this group remains active.
+Taken 2026-10-11T22:50Z, after the manifest and `.gitignore` commits and before this file was rewritten:
+
+```
+On branch main
+Your branch is ahead of 'origin/main' by 2 commits.
+
+Changes not staged for commit:
+	modified:   HANDOFF.md
+	modified:   RESUME_STATE.json
+
+Untracked files:
+	app/aletheia/adapters/_rdap_draft.py
+```
+
+```
+54b85ef06b6f50d3a9156010328ef123f535c769 Add egg-info and ci-artifacts-* to gitignore
+597601960d12de8a5427f628c6ca306e7b595457 phase-5c: mark Gravatar verified-fixture (CI run 38179832021)
+200ada277886ee961c90c668bfe4aa36fc5f2899 phase-5c: add Gravatar adapter with curated public profile fields
+593625bde90aed7b1d5b99d84acf4a995f0538b6 -
+ad9676a39cc010a1eafcbb8a4e1001fd9ba5ad87 phase-5c: record source scope review
+```
+
+The two modified files in that snapshot were the stale 2026-10-11 pause-checkpoint versions that this rewrite replaces.
 
 ## Phase 5c source-review state
 
-- Gravatar and RDAP have narrow public-data scopes documented for implementation. Gravatar will query only the SHA-256 hash of the normalized email via `GET https://api.gravatar.com/v3/profiles/{identifier}` and retain only curated profile fields; it requires an authorization assertion and must not infer identity. RDAP will use the IANA DNS/IPv4/IPv6 bootstrap files for one exact domain or IP lookup, with no probing or enumeration.
-- The owner excluded ONYPHE after review of the Free View terms.
-- Mr.Holmes, IVRE, urlscan, ThreatCluster, and Social Analyzer were excluded after source/scope review; reasons and primary-source links are in `docs/PHASE_5C_REGISTRY.md` and `docs/NOT_INTEGRATED.md`.
-- Proposals without a verified exact upstream remain rejected as recorded in the registry. The proposal list names 19 tools, not 20.
+- Gravatar: implemented in `app/aletheia/adapters/phase5c.py`, wired into `registry.py`, with Dockerfile and runner under `docker/gravatar/`, synthetic fixture `tests/fixtures/gravatar.json`, parser tests in `tests/test_phase5c_adapters.py`, and a manifest entry. Manifest status is `verified-fixture` (synthetic fixture, Docker health smoke only; the local manifest commit is not yet pushed). Scope unchanged: one exact email SHA-256 against `GET https://api.gravatar.com/v3/profiles/{identifier}`, curated public fields only, no identity inference. No live API lookup has occurred.
+- RDAP: not implemented and not wired. The only draft is the untracked file `app/aletheia/adapters/_rdap_draft.py`. Its docstring says it was split out of `phase5c.py` on resume. `phase5c.py` now contains only `GravatarAdapter`, so that file is the only copy of the draft and it is not in git history. It was NOT deleted: the project owner's instruction to delete it assumed the RDAP class still lives in `phase5c.py`, which it does not. Awaiting the owner's decision on the file.
+- RDAP scope (from `docs/PHASE_5C_REGISTRY.md`): IANA bootstrap data, one exact `/domain/{domain}` or `/ip/{address}` lookup, standard library only, preserve the registry record URL as provenance, no probing or enumeration.
 
 ## Next action
 
-Implement the scoped Gravatar adapter and RDAP lookup adapter with independent synthetic fixtures, parser tests, Docker smoke tests, capture cases, build targets, and manifest metadata. Push each bounded increment and verify it in the Docker Verification workflow. Afterward continue the audit-chain phase in the directive order. PhoneInfoga's parser completeness gap remains deferred. Do not perform live XposedOrNot lookups until the user explicitly supplies and authorizes an email target. Keep all verification claims tied to the exact CI run, commit, and raw artifact evidence.
+After the owner confirms, implement RDAP as its own bounded increment: decide with the owner what to do with `_rdap_draft.py` (it is the natural starting point), then add the adapter module, registry wiring, Dockerfile and runner, independent synthetic fixture, parser tests, Docker smoke and capture cases, build target, and manifest entry. First push the three local commits above and confirm CI is green on the pushed head. Verify each increment from the push-triggered workflow artifact before any "verified" claim. Afterward continue the audit-chain phase in the directive order. Do not perform a live XposedOrNot lookup until the user supplies and authorizes an email target.
 
 ## Known deferred issues
 
-The broader audit gaps remain: no verified-live adapters, synthetic fixture provenance, no egress proxy, file-backed JSON graph/checkpoint stores, incomplete score/confidence separation, no negative-result records, missing required `--purpose`, and no verifiable audit hash chain. Do not start Phase 8 work until the prescribed earlier phases are complete.
+- Broader audit gaps: no verified-live adapters, synthetic fixture provenance, no egress proxy, file-backed JSON graph/checkpoint stores, incomplete score/confidence separation, no negative-result records, missing required `--purpose`, and no verifiable audit hash chain. Do not start Phase 8 work before the prescribed earlier phases.
+- PhoneInfoga parser does not emit Google URLs or OVH Found/range/city fields.
+- `_rdap_draft.py` observations (not fixed): an unused `_email_hash` helper, and `ipaddress.ip_address(request.seed.value)` in the IP branch is unguarded against an invalid seed. It is unreviewed and unverified.
+- Documentation drift (not fixed): `README.md` status cites run 38168341113 and 110 tests; `PROJECT_MANIFEST.json` `known_environment_limitations` and `validation` still cite 31 Docker cases and an older baseline; `CHANGELOG.md` has duplicated `# Changelog` headers and out-of-order sections; `AGENT_SETUP.md` and the directive refer to `docs/AUTONOMOUS_DIRECTIVE.md` but both live at the repo root.
+- `.gitignore` lacks the token patterns `AGENT_SETUP.md` §9 asks to verify (`.aletheia_github_token`, `*.token`); `.env.*` already covers `.env.local`.
+- Git warns `LF will be replaced by CRLF` for several files (autocrlf behavior on this Windows checkout). Edit without assuming content changes from line-ending status.
+- Tool-environment note: on this machine `git` is not on PATH (use `C:\Program Files\Git\cmd\git.exe` with `-C <repo>`), `docker` is not installed locally, and the tool shell's working directory and aliases do not persist between calls. `gh` is authenticated as `frostknightfrosty-lgtm`.
 
-`RESUME_STATE.json` tracks the latest verified commit and CI result. As the state update is committed together with work, its `last_commit` points to the preceding verified commit rather than attempting to embed a self-referential commit hash. Downloaded earlier CI artifact directories remain untracked local evidence and must not be staged with source changes.
+## Process note: stale pause checkpoint
+
+The 2026-10-11 pause checkpoint in this file and in `RESUME_STATE.json` became stale. As reported by the project owner, Codex committed the Gravatar work (`200ada2`, 2026-10-12 01:17 +03:00) after the checkpoint was written but before the state files were updated, so the checkpoint kept describing Gravatar as an unfinished draft and named `ad9676a` as the resume point, while HEAD was two commits ahead. Detected on resume 2026-10-12 by comparing `git log` against `RESUME_STATE.json.last_commit`. Rule going forward: after any commit, update `RESUME_STATE.json` and `HANDOFF.md` (in their own commit), and on resume always compare `git log -1` and `git status` to the state files before trusting `next_action`.
+
+## Pause checkpoint — 2026-10-11 (superseded)
+
+The user paused work on 2026-10-11 because tokens were nearly exhausted, with the Gravatar draft uncommitted. That checkpoint is superseded by this file: the Gravatar work was committed in `200ada2` and CI-verified in run `38179832021`.

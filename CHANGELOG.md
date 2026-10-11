@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-10-12 — Gravatar CI verification and state refresh
+- Docker Verification run `38179832021` succeeded on commit `200ada277886ee961c90c668bfe4aa36fc5f2899`: parser preflight 32/32, `119 passed, 1 warning in 12.58s`, capture 33/33 with all return codes 0. Marked Gravatar `verified-fixture` (synthetic fixture and Docker health smoke only; no live API lookup).
+- Added `*.egg-info/` and `ci-artifacts-*/` to `.gitignore`.
+- Replaced the stale 2026-10-11 pause checkpoint in `HANDOFF.md` and `RESUME_STATE.json`. The Gravatar work had been committed (`200ada2`) after that checkpoint was written but before the state files were updated.
+- Commit `593625bde90aed7b1d5b99d84acf4a995f0538b6` (message `-`, adding `AGENT_SETUP.md`, `AUTONOMOUS_DIRECTIVE.md`, and changelog lines) was a formatting slip in the commit message. It is already on origin, so it was not amended and history was not rewritten.
+- The untracked `_rdap_draft.py` was kept, not deleted, because `phase5c.py` holds only the Gravatar adapter and the draft is the only copy of the RDAP code.
+
 ## 2026-10-11 — Phase 5c source review decisions
 - Recorded Gravatar and RDAP as narrowly scoped public-data integrations to implement.
 - Excluded ONYPHE per owner decision and excluded Mr.Holmes, IVRE, urlscan, ThreatCluster, and Social Analyzer where terms, source boundaries, or execution models could not be safely constrained.
