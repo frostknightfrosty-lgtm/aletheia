@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-10-11 — Phase 5b startup checkpoint
+- Created `RESUME_STATE.json` and this handoff checkpoint for the autonomous completion directive.
+- Resolved the LeakCheck gate as excluded, per project-owner decision; no adapter or lookup was created.
+- Recorded current remote CI evidence and the unverified local commits in `HANDOFF.md`.
+- Corrected the Phase 5b registry and project direction to reflect the LeakCheck exclusion.
+
 ## 0.7.0 — Phase 7
 - Added SQLite benchmark store for labeled quality cases and execution telemetry.
 - Added benchmark leaderboard API and CLI.

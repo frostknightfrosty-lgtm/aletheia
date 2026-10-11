@@ -10,7 +10,7 @@ Grey does not include plaintext credentials, stolen session tokens, leaked datab
 
 ## The three modes — all always on
 
-There is no mode selector. There is no --mode, --open, or --legal-only switch in the target operator experience. The three mode names describe behaviors that run together on every investigation:
+There is no mode selector in the target operator experience; the current CLI retains its existing legal-only interface. The three mode names below describe future behaviors that run together on every investigation:
 
 1. **Open behavior:** dispatch every matching Tier 1 source without a separate gate.
 2. **Personal behavior:** record an optional declaration of lawful basis in the audit trail. An empty declaration does not stop a run.
@@ -29,7 +29,7 @@ Every manifest adapter is intended to carry:
 - disabled_reason: string or null; required when enabled_by_default is false
 - batch_grouping: string or null
 
-The Phase 5b/5c registries are proposals only. Their entries do not mean that code, routing, credentials, or runtime enforcement already exists.
+The Phase 5b/5c registries are proposals only. Their entries do not mean that code, routing, credentials, or runtime enforcement already exists. LeakCheck was excluded by the project owner on 2026-10-11 and is not a Phase 5b implementation target.
 
 ## Tier ladder and hard floor
 
@@ -45,7 +45,7 @@ Tier 4 and Tier 5 are permanently excluded from the registry. The desired adapte
 
 ## Posture shift note — Phase 5b
 
-Phase 5b adds a proposed breadth wave of username, email, phone, and public-source checks. The registry records scope and current verification gaps. It is not permission to install or run those tools. In particular, LeakCheck remains pending review, and proposed tools that expose credentials, require target login, or cross the hard floor must not be implemented as written.
+Phase 5b adds a proposed breadth wave of username, email, phone, and public-source checks. The registry records scope and current verification gaps. It is not permission to install or run those tools. LeakCheck is excluded, and proposed tools that expose credentials, require target login, or cross the hard floor must not be implemented as written.
 
 ## Batch grouping table
 
@@ -53,7 +53,7 @@ Group membership is a planning aid for later consolidated adapters. It does not 
 
 | Batch | Members and status | Tier / notes |
 | --- | --- | --- |
-| breach_search | HIBP (current); XposedOrNot (proposed); Hudson Rock (proposed); LeakCheck (pending review) | Mixed Tier 1/3; HIBP requires a paid subscription for direct email-account lookups |
+| breach_search | HIBP (current); XposedOrNot (proposed); Hudson Rock (proposed); LeakCheck (excluded) | Mixed Tier 1/3; HIBP requires a paid subscription for direct email-account lookups |
 | stealer_log | Hudson Rock (proposed) | Tier 1 proposal; return infection signals only, never plaintext |
 | darkweb_search | osint-darkweb-pkg, Darknyx (proposed); ThreatCluster (source-verified proposal); Vamp Darkweb Intel (rejected) | Mixed Tier 1/2 proposals; exclude credential and criminal-market content |
 | username_enum | Sherlock, Maigret (current); Blackbird (proposed); Nexus OSINT (rejected) | Tier 2 |

@@ -1,6 +1,6 @@
 # Phase 5b Adapter Registry
 
-This is a proposal registry, not an implementation or approval to run these tools. All eight entries are marked unverified-live. No Phase 5b adapter code, Docker image, parser, or live run was added by this documentation change.
+This is a proposal registry, not an implementation or approval to run these tools. Seven proposals remain; all are unverified-live. LeakCheck was excluded by the project owner on 2026-10-11 and is documented in `NOT_INTEGRATED.md`. No Phase 5b adapter code, Docker image, parser, or live run was added by this documentation change.
 
 ## xposedornot
 
@@ -39,25 +39,6 @@ secondary_batch_grouping: stealer_log
 ~~~
 
 No source response or fixture was independently verified in this task. Before any implementation, confirm the free endpoint, data fields, rate limits, terms, and that the shallow response cannot expose plaintext.
-
-## leakcheck — pending review
-
-~~~yaml
-name: leakcheck
-input_types: [email, username, password_hash]
-output_schema: CredentialHit[]  # proposed source name only; no plaintext
-invocation: api
-requires_key: false  # claimed for the OSINT-Hub path; unverified
-legal_tier: 1  # pending review; do not register until resolved
-legal_notes: "The proposed free path is described as source identifiers only. The stated access path is OSINT-Hub, a Discord breach-data aggregator; provenance may be grey-to-criminal."
-fixture_provenance: pending verification
-verification_status: unverified-live
-enabled_by_default: true  # proposal only; not approved for registration
-pending_review: true
-batch_grouping: breach_search
-~~~
-
-The source provenance and output must be reviewed before a tier is assigned or an adapter is implemented. The proposed password-hash input is especially sensitive and is not approved for a current investigation path.
 
 ## osint-darkweb-pkg
 

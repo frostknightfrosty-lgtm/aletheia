@@ -34,9 +34,9 @@ The project direction explicitly retains Shodan, HIBP, Reddit API, YouTube Data 
 
 Current manifest legal notes must state the actual key-cost conditions. In particular, the requested blanket free-cost label for HIBP is not used because it would be false for direct email lookups.
 
-## Pending review
+## Excluded and pending proposals
 
-**LeakCheck** remains pending review and is not integrated. Its proposed provenance is through OSINT-Hub, described as a Discord-based breach-data aggregator. Before any implementation, confirm the source's provenance and response fields; reject any path that yields plaintext credentials, stolen tokens, or criminal-market content. The proposed password-hash input is not approved for current use.
+**LeakCheck** is excluded from Phase 5b by the project owner (2026-10-11). It is not integrated. No source was queried and no implementation was attempted. The previous registry proposal's provenance and output behavior were not independently verified.
 
 ## Future re-addition
 
