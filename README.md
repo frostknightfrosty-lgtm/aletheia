@@ -4,7 +4,7 @@ Aletheia is a provenance-first meta-OSINT orchestration platform. Its core bound
 
 ## Current status
 
-**Phase 7 built; live Docker integration pending.** Docker was explicitly attempted in this environment, but the Docker CLI is not installed and no `/var/run/docker.sock` is available.
+**Phase 7 baseline verified in GitHub Actions; the current XposedOrNot addition is pending CI.** Run [38166691859](https://github.com/frostknightfrosty-lgtm/aletheia/actions/runs/38166691859) verified the prior 31 Docker smoke cases; it does not verify the XposedOrNot code in this commit.
 
 ## Quick start
 
@@ -33,6 +33,10 @@ aletheia investigate --seed image:/path/to/photo.jpg --legal-only --authorizatio
 ```
 
 `libphonenumber` and `SunCalc` remain offline deterministic utilities and do not require the assertion.
+
+## Email breach checks
+
+XposedOrNot is constrained to its free community `check-email` endpoint with the detailed response omitted. The adapter records breach names only; it does not retrieve passwords or breach records. Use it only for an email address you are authorized to investigate, and respect the upstream personal-use limits of 25 requests per hour and 100 per day per IP. Its new adapter and documentation-derived fixture are awaiting CI verification; no live lookup has been made.
 
 Finalize a completed run with entity resolution and reports:
 

@@ -7,7 +7,7 @@ from parser_test_marker import parser_test
 
 from aletheia.adapters.identity import (
     H8mailAdapter, HIBPAdapter, HoleheAdapter, LibPhoneNumberAdapter,
-    MaigretAdapter, PhoneInfogaAdapter,
+    MaigretAdapter, PhoneInfogaAdapter, XposedOrNotAdapter,
 )
 from aletheia.adapters.registry import phase4_adapters
 from aletheia.core.audit import AuditLogger
@@ -20,11 +20,11 @@ def req(kind, value, assertion="authorized personal-identifier investigation"):
                              authorization_assertion=assertion)
 
 
-def test_phase4_registry_contains_six_new_adapters():
+def test_phase4_registry_contains_seven_new_adapters():
     registry = phase4_adapters()
-    expected = {"maigret", "holehe", "h8mail", "hibp", "phoneinfoga", "libphonenumber"}
+    expected = {"maigret", "holehe", "h8mail", "hibp", "xposedornot", "phoneinfoga", "libphonenumber"}
     assert expected <= set(registry)
-    assert len(registry) == 18
+    assert len(registry) == 19
 
 
 def test_personal_identifier_adapters_require_authorization_before_docker(monkeypatch, tmp_path):
@@ -42,6 +42,7 @@ def test_personal_identifier_adapters_require_authorization_before_docker(monkey
         (HoleheAdapter(), SeedType.EMAIL, "alice@example.com"),
         (H8mailAdapter(), SeedType.EMAIL, "alice@example.com"),
         (HIBPAdapter(), SeedType.EMAIL, "alice@example.com"),
+        (XposedOrNotAdapter(), SeedType.EMAIL, "alice@example.com"),
         (PhoneInfogaAdapter(), SeedType.PHONE, "+14155552671"),
     ]:
         request = AdapterRunRequest(
@@ -89,6 +90,23 @@ def test_hibp_parser_creates_breach_findings():
     payload = json.dumps([{"Name": "Example Breach", "Title": "Example", "Domain": "example.com"}])
     result = HIBPAdapter().parse(req(SeedType.EMAIL, "alice@example.com"), Path("."), payload, "", 0)
     assert [(f.entity_type, f.value) for f in result.findings] == [(EntityType.BREACH, "Example Breach")]
+
+
+@parser_test('xposedornot')
+def test_xposedornot_parser_reads_only_breach_names():
+    payload = Path(__file__).parent / "fixtures" / "xposedornot.json"
+    result = XposedOrNotAdapter().parse(
+        req(SeedType.EMAIL, "test@example.com"), Path("."), payload.read_text(encoding="utf-8"), "", 0
+    )
+    assert {f.value for f in result.findings} == {
+        "Tesco", "KiwiFarms", "Vermillion", "Verified", "LizardSquad",
+        "2fast4u", "Autotrader", "MyRepoSpace", "SweClockers",
+    }
+    assert all("password" not in f.attributes for f in result.findings)
+    mismatched = XposedOrNotAdapter().parse(
+        req(SeedType.EMAIL, "different@example.com"), Path("."), payload.read_text(encoding="utf-8"), "", 0
+    )
+    assert not mismatched.findings
 
 
 @parser_test('libphonenumber')

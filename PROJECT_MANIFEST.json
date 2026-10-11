@@ -420,6 +420,29 @@
       "key_cost": "paid"
     },
     {
+      "name": "xposedornot",
+      "upstream": "https://xposedornot.com/api_doc",
+      "license": "XposedOrNot API terms",
+      "version_pin": "API v1",
+      "invocation": "Docker / HTTPS API",
+      "input_types": [
+        "email"
+      ],
+      "output_schema": "normalized breach names from the non-detailed email check",
+      "legal_notes": "Free community API for personal low-volume use. Only authorized email queries; obey published limits; no bulk collection, redistribution, passwords, or detailed breach records.",
+      "network": "required",
+      "last_audited": "2026-10-11T19:16:57Z",
+      "verification_status": "unknown",
+      "note": "The new parser fixture and adapter have not yet been checked by CI; fixture provenance: synthetic; fixture file: tests/fixtures/xposedornot.json. No live API lookup has occurred.",
+      "fixture_provenance": "synthetic",
+      "legal_tier": 2,
+      "enabled_by_default": true,
+      "disabled_reason": null,
+      "batch_grouping": "breach_search",
+      "requires_key": false,
+      "key_cost": "free personal low-volume"
+    },
+    {
       "name": "phoneinfoga",
       "upstream": "https://github.com/sundowndev/phoneinfoga",
       "license": "GPL-3.0-only",

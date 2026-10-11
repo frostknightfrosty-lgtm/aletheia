@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Execute the 31 Docker integration smoke cases and preserve raw stdout/stderr."""
+"""Execute the 32 Docker integration smoke cases and preserve raw stdout/stderr."""
 from __future__ import annotations
 import json
 import subprocess
@@ -24,6 +24,7 @@ CASES = [
     ("phase4-holehe", "aletheia/holehe:1.61", ["-c", "from holehe.core import __version__; print(__version__)"]),
     ("phase4-h8mail", "aletheia/h8mail:2.5.6", ["--help"]),
     ("phase4-hibp", "aletheia/hibp:api-v3", ["--health"]),
+    ("phase4-xposedornot", "aletheia/xposedornot:api-v1", ["--health"]),
     ("phase4-phoneinfoga", "aletheia/phoneinfoga:2.11.0", ["version"]),
     ("phase4-libphonenumber", "aletheia/libphonenumber:9.0.40", ["--health"]),
     ("phase5-instaloader", "aletheia/instaloader:4.15.3", ["--health"]),

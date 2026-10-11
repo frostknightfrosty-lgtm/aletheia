@@ -18,6 +18,7 @@ docker build -t aletheia/maigret:0.6.6 docker/maigret
 docker build -t aletheia/holehe:1.61 docker/holehe
 docker build -t aletheia/h8mail:2.5.6 docker/h8mail
 docker build -t aletheia/hibp:api-v3 docker/hibp
+docker build -t aletheia/xposedornot:api-v1 docker/xposedornot
 docker build -t aletheia/phoneinfoga:2.11.0 docker/phoneinfoga
 docker build -t aletheia/libphonenumber:9.0.40 docker/libphonenumber
 docker build -t aletheia/instaloader:4.15.3 docker/instaloader

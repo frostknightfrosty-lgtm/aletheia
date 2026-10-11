@@ -53,7 +53,7 @@ Group membership is a planning aid for later consolidated adapters. It does not 
 
 | Batch | Members and status | Tier / notes |
 | --- | --- | --- |
-| breach_search | HIBP (current); XposedOrNot (proposed); Hudson Rock and LeakCheck (excluded) | Mixed Tier 2/3; HIBP requires a paid subscription for direct email-account lookups |
+| breach_search | HIBP (current); XposedOrNot (Phase 5b implementation in progress); Hudson Rock and LeakCheck (excluded) | Mixed Tier 2/3; HIBP requires a paid subscription for direct email-account lookups |
 | stealer_log | Hudson Rock (excluded after scoped review) | Official API paths expose compromised credentials; no stable Boolean-only path verified |
 | darkweb_search | osint-darkweb-pkg and DarkNyx (excluded after scoped review); ThreatCluster (source-verified proposal); Vamp Darkweb Intel (rejected) | Exclude credential and criminal-market content; see `NOT_INTEGRATED.md` |
 | username_enum | Sherlock, Maigret (current); Blackbird (proposed); Nexus OSINT (rejected) | Tier 2 |

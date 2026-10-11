@@ -57,6 +57,7 @@ def test_phase3_container_health_smoke(image, command):
     ("aletheia/holehe:1.61", ["-c", "from holehe.core import __version__; print(__version__)"]),
     ("aletheia/h8mail:2.5.6", ["--help"]),
     ("aletheia/hibp:api-v3", ["--health"]),
+    ("aletheia/xposedornot:api-v1", ["--health"]),
     ("aletheia/phoneinfoga:2.11.0", ["version"]),
     ("aletheia/libphonenumber:9.0.40", ["--health"]),
 ])

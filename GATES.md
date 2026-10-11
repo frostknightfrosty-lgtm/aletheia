@@ -4,7 +4,7 @@ Last reviewed: 2026-10-11
 
 ## Open gates
 
-None currently awaiting a user decision.
+None currently blocking source review or adapter implementation. Before any XposedOrNot live lookup, obtain an email address the user owns or is explicitly authorized to investigate.
 
 ## Resolved gates
 

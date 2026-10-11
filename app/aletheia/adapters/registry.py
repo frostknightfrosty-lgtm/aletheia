@@ -3,7 +3,7 @@ from __future__ import annotations
 from aletheia.adapters.exiftool import ExifToolAdapter
 from aletheia.adapters.identity import (
     H8mailAdapter, HIBPAdapter, HoleheAdapter, LibPhoneNumberAdapter, MaigretAdapter,
-    PhoneInfogaAdapter,
+    PhoneInfogaAdapter, XposedOrNotAdapter,
 )
 from aletheia.adapters.sherlock import SherlockAdapter
 from aletheia.adapters.theharvester import TheHarvesterAdapter
@@ -36,7 +36,7 @@ def phase3_adapters() -> dict[str, Adapter]:
 def phase4_adapters() -> dict[str, Adapter]:
     adapters = [
         *phase3_adapters().values(),
-        MaigretAdapter(), HoleheAdapter(), H8mailAdapter(), HIBPAdapter(),
+        MaigretAdapter(), HoleheAdapter(), H8mailAdapter(), HIBPAdapter(), XposedOrNotAdapter(),
         PhoneInfogaAdapter(), LibPhoneNumberAdapter(),
     ]
     return {a.descriptor.name: a for a in adapters}

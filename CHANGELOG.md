@@ -5,6 +5,10 @@
 - Excluded Hudson Rock, DarkNyx, and osint-darkweb-pkg from the active Phase 5b registry because their documented access paths could not be verified as stable Tier 1–2-only scopes.
 - Recorded official-source URLs and the statically inspected PyPI source archive hash in `docs/NOT_INTEGRATED.md`; no candidate package was installed or run.
 
+## 2026-10-11 — XposedOrNot implementation prepared (CI pending)
+- Added the XposedOrNot email adapter, isolated standard-library Docker runner, parser fixture from the official documentation example, and parser/authorization/Docker health coverage.
+- Added its build target and manifest entry. The manifest remains `unknown` until CI confirms the new fixture tests; no live email lookup was made.
+
 ## 2026-10-11 — Phase 5b startup checkpoint
 - Created `RESUME_STATE.json` and this handoff checkpoint for the autonomous completion directive.
 - Resolved the LeakCheck gate as excluded, per project-owner decision; no adapter or lookup was created.

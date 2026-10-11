@@ -15,7 +15,7 @@ LeakCheck is excluded by the project owner. Hudson Rock, DarkNyx, and osint-dark
 - Docker Verification run `38165531894` succeeded on that commit: https://github.com/frostknightfrosty-lgtm/aletheia/actions/runs/38165531894
 - Raw artifact lines: `PARSER PREFLIGHT: PASS — 30/30 adapters have parser coverage`; `108 passed, 1 warning in 11.93s`; `DOCKER CAPTURE: PASS — 31/31 cases captured`. `results.json` contained 31 cases, all with return code 0. This was CI validation of the current pre-source-review commit, not validation of the uncommitted documentation edits.
 - The manifest test fix is commit `f68729f7853a1c706232c0c5b39cc08af2773eae`; its CI run `38164845596` also succeeded.
-- No Phase 5b adapter additions have been implemented. No live investigation has been performed in this work.
+- The XposedOrNot adapter implementation, Docker image, fixture, and CI coverage are included in the current commit; its push-triggered CI has not yet verified them. No live API lookup has been performed.
 
 ## Phase 5b source-review state
 
@@ -29,10 +29,10 @@ LeakCheck is excluded by the project owner. Hudson Rock, DarkNyx, and osint-dark
 
 ## Next action
 
-Continue Phase 5b in order with XposedOrNot. Preserve the exact route and non-detailed response limit in `docs/PHASE_5B_REGISTRY.md`. Do not perform a live XposedOrNot lookup until the user supplies and authorizes an email target. Keep all live results and verification claims tied to the exact CI run, commit, and raw artifact evidence.
+Inspect the push-triggered CI run and artifact for the XposedOrNot implementation before proceeding. The adapter is constrained to the documented no-key `GET https://api.xposedornot.com/v1/check-email/{email}` route with `details` omitted, parsing breach names only. Do not perform a live lookup until the user explicitly supplies and authorizes an email target. Keep all verification claims tied to the exact CI run, commit, and raw artifact evidence.
 
 ## Known deferred issues
 
 The broader audit gaps remain: no verified-live adapters, synthetic fixture provenance, no egress proxy, file-backed JSON graph/checkpoint stores, incomplete score/confidence separation, no negative-result records, missing required `--purpose`, and no verifiable audit hash chain. Do not start Phase 8 work until the prescribed earlier phases are complete.
 
-`RESUME_STATE.json` tracks the next action and latest CI result. Downloaded earlier CI artifact directories remain untracked local evidence and must not be staged with source changes.
+`RESUME_STATE.json` tracks the latest verified commit and CI result. As the state update is committed together with work, its `last_commit` points to the preceding verified commit rather than attempting to embed a self-referential commit hash. Downloaded earlier CI artifact directories remain untracked local evidence and must not be staged with source changes.

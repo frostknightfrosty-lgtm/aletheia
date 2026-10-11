@@ -281,6 +281,57 @@ class HIBPAdapter(IdentityAdapter):
         return _result(request, self.descriptor, started, findings, stdout, stderr, exit_code)
 
 
+class XposedOrNotAdapter(IdentityAdapter):
+    descriptor = AdapterDescriptor(
+        name="xposedornot", license="XposedOrNot API terms",
+        input_types=[SeedType.EMAIL], output_types=[EntityType.BREACH],
+        legal_notes=[
+            "Uses only the free community check-email endpoint with detailed results disabled; parses breach names only and never retrieves passwords or breach records.",
+            "Query only an email address you are authorized to investigate. This is a personal, low-volume API: obey its published limits and do not bulk collect or redistribute breach data.",
+        ],
+        rate_limit="One request per email; 2 requests/second, 25/hour, and 100/day per IP according to the upstream community API limits.",
+        invocation="HTTPS API via dedicated Docker runner", version_pin="API v1",
+        upstream="https://xposedornot.com/api_doc", network_required=True,
+        docker_image="aletheia/xposedornot:api-v1",
+        output_schema={"breach_names": "string[]"}, health_check="--health",
+        requires_authorization_assertion=True,
+    )
+
+    def build_command(self, request: AdapterRunRequest, workspace: Path) -> list[str]:
+        return ["email", request.seed.value]
+
+    def parse(self, request: AdapterRunRequest, workspace: Path, stdout: str, stderr: str, exit_code: int) -> AdapterRunResult:
+        started = datetime.now(timezone.utc)
+        findings: list[Finding] = []
+        raw = stdout.encode()
+        try:
+            payload = json.loads(stdout) if stdout.strip() else {}
+        except json.JSONDecodeError:
+            payload = {}
+
+        response_email = payload.get("email") if isinstance(payload, dict) else None
+        email_matches = (
+            isinstance(response_email, str)
+            and response_email.casefold() == request.seed.value.casefold()
+        )
+        if email_matches and "Error" not in payload and payload.get("status", "success") == "success":
+            groups = payload.get("breaches", [])
+            if isinstance(groups, list):
+                names = [name for group in groups for name in (group if isinstance(group, list) else [group])
+                         if isinstance(name, str) and name.strip()]
+                source = "https://api.xposedornot.com/v1/check-email/" + quote(request.seed.value, safe="")
+                for name in dict.fromkeys(names):
+                    findings.append(Finding(
+                        entity_type=EntityType.BREACH, value=name,
+                        attributes={"email": request.seed.value},
+                        provenance=_prov(
+                            self.descriptor, source_url=source, confidence=0.90, raw=raw,
+                            notes=["Non-detailed XposedOrNot response; breach name only, not underlying breach data or credentials."],
+                        ),
+                    ))
+        return _result(request, self.descriptor, started, findings, stdout, stderr, exit_code)
+
+
 class PhoneInfogaAdapter(IdentityAdapter):
     descriptor = AdapterDescriptor(
         name="phoneinfoga", license="GPL-3.0-only", input_types=[SeedType.PHONE], output_types=[EntityType.PHONE, EntityType.UNKNOWN, EntityType.SERVICE],

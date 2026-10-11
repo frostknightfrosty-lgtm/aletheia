@@ -1,11 +1,11 @@
 {
   "session_id": "ed6afe65-e113-4a11-8fbf-a90486e06d99",
-  "last_updated": "2026-10-11T19:05:30Z",
-  "last_commit": "cd71a0c5753bd8c94ffea5dc6acb27b093ce50b8",
-  "last_ci_run": "38165531894",
+  "last_updated": "2026-10-11T19:19:47Z",
+  "last_commit": "4929ef314f2742d6fb71e95820c7be56fbbc789f",
+  "last_ci_run": "38166691859",
   "last_ci_status": "green",
   "current_phase": "Phase 5b — source review and adapter implementation",
-  "current_task": "Complete the scoped-source review; proceed to XposedOrNot under the documented non-detailed API scope.",
+  "current_task": "XposedOrNot implementation is prepared; push it and wait for its push-triggered CI verification.",
   "current_status": "in_progress",
   "completed_phases": [
     "Original Phases 1–7 baseline (subject to audit gaps documented in HANDOFF.md)",
@@ -23,8 +23,10 @@
     "Authorized live investigation",
     "Documentation and final CI pass"
   ],
-  "open_gates": [],
-  "next_action": "Implement XposedOrNot using only GET https://api.xposedornot.com/v1/check-email/{email} with details=false; use documented source material for parser coverage and do not live-query until the user provides and authorizes an email target. Commit, push, and verify in CI before proceeding to the next Phase 5b item.",
+  "open_gates": [
+    "User-owned email target required before XposedOrNot live lookup"
+  ],
+  "next_action": "Inspect the push-triggered Docker Verification run and artifact for the XposedOrNot implementation. If green, record that exact run and commit, then continue Phase 5b. Do not live-query XposedOrNot until the user explicitly supplies and authorizes an email target.",
   "files_in_flight": [],
-  "notes_for_next_session": "Latest pre-source-review CI run 38165531894 succeeded on commit cd71a0c5753bd8c94ffea5dc6acb27b093ce50b8 (https://github.com/frostknightfrosty-lgtm/aletheia/actions/runs/38165531894). Artifact raw lines: PARSER PREFLIGHT: PASS — 30/30 adapters have parser coverage; 108 passed, 1 warning in 11.93s; DOCKER CAPTURE: PASS — 31/31 cases captured. results.json had 31 entries, all returncode 0. Hudson Rock, DarkNyx, and osint-darkweb-pkg are excluded after scoped-source review; details and evidence are in docs/NOT_INTEGRATED.md. XposedOrNot source docs verify a keyless check-email route with details=false, but no authorized email target was provided for a live call. PhoneInfoga scope confirmation, Blackbird and Lullar reviews remain. Older CI artifact folders remain untracked; do not stage them."
+  "notes_for_next_session": "Latest green CI run 38166691859 succeeded on commit 4929ef314f2742d6fb71e95820c7be56fbbc789f (https://github.com/frostknightfrosty-lgtm/aletheia/actions/runs/38166691859). Its artifact showed PARSER PREFLIGHT: PASS — 30/30 adapters have parser coverage; 108 passed, 1 warning in 8.98s; DOCKER CAPTURE: PASS — 31/31 cases captured; results.json had 31 entries, all returncode 0. The current XposedOrNot implementation uses only the official non-detailed check-email route and has no live lookup; the new adapter, fixture, parser test, health smoke, build target, and manifest count update need CI verification. Manifest status is deliberately unknown until that CI run confirms fixture tests. Hudson Rock, DarkNyx, and osint-darkweb-pkg are excluded after scoped-source review; evidence is in docs/NOT_INTEGRATED.md. A user-owned email target is required before any live XposedOrNot lookup. PhoneInfoga scope confirmation, Blackbird and Lullar reviews remain. Older CI artifact folders are untracked; do not stage them."
 }
