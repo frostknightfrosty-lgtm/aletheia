@@ -45,7 +45,7 @@ Tier 4 and Tier 5 are permanently excluded from the registry. The desired adapte
 
 ## Posture shift note — Phase 5b
 
-Phase 5b adds a proposed breadth wave of username, email, phone, and public-source checks. The registry records scope and current verification gaps. It is not permission to install or run those tools. LeakCheck is excluded, and proposed tools that expose credentials, require target login, or cross the hard floor must not be implemented as written.
+Phase 5b adds a proposed breadth wave of username, email, phone, and public-source checks. The registry records scope and current verification gaps. It is not permission to install or run those tools. LeakCheck is excluded. Hudson Rock, DarkNyx, osint-darkweb-pkg, Blackbird, and Lullar were excluded after source review found no acceptable documented scope, interface, or license for the proposed integrations. Proposed tools that expose credentials, require target login, or cross the hard floor must not be implemented as written.
 
 ## Batch grouping table
 
@@ -53,12 +53,12 @@ Group membership is a planning aid for later consolidated adapters. It does not 
 
 | Batch | Members and status | Tier / notes |
 | --- | --- | --- |
-| breach_search | HIBP (current); XposedOrNot (Phase 5b implementation in progress); Hudson Rock and LeakCheck (excluded) | Mixed Tier 2/3; HIBP requires a paid subscription for direct email-account lookups |
+| breach_search | HIBP (current); XposedOrNot (Phase 5b implemented); Hudson Rock and LeakCheck (excluded) | Mixed Tier 2/3; HIBP requires a paid subscription for direct email-account lookups |
 | stealer_log | Hudson Rock (excluded after scoped review) | Official API paths expose compromised credentials; no stable Boolean-only path verified |
 | darkweb_search | osint-darkweb-pkg and DarkNyx (excluded after scoped review); ThreatCluster (source-verified proposal); Vamp Darkweb Intel (rejected) | Exclude credential and criminal-market content; see `NOT_INTEGRATED.md` |
-| username_enum | Sherlock, Maigret (current); Blackbird (proposed); Nexus OSINT (rejected) | Tier 2 |
+| username_enum | Sherlock, Maigret (current); Blackbird (excluded after source review); Nexus OSINT (rejected) | Tier 2 |
 | phone_intel | PhoneInfoga, libphonenumber (current) | Tier 1 |
-| people_search | Lullar (proposed); Mr.Holmes (source-verified proposal); OSINT Search Tool (rejected) | Tier 2; constrain to unauthenticated public sources |
+| people_search | Lullar (excluded after source review); Mr.Holmes (source-verified proposal); OSINT Search Tool (rejected) | Tier 2; constrain to unauthenticated public sources |
 | email_intel | Gravatar (source-verified proposal); GHunt and EmailRep (rejected) | Mixed Tier 1/2; GHunt requires account cookies, EmailRep does not issue new keys |
 | domain_intel | theHarvester, Amass, Subfinder, Assetfinder (current); ONYPHE, IVRE, urlscan.io, RDAP (source-verified proposals) | Mixed Tier 1/2 |
 | social_media | Instaloader, Reddit API, YouTube API (current); Social Analyzer (source-verified proposal); Twint fork and Osintgram (rejected) | Tier 2 for public-profile automation; no login or bypass |

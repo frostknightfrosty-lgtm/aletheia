@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-10-11 — Phase 5b source-review follow-up
+- Docker Verification run `38171111124` succeeded on commit `76cbf765e2d3d2d491c12fea07648e7830b85d2b`: parser preflight 31/31, `110 passed, 1 warning in 12.55s`, capture 32/32, and all capture return codes were 0. Image build, tests, capture, and artifact upload succeeded.
+- Applied the owner's exact source-scope conditions. Hudson Rock's documented username route returns credential fields; DarkNyx has no documented free metadata-only API and prohibits scraping; osint-darkweb-pkg cannot limit its query to the three approved indexes. These remain excluded.
+- Reviewed Blackbird's current repository and Lullar's published checker. Blackbird has no declared upstream license; Lullar documents browser-side URL generation with manual profile opening rather than a machine-readable adapter interface. Both were excluded from integration.
+- No new tool was installed, executed, or queried against a target. Phase 5b source review is complete; next is Phase 5c proposal verification.
+
 ## 2026-10-11 — XposedOrNot CI follow-up
 - Docker Verification run `38167558342` built all pinned images and captured all 32 cases with return code 0, but the pytest suite exposed a stale cumulative Phase 5 registry-size assertion (`26` actual versus `25` expected).
 - Updated only the expected registry size to 26; no test behavior or assertion was weakened.

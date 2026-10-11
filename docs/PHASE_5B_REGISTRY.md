@@ -1,6 +1,6 @@
 # Phase 5b Adapter Registry
 
-This registry tracks Phase 5b source scope and implementation status; it is not approval to run tools against arbitrary targets. XposedOrNot is implemented and verified-fixture. PhoneInfoga's existing invocation has been checked against v2.11.0 upstream source and scoped to unauthenticated public metadata. Blackbird and Lullar remain unverified proposals. LeakCheck was excluded by the project owner on 2026-10-11. Hudson Rock, osint-darkweb-pkg, and DarkNyx were excluded after their published call paths could not be verified to stay within the project's Tier 1–2 content boundary; see `NOT_INTEGRATED.md`.
+This registry tracks Phase 5b source scope and implementation status; it is not approval to run tools against arbitrary targets. XposedOrNot is implemented and verified-fixture. PhoneInfoga's existing invocation has been checked against v2.11.0 upstream source and scoped to unauthenticated public metadata. LeakCheck was excluded by the project owner on 2026-10-11. Hudson Rock, DarkNyx, osint-darkweb-pkg, Blackbird, and Lullar were excluded after source review; see `NOT_INTEGRATED.md` for the documented interfaces, licenses, and scope findings. No adapter for these excluded candidates was installed or run.
 
 ## xposedornot
 
@@ -48,42 +48,7 @@ The Aletheia adapter calls only `phoneinfoga scan -n <number>` and its descripto
 
 Known parser limit: the current Aletheia parser does not emit Google search URLs or OVH's `Found`, number-range, and city fields. This is recorded for a later parser task; it does not change the scoped source behavior or the existing fixture verification claim.
 
-## blackbird
-
-~~~yaml
-name: blackbird
-input_types: [username, email]
-output_schema: AccountHit[]  # platform, profile URL
-invocation: local_python  # CLI
-requires_key: false
-rate_limit: "daily usage cap"
-legal_tier: 2
-legal_notes: "Proposal describes public-profile endpoint enumeration. Do not bypass login, CAPTCHA, rate limits, or access controls."
-fixture_provenance: https://github.com/p1ngul1n0/blackbird
-verification_status: unverified-live
-enabled_by_default: true
-batch_grouping: username_enum
-~~~
-
-Current package identity, license, maintenance date, and actual free-use limits need to be pinned before implementation.
-
-## lullar
-
-~~~yaml
-name: lullar
-input_types: [username, email, name]
-output_schema: AccountHit[]  # proposed 170+ platforms
-invocation: web_scraper  # fragile
-requires_key: false
-legal_tier: 2
-legal_notes: "Proposal describes a web-only scraper. Every request must remain unauthenticated, respect applicable law, and stop on access controls or blocking."
-fixture_provenance: pending verification
-verification_status: unverified-live
-enabled_by_default: true
-batch_grouping: people_search
-~~~
-
-No official source, license, stable endpoint, or maintenance record was verified for this proposal in this task. Its stated fragility makes silent parser failure a known design risk.
+The remaining Phase 5b proposals were source-reviewed and excluded. Their documented interfaces and reasons are recorded in `NOT_INTEGRATED.md`; they are not active registry entries.
 
 ## Implementation gate
 

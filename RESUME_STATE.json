@@ -1,20 +1,20 @@
 {
   "session_id": "ed6afe65-e113-4a11-8fbf-a90486e06d99",
-  "last_updated": "2026-10-11T20:10:39Z",
-  "last_commit": "7a3bd0d29dc464e4d30469dde268733a8dea3d6e",
-  "last_ci_run": "38170483392",
+  "last_updated": "2026-10-11T20:19:26Z",
+  "last_commit": "76cbf765e2d3d2d491c12fea07648e7830b85d2b",
+  "last_ci_run": "38171111124",
   "last_ci_status": "green",
-  "current_phase": "Phase 5b — source review and adapter implementation",
-  "current_task": "PhoneInfoga scope review is complete; review Blackbird and Lullar upstream source, license, exact invocation, and maintenance before implementation.",
+  "current_phase": "Phase 5c — source verification and implementation or rejection",
+  "current_task": "Phase 5b source review is complete; begin source verification of each Phase 5c proposal before implementing or rejecting it.",
   "current_status": "in_progress",
   "completed_phases": [
     "Original Phases 1–7 baseline (subject to audit gaps documented in HANDOFF.md)",
     "Stale manifest test count fixed and Docker CI verified green (run 38164845596)",
-    "Phase 5b scoped-source review: Hudson Rock, DarkNyx, and osint-darkweb-pkg excluded",
-    "XposedOrNot adapter implemented and verified-fixture in Docker CI run 38168341113"
+    "Phase 5b source review: XposedOrNot implemented and verified-fixture; PhoneInfoga existing scope reviewed; LeakCheck, Hudson Rock, DarkNyx, osint-darkweb-pkg, Blackbird, and Lullar excluded",
+    "PhoneInfoga scope and documentation verified in Docker CI run 38170483392",
+    "Phase 5b source-review documentation verified in Docker CI run 38171111124"
   ],
   "pending_phases": [
-    "Phase 5b adapter review and implementation",
     "Phase 5c source verification and implementation or documented rejection",
     "Audit chain",
     "Storage backends",
@@ -27,7 +27,7 @@
   "open_gates": [
     "User-owned email target required before XposedOrNot live lookup"
   ],
-  "next_action": "Review Blackbird and Lullar upstream source, license, exact invocation, maintenance, and legal scope before implementing either adapter. Do not live-query XposedOrNot until the user explicitly supplies and authorizes an email target.",
+  "next_action": "Verify each Phase 5c proposal against official upstream source, license, exact invocation, maintenance, cost, and legal scope; implement only sources that pass the documented constraints and reject the rest. Do not live-query XposedOrNot until the user explicitly supplies and authorizes an email target.",
   "files_in_flight": [],
-  "notes_for_next_session": "Latest CI run 38170483392 succeeded on commit 7a3bd0d29dc464e4d30469dde268733a8dea3d6e (https://github.com/frostknightfrosty-lgtm/aletheia/actions/runs/38170483392). Artifact raw lines: PARSER PREFLIGHT: PASS — 31/31 adapters have parser coverage; 110 passed, 1 warning in 11.83s; DOCKER CAPTURE: PASS — 32/32 cases captured. All 32 capture results had returncode 0, including phase4-phoneinfoga smoke. PhoneInfoga scope is reviewed against tag-pinned v2.11.0 official docs and source: local parsing, Google URL generation only, and OVH public number-range API; no API credentials are passed by Aletheia and no live scan was performed. Its parser does not emit Google URLs or OVH Found/range/city fields; recorded as deferred. XposedOrNot is verified-fixture only from run 38168341113; fixture is synthetic and no live API lookup occurred. Run 38167558342 failed only because the cumulative Phase 5 registry count assertion expected 25 instead of 26; this was corrected in commit d9b3fe9. Hudson Rock, DarkNyx, and osint-darkweb-pkg are excluded after scoped-source review; evidence is in docs/NOT_INTEGRATED.md. Next review Blackbird and Lullar source/license/invocation/maintenance before implementation. Older CI artifact folders are untracked; do not stage them."
+  "notes_for_next_session": "Latest CI run 38171111124 succeeded on commit 76cbf765e2d3d2d491c12fea07648e7830b85d2b (https://github.com/frostknightfrosty-lgtm/aletheia/actions/runs/38171111124). Artifact raw lines: PARSER PREFLIGHT: PASS — 31/31 adapters have parser coverage; 110 passed, 1 warning in 12.55s; DOCKER CAPTURE: PASS — 32/32 cases captured. All 32 results had returncode 0, with 32 stdout/stderr pairs; build, test, capture, and upload steps succeeded. PhoneInfoga scope is reviewed against tag-pinned v2.11.0 official docs/source: local parsing, Google URL generation only, OVH public number-range API; no API credentials are passed, no live scan performed, and parser omission of Google URLs/OVH fields remains deferred. XposedOrNot is verified-fixture only (synthetic fixture), no live API lookup. Hudson Rock excluded: official username endpoint POST /json/v3/search-by-login/usernames returns credential objects with username/password; no Boolean-only endpoint verified. DarkNyx excluded: public search covers leak/onion content, public API is Pro, terms prohibit scraping. osint-darkweb-pkg excluded: searches 17 hardcoded engines and cannot restrict to Ahmia/Torch/OnionLand. Blackbird excluded: current repo has no declared license; Lullar excluded: its checker documents manual URL opening, with no machine API. LeakCheck excluded by owner. No target was queried. Next action: Phase 5c source verification. Earlier artifact folders in repo root remain untracked and must not be staged."
 }

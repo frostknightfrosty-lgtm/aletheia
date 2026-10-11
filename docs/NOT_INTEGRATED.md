@@ -40,14 +40,13 @@ Current manifest legal notes must state the actual key-cost conditions. In parti
 
 ### Phase 5b exclusions after scoped source review (2026-10-11)
 
-These proposals were reviewed against the project owner's requirement to verify a stable invocation that can be constrained to Tier 1–2 content. The documented call paths did not meet that condition, so they were moved out of the active proposal registry. No adapter was installed or run.
+These proposals were reviewed against the project owner's requirement to verify a stable invocation that can be constrained to Tier 1–2 content. The documented call paths did not meet that condition, so they were moved out of the active proposal registry. No adapter was installed or run. The owner's exact review conditions were applied: if a source lacks a documented, enforceable safe scope, it is excluded rather than implemented speculatively.
 
 ~~~yaml
 name: hudsonrock
 status: excluded
-scope_constraint: "No stable, documented Boolean-only infection-signal API was found. The official API requires an API key; its username route searches compromised credentials, and documented domain/stealer responses include credential objects with username and password fields. Aletheia must not call those endpoints."
+scope_constraint: "The official username endpoint is POST https://api.hudsonrock.com/json/v3/search-by-login/usernames and requires the search-by-login API permission. Its documented response contains stealer/device fields and credentials[] with username and password fields. No stable Boolean-only infection-signal endpoint was documented. Exclude; do not call the credential-returning route."
 evidence:
-  - https://docs.hudsonrock.com/reference/authentication
   - https://docs.hudsonrock.com/docs/username-search
   - https://docs.hudsonrock.com/docs/domain-search
 ~~~
@@ -55,7 +54,7 @@ evidence:
 ~~~yaml
 name: darknyx
 status: excluded
-scope_constraint: "No public metadata-only entity-search API or exact public API endpoint is documented. The free web search covers onion sites, leak dumps, and marketplaces; its legal notice says personal-data masking is incomplete and prohibits scraping. API access is a Pro feature. Aletheia cannot verify a Tier 1–2-only response boundary or use the public page as an undocumented scraper."
+scope_constraint: "The public site search is described as indexing onion sites, leak dumps, ransomware groups, public Telegram, and marketplaces. The homepage identifies API access as a Pro feature, and the legal terms prohibit scraping, probing, or bypassing service filters. No documented public entity-search API returning only category, snippet, onion URL, or a sanitized feed was found. Exclude; do not scrape the public page or use paid Pro API access."
 evidence:
   - https://darknyx.com/
   - https://darknyx.com/legal/
@@ -64,11 +63,29 @@ evidence:
 ~~~yaml
 name: osint-darkweb-pkg
 status: excluded
-scope_constraint: "The published get_search_results(query) call concurrently queries 17 hardcoded .onion search endpoints, not only Ahmia, Torch, and OnionLand, and returns titles and onion URLs without engine provenance or a supported engine allowlist. A separate scrape_multiple(urls) call fetches onion pages and extracts up to 1200 characters; Aletheia would not call it, and page fetching is not required by the search function itself. The package offers no documented way to restrict its public invocation to the three approved engines. At least its hardcoded Torch endpoint differs from the current address published by Torch's own site, so endpoint ownership/current status cannot be trusted from the package source alone."
+scope_constraint: "The documented get_search_results(query) sub-call queries 17 hardcoded .onion search endpoints, not only Ahmia, Torch, and OnionLand, and returns titles/links without engine provenance or an engine allowlist. It cannot be constrained to the three approved indexes through its public interface. The separate scrape_multiple(urls) sub-call fetches .onion pages and extracts page text; Aletheia would not call it. The search sub-call itself does not require page fetching, but its engine set and provenance fail the owner's scope condition. Exclude this package; do not invoke scrape_multiple or substitute an undocumented patched call path."
 evidence:
   - https://pypi.org/project/osint-darkweb-pkg/
   - https://files.pythonhosted.org/packages/source/o/osint-darkweb-pkg/osint_darkweb_pkg-0.1.0.tar.gz (SHA-256: 7a42152d02d3493ec01e8913964e05b4b850107f9be06f50ba89978795463e42; statically inspected; not installed or executed)
   - https://torch.cx/about/ (current canonical onion address published by Torch)
+~~~
+
+~~~yaml
+name: blackbird
+status: excluded
+scope_constraint: "The current official repository is https://github.com/antoniaci/blackbird (the former p1ngul1n0 URL redirects there). The documented username CLI is python blackbird.py --username <username>; optional flags can dump HTML or send found site names to an external AI service. The repository has no declared license (GitHub API license field is null and the repository root has no LICENSE file), so Aletheia cannot legally redistribute or bundle it. The repository's latest push was 2025-07-13; maintenance freshness is also unestablished. Exclude unless the upstream publishes a license and supported, scopeable invocation."
+evidence:
+  - https://github.com/antoniaci/blackbird
+  - https://github.com/antoniaci/blackbird/blob/main/blackbird.py
+~~~
+
+~~~yaml
+name: lullar
+status: excluded
+scope_constraint: "The current public username-checker page documents URL generation in the browser: it creates profile URLs and the visitor opens a profile to decide whether it loads or returns 404. No CLI, machine-readable API, source repository, or automation license was documented. The marketing page's claims of automatic parallel checking conflict with the dedicated checker instructions. Exclude; do not scrape the site or automate checks across third-party platforms without a documented interface and scope."
+evidence:
+  - https://com.lullar.com/en/tools/username-checker
+  - https://com.lullar.com/en/guide/social-media-username-search
 ~~~
 
 ## Future re-addition
