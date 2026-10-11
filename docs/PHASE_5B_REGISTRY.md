@@ -14,14 +14,14 @@ rate_limit: "25/hour, 100/day per IP"
 legal_tier: 2
 legal_notes: "Free community API for personal, low-volume use. Query only an authorized email, obey the published request caps, and do not bulk collect or redistribute breach data."
 scope_constraint: "Use only GET https://api.xposedornot.com/v1/check-email/{email} with details omitted or false. Store only the echoed query email and breach names; do not call analytics, password, or domain endpoints. The documented community endpoint is free and capped at 25 requests/hour and 100/day per IP."
-implementation_status: in_progress; CI pending
+implementation_status: implemented; Docker CI verified in run 38168341113 on commit d9b3fe9afc9c7b28be37c8c1a5ae601c481fa59c
 fixture_provenance: documentation example at https://xposedornot.com/api_doc; modeled fixture is marked synthetic
-verification_status: unknown
+verification_status: verified-fixture
 enabled_by_default: true
 batch_grouping: breach_search
 ~~~
 
-The endpoint, default response fields, and published rate limit were checked against the official API documentation. No live request was made because no authorized email target was supplied for this check. The adapter parses names only; it does not access detailed breach or password endpoints.
+The endpoint, default response fields, and published rate limit were checked against the official API documentation. CI run [38168341113](https://github.com/frostknightfrosty-lgtm/aletheia/actions/runs/38168341113) passed the synthetic fixture tests and Docker health smoke. The artifact reported `PARSER PREFLIGHT: PASS — 31/31 adapters have parser coverage`, `110 passed, 1 warning in 17.29s`, and `DOCKER CAPTURE: PASS — 32/32 cases captured`; all capture return codes were 0. No live request was made because no authorized email target was supplied. The adapter parses names only; it does not access detailed breach or password endpoints.
 
 ## phoneinfoga — existing adapter, scope confirmation proposed
 

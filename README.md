@@ -4,7 +4,7 @@ Aletheia is a provenance-first meta-OSINT orchestration platform. Its core bound
 
 ## Current status
 
-**Phase 7 baseline verified in GitHub Actions; the current XposedOrNot addition is pending CI.** Run [38166691859](https://github.com/frostknightfrosty-lgtm/aletheia/actions/runs/38166691859) verified the prior 31 Docker smoke cases; it does not verify the XposedOrNot code in this commit.
+**Phase 7 baseline and XposedOrNot fixture integration verified in GitHub Actions.** Run [38168341113](https://github.com/frostknightfrosty-lgtm/aletheia/actions/runs/38168341113), on commit `d9b3fe9afc9c7b28be37c8c1a5ae601c481fa59c`, reported 110 passed, `PARSER PREFLIGHT: PASS — 31/31 adapters have parser coverage`, and `DOCKER CAPTURE: PASS — 32/32 cases captured` with all capture return codes 0. This verifies fixtures and container startup only; no live XposedOrNot API lookup has been made.
 
 ## Quick start
 
@@ -36,7 +36,7 @@ aletheia investigate --seed image:/path/to/photo.jpg --legal-only --authorizatio
 
 ## Email breach checks
 
-XposedOrNot is constrained to its free community `check-email` endpoint with the detailed response omitted. The adapter records breach names only; it does not retrieve passwords or breach records. Use it only for an email address you are authorized to investigate, and respect the upstream personal-use limits of 25 requests per hour and 100 per day per IP. Its new adapter and documentation-derived fixture are awaiting CI verification; no live lookup has been made.
+XposedOrNot is constrained to its free community `check-email` endpoint with the detailed response omitted. The adapter records breach names only; it does not retrieve passwords or breach records. Use it only for an email address you are authorized to investigate, and respect the upstream personal-use limits of 25 requests per hour and 100 per day per IP. Its synthetic, documentation-derived parser fixture and Docker health smoke passed in CI run [38168341113](https://github.com/frostknightfrosty-lgtm/aletheia/actions/runs/38168341113); no live lookup has been made.
 
 Finalize a completed run with entity resolution and reports:
 

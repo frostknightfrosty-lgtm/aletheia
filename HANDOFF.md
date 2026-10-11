@@ -11,12 +11,13 @@ LeakCheck is excluded by the project owner. Hudson Rock, DarkNyx, and osint-dark
 ## Repository and CI state
 
 - Repository: `frostknightfrosty-lgtm/aletheia`, branch `main`.
-- Current committed HEAD at the latest CI run: `b74beb866109115b9fc9a312bfdce7110cdbe5c9`.
-- Docker Verification run `38167558342` failed on that commit: https://github.com/frostknightfrosty-lgtm/aletheia/actions/runs/38167558342
-- Raw artifact lines: `PARSER PREFLIGHT: PASS — 31/31 adapters have parser coverage`; pytest summary `1 failed, 109 passed, 1 warning in 12.51s`; `DOCKER CAPTURE: PASS — 32/32 cases captured`. All 32 `results.json` entries had return code 0, including `phase4-xposedornot`. The sole failure is a stale cumulative Phase 5 registry size in `tests/test_phase5_adapters.py:26` (`assert 26 == 25`); the XposedOrNot parser, Docker image build, and smoke case are covered among the passing checks. No live API lookup has been performed.
+- Latest CI-verified commit: `d9b3fe9afc9c7b28be37c8c1a5ae601c481fa59c`.
+- Docker Verification run `38168341113` succeeded on that commit: https://github.com/frostknightfrosty-lgtm/aletheia/actions/runs/38168341113
+- Raw artifact lines: `PARSER PREFLIGHT: PASS — 31/31 adapters have parser coverage`; `110 passed, 1 warning in 17.29s`; `DOCKER CAPTURE: PASS — 32/32 cases captured`. The artifact's `results.json` contained 32 entries, all with return code 0, including `phase4-xposedornot`. The image build and test steps both succeeded. This verifies fixture parsing and container smoke only; no live API lookup was performed.
+- Previous run `38167558342` failed on commit `b74beb866109115b9fc9a312bfdce7110cdbe5c9` only because `tests/test_phase5_adapters.py:26` expected 25 cumulative adapters while the registry now contains 26. The one-line expected-count correction is in the green commit above.
 - The preceding Docker Verification run `38165531894` succeeded on `cd71a0c5753bd8c94ffea5dc6acb27b093ce50b8`: https://github.com/frostknightfrosty-lgtm/aletheia/actions/runs/38165531894
 - The manifest test fix is commit `f68729f7853a1c706232c0c5b39cc08af2773eae`; its CI run `38164845596` also succeeded.
-- The XposedOrNot adapter, fixture, and Docker health case passed in run `38167558342`; the overall run is red only because of the stale registry-size assertion described above. No live API lookup has been performed.
+- XposedOrNot is `verified-fixture`; manifest and registry status cite run `38168341113`. Its source remains limited to the documented no-key `GET https://api.xposedornot.com/v1/check-email/{email}` route with `details` omitted, parsing breach names only. No live API lookup has been performed.
 
 ## Phase 5b source-review state
 
@@ -30,7 +31,7 @@ LeakCheck is excluded by the project owner. Hudson Rock, DarkNyx, and osint-dark
 
 ## Next action
 
-The test count assertion now needs to reflect the cumulative Phase 5 registry size of 26 after adding XposedOrNot to Phase 4. Change only that expected count, commit, and push; then inspect the push-triggered CI artifact. The XposedOrNot adapter is constrained to the documented no-key `GET https://api.xposedornot.com/v1/check-email/{email}` route with `details` omitted, parsing breach names only. Do not perform a live lookup until the user explicitly supplies and authorizes an email target. Keep all verification claims tied to the exact CI run, commit, and raw artifact evidence.
+Continue Phase 5b by confirming the existing PhoneInfoga invocation and legal scope, then review Blackbird and Lullar upstream source, license, invocation, and maintenance before implementation. Do not perform live XposedOrNot lookups until the user explicitly supplies and authorizes an email target. Keep all verification claims tied to the exact CI run, commit, and raw artifact evidence.
 
 ## Known deferred issues
 
