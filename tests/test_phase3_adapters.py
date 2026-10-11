@@ -5,7 +5,7 @@ import pytest
 from parser_test_marker import parser_test
 
 from aletheia.adapters.infra import (
-    AmassAdapter, AssetfinderAdapter, CensysAdapter, CrtshAdapter, DnsreconAdapter,
+    AmassAdapter, AssetfinderAdapter, CrtshAdapter, DnsreconAdapter,
     DnsxAdapter, FierceAdapter, MassdnsAdapter, ShodanAdapter, SubfinderAdapter,
 )
 from aletheia.adapters.registry import phase3_adapters
@@ -19,17 +19,17 @@ def req(seed_type=SeedType.DOMAIN, value="example.com", assertion=None):
                              legal_only=True, authorization_assertion=assertion)
 
 
-def test_phase3_registry_has_ten_new_adapters():
+def test_phase3_registry_has_nine_new_adapters():
     registry = phase3_adapters()
-    expected = {"amass", "subfinder", "assetfinder", "dnsx", "massdns", "dnsrecon", "fierce", "shodan", "censys", "crt.sh"}
+    expected = {"amass", "subfinder", "assetfinder", "dnsx", "massdns", "dnsrecon", "fierce", "shodan", "crt.sh"}
     assert expected <= set(registry)
-    assert len(registry) == 13
+    assert len(registry) == 12
 
 
 def test_new_descriptors_have_contract_fields():
     for adapter in [AmassAdapter(), SubfinderAdapter(), AssetfinderAdapter(), DnsxAdapter(),
                     MassdnsAdapter(), DnsreconAdapter(), FierceAdapter(), ShodanAdapter(),
-                    CensysAdapter(), CrtshAdapter()]:
+                    CrtshAdapter()]:
         d = adapter.descriptor
         assert d.name and d.license and d.version_pin and d.docker_image
         assert d.input_types and d.output_types
@@ -87,13 +87,6 @@ def test_shodan_domain_parser(tmp_path):
     payload = '{"data":[{"subdomain":"www","value":"1.2.3.4","type":"A"}]}'
     result = ShodanAdapter().parse(req(), tmp_path, payload, "", 0)
     assert {f.value for f in result.findings} >= {"example.com", "www.example.com", "1.2.3.4"}
-
-
-@parser_test('censys')
-def test_censys_recursive_parser(tmp_path):
-    payload = '{"result":{"host":{"ip":"1.2.3.4","services":[{"hostname":"www.example.com","url":"https://www.example.com:443"}]}}}'
-    result = CensysAdapter().parse(req(), tmp_path, payload, "", 0)
-    assert {f.value for f in result.findings} >= {"1.2.3.4", "www.example.com", "https://www.example.com:443"}
 
 
 @parser_test('crt.sh')

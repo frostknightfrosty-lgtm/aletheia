@@ -45,7 +45,6 @@ def test_exiftool_container_smoke(tmp_path):
     ("aletheia/dnsrecon:1.6.3", ["--help"]),
     ("aletheia/fierce:1.6.0", ["--help"]),
     ("aletheia/shodan:1.31.0", ["--health"]),
-    ("aletheia/censys:platform-v3", ["--health"]),
     ("aletheia/crtsh:public-json", ["--health"]),
 ])
 def test_phase3_container_health_smoke(image, command):
@@ -60,7 +59,6 @@ def test_phase3_container_health_smoke(image, command):
     ("aletheia/hibp:api-v3", ["--health"]),
     ("aletheia/phoneinfoga:2.11.0", ["version"]),
     ("aletheia/libphonenumber:9.0.40", ["--health"]),
-    ("aletheia/twilio-lookup:api-v2", ["--health"]),
 ])
 def test_phase4_docker_health(image, args):
     entrypoint = ["--entrypoint", "python"] if image == "aletheia/holehe:1.61" else []
@@ -76,7 +74,6 @@ def test_phase4_docker_health(image, args):
     ("aletheia/suncalc:2.0.2", ["--health"]),
     ("aletheia/deepface:0.0.101", ["--health"]),
     ("aletheia/insightface:2.1", ["--health"]),
-    ("aletheia/google-vision:3.16.0", ["--health"]),
 ])
 def test_phase5_docker_health(image,args):
     r=_run(["docker","run","--rm","--network","none",image,*args])

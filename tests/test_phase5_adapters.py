@@ -6,7 +6,7 @@ import pytest
 from parser_test_marker import parser_test
 
 from aletheia.adapters.social_geo_image import (
-    DeepFaceAdapter, GoogleVisionAdapter, InsightFaceAdapter, InstaloaderAdapter,
+    DeepFaceAdapter, InsightFaceAdapter, InstaloaderAdapter,
     OverpassAdapter, RedditAPIAdapter, SunCalcAdapter, YouTubeAPIAdapter,
 )
 from aletheia.adapters.registry import phase5_adapters
@@ -19,11 +19,11 @@ def req(kind, value, assertion="authorized Phase 5 test"):
                              authorization_assertion=assertion)
 
 
-def test_phase5_registry_contains_eight_new_adapters():
+def test_phase5_registry_contains_seven_new_adapters():
     registry = phase5_adapters()
-    expected = {"instaloader", "reddit-api", "youtube-api", "overpass", "suncalc", "deepface", "insightface", "google-vision"}
+    expected = {"instaloader", "reddit-api", "youtube-api", "overpass", "suncalc", "deepface", "insightface"}
     assert expected <= set(registry)
-    assert len(registry) == 28
+    assert len(registry) == 25
 
 
 def test_phase5_authorization_gate(monkeypatch, tmp_path):
@@ -39,7 +39,6 @@ def test_phase5_authorization_gate(monkeypatch, tmp_path):
         (RedditAPIAdapter(), SeedType.USERNAME, "alice"),
         (YouTubeAPIAdapter(), SeedType.USERNAME, "alice"),
         (OverpassAdapter(), SeedType.GEOLOCATION, "51.5,-0.1"),
-        (GoogleVisionAdapter(), SeedType.IMAGE, "/tmp/a.jpg"),
     ]:
         request=AdapterRunRequest(run_id=uuid4(),seed=Seed(type=kind,value=value),legal_only=True,authorization_assertion=None)
         with pytest.raises(ValueError, match="authorization_assertion"):
@@ -94,13 +93,4 @@ def test_deepface_parser_no_identity_claim():
 def test_insightface_parser():
     payload=json.dumps({"faces":[{"bbox":[1,2,3,4],"det_score":0.88}]})
     result=InsightFaceAdapter().parse(req(SeedType.IMAGE,"/tmp/sample.jpg"),Path('.'),payload,'',0)
-    assert any(f.entity_type==EntityType.FACE for f in result.findings)
-
-
-@parser_test('google-vision')
-def test_google_vision_parser():
-    payload=json.dumps({"labels":[{"description":"cat","score":0.91}],"text":{"text":"HELLO"},"faces":[{}]})
-    result=GoogleVisionAdapter().parse(req(SeedType.IMAGE,"/tmp/sample.jpg"),Path('.'),payload,'',0)
-    assert any(f.value=='cat' for f in result.findings)
-    assert any(f.entity_type==EntityType.OCR_TEXT and f.value=='HELLO' for f in result.findings)
     assert any(f.entity_type==EntityType.FACE for f in result.findings)

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Execute the 34 Docker integration smoke cases and preserve raw stdout/stderr."""
+"""Execute the 31 Docker integration smoke cases and preserve raw stdout/stderr."""
 from __future__ import annotations
 import json
 import subprocess
@@ -19,7 +19,6 @@ CASES = [
     ("phase3-dnsrecon", "aletheia/dnsrecon:1.6.3", ["--help"]),
     ("phase3-fierce", "aletheia/fierce:1.6.0", ["--help"]),
     ("phase3-shodan", "aletheia/shodan:1.31.0", ["--health"]),
-    ("phase3-censys", "aletheia/censys:platform-v3", ["--health"]),
     ("phase3-crtsh", "aletheia/crtsh:public-json", ["--health"]),
     ("phase4-maigret", "aletheia/maigret:0.6.6", ["--version"]),
     ("phase4-holehe", "aletheia/holehe:1.61", ["-c", "from holehe.core import __version__; print(__version__)"]),
@@ -27,7 +26,6 @@ CASES = [
     ("phase4-hibp", "aletheia/hibp:api-v3", ["--health"]),
     ("phase4-phoneinfoga", "aletheia/phoneinfoga:2.11.0", ["version"]),
     ("phase4-libphonenumber", "aletheia/libphonenumber:9.0.40", ["--health"]),
-    ("phase4-twilio", "aletheia/twilio-lookup:api-v2", ["--health"]),
     ("phase5-instaloader", "aletheia/instaloader:4.15.3", ["--health"]),
     ("phase5-reddit", "aletheia/reddit-api:v1", ["--health"]),
     ("phase5-youtube", "aletheia/youtube-api:v3", ["--health"]),
@@ -35,7 +33,6 @@ CASES = [
     ("phase5-suncalc", "aletheia/suncalc:2.0.2", ["--health"]),
     ("phase5-deepface", "aletheia/deepface:0.0.101", ["--health"]),
     ("phase5-insightface", "aletheia/insightface:2.1", ["--health"]),
-    ("phase5-google-vision", "aletheia/google-vision:3.16.0", ["--health"]),
     ("phase6-sec-edgar", "aletheia/sec-edgar:public-api", ["--health"]),
     ("phase6-gleif", "aletheia/gleif:api-v1", ["--health"]),
     ("phase6-opencorporates", "aletheia/opencorporates:api-v0.4.8", ["--health"]),

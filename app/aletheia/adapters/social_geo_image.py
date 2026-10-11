@@ -232,32 +232,4 @@ class InsightFaceAdapter(Phase5Adapter):
         return _result(request,self.descriptor,started,findings,stdout,stderr,exit_code)
 
 
-class GoogleVisionAdapter(Phase5Adapter):
-    descriptor=AdapterDescriptor(
-        name="google-vision", license="Apache-2.0 client / Google Cloud service terms", input_types=[SeedType.IMAGE, SeedType.FILE_PATH], output_types=[EntityType.IMAGE, EntityType.FACE, EntityType.OCR_TEXT, EntityType.UNKNOWN],
-        legal_notes=["Google Cloud Vision read-only image annotations for operator-supplied files. No face identity recognition is requested. Billing, retention, and service terms are operator responsibilities."],
-        rate_limit="Provider quota/billing controlled; one image per invocation.", invocation="Google Cloud Vision API via dedicated Docker runner", version_pin="3.16.0",
-        upstream="https://cloud.google.com/vision/docs", network_required=True, docker_image="aletheia/google-vision:3.16.0", output_schema={"labels":"object[]","text":"object","faces":"object[]"}, health_check="runner.py --health",
-        requires_authorization_assertion=True, secret_env=["GOOGLE_APPLICATION_CREDENTIALS_JSON"],
-    )
-    def supports(self, seed_type): return seed_type in {SeedType.IMAGE, SeedType.FILE_PATH}
-    def build_command(self, request, workspace):
-        image=_stage_image(request,workspace); return ["runner.py",str(image)]
-    def parse(self, request, workspace, stdout, stderr, exit_code):
-        started=datetime.now(timezone.utc); raw=stdout.encode(); findings=[]
-        try: data=json.loads(stdout) if stdout.strip() else {}
-        except json.JSONDecodeError: data={}
-        findings.append(Finding(entity_type=EntityType.IMAGE,value=str(Path(request.seed.value).resolve()),attributes={},provenance=_prov(self.descriptor,source_url=self.descriptor.upstream,confidence=0.99,raw=raw),source_kind="seed"))
-        if isinstance(data,dict):
-            for label in data.get("labels",[]):
-                if isinstance(label,dict) and label.get("description"):
-                    findings.append(Finding(entity_type=EntityType.UNKNOWN,value=label["description"],attributes={"score":label.get("score")},provenance=_prov(self.descriptor,source_url=self.descriptor.upstream,confidence=float(label.get("score",0.5)),raw=raw)))
-            text=data.get("text",{}) or {}
-            if isinstance(text,dict) and text.get("text"):
-                findings.append(Finding(entity_type=EntityType.OCR_TEXT,value=str(text["text"]),attributes={},provenance=_prov(self.descriptor,source_url=self.descriptor.upstream,confidence=0.92,raw=raw)))
-            for i,_face in enumerate(data.get("faces",[]) if isinstance(data.get("faces"),list) else []):
-                findings.append(Finding(entity_type=EntityType.FACE,value=f"{Path(request.seed.value).name}#face-{i+1}",attributes={},provenance=_prov(self.descriptor,source_url=self.descriptor.upstream,confidence=0.90,raw=raw,notes=["Cloud Vision face detection only; no identity search."])))
-        return _result(request,self.descriptor,started,findings,stdout,stderr,exit_code)
-
-
-PHASE5_ADAPTER_CLASSES = [InstaloaderAdapter, RedditAPIAdapter, YouTubeAPIAdapter, OverpassAdapter, SunCalcAdapter, DeepFaceAdapter, InsightFaceAdapter, GoogleVisionAdapter]
+PHASE5_ADAPTER_CLASSES = [InstaloaderAdapter, RedditAPIAdapter, YouTubeAPIAdapter, OverpassAdapter, SunCalcAdapter, DeepFaceAdapter, InsightFaceAdapter]

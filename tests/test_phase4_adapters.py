@@ -7,7 +7,7 @@ from parser_test_marker import parser_test
 
 from aletheia.adapters.identity import (
     H8mailAdapter, HIBPAdapter, HoleheAdapter, LibPhoneNumberAdapter,
-    MaigretAdapter, PhoneInfogaAdapter, TwilioLookupAdapter,
+    MaigretAdapter, PhoneInfogaAdapter,
 )
 from aletheia.adapters.registry import phase4_adapters
 from aletheia.core.audit import AuditLogger
@@ -20,11 +20,11 @@ def req(kind, value, assertion="authorized personal-identifier investigation"):
                              authorization_assertion=assertion)
 
 
-def test_phase4_registry_contains_seven_new_adapters():
+def test_phase4_registry_contains_six_new_adapters():
     registry = phase4_adapters()
-    expected = {"maigret", "holehe", "h8mail", "hibp", "phoneinfoga", "libphonenumber", "twilio-lookup"}
+    expected = {"maigret", "holehe", "h8mail", "hibp", "phoneinfoga", "libphonenumber"}
     assert expected <= set(registry)
-    assert len(registry) == 20
+    assert len(registry) == 18
 
 
 def test_personal_identifier_adapters_require_authorization_before_docker(monkeypatch, tmp_path):
@@ -43,7 +43,6 @@ def test_personal_identifier_adapters_require_authorization_before_docker(monkey
         (H8mailAdapter(), SeedType.EMAIL, "alice@example.com"),
         (HIBPAdapter(), SeedType.EMAIL, "alice@example.com"),
         (PhoneInfogaAdapter(), SeedType.PHONE, "+14155552671"),
-        (TwilioLookupAdapter(), SeedType.PHONE, "+14155552671"),
     ]:
         request = AdapterRunRequest(
             run_id=uuid4(),
@@ -97,13 +96,6 @@ def test_libphonenumber_parser():
     payload = json.dumps({"e164": "+14155552671", "region": "US", "valid": True, "possible": True})
     result = LibPhoneNumberAdapter().parse(req(SeedType.PHONE, "+1 415 555 2671"), Path("."), payload, "", 0)
     assert any(f.entity_type == EntityType.PHONE and f.value == "+14155552671" for f in result.findings)
-
-
-@parser_test('twilio-lookup')
-def test_twilio_parser():
-    payload = json.dumps({"phone_number": "+14159929960", "country_code": "US", "valid": True, "url": "https://lookups.twilio.com/v2/PhoneNumbers/+14159929960"})
-    result = TwilioLookupAdapter().parse(req(SeedType.PHONE, "+14159929960"), Path("."), payload, "", 0)
-    assert any(f.entity_type == EntityType.PHONE and f.value == "+14159929960" for f in result.findings)
 
 
 @parser_test('phoneinfoga')

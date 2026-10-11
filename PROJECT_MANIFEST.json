@@ -7,7 +7,7 @@
   "goals": [
     "Unify external OSINT collectors behind a typed adapter contract.",
     "Persist a provenance-first entity graph and resumable workflow checkpoints.",
-    "Add ten isolated domain/infrastructure adapters without rewriting upstream tools.",
+    "Add nine isolated domain/infrastructure adapters without rewriting upstream tools.",
     "Enforce legal-only routing and explicit authorization for target-adjacent DNS/recon actions.",
     "Preserve per-fact provenance: value, tool, source URL, timestamp, confidence.",
     "Add legal-gated identity, email, and phone adapters without reimplementing upstream tools.",
@@ -20,9 +20,9 @@
   "phases": {
     "1": "core graph + checkpoint + adapter framework + Sherlock + theHarvester + ExifTool",
     "2": "entity resolution + dedup + reporting",
-    "3": "10 domain/infra adapters",
+    "3": "9 domain/infra adapters",
     "4": "identity/email/phone adapters",
-    "5": "social/geo/image adapters",
+    "5": "7 social/geo/image adapters",
     "6": "corporate/records/sanctions",
     "7": "benchmarking + web UI + MCP server"
   },
@@ -61,7 +61,11 @@
       "last_audited": "2026-10-08T18:39:35+03:00",
       "verification_status": "verified-fixture",
       "note": "Fixture parser coverage passes; fixture provenance: synthetic; fixture file: tests/fixtures/sherlock.txt. No live container run has occurred.",
-      "fixture_provenance": "synthetic"
+      "fixture_provenance": "synthetic",
+      "legal_tier": 2,
+      "enabled_by_default": true,
+      "disabled_reason": null,
+      "batch_grouping": "username_enum"
     },
     {
       "name": "theHarvester",
@@ -78,7 +82,11 @@
       "last_audited": "2026-10-08T18:39:35+03:00",
       "verification_status": "verified-fixture",
       "note": "Fixture parser coverage passes; fixture provenance: synthetic; fixture file: tests/fixtures/theharvester.jsonl. No live container run has occurred.",
-      "fixture_provenance": "synthetic"
+      "fixture_provenance": "synthetic",
+      "legal_tier": 1,
+      "enabled_by_default": true,
+      "disabled_reason": null,
+      "batch_grouping": "domain_intel"
     },
     {
       "name": "exiftool",
@@ -96,7 +104,11 @@
       "last_audited": "2026-10-08T18:39:35+03:00",
       "verification_status": "verified-fixture",
       "note": "Fixture parser coverage passes; fixture provenance: synthetic; fixture file: tests/fixtures/exiftool.json. No live container run has occurred.",
-      "fixture_provenance": "synthetic"
+      "fixture_provenance": "synthetic",
+      "legal_tier": 1,
+      "enabled_by_default": true,
+      "disabled_reason": null,
+      "batch_grouping": null
     },
     {
       "name": "rapidfuzz",
@@ -145,7 +157,11 @@
       "last_audited": "2026-10-08T18:39:35+03:00",
       "verification_status": "verified-fixture",
       "note": "Fixture parser coverage passes; fixture provenance: synthetic; fixture file: tests/fixtures/amass.txt. No live container run has occurred.",
-      "fixture_provenance": "synthetic"
+      "fixture_provenance": "synthetic",
+      "legal_tier": 1,
+      "enabled_by_default": true,
+      "disabled_reason": null,
+      "batch_grouping": "domain_intel"
     },
     {
       "name": "subfinder",
@@ -162,7 +178,11 @@
       "last_audited": "2026-10-08T18:39:35+03:00",
       "verification_status": "verified-fixture",
       "note": "Fixture parser coverage passes; fixture provenance: synthetic; fixture file: tests/fixtures/subfinder.txt. No live container run has occurred.",
-      "fixture_provenance": "synthetic"
+      "fixture_provenance": "synthetic",
+      "legal_tier": 1,
+      "enabled_by_default": true,
+      "disabled_reason": null,
+      "batch_grouping": "domain_intel"
     },
     {
       "name": "assetfinder",
@@ -179,7 +199,11 @@
       "last_audited": "2026-10-08T18:39:35+03:00",
       "verification_status": "verified-fixture",
       "note": "Fixture parser coverage passes; fixture provenance: synthetic; fixture file: tests/fixtures/assetfinder.txt. No live container run has occurred.",
-      "fixture_provenance": "synthetic"
+      "fixture_provenance": "synthetic",
+      "legal_tier": 1,
+      "enabled_by_default": true,
+      "disabled_reason": null,
+      "batch_grouping": "domain_intel"
     },
     {
       "name": "dnsx",
@@ -196,7 +220,11 @@
       "last_audited": "2026-10-08T18:39:35+03:00",
       "verification_status": "verified-fixture",
       "note": "Fixture parser coverage passes; fixture provenance: synthetic; fixture file: tests/fixtures/dnsx.jsonl. No live container run has occurred.",
-      "fixture_provenance": "synthetic"
+      "fixture_provenance": "synthetic",
+      "legal_tier": 2,
+      "enabled_by_default": true,
+      "disabled_reason": null,
+      "batch_grouping": "dns_records"
     },
     {
       "name": "massdns",
@@ -213,7 +241,11 @@
       "last_audited": "2026-10-08T18:39:35+03:00",
       "verification_status": "verified-fixture",
       "note": "Fixture parser coverage passes; fixture provenance: synthetic; fixture file: tests/fixtures/massdns.txt. No live container run has occurred.",
-      "fixture_provenance": "synthetic"
+      "fixture_provenance": "synthetic",
+      "legal_tier": 2,
+      "enabled_by_default": true,
+      "disabled_reason": null,
+      "batch_grouping": "dns_records"
     },
     {
       "name": "dnsrecon",
@@ -230,7 +262,11 @@
       "last_audited": "2026-10-08T18:39:35+03:00",
       "verification_status": "verified-fixture",
       "note": "Fixture parser coverage passes; fixture provenance: synthetic; fixture file: tests/fixtures/dnsrecon.json. No live container run has occurred.",
-      "fixture_provenance": "synthetic"
+      "fixture_provenance": "synthetic",
+      "legal_tier": 2,
+      "enabled_by_default": true,
+      "disabled_reason": null,
+      "batch_grouping": "dns_records"
     },
     {
       "name": "fierce",
@@ -247,7 +283,11 @@
       "last_audited": "2026-10-08T18:39:35+03:00",
       "verification_status": "verified-fixture",
       "note": "Fixture parser coverage passes; fixture provenance: synthetic; fixture file: tests/fixtures/fierce.txt. No live container run has occurred.",
-      "fixture_provenance": "synthetic"
+      "fixture_provenance": "synthetic",
+      "legal_tier": 2,
+      "enabled_by_default": true,
+      "disabled_reason": null,
+      "batch_grouping": "dns_records"
     },
     {
       "name": "shodan",
@@ -260,30 +300,17 @@
         "ip"
       ],
       "output_schema": "normalized host/IP/domain observations from licensed API responses",
-      "legal_notes": "Read-only API lookup; API key required; honor account terms and quotas.",
+      "legal_notes": "Read-only API lookup; API key required; a free account tier is available subject to service terms and quotas.",
       "network": "required",
       "last_audited": "2026-10-08T18:39:35+03:00",
       "verification_status": "verified-fixture",
       "note": "Fixture parser coverage passes; fixture provenance: synthetic; fixture file: tests/fixtures/shodan.json. No live container run has occurred.",
-      "fixture_provenance": "synthetic"
-    },
-    {
-      "name": "censys",
-      "upstream": "https://docs.censys.com/reference/get-started",
-      "license": "Apache-2.0 (Censys Python tooling/API integration)",
-      "version_pin": "Platform API v3",
-      "invocation": "Docker / HTTPS API",
-      "input_types": [
-        "domain",
-        "ip"
-      ],
-      "output_schema": "normalized host/IP/URL/domain observations from indexed API responses",
-      "legal_notes": "PAT required. Organization ID may be supplied for organization entitlements. Read-only indexed data.",
-      "network": "required",
-      "last_audited": "2026-10-08T18:39:35+03:00",
-      "verification_status": "verified-fixture",
-      "note": "Fixture parser coverage passes; fixture provenance: synthetic; fixture file: tests/fixtures/censys.json. No live container run has occurred.",
-      "fixture_provenance": "synthetic"
+      "fixture_provenance": "synthetic",
+      "legal_tier": 3,
+      "enabled_by_default": true,
+      "disabled_reason": null,
+      "batch_grouping": "threat_intel",
+      "requires_key": true
     },
     {
       "name": "crt.sh",
@@ -300,7 +327,11 @@
       "last_audited": "2026-10-08T18:39:35+03:00",
       "verification_status": "verified-fixture",
       "note": "Fixture parser coverage passes; fixture provenance: synthetic; fixture file: tests/fixtures/crtsh.json. No live container run has occurred.",
-      "fixture_provenance": "synthetic"
+      "fixture_provenance": "synthetic",
+      "legal_tier": 1,
+      "enabled_by_default": true,
+      "disabled_reason": null,
+      "batch_grouping": "certificate_transparency"
     },
     {
       "name": "maigret",
@@ -317,7 +348,11 @@
       "last_audited": "2026-10-08T18:39:35+03:00",
       "verification_status": "verified-fixture",
       "note": "Fixture parser coverage passes; fixture provenance: synthetic; fixture file: tests/fixtures/maigret.ndjson. No live container run has occurred.",
-      "fixture_provenance": "synthetic"
+      "fixture_provenance": "synthetic",
+      "legal_tier": 2,
+      "enabled_by_default": true,
+      "disabled_reason": null,
+      "batch_grouping": "username_enum"
     },
     {
       "name": "holehe",
@@ -334,7 +369,11 @@
       "last_audited": "2026-10-08T18:39:35+03:00",
       "verification_status": "verified-fixture",
       "note": "Fixture parser coverage passes; fixture provenance: synthetic; fixture file: tests/fixtures/holehe.txt. No live container run has occurred.",
-      "fixture_provenance": "synthetic"
+      "fixture_provenance": "synthetic",
+      "legal_tier": 2,
+      "enabled_by_default": true,
+      "disabled_reason": null,
+      "batch_grouping": "email_intel"
     },
     {
       "name": "h8mail",
@@ -351,7 +390,11 @@
       "last_audited": "2026-10-08T18:39:35+03:00",
       "verification_status": "verified-fixture",
       "note": "Fixture parser coverage passes; fixture provenance: synthetic; fixture file: tests/fixtures/h8mail.json. No live container run has occurred.",
-      "fixture_provenance": "synthetic"
+      "fixture_provenance": "synthetic",
+      "legal_tier": 2,
+      "enabled_by_default": true,
+      "disabled_reason": null,
+      "batch_grouping": "breach_search"
     },
     {
       "name": "hibp",
@@ -363,12 +406,18 @@
         "email"
       ],
       "output_schema": "normalized breach observations",
-      "legal_notes": "Authenticated breach-account lookup only; API key required; no password retrieval.",
+      "legal_notes": "Direct email breach-account API lookup currently requires a paid subscription (key_cost: paid); no password retrieval. Pwned Passwords has separate access terms.",
       "network": "required",
       "last_audited": "2026-10-08T18:39:35+03:00",
       "verification_status": "verified-fixture",
       "note": "Fixture parser coverage passes; fixture provenance: synthetic; fixture file: tests/fixtures/hibp.json. No live container run has occurred.",
-      "fixture_provenance": "synthetic"
+      "fixture_provenance": "synthetic",
+      "legal_tier": 3,
+      "enabled_by_default": true,
+      "disabled_reason": null,
+      "batch_grouping": "breach_search",
+      "requires_key": true,
+      "key_cost": "paid"
     },
     {
       "name": "phoneinfoga",
@@ -385,7 +434,11 @@
       "last_audited": "2026-10-08T18:39:35+03:00",
       "verification_status": "verified-fixture",
       "note": "Fixture parser coverage passes; fixture provenance: synthetic; fixture file: tests/fixtures/phoneinfoga.txt. No live container run has occurred.",
-      "fixture_provenance": "synthetic"
+      "fixture_provenance": "synthetic",
+      "legal_tier": 1,
+      "enabled_by_default": true,
+      "disabled_reason": null,
+      "batch_grouping": "phone_intel"
     },
     {
       "name": "libphonenumber",
@@ -402,24 +455,11 @@
       "last_audited": "2026-10-08T18:39:35+03:00",
       "verification_status": "verified-fixture",
       "note": "Fixture parser coverage passes; fixture provenance: synthetic; fixture file: tests/fixtures/libphonenumber.json. No live container run has occurred.",
-      "fixture_provenance": "synthetic"
-    },
-    {
-      "name": "twilio-lookup",
-      "upstream": "https://www.twilio.com/docs/lookup/v2-api",
-      "license": "Proprietary service API",
-      "version_pin": "Lookup v2",
-      "invocation": "Docker / HTTPS API",
-      "input_types": [
-        "phone"
-      ],
-      "output_schema": "normalized Basic Lookup observations",
-      "legal_notes": "Read-only Basic Lookup by default; paid data packages are not requested by the adapter; explicit authorization required.",
-      "network": "required",
-      "last_audited": "2026-10-08T18:39:35+03:00",
-      "verification_status": "verified-fixture",
-      "note": "Fixture parser coverage passes; fixture provenance: synthetic; fixture file: tests/fixtures/twilio-lookup.json. No live container run has occurred.",
-      "fixture_provenance": "synthetic"
+      "fixture_provenance": "synthetic",
+      "legal_tier": 1,
+      "enabled_by_default": true,
+      "disabled_reason": null,
+      "batch_grouping": "phone_intel"
     },
     {
       "name": "instaloader",
@@ -436,7 +476,11 @@
       "last_audited": "2026-10-08T18:39:35+03:00",
       "verification_status": "verified-fixture",
       "note": "Fixture parser coverage passes; fixture provenance: synthetic; fixture file: tests/fixtures/instaloader.json. No live container run has occurred.",
-      "fixture_provenance": "synthetic"
+      "fixture_provenance": "synthetic",
+      "legal_tier": 2,
+      "enabled_by_default": true,
+      "disabled_reason": null,
+      "batch_grouping": "social_media"
     },
     {
       "name": "reddit-api",
@@ -448,12 +492,17 @@
         "username"
       ],
       "output_schema": "normalized public user-overview observations",
-      "legal_notes": "Official OAuth API only; operator credentials required; no target login/private data.",
+      "legal_notes": "Official OAuth API only; credentials are available without an issuance fee (key_cost: free). API terms, quotas, and potential fees apply; no target login/private data.",
       "network": "required",
       "last_audited": "2026-10-08T18:39:35+03:00",
       "verification_status": "verified-fixture",
       "note": "Fixture parser coverage passes; fixture provenance: synthetic; fixture file: tests/fixtures/reddit.json. No live container run has occurred.",
-      "fixture_provenance": "synthetic"
+      "fixture_provenance": "synthetic",
+      "legal_tier": 3,
+      "enabled_by_default": true,
+      "disabled_reason": null,
+      "batch_grouping": "social_media",
+      "requires_key": true
     },
     {
       "name": "youtube-api",
@@ -465,12 +514,17 @@
         "username"
       ],
       "output_schema": "normalized channel metadata observations",
-      "legal_notes": "Official read-only YouTube Data API; API key required; honor quota and terms.",
+      "legal_notes": "Official read-only YouTube Data API; API key issuance is free (key_cost: free); default quota is subject to project approval, terms, and quota rules.",
       "network": "required",
       "last_audited": "2026-10-08T18:39:35+03:00",
       "verification_status": "verified-fixture",
       "note": "Fixture parser coverage passes; fixture provenance: synthetic; fixture file: tests/fixtures/youtube.json. No live container run has occurred.",
-      "fixture_provenance": "synthetic"
+      "fixture_provenance": "synthetic",
+      "legal_tier": 3,
+      "enabled_by_default": true,
+      "disabled_reason": null,
+      "batch_grouping": "social_media",
+      "requires_key": true
     },
     {
       "name": "overpass",
@@ -487,7 +541,11 @@
       "last_audited": "2026-10-08T18:39:35+03:00",
       "verification_status": "verified-fixture",
       "note": "Fixture parser coverage passes; fixture provenance: synthetic; fixture file: tests/fixtures/overpass.json. No live container run has occurred.",
-      "fixture_provenance": "synthetic"
+      "fixture_provenance": "synthetic",
+      "legal_tier": 1,
+      "enabled_by_default": true,
+      "disabled_reason": null,
+      "batch_grouping": "geoint"
     },
     {
       "name": "suncalc",
@@ -504,7 +562,11 @@
       "last_audited": "2026-10-08T18:39:35+03:00",
       "verification_status": "verified-fixture",
       "note": "Fixture parser coverage passes; fixture provenance: synthetic; fixture file: tests/fixtures/suncalc.json. No live container run has occurred.",
-      "fixture_provenance": "synthetic"
+      "fixture_provenance": "synthetic",
+      "legal_tier": 1,
+      "enabled_by_default": true,
+      "disabled_reason": null,
+      "batch_grouping": "geoint"
     },
     {
       "name": "deepface",
@@ -522,7 +584,11 @@
       "last_audited": "2026-10-08T18:39:35+03:00",
       "verification_status": "verified-fixture",
       "note": "Fixture parser coverage passes; fixture provenance: synthetic; fixture file: tests/fixtures/deepface.json. No live container run has occurred.",
-      "fixture_provenance": "synthetic"
+      "fixture_provenance": "synthetic",
+      "legal_tier": 1,
+      "enabled_by_default": true,
+      "disabled_reason": null,
+      "batch_grouping": null
     },
     {
       "name": "insightface",
@@ -540,25 +606,11 @@
       "last_audited": "2026-10-08T18:39:35+03:00",
       "verification_status": "verified-fixture",
       "note": "Fixture parser coverage passes; fixture provenance: synthetic; fixture file: tests/fixtures/insightface.json. No live container run has occurred.",
-      "fixture_provenance": "synthetic"
-    },
-    {
-      "name": "google-vision",
-      "upstream": "https://cloud.google.com/vision/docs",
-      "license": "Apache-2.0 client / Google Cloud service terms",
-      "version_pin": "3.16.0",
-      "invocation": "Docker / Google Cloud Vision API",
-      "input_types": [
-        "image",
-        "file_path"
-      ],
-      "output_schema": "labels/OCR/face-detection observations",
-      "legal_notes": "Operator-supplied images only; explicit assertion and credentials required; no face identity recognition.",
-      "network": "required",
-      "last_audited": "2026-10-08T18:39:35+03:00",
-      "verification_status": "verified-fixture",
-      "note": "Fixture parser coverage passes; fixture provenance: synthetic; fixture file: tests/fixtures/google-vision.json. No live container run has occurred.",
-      "fixture_provenance": "synthetic"
+      "fixture_provenance": "synthetic",
+      "legal_tier": 1,
+      "enabled_by_default": true,
+      "disabled_reason": null,
+      "batch_grouping": null
     },
     {
       "name": "sec-edgar",
@@ -575,7 +627,11 @@
       "last_audited": "2026-10-08T18:39:35+03:00",
       "verification_status": "verified-fixture",
       "note": "Fixture parser coverage passes; fixture provenance: synthetic; fixture file: tests/fixtures/sec-edgar.json. No live container run has occurred.",
-      "fixture_provenance": "synthetic"
+      "fixture_provenance": "synthetic",
+      "legal_tier": 1,
+      "enabled_by_default": true,
+      "disabled_reason": null,
+      "batch_grouping": "company_registry"
     },
     {
       "name": "gleif",
@@ -592,7 +648,11 @@
       "last_audited": "2026-10-08T18:39:35+03:00",
       "verification_status": "verified-fixture",
       "note": "Fixture parser coverage passes; fixture provenance: synthetic; fixture file: tests/fixtures/gleif.json. No live container run has occurred.",
-      "fixture_provenance": "synthetic"
+      "fixture_provenance": "synthetic",
+      "legal_tier": 1,
+      "enabled_by_default": true,
+      "disabled_reason": null,
+      "batch_grouping": "company_registry"
     },
     {
       "name": "opencorporates",
@@ -604,12 +664,17 @@
         "name"
       ],
       "output_schema": "company/entity search records",
-      "legal_notes": "API token required; respect plan quotas and licensing; website scraping is not used.",
+      "legal_notes": "API token required; key_cost: free for qualifying open-data use with share-alike attribution; other use may require a paid account. Respect quotas and licensing; website scraping is not used.",
       "network": "required",
       "last_audited": "2026-10-08T18:39:35+03:00",
       "verification_status": "verified-fixture",
       "note": "Fixture parser coverage passes; fixture provenance: synthetic; fixture file: tests/fixtures/opencorporates.json. No live container run has occurred.",
-      "fixture_provenance": "synthetic"
+      "fixture_provenance": "synthetic",
+      "legal_tier": 3,
+      "enabled_by_default": true,
+      "disabled_reason": null,
+      "batch_grouping": "company_registry",
+      "requires_key": true
     },
     {
       "name": "opensanctions",
@@ -628,7 +693,12 @@
       "last_audited": "2026-10-08T18:39:35+03:00",
       "verification_status": "verified-fixture",
       "note": "Fixture parser coverage passes; fixture provenance: synthetic; fixture file: tests/fixtures/opensanctions.json. No live container run has occurred.",
-      "fixture_provenance": "synthetic"
+      "fixture_provenance": "synthetic",
+      "legal_tier": 3,
+      "enabled_by_default": true,
+      "disabled_reason": null,
+      "batch_grouping": "sanctions_multi",
+      "requires_key": true
     },
     {
       "name": "courtlistener",
@@ -645,7 +715,11 @@
       "last_audited": "2026-10-08T18:39:35+03:00",
       "verification_status": "verified-fixture",
       "note": "Fixture parser coverage passes; fixture provenance: synthetic; fixture file: tests/fixtures/courtlistener.json. No live container run has occurred.",
-      "fixture_provenance": "synthetic"
+      "fixture_provenance": "synthetic",
+      "legal_tier": 1,
+      "enabled_by_default": true,
+      "disabled_reason": null,
+      "batch_grouping": null
     }
   ],
   "phase_1_scope": {
@@ -654,14 +728,13 @@
       "domain",
       "file_path"
     ],
-    "graph_store": "SQLite-compatible canonical store for tests/local dev; PostgreSQL schema and Neo4j projection hooks included for deployment",
+    "graph_store": "File-backed JSON graph and checkpoint stores are current; production database backends remain future work",
     "durable_orchestrator": "checkpointed local DAG runner in Phase 1; Temporal/Celery integration boundary reserved",
     "reporting": "completed in Phase 2",
     "benchmarking": "not implemented until Phase 7"
   },
   "known_environment_limitations": [
-    "Docker CLI is not installed in the build environment and no /var/run/docker.sock is available; live container build/run tests cannot execute here.",
-    "The Phase 7 integration suite therefore skips 34 Docker tests rather than asserting false success.",
+    "The historical local environment had no Docker CLI or Docker socket. Hosted CI verified 34 Docker cases before the approved removals; the current 31-case set has not yet been run in CI.",
     "InsightFace requires operator-provisioned model weights because the container intentionally has no network path for model download.",
     "Production-grade outbound-request auditing for opaque CLI/API collectors still requires enforced egress/proxy telemetry beyond adapter invocation logs.",
     "The Phase 7 web UI is intentionally unauthenticated for local development and must be placed behind authentication before non-local exposure."
@@ -691,7 +764,6 @@
       "dnsrecon",
       "fierce",
       "shodan",
-      "censys",
       "crt.sh"
     ],
     "passive_or_indexed": [
@@ -699,7 +771,6 @@
       "subfinder",
       "assetfinder",
       "shodan",
-      "censys",
       "crt.sh"
     ],
     "authorization_required": [
@@ -709,7 +780,7 @@
       "fierce"
     ],
     "docker_isolation": "Each new upstream tool has its own dedicated Docker image; GPL tools are kept as separate processes/images.",
-    "credential_handling": "Shodan/Censys secrets are explicit allowlisted environment variables and are not embedded in commands or results; Phase 4 follows the same invariant.",
+    "credential_handling": "Shodan secrets are explicit allowlisted environment variables and are not embedded in commands or results; Phase 4 follows the same invariant.",
     "source_provenance_policy": "Where upstream CLI output lacks per-record URLs, the finding distinguishes collector provenance from primary-source provenance and hashes raw evidence."
   },
   "phase_4_scope": {
@@ -719,12 +790,11 @@
       "h8mail",
       "hibp",
       "phoneinfoga",
-      "libphonenumber",
-      "twilio-lookup"
+      "libphonenumber"
     ],
     "identity_policy": "Claimed/positive account signals are retained; negative/error/rate-limited states are excluded from the graph as identity facts.",
     "email_policy": "No password fields are emitted. HIBP is authenticated breach-account lookup only. h8mail is restricted to a bounded non-premium mode.",
-    "phone_policy": "libphonenumber is offline parsing/validation; PhoneInfoga and Twilio require explicit authorization assertions.",
+    "phone_policy": "libphonenumber is offline parsing/validation; PhoneInfoga requires explicit authorization assertions.",
     "credential_handling": "Secrets are injected by Docker inherited environment names only; secret values are excluded from command argv, audit records, and result JSON.",
     "docker_isolation": "Every selected upstream tool has its own Docker image; GPL tools are separate processes/images.",
     "deferred": [
@@ -739,9 +809,9 @@
     }
   },
   "validation": {
-    "unit_and_contract_tests": "67 passed, 34 skipped",
-    "integration_tests": "34 skipped because Docker CLI and Docker socket are unavailable",
-    "integration_skip_breakdown": "3 Phase 1 + 10 Phase 3 + 7 Phase 4 + 8 Phase 5 + 5 Phase 6 + 1 Phase 7",
+    "unit_and_contract_tests": "67 passed, 34 skipped (historical pre-removal local baseline; not rerun after removals).",
+    "integration_tests": "31 configured Docker cases after the approved removals; not rerun in this worktree.",
+    "integration_skip_breakdown": "3 Phase 1 + 9 Phase 3 + 6 Phase 4 + 7 Phase 5 + 5 Phase 6 + 1 Phase 7 = 31 configured cases.",
     "syntax_checks": [
       "python -m compileall -q app docker",
       "bash -n docker/build.sh"
@@ -765,8 +835,7 @@
       "overpass",
       "suncalc",
       "deepface",
-      "insightface",
-      "google-vision"
+      "insightface"
     ],
     "social": [
       "instaloader",
@@ -779,11 +848,10 @@
     ],
     "image": [
       "deepface",
-      "insightface",
-      "google-vision"
+      "insightface"
     ],
     "biometric_policy": "Detection only. No remote face search, no person-identification claims, and no demographic inference.",
-    "credential_policy": "Reddit, YouTube, and Google Cloud secrets are allowlisted environment variables and excluded from argv/audit command records.",
+    "credential_policy": "Reddit and YouTube secrets are allowlisted environment variables and excluded from argv/audit command records.",
     "model_policy": "Offline face adapters never fetch model weights at runtime; model files must be operator-provisioned when required.",
     "deferred": [
       "tiktok-research-api",
