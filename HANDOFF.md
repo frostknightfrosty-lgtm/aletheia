@@ -36,3 +36,7 @@ The LeakCheck gate is resolved as excluded. Hudson Rock's [official API docs](ht
 Read `RESUME_STATE.json`, `GATES.md`, this file, and the project authority documents before continuing. `RESUME_STATE.json.last_commit` names the latest source/content commit preceding the bookkeeping checkpoint; Git cannot embed the hash of a commit in a file inside that same commit without a self-referential hash. Treat the checkpoint commit as the current repository snapshot and report both SHAs when needed.
 
 No new Phase 8 work has started.
+
+## Deferred issues
+
+- `tests/test_project_manifest.py:99` hardcodes the adapter count (currently 30). Every future adapter addition or removal will break it. A more robust design is to drop the count assertion and only assert that every manifest adapter has a matching fixture file. Defer to a cleanup pass — not blocking.
