@@ -105,7 +105,8 @@ def test_verified_fixture_adapter_notes_name_existing_fixture_file():
         # Check for fixture file marker case-insensitively
         note_lower = entry["note"].lower()
         assert "fixture file: " in note_lower, f"Missing 'fixture file: ' marker in note: {entry['note'][:100]}"
-        # Extract the path conservatively between the marker and the next sentence.
+        # Extract the path between "fixture file: " and ". No live" or end of string
         marker_idx = note_lower.index("fixture file: ")
-        path_text = entry["note"][marker_idx + len("fixture file: "):].split(". No live", 1)[0].split(".", 1)[0] + "."
-        assert (ROOT / path_text).is_file(), f"Fixture file not found: {path_text}"
+        after_marker = entry["note"][marker_idx + len("fixture file: "):]
+        path_text = after_marker.split(". No live", 1)[0].strip()
+        assert (ROOT / path_text).is_file(), f"Fixture file not found: {path_text} (from note: {entry['note'][:150]})"
