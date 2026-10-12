@@ -22,6 +22,11 @@ class SeedType(StrEnum):
     FILE_PATH = "file_path"
     IMAGE = "image"
     GEOLOCATION = "geolocation"
+    COMPANY_NAME = "company_name"
+    BANK_NAME = "bank_name"
+    VIN = "vin"
+    PERSON_NAME = "person_name"
+    LOBBYIST_NAME = "lobbyist_name"
 
 
 class EntityType(StrEnum):
@@ -51,6 +56,7 @@ class EntityType(StrEnum):
     SANCTION = "sanction"
     JURISDICTION = "jurisdiction"
     UNKNOWN = "unknown"
+    GOVERNMENT_RECORD = "government_record"
 
 
 class RelationshipType(StrEnum):

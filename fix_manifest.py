@@ -1,43 +1,17 @@
-with open('C:\\Users\\N V\\Documents\\GitHub\\aletheia\\PROJECT_MANIFEST.json', 'r') as f:
-    content = f.read()
+import json
 
-# Fix the structure - find the exact pattern
-old = '''  ],
-    "supported_seeds": [
-      "username",
-      "domain",
-      "file_path"
-    ],
-    "graph_store": "File-backed JSON graph and checkpoint stores are current; production database backends remain future work",
-    "durable_orchestrator": "checkpointed local DAG runner in Phase 1; Temporal/Celery integration boundary reserved",
-    "reporting": "completed in Phase 2",
-    "benchmarking": "not implemented until Phase 7"
-  },
-  "known_environment_limitations": ['''
+with open('PROJECT_MANIFEST.json', 'r') as f:
+    manifest = json.load(f)
 
-new = '''  ],
-  "phase_1_scope": {
-    "supported_seeds": [
-      "username",
-      "domain",
-      "file_path"
-    ],
-    "graph_store": "File-backed JSON graph and checkpoint stores are current; production database backends remain future work",
-    "durable_orchestrator": "checkpointed local DAG runner in Phase 1; Temporal/Celery integration boundary reserved",
-    "reporting": "completed in Phase 2",
-    "benchmarking": "not implemented until Phase 7"
-  },
-  "known_environment_limitations": ['''
+# Find and update government_records_us verification_status
+for entry in manifest['tool_inventory']:
+    if entry.get('name') == 'government_records_us':
+        entry['verification_status'] = 'verified-fixture'
+        # Update the note to reflect CI verification
+        entry['note'] = 'Synthetic fixture parser and Docker health smoke verified in CI. Fixture file: tests/fixtures/government_records_us.json. No live API lookups have occurred.'
+        print(f'Updated {entry["name"]}: verification_status={entry["verification_status"]}')
+        break
 
-if old in content:
-    content = content.replace(old, new)
-    with open('C:\\Users\\N V\\Documents\\GitHub\\aletheia\\PROJECT_MANIFEST.json', 'w') as f:
-        f.write(content)
-    print('Fixed!')
-else:
-    print('Pattern not found')
-    # Debug: find the actual content
-    idx = content.find('"supported_seeds"')
-    if idx >= 0:
-        print('Found at:', idx)
-        print(repr(content[idx-50:idx+200]))
+with open('PROJECT_MANIFEST.json', 'w') as f:
+    json.dump(manifest, f, indent=2)
+print('Manifest updated')

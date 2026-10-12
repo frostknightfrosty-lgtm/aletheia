@@ -18,6 +18,7 @@ from aletheia.adapters.social_geo_image import (
     OverpassAdapter, RedditAPIAdapter, SunCalcAdapter, YouTubeAPIAdapter,
 )
 from aletheia.adapters.phase5c import GravatarAdapter, RdapAdapter
+from aletheia.adapters.government_records_us import GovernmentRecordsUSAdapter
 from aletheia.adapters.ip_intelligence import IPIntelligenceAdapter
 
 
@@ -67,4 +68,5 @@ def phase7_adapters() -> dict[str, Adapter]:
     adapters[GravatarAdapter.descriptor.name] = GravatarAdapter()
     adapters[RdapAdapter.descriptor.name] = RdapAdapter()
     adapters[IPIntelligenceAdapter.descriptor.name] = IPIntelligenceAdapter()
+    adapters[GovernmentRecordsUSAdapter.descriptor.name] = GovernmentRecordsUSAdapter()
     return adapters

@@ -1,0 +1,118 @@
+{
+  "input_type": "person_name",
+  "input_value": "John Smith",
+  "timestamp": "2026-10-13T12:00:00+00:00",
+  "sources": [
+    {
+      "source": "finra-brokercheck",
+      "skipped": false,
+      "skip_reason": null,
+      "timestamp": "2026-10-13T12:00:01+00:00",
+      "http_status": 200,
+      "error": null,
+      "raw_hash": "a1b2c3d4e5f6789012345678901234567890abcdef1234567890abcdef123456",
+      "data": {
+        "data": [
+          {
+            "crd": 1234567,
+            "firstName": "John",
+            "middleName": "A",
+            "lastName": "Smith",
+            "nameSuffix": "",
+            "otherNames": ["Jon Smith"],
+            "bcScope": "A",
+            "iaScope": "I",
+            "hasBcDisclosure": false,
+            "hasIaDisclosure": true,
+            "isPermanentlyBarred": false,
+            "approvedFinraRegistrationCount": 3,
+            "employmentCount": 2,
+            "industryDays": 7300,
+            "industryEntryAt": 1451606400000,
+            "currentEmployments": [
+              {"firmName": "ABC Brokerage Inc", "firmCrd": 98765, "startDate": 1609459200000}
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "source": "bop-inmate-locator",
+      "skipped": false,
+      "skip_reason": null,
+      "timestamp": "2026-10-13T12:00:02+00:00",
+      "http_status": 200,
+      "error": null,
+      "raw_hash": "b2c3d4e5f6789012345678901234567890abcdef1234567890abcdef1234567a",
+      "data": {
+        "InmateLocator": [
+          {
+            "nameLast": "SMITH",
+            "nameFirst": "JOHN",
+            "nameMiddle": "A",
+            "sex": "Male",
+            "race": "White",
+            "age": "45",
+            "inmateNum": "12345-060",
+            "inmateNumType": "IRN",
+            "releaseCode": "",
+            "faclCode": "ATL",
+            "faclName": "Atlanta",
+            "faclType": "FCI",
+            "faclURL": "/locations/institutions/atl/",
+            "projRelDate": "01/15/2028",
+            "actRelDate": "",
+            "suffix": ""
+          }
+        ],
+        "Captcha": false,
+        "Messages": {},
+        "FormToken": "pub29342info"
+      }
+    },
+    {
+      "source": "occ-enforcement",
+      "skipped": false,
+      "skip_reason": null,
+      "timestamp": "2026-10-13T12:00:03+00:00",
+      "http_status": 200,
+      "error": null,
+      "raw_hash": "c3d4e5f6789012345678901234567890abcdef1234567890abcdef1234567890ab",
+      "data": {
+        "enforcementActions": [
+          {
+            "bankName": "First National Bank",
+            "actionType": "Cease and Desist Order",
+            "actionDate": "2025-06-15",
+            "subject": "John Smith",
+            "description": "Consent order for unsafe banking practices"
+          }
+        ]
+      }
+    },
+    {
+      "source": "fed-enforcement",
+      "skipped": false,
+      "skip_reason": null,
+      "timestamp": "2026-10-13T12:00:04+00:00",
+      "http_status": 200,
+      "error": null,
+      "raw_hash": "d4e5f6789012345678901234567890abcdef1234567890abcdef1234567890abc1",
+      "data": {
+        "filtered": true,
+        "query": "John Smith",
+        "results": [
+          {
+            "effectiveDate": "2025-06-15",
+            "terminationDate": "",
+            "individual": "John Smith",
+            "individualAffiliation": "First National Bank",
+            "bankingOrganization": "First National Bank",
+            "action": "Cease and Desist Order",
+            "url": "https://www.federalreserve.gov/supervisionreg/enforcementactions/20250615.htm"
+          }
+        ]
+      }
+    }
+  ]
+}

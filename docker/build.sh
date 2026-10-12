@@ -37,3 +37,4 @@ docker build -f docker/courtlistener/Dockerfile -t aletheia/courtlistener:api-v3
 docker build -f docker/gravatar/Dockerfile -t aletheia/gravatar:api-v3 docker/gravatar
 docker build -f docker/rdap/Dockerfile -t aletheia/rdap:rfc9082 docker/rdap
 docker build -f docker/ip_intelligence/Dockerfile -t aletheia/ip-intelligence:v1 docker/ip_intelligence
+docker build -f docker/government_records_us/Dockerfile -t aletheia/gov-records-us:v1 docker/government_records_us
