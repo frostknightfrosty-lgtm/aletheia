@@ -257,6 +257,8 @@ class GovernmentRecordsUSAdapter(Adapter):
             "LDA_API_KEY",
             "NYC_OPEN_DATA_TOKEN",
         ],
+        parser_test_exempt=True,
+        parser_test_exempt_reason="Parser tests in tests/test_government_records_us_adapter.py (25 tests covering all 11 sub-sources and edge cases)",
     )
 
     def supports(self, seed_type: SeedType) -> bool:
