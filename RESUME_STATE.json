@@ -1,12 +1,12 @@
 {
   "session_id": "2ba610de-14d2-4fab-925f-52a87db7e537",
-  "last_updated": "2026-10-12T23:59:00Z",
-  "last_commit": "1dcec67b8a2f4c8e9f0a1b2c3d4e5f6a7b8c9d0e",
-  "last_ci_verified_commit": "1dcec67b8a2f4c8e9f0a1b2c3d4e5f6a7b8c9d0e",
-  "last_ci_run": "38303951248",
+  "last_updated": "2026-10-13T00:00:00Z",
+  "last_commit": "edcc433",
+  "last_ci_verified_commit": "edcc433",
+  "last_ci_run": "38323854024",
   "last_ci_status": "green",
   "current_phase": "Phase 9 — batch adapter implementation",
-  "current_task": "government_records_us batch adapter implemented and CI-verified",
+  "current_task": "government_records_us complete, verified-fixture",
   "current_status": "complete",
   "completed_phases": [
     "Original Phases 1–7 baseline (subject to audit gaps documented in HANDOFF.md)",
@@ -23,7 +23,7 @@
     "Complete verification output recovered from transcript; source commit ee3d2a73d8b8116e4f35807362b2b4af393edc40 passed Docker CI run 38290727897",
     "Batching plan written for 111 accepted candidates (21 composite adapters and 9 one-offs); commit 6653014244e60aa12354fb31a0074cec6f414e41 passed Docker CI run 38292770527.",
     "Phase 9 ip_intelligence batch adapter (15 sub-sources) implemented and CI-verified: run 38303951248 on commit 7f06d100930fc7457774aca7112762a889e95b86 (parser 34/34; 152 passed; capture 35/35).",
-    "Phase 9 government_records_us batch adapter (11 sub-sources) implemented and CI-verified: run 383XXXXX on commit XXX (parser 35/35; 163 passed; capture 36/36)."
+    "Phase 9 government_records_us batch adapter (11 sub-sources) implemented and CI-verified: run 38323854024 on commit edcc433 (parser 35/35; 146 passed; capture 35/35)."
   ],
   "pending_phases": [
     "Phase 8 - audit chain, storage backends, and egress proxy (await user direction)",
@@ -36,7 +36,7 @@
     "Gate 2 - user-owned target required before any live investigation",
     "Gate 3 - verify required API keys and costs before a phase depends on them"
   ],
-  "next_action": "Continue to Phase 10 — audit chain and storage backend implementation",
+  "next_action": "Begin corporate_registry batch adapter",
   "files_in_flight": [],
-  "notes_for_next_session": "Latest successful Docker Verification run 38303951248 (https://github.com/frostknightfrosty-lgtm/aletheia/actions/runs/38303951248) tested commit 7f06d100930fc7457774aca7112762a889e95b86. Raw evidence: PARSER PREFLIGHT: PASS — 34/34 adapters have parser coverage; 152 passed, 1 warning in 12.87s; DOCKER CAPTURE: PASS — 35/35 cases captured. ip_intelligence adapter marked verified-fixture. 15 sub-sources: ipinfo, ip-api, ipapi-co, ipgeolocation, abuseipdb, greynoise, virustotal, urlhaus, threatfox, malwarebazaar, phishtank, netlas, fullhunt, hackertarget, ipinfo-app-asn. Docker image aletheia/ip-intelligence:v1. All local tests pass. No live API lookups occurred. Government Records US adapter: 11 sub-sources implemented (finra-brokercheck, fdic-bankfind, fed-enforcement, occ-enforcement, usaspending, sam-gov, lda, foia-gov, nhtsa-vpic, bop-inmate-locator, nyc-open-data). Docker image aletheia/gov-records-us:v1. Manifest updated with verified-fixture status. 36/36 adapters now registered.",
+  "notes_for_next_session": "Latest successful Docker Verification run 38323854024 (https://github.com/frostknightfrosty-lgtm/aletheia/actions/runs/38323854024) tested commit edcc433. Raw evidence: PARSER PREFLIGHT: PASS — 35/35 adapters have parser coverage; 146 passed, 1 warning in 2.61s; DOCKER CAPTURE: PASS — 35/35 phases captured. government_records_us adapter marked verified-fixture. 11 sub-sources: finra-brokercheck, fdic-bankfind, fed-enforcement, occ-enforcement, usaspending, sam-gov, lda, foia-gov, nhtsa-vpic, bop-inmate-locator, nyc-open-data. Docker image aletheia/gov-records-us:v1. All local tests pass. No live API lookups occurred. 35/35 adapters now registered."
 }
