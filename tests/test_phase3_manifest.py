@@ -16,9 +16,10 @@ def test_domain_run_manifest_contains_phase3_and_authorization(tmp_path):
     assert manifest is not None
     assert manifest["goal"].startswith("Aletheia investigation")
     assert manifest["authorization_assertion"] == "Authorized test scope"
-    assert len(manifest["pending"]) == 11
+    assert len(manifest["pending"]) == 12
+    assert "rdap" in manifest["pending"]
     assert "opensanctions" in manifest["pending"]
     assert set(manifest["pending"]) == {
         "theHarvester", "amass", "subfinder", "assetfinder", "dnsx", "massdns",
-        "dnsrecon", "fierce", "shodan", "crt.sh", "opensanctions",
+        "dnsrecon", "fierce", "shodan", "crt.sh", "opensanctions", "rdap",
     }
