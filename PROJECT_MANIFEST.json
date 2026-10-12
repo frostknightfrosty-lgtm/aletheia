@@ -789,6 +789,46 @@
       "enabled_by_default": true,
       "disabled_reason": null,
       "batch_grouping": null
+    },
+    {
+      "name": "ip_intelligence",
+      "upstream": "https://github.com/frostknightfrosty-lgtm/aletheia/tree/main/docker/ip_intelligence",
+      "license": "Composite adapter; sub-sources have individual licenses",
+      "version_pin": "1.0",
+      "invocation": "HTTPS APIs via dedicated Docker runner (aletheia/ip-intelligence:v1)",
+      "input_types": [
+        "ip",
+        "cidr"
+      ],
+      "output_schema": "IPIntelligenceFinding[]",
+      "legal_notes": "Composite adapter querying 15 IP intelligence sub-sources via their public APIs. Sub-sources requiring free API keys (IPinfo, IPGeolocation, AbuseIPDB, GreyNoise, VirusTotal, URLhaus, ThreatFox, MalwareBazaar, Netlas, FullHunt) will be skipped if the corresponding environment variable is not set. Skip reasons are recorded in output. Tier 1 sub-sources (IP-API, ipapi.co, HackerTarget, ipinfo.app ASN) run without keys. All sub-sources are public REST APIs; no unauthorized access, CAPTCHA bypass, or credential use against third-party accounts. Rate limits are per-sub-source; the adapter queries each once per run. Respect provider quotas and 429 responses.",
+      "network": "required",
+      "last_audited": "2026-10-12T12:00:00Z",
+      "verification_status": "unknown",
+      "note": "Synthetic fixture parser and Docker health smoke pending CI run; fixture file: tests/fixtures/ip_intelligence.json. No live API lookups have occurred.",
+      "fixture_provenance": "synthetic",
+      "legal_tier": 1,
+      "enabled_by_default": true,
+      "disabled_reason": null,
+      "batch_grouping": "ip_intelligence",
+      "requires_key": false,
+      "sub_sources": [
+        {"name": "ipinfo", "requires_key": true, "key_cost": "free"},
+        {"name": "ip-api", "requires_key": false},
+        {"name": "ipapi-co", "requires_key": false},
+        {"name": "ipgeolocation", "requires_key": true, "key_cost": "free"},
+        {"name": "abuseipdb", "requires_key": true, "key_cost": "free"},
+        {"name": "greynoise", "requires_key": true, "key_cost": "free"},
+        {"name": "virustotal", "requires_key": true, "key_cost": "free"},
+        {"name": "urlhaus", "requires_key": true, "key_cost": "free"},
+        {"name": "threatfox", "requires_key": true, "key_cost": "free"},
+        {"name": "malwarebazaar", "requires_key": true, "key_cost": "free"},
+        {"name": "phishtank", "requires_key": false},
+        {"name": "netlas", "requires_key": true, "key_cost": "free"},
+        {"name": "fullhunt", "requires_key": true, "key_cost": "free"},
+        {"name": "hackertarget", "requires_key": false},
+        {"name": "ipinfo-app-asn", "requires_key": false}
+      ]
     }
   ],
   "phase_1_scope": {

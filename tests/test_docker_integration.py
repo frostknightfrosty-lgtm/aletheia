@@ -106,3 +106,8 @@ def test_phase5c_gravatar_container_health():
 def test_phase5c_rdap_container_health():
     r = _run(["docker", "run", "--rm", "--network", "none", "aletheia/rdap:rfc9082", "--health"])
     assert r.returncode == 0, r.stderr or r.stdout
+
+
+def test_phase9_ip_intelligence_container_health():
+    r = _run(["docker", "run", "--rm", "--network", "none", "aletheia/ip-intelligence:v1", "--health"])
+    assert r.returncode == 0, r.stderr or r.stdout

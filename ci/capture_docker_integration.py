@@ -42,6 +42,7 @@ CASES = [
     ("phase7-core-import", "aletheia/core:0.7.0", ["-c", "import aletheia; print('core import ok')"]),
     ("phase5c-gravatar", "aletheia/gravatar:api-v3", ["--health"]),
     ("phase5c-rdap", "aletheia/rdap:rfc9082", ["--health"]),
+    ("phase9-ip-intelligence", "aletheia/ip-intelligence:v1", ["--health"]),
 ]
 
 def main() -> int:

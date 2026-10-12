@@ -36,3 +36,4 @@ docker build -f docker/opensanctions/Dockerfile -t aletheia/opensanctions:api do
 docker build -f docker/courtlistener/Dockerfile -t aletheia/courtlistener:api-v3 docker/courtlistener
 docker build -f docker/gravatar/Dockerfile -t aletheia/gravatar:api-v3 docker/gravatar
 docker build -f docker/rdap/Dockerfile -t aletheia/rdap:rfc9082 docker/rdap
+docker build -f docker/ip_intelligence/Dockerfile -t aletheia/ip-intelligence:v1 docker/ip_intelligence
