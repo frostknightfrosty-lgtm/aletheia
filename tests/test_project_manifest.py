@@ -102,9 +102,10 @@ def test_verified_fixture_adapter_notes_name_existing_fixture_file():
     assert len(adapters) == 35
     for entry in adapters:
         assert entry["fixture_provenance"] == "synthetic"
-        marker = "fixture file: "
-        assert marker in entry["note"]
-        rel = entry["note"].split(marker, 1)[1].split(".", 1)[0] + "." + entry["note"].split(marker, 1)[1].split(".", 1)[1].split(".",1)[0] if False else None
+        # Check for fixture file marker case-insensitively
+        note_lower = entry["note"].lower()
+        assert "fixture file: " in note_lower, f"Missing 'fixture file: ' marker in note: {entry['note'][:100]}"
         # Extract the path conservatively between the marker and the next sentence.
-        path_text = entry["note"].split(marker, 1)[1].split(". No live", 1)[0]
-        assert (ROOT / path_text).is_file(), path_text
+        marker_idx = note_lower.index("fixture file: ")
+        path_text = entry["note"][marker_idx + len("fixture file: "):].split(". No live", 1)[0].split(".", 1)[0] + "."
+        assert (ROOT / path_text).is_file(), f"Fixture file not found: {path_text}"

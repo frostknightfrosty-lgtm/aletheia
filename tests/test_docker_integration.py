@@ -110,7 +110,7 @@ def _evidence_lines(stdout: str) -> dict[str, str]:
 
     return {
         "PARSER PREFLIGHT": parser_pass,
-        "Pytest": str(11 + 18),  # 11 fixture tests + 18 ip_intelligence adapter tests
+        "Pytest": "177",  # ~152 existing + 25 new gov_records_us tests
         "DOCKER CAPTURE": docker_capture,
     }
 
