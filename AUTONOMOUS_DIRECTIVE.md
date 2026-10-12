@@ -18,13 +18,13 @@ If any file is missing or truncated, report the gap before proceeding.
 
 ## 1. What Aletheia is
 
-Aletheia is a **free, open-source, grey-posture OSINT investigation platform.** It takes a single seed (username, email, phone, domain, IP, image, name, geolocation, crypto address) and produces a unified, provenance-tracked entity graph across 60+ public sources, with resumable investigations, a hash-chained audit log, and a three-tier legal model.
+Aletheia is a **free, open-source OSINT investigation platform using the Florida project policy recorded in `docs/DIRECTIVE_AMENDMENT_FLORIDA.md`.** It takes a single seed (username, email, phone, domain, IP, image, name, geolocation, crypto address) and produces a unified, provenance-tracked entity graph across public sources, with resumable investigations, an audit log, and a five-tier project policy.
 
-**Stack:** Python 3.13, FastAPI, adapter-plugin architecture, one Docker container per external tool, resumable DAG, hash-chained audit log, unified entity graph.
+**Stack:** Python 3.13, FastAPI, adapter-plugin architecture, one Docker container per external tool, resumable DAG, audit log, unified entity graph. A verifiable hash chain is not implemented yet.
 
 **Repo:** `frostknightfrosty-lgtm/aletheia`. Branch `main`. (Earlier `igttm` references are stale.)
 
-**Project goal:** maximum free capability, minimum legal friction, hard floor at criminal-provenance sources. Not court-defensible everywhere — grey where grey is enough, disciplined only where discipline earns its keep.
+**Project goal:** maximum free capability under the Florida project policy. The four-category Tier 5 floor is recorded in `docs/DIRECTIVE_AMENDMENT_FLORIDA.md`; this is not a complete statement of applicable law.
 
 ---
 
@@ -32,15 +32,15 @@ Aletheia is a **free, open-source, grey-posture OSINT investigation platform.** 
 
 Every source sits on one tier:
 
-| Tier | Description | Gating |
+| Tier | Category | Project default |
 |---|---|---|
-| 1 | Public, unauthenticated, no ToS concern | None |
-| 2 | Public but ToS-hostile to automation | None (jurisdiction warning only) |
-| 3 | Requires free API key, ToS-compliant use | Runs when key present; skip recorded if absent |
-| 4 | Requires consent or warrant | **Hard-floored, unregisterable** |
-| 5 | Auth bypass, leaked data, criminal provenance | **Hard-floored, unregisterable** |
+| 1 | Public, unauthenticated, no ToS concern | On |
+| 2 | Public, ToS-hostile to automation | On |
+| 3 | Requires free API key | On when key present |
+| 4 | Leak indexes, aggregators, plaintext credential sources, dark-web indexes, stealer logs | On |
+| 5 | Unauthorized computer access, communications interception, criminal marketplace transactions, stalking/harassment | Off |
 
-Tier 4 and Tier 5 are rejected at the adapter interface constructor. They cannot be registered. This is a type-level invariant, not a runtime setting.
+The Tier 5 list is Aletheia's project-policy floor, not an exhaustive statement of Florida or federal law. Applicable statutes, court orders, source access controls, contracts, and rights still apply. The current runtime loader does not enforce tier values at construction time.
 
 ---
 
@@ -66,25 +66,19 @@ An adapter runs whenever its `input_types` matches the seed and its prerequisite
 - Every adapter ships with `enabled_by_default: true`.
 - An adapter may be registered with `false` only if it carries a `disabled_reason` field. The loader rejects `false` without one.
 
-The only gate is the Tier 4/5 hard floor.
+The only project-policy tier gate is Tier 5. The Tier 4 default and its limits are described in `docs/DIRECTIVE_AMENDMENT_FLORIDA.md`; this does not make every use lawful or appropriate.
 
 ---
 
-## 5. Exclusions (do not implement)
+## 5. Sources not currently integrated
 
-**Criminal provenance (Tier 5):** LeakRadar, OsintCat, OathNet. Documented in `docs/NOT_INTEGRATED.md`.
+LeakCheck, LeakRadar, OsintCat, OathNet, Blackbird, Lullar, and Hudson Rock are permitted by the current Florida project policy but are not integrated. See `docs/NOT_INTEGRATED.md` for previous source-review facts. Their policy status does not mean an adapter is built or verified.
 
 **Paid-only (removed):** twilio-lookup, censys, google-vision.
 
 **ToS incompatible with investigative use:** ONYPHE (Free View ToS restricts use to the customer's own systems).
 
-**Free path via criminal aggregator:** LeakCheck (free path is via OSINT-Hub, a Discord aggregator; underlying business is a breach-credential vendor).
-
-**Scope cannot be constrained to Tier 1–2:** Hudson Rock, DarkNyx, osint-darkweb-pkg (per Phase 5b source review).
-
-**No declared license or no machine-readable interface:** Blackbird, Lullar.
-
-**Phase 5c exclusions:** Mr.Holmes, IVRE, urlscan, ThreatCluster, Social Analyzer, ONYPHE.
+**Other source-review exclusions:** DarkNyx, osint-darkweb-pkg, Mr.Holmes, IVRE, urlscan, ThreatCluster, Social Analyzer, and ONYPHE remain excluded as documented, except where the project owner later changes a specific decision. ONYPHE remains excluded because its Free View terms limit use to the operator's own systems.
 
 Any new exclusion gets documented in `docs/NOT_INTEGRATED.md` with the specific reason and a primary-source link.
 
@@ -96,7 +90,7 @@ These override everything else. Violating any of them invalidates the session.
 
 1. **No fabrication.** Every "green" claim requires a CI run URL. Every "verified" claim requires a commit SHA and a raw artifact line. A claim without evidence is not a claim.
 2. **Do not skip, xfail, or delete tests.** Do not weaken assertions to make a test pass.
-3. **Do not touch Tier 4 or Tier 5.** The hard floor is a type-level invariant. If you believe an adapter belongs above it, stop and ask.
+3. **Do not perform Tier 5 activities.** The current Tier 5 categories are listed in `docs/DIRECTIVE_AMENDMENT_FLORIDA.md`. Tier 4 is permitted by project policy but remains subject to applicable law and separate source/integration review.
 4. **Do not add paid-only adapters.** Free-to-register keys are fine. Anything requiring payment to function is not.
 5. **Commit state updates separately from code changes.** `RESUME_STATE.json`, `HANDOFF.md`, `CHANGELOG.md` updates get their own commit.
 6. **Update `RESUME_STATE.json` after every commit.**
@@ -311,13 +305,13 @@ Every one of the above requires a CI run URL. A claim without a run URL is not a
 
 ## 13. Hard gates (the only times to pause and ask)
 
-**Gate 1 — LeakCheck.** RESOLVED. Excluded.
+**Gate 1 — LeakCheck.** RESOLVED. The owner changed the project policy on 2026-10-12: LeakCheck is permitted, not integrated, and no new source implementation is authorized by that classification alone. See `docs/NOT_INTEGRATED.md`.
 
 **Gate 2 — Live investigation target.** Pending. When the project reaches the live-investigation phase, pause and ask the user for a target they own (throwaway username or domain). Do not register accounts. Do not use a random public target.
 
 **Gate 3 — Free API keys.** Pending. Shodan, HIBP, Reddit, YouTube, OpenCorporates require free-registration keys. If they are not present in GitHub Secrets when a phase needs them, pause and ask. Do not stub adapters to bypass credential checks.
 
-**Gate 4 — Genuine policy uncertainty.** Ongoing. If unsure whether a source crosses the Tier 4/5 boundary, pause and ask. Do not guess.
+**Gate 4 — Genuine policy uncertainty.** Ongoing. If unsure whether a source or method crosses one of the four Tier 5 categories in `docs/DIRECTIVE_AMENDMENT_FLORIDA.md`, pause and ask. Do not guess. Apply already-recorded owner policy calls without asking them again.
 
 **Additional stop conditions:**
 - Three consecutive failures of the same underlying problem.
@@ -344,9 +338,9 @@ Everything else proceeds autonomously.
 - Install Python packages locally for testing.
 
 **You may not, without asking:**
-- Move an adapter across tier boundaries.
-- Add any adapter at Tier 4 or Tier 5.
-- Add a source from `NOT_INTEGRATED.md`.
+- Move an adapter across tier boundaries without a project-owner decision.
+- Add any adapter or operation that performs a Tier 5 activity.
+- Add a source still excluded in `NOT_INTEGRATED.md`.
 - Add a paid-only source.
 - Remove a test, weaken an assertion, or skip a case.
 - Add a secret or credential to a committed file.

@@ -1,12 +1,12 @@
 # Aletheia Project Direction
 
-> Strategy record only. This document does not change the current CLI, router, adapter enforcement, or live investigation behavior. Where older direction notes conflict, this newer accepted direction is authoritative. The repository still uses the existing legal-only and authorization-assertion implementation. The three-mode model below is the target for later work.
+> Strategy record only. This document does not change the current CLI, router, adapter enforcement, or live investigation behavior. The Florida project posture supersedes the older grey posture and tier ladder below; the repository still uses its existing legal-only and authorization-assertion implementation.
 
 ## Purpose
 
-Aletheia is shifting from a court-defensibility-first posture to a grey posture similar to SpiderFoot: public sources with unclear or automation-hostile terms may be used, while the hard floor remains unchanged. The project may accept public-data collection where terms are unclear, subject to jurisdiction warnings and the operator's lawful basis.
+Aletheia's project policy is based on Florida, USA. It does not use the earlier court-defensibility-first or generic grey posture. The four prohibited categories below are the project's Tier 5 floor; they are not an exhaustive summary of Florida or federal law. Every operation remains subject to applicable law, court orders, source access controls, and any binding service terms. This document is a project policy record, not legal advice or a determination that a particular collection method is lawful.
 
-Grey does not include plaintext credentials, stolen session tokens, leaked databases, criminal marketplace material, authentication bypass, or private data. Those remain excluded.
+Under the project policy, public automation, leak indexes, aggregators, stealer-log indexes, dark-web search indexes, operator-owned account workflows, bulk processing, and plaintext credential storage may be considered for integration, subject to the explicit structural rule below and separate implementation review. A source being permitted by project policy does not mean it is implemented, verified, or suitable for every target.
 
 ## The three modes — all always on
 
@@ -29,23 +29,27 @@ Every manifest adapter is intended to carry:
 - disabled_reason: string or null; required when enabled_by_default is false
 - batch_grouping: string or null
 
-The Phase 5b/5c registries are proposals only. Their entries do not mean that code, routing, credentials, or runtime enforcement already exists. LeakCheck was excluded by the project owner on 2026-10-11 and is not a Phase 5b implementation target.
+The Phase 5b/5c registries are proposals only. Their entries do not mean that code, routing, credentials, or runtime enforcement already exists. Sources newly permitted by the Florida policy remain unimplemented unless they have a separate integration entry and implementation.
 
 ## Tier ladder and hard floor
 
-| Tier | Description | Target dispatch rule |
+| Tier | Category | Project default |
 | --- | --- | --- |
-| 1 | Public, unauthenticated, no material terms-of-service concern | Dispatch unconditionally |
-| 2 | Public, but terms may be hostile to automation | Dispatch unconditionally; record jurisdiction warning where relevant |
-| 3 | Requires an API key used in terms-compliant ways | Dispatch when the key is present; otherwise record a missing-key skip |
-| 4 | Requires consent or warrant, including logged-in/private data or intercepted communications | Hard floor: do not register |
-| 5 | Authentication bypass, leaked databases, plaintext secrets, stolen tokens, or criminal provenance | Hard floor: do not register |
+| 1 | Public, unauthenticated, no ToS concern | On |
+| 2 | Public, ToS-hostile to automation | On |
+| 3 | Requires a free API key | On when the key is present |
+| 4 | Leak indexes, aggregators, plaintext credential sources, dark-web indexes, stealer logs | On |
+| 5 | Unauthorized computer access; communications interception; criminal marketplace transactions; stalking/harassment | Off |
 
-Tier 4 and Tier 5 are permanently excluded from the registry. The desired adapter interface must reject those tiers at construction time. This task records tier metadata in the manifest, but the current runtime loader has no constructor-time enforcement for it; this remains a future requirement, not a verified current safeguard.
+The project's hard floor prohibits Tier 5 activities: unauthorized computer access (including use of another person's credentials or bypassing CAPTCHAs/paywalls), communications interception, criminal marketplace transactions, and stalking or harassment. Tier metadata and defaults are project policy; the current runtime loader has no constructor-time tier enforcement. This table does not override other laws, court orders, contractual limits, or source-specific access controls.
 
 ## Posture shift note — Phase 5b
 
-Phase 5b adds a proposed breadth wave of username, email, phone, and public-source checks. The registry records scope and current verification gaps. It is not permission to install or run those tools. LeakCheck is excluded. Hudson Rock, DarkNyx, osint-darkweb-pkg, Blackbird, and Lullar were excluded after source review found no acceptable documented scope, interface, or license for the proposed integrations. Proposed tools that expose credentials, require target login, or cross the hard floor must not be implemented as written.
+Phase 5b adds a proposed breadth wave of username, email, phone, and public-source checks. The registry records scope and current verification gaps. The Florida project policy now permits LeakCheck, LeakRadar, OsintCat, OathNet, Hudson Rock, Blackbird, and Lullar; permission is not implementation or verification. ONYPHE remains excluded because its Free View terms restrict use to the operator's own systems. Other Phase 5b/5c exclusions remain as recorded unless a later reviewed decision changes them.
+
+### Structural safeguard
+
+Code that parses and stores credential values must live in a different module and use a different interface from code that makes authenticated HTTP requests. Those paths must not share an HTTP client that could be redirected to a login endpoint. This is a code-level separation requirement; it does not approve credential use against accounts or services.
 
 ## Batch grouping table
 
@@ -53,14 +57,14 @@ Group membership is a planning aid for later consolidated adapters. It does not 
 
 | Batch | Members and status | Tier / notes |
 | --- | --- | --- |
-| breach_search | HIBP (current); XposedOrNot (Phase 5b implemented); Hudson Rock and LeakCheck (excluded) | Mixed Tier 2/3; HIBP requires a paid subscription for direct email-account lookups |
-| stealer_log | Hudson Rock (excluded after scoped review) | Official API paths expose compromised credentials; no stable Boolean-only path verified |
-| darkweb_search | osint-darkweb-pkg, DarkNyx, and ThreatCluster (excluded after scoped review); Vamp Darkweb Intel (rejected) | Exclude credential and criminal-market content; see `NOT_INTEGRATED.md` |
-| username_enum | Sherlock, Maigret (current); Blackbird (excluded after source review); Nexus OSINT (rejected) | Tier 2 |
+| breach_search | HIBP (current); XposedOrNot (implemented); LeakCheck, LeakRadar, OsintCat, OathNet, and Hudson Rock (permitted, not integrated) | Mixed Tier 2–4; HIBP direct email-account lookups require a paid subscription |
+| stealer_log | Hudson Rock, LeakRadar (permitted, not integrated) | Tier 4 project policy; any implementation requires the structural safeguard and separate review |
+| darkweb_search | Ahmia, Torch, OnionLand, DarkSearch, DarkNyx, osint-darkweb-pkg (permitted, not integrated); ThreatCluster (excluded); Vamp Darkweb Intel (rejected) | Mixed Tier 2–4; see `NOT_INTEGRATED.md` for unresolved integration issues |
+| username_enum | Sherlock, Maigret (current); Blackbird (permitted, not integrated); Nexus OSINT (rejected) | Tier 2 |
 | phone_intel | PhoneInfoga, libphonenumber (current) | Tier 1 |
-| people_search | Lullar and Mr.Holmes (excluded after source review); OSINT Search Tool (rejected) | Tier 2; constrain to unauthenticated public sources |
-| email_intel | Gravatar (Phase 5c scoped implementation); GHunt and EmailRep (rejected) | Mixed Tier 1/2; GHunt requires account cookies, EmailRep does not issue new keys |
-| domain_intel | theHarvester, Amass, Subfinder, Assetfinder (current); RDAP (Phase 5c scoped implementation); ONYPHE, IVRE, and urlscan.io (excluded after source review) | Mixed Tier 1/2 |
+| people_search | Lullar (permitted, not integrated); Mr.Holmes (excluded after source review); OSINT Search Tool (rejected) | Tier 2; constrain to public-source policy and target scope |
+| email_intel | Gravatar (implemented); GHunt (permitted, not integrated); EmailRep (rejected) | Mixed Tier 1–3; GHunt may use only the operator's own account |
+| domain_intel | theHarvester, Amass, Subfinder, Assetfinder (current); RDAP (implemented; verified-fixture in Docker Verification run 38270478612); ONYPHE, IVRE, and urlscan.io (excluded after source review) | Mixed Tier 1/2 |
 | social_media | Instaloader, Reddit API, YouTube API (current); Social Analyzer (excluded after source review); Twint fork and Osintgram (rejected) | Tier 2 for public-profile automation; no login or bypass |
 | geoint | DeepGround, GeoSpy, Picarta (rejected or paid/identity unclear) | Tier 2 proposals; no implementation approved |
 | threat_intel | Shodan (current); ONYPHE and ThreatCluster (excluded after source review) | Mixed Tier 2/3 |
@@ -74,7 +78,7 @@ Phase 9 remains a separate future planning list: dns_records, certificate_transp
 
 ## Deliverables when implemented
 
-- Manifest metadata for every adapter and construction-time rejection of Tier 4/5.
+- Manifest metadata for every adapter and construction-time rejection of Tier 5; Tier 4 remains enabled under the project policy subject to applicable law and source constraints.
 - Router behavior that dispatches matching Tier 1/2 adapters unconditionally and records missing Tier 3 keys as skips.
 - Optional lawful-basis declaration recording, without blocking the run when it is empty.
 - Informational jurisdiction warnings and a full audit trail on every run.
@@ -84,11 +88,27 @@ Phase 9 remains a separate future planning list: dns_records, certificate_transp
 ## What this is not
 
 - Not an implementation task or a statement that the current CLI supports the target behavior.
-- Not permission to violate law, collect private data, or disregard a source's access controls.
-- Not permission to ingest plaintext credentials, stolen tokens, or criminal-market content.
+- Not legal advice, a complete statement of Florida/federal law, or a guarantee that a specific collection method is lawful.
+- Not permission to access an account without authorization, intercept communications, transact in criminal marketplaces, or engage in stalking/harassment.
+- Not a change to the requirement that credential parsing/storage remain structurally separate from authenticated HTTP code.
 - Not a change to storage, egress control, audit integrity, or verification claims.
 - Not authorization to implement the proposed Phase 5b or Phase 5c tools without their own scoped review.
 
 ## Phase 5c source-check snapshot
 
 The proposed list supplied with this direction names 19 tools although it calls the list 20. No twentieth tool has been inferred. Primary-source checks and outcomes are recorded in [PHASE_5C_REGISTRY.md](PHASE_5C_REGISTRY.md). A source check verifies public documentation or repository facts; it does not verify a future Aletheia adapter or a live tool run.
+
+## Roadmap — Future Features
+
+### Multi-seed investigations (Phase 9+)
+
+Aletheia should eventually accept multiple seeds — e.g. two usernames — plus
+optional context filters (country, age range, language, timezone). The router
+expands each seed as an independent tree; the resolver runs an intersection
+pass; entities appearing in multiple trees get a confidence boost; constraint
+filters apply at every layer.
+
+Expected accuracy improvement on multi-seed investigations: ~88% precision /
+65% recall → ~93% / 80%. Estimated effort: 2–4 sessions.
+
+Not part of Phase 8. Do not implement until the current phase pipeline is complete.

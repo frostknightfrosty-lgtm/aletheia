@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-10-12 — RDAP implementation and Florida framework
+- Implemented the RDAP domain/IP adapter, isolated standard-library Docker runner, synthetic RFC-shaped fixture, parser tests, offline container health smoke, capture case, registry entry, and build target. The runner uses IANA bootstrap data and one exact HTTPS lookup, validates record/seed correspondence, excludes contact fields, and labels 0.85 confidence as registry-data confidence rather than identity confidence.
+- Docker Verification run `38270478612` succeeded on commit `33185c7fbbe253562f6b644955bf2ff5ede79c0e`: `PARSER PREFLIGHT: PASS — 33/33 adapters have parser coverage`; `128 passed, 1 warning in 13.87s`; `DOCKER CAPTURE: PASS — 34/34 cases captured`. `results.json` had 34 entries with zero nonzero return codes and 34 stdout/stderr pairs. RDAP's offline health smoke returned 0. This verifies fixture/parser and container startup only; no live RDAP lookup occurred.
+- CI run `38269210962` first exposed a stale domain pending-adapter count (11 expected, 12 actual after RDAP became domain-capable). Updated the count and expected set in `tests/test_phase3_manifest.py`; no test was skipped or weakened.
+- Updated the project policy documentation to the owner's Florida framework, retained the legal caveat that the project-defined floor is not a complete statement of law, and documented the Phase 9+ multi-seed roadmap. No adapter discovery registry or live investigation was changed/run.
+
 ## 2026-10-12 — Gravatar CI verification and state refresh
 - Docker Verification run `38179832021` succeeded on commit `200ada277886ee961c90c668bfe4aa36fc5f2899`: parser preflight 32/32, `119 passed, 1 warning in 12.58s`, capture 33/33 with all return codes 0. Marked Gravatar `verified-fixture` (synthetic fixture and Docker health smoke only; no live API lookup).
 - Added `*.egg-info/` and `ci-artifacts-*/` to `.gitignore`.

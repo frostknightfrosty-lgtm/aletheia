@@ -1,16 +1,20 @@
 # Not Integrated
 
-This page records tools excluded from the current registry and proposals that need review. It does not claim that a tool was installed, executed, or tested by Aletheia.
+This page records tools not currently integrated and source-review history. A status of “allowed” under the Florida project policy does not mean that a tool was installed, implemented, executed, or verified by Aletheia.
 
-## Excluded at the hard floor: criminal provenance or secret exposure
+## Previously excluded — now allowed under Florida framework
 
-These exclusions are project-policy classifications supplied for this direction; this task did not independently inspect or execute these products.
+The project owner changed the project policy on 2026-10-12. These sources are no longer excluded by the project-level Tier 5 classification; each remains unimplemented and unverified unless stated otherwise elsewhere.
 
-- **LeakRadar:** described as exposing plaintext credentials from stealer logs and combolists and indexing dark-web forum/marketplace posts.
-- **OsintCat:** described as aggregating breach-data providers, with Discord lookup that may return tokens or passwords.
-- **OathNet:** described as combining breach databases, stealer logs, and Discord user data including tokens.
+- **LeakCheck:** allowed, including the free OSINT-Hub path. No source was queried or implementation attempted during this review.
+- **LeakRadar:** allowed by project policy; previously described as a stealer-log/combolist and dark-web index.
+- **OsintCat:** allowed by project policy; previously described as an aggregator that may return tokens or passwords.
+- **OathNet:** allowed by project policy; previously described as combining breach databases, stealer logs, and Discord user data.
+- **Blackbird:** allowed by project policy. Earlier source review found no declared upstream license and described optional HTML/AI features; these remain integration/licensing facts to resolve before bundling, not a policy exclusion.
+- **Lullar:** allowed by project policy. Earlier source review found a browser URL-generation workflow and no documented machine-readable interface; this remains an implementation limitation, not a policy exclusion.
+- **Hudson Rock:** allowed by project policy, including the documented username endpoint that may return credential fields. No Aletheia adapter or endpoint call was added. Any future credential parsing/storage must remain structurally separate from authenticated HTTP code.
 
-The boundary is source and output provenance: grey allows public data with unclear terms when no plaintext secrets or criminal-market content are collected; criminal-provenance material remains excluded. A future adapter must not ingest plaintext credentials, stolen session tokens, or marketplace content.
+This section records Aletheia policy only. It is not a legal conclusion, a claim that these sources are accurate or licensed for every use, or evidence of an integration. ONYPHE remains excluded for its own-systems Free View scope mismatch, as recorded below. Other source-specific Phase 5c exclusions remain unchanged.
 
 ## Removed integrations
 
@@ -34,59 +38,17 @@ The project direction explicitly retains Shodan, HIBP, Reddit API, YouTube Data 
 
 Current manifest legal notes must state the actual key-cost conditions. In particular, the requested blanket free-cost label for HIBP is not used because it would be false for direct email lookups.
 
-## Excluded and pending proposals
+## Integration reviews and pending proposals
 
-**LeakCheck** is excluded from Phase 5b by the project owner (2026-10-11). It is not integrated. No source was queried and no implementation was attempted. The previous registry proposal's provenance and output behavior were not independently verified.
+### Phase 5b historical review notes (2026-10-11)
 
-### Phase 5b exclusions after scoped source review (2026-10-11)
+The following source facts were documented when these proposals were excluded under the prior project posture. The owner later changed the project policy so the sources listed in the Florida section above are allowed; the facts remain useful for implementation planning, but are no longer Tier 5 exclusions:
 
-These proposals were reviewed against the project owner's requirement to verify a stable invocation that can be constrained to Tier 1–2 content. The documented call paths did not meet that condition, so they were moved out of the active proposal registry. No adapter was installed or run. The owner's exact review conditions were applied: if a source lacks a documented, enforceable safe scope, it is excluded rather than implemented speculatively.
-
-~~~yaml
-name: hudsonrock
-status: excluded
-scope_constraint: "The official username endpoint is POST https://api.hudsonrock.com/json/v3/search-by-login/usernames and requires the search-by-login API permission. Its documented response contains stealer/device fields and credentials[] with username and password fields. No stable Boolean-only infection-signal endpoint was documented. Exclude; do not call the credential-returning route."
-evidence:
-  - https://docs.hudsonrock.com/docs/username-search
-  - https://docs.hudsonrock.com/docs/domain-search
-~~~
-
-~~~yaml
-name: darknyx
-status: excluded
-scope_constraint: "The public site search is described as indexing onion sites, leak dumps, ransomware groups, public Telegram, and marketplaces. The homepage identifies API access as a Pro feature, and the legal terms prohibit scraping, probing, or bypassing service filters. No documented public entity-search API returning only category, snippet, onion URL, or a sanitized feed was found. Exclude; do not scrape the public page or use paid Pro API access."
-evidence:
-  - https://darknyx.com/
-  - https://darknyx.com/legal/
-~~~
-
-~~~yaml
-name: osint-darkweb-pkg
-status: excluded
-scope_constraint: "The documented get_search_results(query) sub-call queries 17 hardcoded .onion search endpoints, not only Ahmia, Torch, and OnionLand, and returns titles/links without engine provenance or an engine allowlist. It cannot be constrained to the three approved indexes through its public interface. The separate scrape_multiple(urls) sub-call fetches .onion pages and extracts page text; Aletheia would not call it. The search sub-call itself does not require page fetching, but its engine set and provenance fail the owner's scope condition. Exclude this package; do not invoke scrape_multiple or substitute an undocumented patched call path."
-evidence:
-  - https://pypi.org/project/osint-darkweb-pkg/
-  - https://files.pythonhosted.org/packages/source/o/osint-darkweb-pkg/osint_darkweb_pkg-0.1.0.tar.gz (SHA-256: 7a42152d02d3493ec01e8913964e05b4b850107f9be06f50ba89978795463e42; statically inspected; not installed or executed)
-  - https://torch.cx/about/ (current canonical onion address published by Torch)
-~~~
-
-~~~yaml
-name: blackbird
-status: excluded
-scope_constraint: "The current official repository is https://github.com/antoniaci/blackbird (the former p1ngul1n0 URL redirects there). The documented username CLI is python blackbird.py --username <username>; optional flags can dump HTML or send found site names to an external AI service. The repository has no declared license (GitHub API license field is null and the repository root has no LICENSE file), so Aletheia cannot legally redistribute or bundle it. The repository's latest push was 2025-07-13; maintenance freshness is also unestablished. Exclude unless the upstream publishes a license and supported, scopeable invocation."
-evidence:
-  - https://github.com/antoniaci/blackbird
-  - https://github.com/antoniaci/blackbird/blob/main/blackbird.py
-~~~
-
-~~~yaml
-name: lullar
-status: excluded
-scope_constraint: "The current public username-checker page documents URL generation in the browser: it creates profile URLs and the visitor opens a profile to decide whether it loads or returns 404. No CLI, machine-readable API, source repository, or automation license was documented. The marketing page's claims of automatic parallel checking conflict with the dedicated checker instructions. Exclude; do not scrape the site or automate checks across third-party platforms without a documented interface and scope."
-evidence:
-  - https://com.lullar.com/en/tools/username-checker
-  - https://com.lullar.com/en/guide/social-media-username-search
-~~~
+- Hudson Rock's official username endpoint is `POST https://api.hudsonrock.com/json/v3/search-by-login/usernames`; its documented response contains stealer/device fields and `credentials[]` username/password fields. Earlier review found no stable Boolean-only infection-signal endpoint. Sources: https://docs.hudsonrock.com/docs/username-search and https://docs.hudsonrock.com/docs/domain-search.
+- DarkNyx's public site describes indexing onion sites, leak dumps, ransomware groups, public Telegram, and marketplaces; its homepage describes API access as Pro and its legal terms prohibit scraping. Earlier review found no documented public metadata-only API. Sources: https://darknyx.com/ and https://darknyx.com/legal/.
+- `osint-darkweb-pkg`'s `get_search_results(query)` was statically inspected and found to query 17 hardcoded onion endpoints; a separate `scrape_multiple(urls)` fetches pages. Earlier review found no public engine allowlist. The package was not installed or executed. The inspected archive SHA-256 was `7a42152d02d3493ec01e8913964e05b4b850107f9be06f50ba89978795463e42`.
+- Blackbird's current repository is https://github.com/antoniaci/blackbird. Earlier review found no declared license and optional HTML/AI output flags; source references: https://github.com/antoniaci/blackbird and https://github.com/antoniaci/blackbird/blob/main/blackbird.py.
+- Lullar's checker page documents browser URL generation and manual review; earlier review found no documented CLI or machine API. Sources: https://com.lullar.com/en/tools/username-checker and https://com.lullar.com/en/guide/social-media-username-search.
 
 ### Phase 5c exclusions after source and scope review (2026-10-11)
 
@@ -97,7 +59,7 @@ evidence:
 - **ThreatCluster:** the free key includes dark-web search/read endpoints and leak-site victim-enrichment routes; no endpoint/schema pair was verified that guarantees a Tier 1–2-only result for Aletheia's general use. Its free plan is also described for personal/evaluation use.
 - **Social Analyzer:** its broad multi-site workflow spans more than 1,000 social websites and uses multiple request/metadata techniques; no per-site allowlist and rate/terms scope was established.
 
-The Phase 5c proposals **Gravatar** and **RDAP** are scoped for implementation only: Gravatar uses the official profile API with the email SHA-256 hash and a curated public-field allowlist; RDAP uses IANA bootstrap data for one exact domain/IP lookup. They remain unverified until their implementations and CI runs are complete. Detailed sources and constraints are in `docs/PHASE_5C_REGISTRY.md`.
+The Phase 5c proposals **Gravatar** and **RDAP** are narrowly scoped integrations: Gravatar uses the official profile API with the email SHA-256 hash and a curated public-field allowlist; RDAP uses IANA bootstrap data for one exact domain/IP lookup. RDAP is `verified-fixture` based on Docker Verification run 38270478612 (synthetic fixture, parser coverage, image build, and offline health smoke only); no live RDAP lookup occurred. See `PROJECT_MANIFEST.json` and `docs/PHASE_5C_REGISTRY.md` for status and scope.
 
 ## Future re-addition
 
