@@ -1,0 +1,45 @@
+{
+  "fixture_provenance": "synthetic RFC 9082/9083-shaped test data; not captured from any registry",
+  "domain": {
+    "query_url": "https://rdap.example/domain/example.com",
+    "record": {
+      "objectClassName": "domain",
+      "handle": "EXAMPLE-1",
+      "ldhName": "EXAMPLE.COM",
+      "unicodeName": "example.com",
+      "status": ["active"],
+      "events": [
+        {"eventAction": "registration", "eventDate": "2020-01-01T00:00:00Z"},
+        {"eventAction": "expiration", "eventDate": "2030-01-01T00:00:00Z"}
+      ],
+      "nameservers": [
+        {"ldhName": "ns1.example.net"},
+        {"ldhName": "ns2.example.net"}
+      ],
+      "secureDNS": {"delegationSigned": true},
+      "entities": [
+        {"roles": ["registrant"], "vcardArray": ["vcard", [["fn", {}, "text", "Synthetic Privacy Service"], ["email", {}, "text", "privacy@example.invalid"]]]}
+      ],
+      "remarks": [{"description": ["Synthetic contact-like text that must not be emitted"]}]
+    }
+  },
+  "ip": {
+    "query_url": "https://rdap.example/ip/192.0.2.7",
+    "record": {
+      "objectClassName": "ip network",
+      "handle": "TEST-NET-1",
+      "name": "Documentation Network",
+      "type": "DIRECT ALLOCATION",
+      "startAddress": "192.0.2.0",
+      "endAddress": "192.0.2.255",
+      "ipVersion": "v4",
+      "country": "ZZ",
+      "parentHandle": "TEST-NET",
+      "status": ["active"],
+      "entities": [
+        {"roles": ["technical"], "vcardArray": ["vcard", [["fn", {}, "text", "Synthetic Network Contact"], ["email", {}, "text", "contact@example.invalid"]]]}
+      ],
+      "remarks": [{"description": ["Synthetic contact-like text that must not be emitted"]}]
+    }
+  }
+}

@@ -466,6 +466,29 @@
       "key_cost": "free; API key optional"
     },
     {
+      "name": "rdap",
+      "upstream": "https://www.iana.org/assignments/rdap-dns",
+      "license": "IETF RFC 9082 / RFC 9224 standards; IANA bootstrap registry",
+      "version_pin": "RFC 9082 / RFC 9224",
+      "invocation": "Docker / HTTPS RDAP bootstrap lookup",
+      "input_types": [
+        "domain",
+        "ip"
+      ],
+      "output_schema": "curated exact-seed domain or IP registration metadata; no contacts or registrant identity claims",
+      "legal_notes": "Uses IANA bootstrap data and one exact HTTPS lookup for the normalized seed. Contact entities, email/postal addresses, remarks, and unreviewed fields are excluded. Registry data does not establish control or identity.",
+      "network": "required",
+      "last_audited": "2026-10-12T15:04:34Z",
+      "verification_status": "unknown",
+      "note": "RDAP implementation and parser tests are pending CI; fixture provenance: synthetic; fixture file: tests/fixtures/rdap.json. No live RDAP lookup has occurred.",
+      "fixture_provenance": "synthetic",
+      "legal_tier": 1,
+      "enabled_by_default": true,
+      "disabled_reason": null,
+      "batch_grouping": "domain_intel",
+      "requires_key": false
+    },
+    {
       "name": "phoneinfoga",
       "upstream": "https://github.com/sundowndev/phoneinfoga",
       "license": "GPL-3.0-only",

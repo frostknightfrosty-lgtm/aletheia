@@ -35,3 +35,4 @@ docker build -f docker/opencorporates/Dockerfile -t aletheia/opencorporates:api-
 docker build -f docker/opensanctions/Dockerfile -t aletheia/opensanctions:api docker/opensanctions
 docker build -f docker/courtlistener/Dockerfile -t aletheia/courtlistener:api-v3 docker/courtlistener
 docker build -f docker/gravatar/Dockerfile -t aletheia/gravatar:api-v3 docker/gravatar
+docker build -f docker/rdap/Dockerfile -t aletheia/rdap:rfc9082 docker/rdap

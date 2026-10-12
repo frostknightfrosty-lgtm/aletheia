@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Execute the 33 Docker integration smoke cases and preserve raw stdout/stderr."""
+"""Execute the 34 Docker integration smoke cases and preserve raw stdout/stderr."""
 from __future__ import annotations
 import json
 import subprocess
@@ -41,6 +41,7 @@ CASES = [
     ("phase6-courtlistener", "aletheia/courtlistener:api-v3", ["--health"]),
     ("phase7-core-import", "aletheia/core:0.7.0", ["-c", "import aletheia; print('core import ok')"]),
     ("phase5c-gravatar", "aletheia/gravatar:api-v3", ["--health"]),
+    ("phase5c-rdap", "aletheia/rdap:rfc9082", ["--health"]),
 ]
 
 def main() -> int:

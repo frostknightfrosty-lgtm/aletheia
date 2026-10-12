@@ -17,7 +17,7 @@ from aletheia.adapters.social_geo_image import (
     DeepFaceAdapter, InsightFaceAdapter, InstaloaderAdapter,
     OverpassAdapter, RedditAPIAdapter, SunCalcAdapter, YouTubeAPIAdapter,
 )
-from aletheia.adapters.phase5c import GravatarAdapter
+from aletheia.adapters.phase5c import GravatarAdapter, RdapAdapter
 
 
 def phase1_adapters() -> dict[str, Adapter]:
@@ -64,4 +64,5 @@ def phase7_adapters() -> dict[str, Adapter]:
     # Phase 7 adds control-plane capabilities; external collectors remain the Phase 6 registry.
     adapters = phase6_adapters()
     adapters[GravatarAdapter.descriptor.name] = GravatarAdapter()
+    adapters[RdapAdapter.descriptor.name] = RdapAdapter()
     return adapters
