@@ -242,7 +242,7 @@ def test_finding_from_fixture():
 # ── run result parsing ─────────────────────────────────────────────────────────
 
 
-def test_parse_success(mocker):
+def test_parse_success():
     from aletheia.adapters.government_records_us import GovernmentRecordsUSAdapter
 
     fixture = load_fixture()
@@ -262,7 +262,7 @@ def test_parse_success(mocker):
     assert adapter is not None
 
 
-def test_parse_skipped(mocker):
+def test_parse_skipped():
     """Test that skipped sub-sources produce a finding with skip reason."""
     from aletheia.adapters.government_records_us import GovernmentRecordsUSAdapter
 
@@ -290,7 +290,7 @@ def test_parse_skipped(mocker):
     assert adapter is not None
 
 
-def test_parse_error(mocker):
+def test_parse_error():
     """Test that errored sub-sources produce a finding with error info."""
     from aletheia.adapters.government_records_us import GovernmentRecordsUSAdapter
 
