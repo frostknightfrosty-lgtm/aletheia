@@ -1,12 +1,12 @@
 {
   "session_id": "2ba610de-14d2-4fab-925f-52a87db7e537",
-  "last_updated": "2026-10-12T15:52:34Z",
-  "last_commit": "e160c5e9fdee34ca0581b1cba3089cdbe2ae415c",
-  "last_ci_verified_commit": "e160c5e9fdee34ca0581b1cba3089cdbe2ae415c",
-  "last_ci_run": "38272314026",
+  "last_updated": "2026-10-12T16:03:11Z",
+  "last_commit": "67d19e662a8830b3c392c2226e0d78ddcdd438a8",
+  "last_ci_verified_commit": "67d19e662a8830b3c392c2226e0d78ddcdd438a8",
+  "last_ci_run": "38273505822",
   "last_ci_status": "green",
   "current_phase": "Phase 5c complete - RDAP verified-fixture; Florida framework recorded",
-  "current_task": "The requested Phase 5c RDAP increment and Florida policy/roadmap documentation are committed and CI-verified. Latest run 38272314026 tested commit e160c5e9fdee34ca0581b1cba3089cdbe2ae415c; parser preflight 33/33, pytest 128 passed/1 warning, Docker capture 34/34, and RDAP container health rc=0. No live RDAP lookup was performed. Await user direction before Phase 8.",
+  "current_task": "Phase 5c RDAP and Florida policy/roadmap documentation are complete and CI-verified. Run 38273505822 tested commit 67d19e662a8830b3c392c2226e0d78ddcdd438a8; parser 33/33, pytest 128 passed/1 warning, capture 34/34, RDAP health smoke rc=0. No live RDAP lookup occurred. Await user direction before Phase 8.",
   "current_status": "complete",
   "completed_phases": [
     "Original Phases 1–7 baseline (subject to audit gaps documented in HANDOFF.md)",
@@ -34,5 +34,5 @@
   ],
   "next_action": "Await user direction on Phase 8 (audit chain, storage backends, egress proxy). Do not begin those tasks until directed.",
   "files_in_flight": [],
-  "notes_for_next_session": "Latest successful Docker Verification run 38272314026 (https://github.com/frostknightfrosty-lgtm/aletheia/actions/runs/38272314026) tested commit e160c5e9fdee34ca0581b1cba3089cdbe2ae415c. Raw artifact evidence: parser preflight 33/33 adapters; pytest 128 passed, 1 warning in 12.94s; Docker capture 34/34. results.json SHA-256 740F39E2FA0C9E4D1B4D8267CFD9F781C9DCB6A57000D03BA95930AA0B1D4ED5; it contains 34 cases, zero nonzero return codes, and 34 stdout/stderr pairs. RDAP image aletheia/rdap:rfc9082 was recorded with image ID sha256:38022dd0fb8e99ec7f531f8370f45543bccd8ca92913a5cba2f6e547e2fbccef; phase5c-rdap offline health smoke rc=0. Manifest status verified-fixture; fixture is synthetic; no live RDAP lookup. Earlier run 38269210962 failed a stale pending-count test: expected 11, actual 12 because RDAP supports DOMAIN. Fixed in 3d5d528 and verified by green run 38270478612, then manifest and docs verified in run 38272314026. last_commit and last_ci_verified_commit both record e160c5e because the next final state commit cannot record its own hash. The state-only commit push-triggered CI run should be checked and reported but is intentionally not recursively written back into this state file. Docker is unavailable locally. Do not stage ci-artifacts-* folders. Do not modify adapter discovery registries or begin Phase 8 without user direction."
+  "notes_for_next_session": "Latest successful Docker Verification run 38273505822 (https://github.com/frostknightfrosty-lgtm/aletheia/actions/runs/38273505822) tested commit 67d19e662a8830b3c392c2226e0d78ddcdd438a8. Raw evidence: parser preflight 33/33; pytest 128 passed, 1 warning in 13.31s; Docker capture 34/34. results.json SHA-256 FAAF323A67FAB9FD1CEA1F1F252C98122FABBB7C62FDA08285F746980477FC2C; 34 cases, zero nonzero return codes, 34 stdout and 34 stderr files. RDAP image aletheia/rdap:rfc9082 recorded with image ID sha256:38022dd0fb8e99ec7f531f8370f45543bccd8ca92913a5cba2f6e547e2fbccef; phase5c-rdap offline health smoke rc=0. Manifest status verified-fixture; fixture is synthetic; no live RDAP lookup. Earlier run 38269210962 exposed an 11-versus-12 domain pending count; fixed in 3d5d528 and verified by green runs 38270478612 and 38272314026. This state refresh records the latest completed run and its tested commit. Its own push-triggered CI run should be checked and reported but is not recursively written into the state file. Docker is unavailable locally. Do not stage ci-artifacts-* folders, modify adapter discovery registries, or begin Phase 8 without user direction."
 }
