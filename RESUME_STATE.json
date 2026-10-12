@@ -1,13 +1,13 @@
 {
   "session_id": "2ba610de-14d2-4fab-925f-52a87db7e537",
-  "last_updated": "2026-10-12T15:42:57Z",
-  "last_commit": "50d7e90109197c67e410f4ed9a976a913461fb85",
-  "last_ci_verified_commit": "33185c7fbbe253562f6b644955bf2ff5ede79c0e",
-  "last_ci_run": "38270478612",
+  "last_updated": "2026-10-12T15:52:34Z",
+  "last_commit": "e160c5e9fdee34ca0581b1cba3089cdbe2ae415c",
+  "last_ci_verified_commit": "e160c5e9fdee34ca0581b1cba3089cdbe2ae415c",
+  "last_ci_run": "38272314026",
   "last_ci_status": "green",
-  "current_phase": "Phase 5c — RDAP CI-verified; Florida documentation committed, CI pending",
-  "current_task": "RDAP and the Florida framework documentation are committed through 50d7e90109197c67e410f4ed9a976a913461fb85. Latest verified run 38270478612 tested 33185c7 and passed parser 33/33, 128 tests, and capture 34/34. The manifest verification metadata commit and docs commit are newer than that run; push the docs and this state update, then verify the resulting CI run.",
-  "current_status": "in_progress",
+  "current_phase": "Phase 5c complete - RDAP verified-fixture; Florida framework recorded",
+  "current_task": "The requested Phase 5c RDAP increment and Florida policy/roadmap documentation are committed and CI-verified. Latest run 38272314026 tested commit e160c5e9fdee34ca0581b1cba3089cdbe2ae415c; parser preflight 33/33, pytest 128 passed/1 warning, Docker capture 34/34, and RDAP container health rc=0. No live RDAP lookup was performed. Await user direction before Phase 8.",
+  "current_status": "complete",
   "completed_phases": [
     "Original Phases 1–7 baseline (subject to audit gaps documented in HANDOFF.md)",
     "State refresh CI verified: run 38264456202 on commit 89c513e139b275b3554a0909251156d9d6bfa439 (parser preflight 32/32; 119 passed, 1 warning; Docker capture 33/33)",
@@ -18,23 +18,21 @@
     "Phase 5b exclusion and scoped-review documentation verified in Docker CI run 38172013706",
     "Phase 5c source review: Gravatar/RDAP scoped for implementation; ONYPHE excluded by owner; Mr.Holmes, IVRE, urlscan, ThreatCluster, Social Analyzer excluded (CI run 38172950867)",
     "Phase 5c Gravatar adapter implemented and Docker CI verified-fixture: run 38179832021 on commit 200ada277886ee961c90c668bfe4aa36fc5f2899 (parser preflight 32/32; 119 passed, 1 warning; capture 33/33; no live lookup)",
-    "Phase 5c RDAP implementation CI-verified as verified-fixture (run 38270478612)"
+    "Phase 5c RDAP implementation CI-verified as verified-fixture (run 38270478612)",
+    "Phase 5c RDAP and Florida framework documentation CI-verified: run 38272314026 on e160c5e9fdee34ca0581b1cba3089cdbe2ae415c (parser 33/33; 128 passed; capture 34/34)"
   ],
   "pending_phases": [
-    "CI-verify manifest verification metadata and Florida documentation commit; then final state refresh",
-    "Commit the Florida framework and multi-seed roadmap documentation updates",
-    "Audit chain",
-    "Storage backends",
-    "Egress proxy",
+    "Phase 8 - audit chain, storage backends, and egress proxy (await user direction)",
     "Score calibration",
     "Batch adapters",
     "Authorized live investigation",
-    "Documentation and final CI pass"
+    "Final documentation and CI reconciliation"
   ],
   "open_gates": [
-    "User-owned email target required before XposedOrNot live lookup"
+    "Gate 2 - user-owned target required before any live investigation",
+    "Gate 3 - verify required API keys and costs before a phase depends on them"
   ],
-  "next_action": "Push commit 50d7e90 and this state update together to main. Wait for the push-triggered Docker Verification run and inspect its raw artifact. If green, update HANDOFF.md and RESUME_STATE.json with the tested docs HEAD and run, commit the state update separately, and verify the final state commit via its push-triggered run. Do not manually dispatch CI. No live investigation or Phase 8 work is included in this increment.",
+  "next_action": "Await user direction on Phase 8 (audit chain, storage backends, egress proxy). Do not begin those tasks until directed.",
   "files_in_flight": [],
-  "notes_for_next_session": "RDAP is verified-fixture based on run 38270478612 (https://github.com/frostknightfrosty-lgtm/aletheia/actions/runs/38270478612) on commit 33185c7fbbe253562f6b644955bf2ff5ede79c0e. Raw artifact lines: PARSER PREFLIGHT: PASS — 33/33 adapters have parser coverage; 128 passed, 1 warning in 13.87s; DOCKER CAPTURE: PASS — 34/34 cases captured. results.json had 34 cases with 0 nonzero return codes, 34 stdout and 34 stderr pairs; phase5c-rdap health smoke returned 0. Fixture is synthetic; no live lookup. Manifest status update commit e73524892fabc6f648531d1b72d3a23558b0f46c and Florida documentation commit 50d7e90109197c67e410f4ed9a976a913461fb85 are newer than this CI run and need the push-triggered run to verify. HANDOFF.md documents the interim state. Current Docker CLI is unavailable locally. User explicitly excluded adapter discovery workstream and Phase 8 from this scoped increment. Latest known failed run 38269210962 failed only at an outdated domain pending count; corrected in 3d5d528 and verified by 38270478612. Do not stage ci-artifacts-* folders."
+  "notes_for_next_session": "Latest successful Docker Verification run 38272314026 (https://github.com/frostknightfrosty-lgtm/aletheia/actions/runs/38272314026) tested commit e160c5e9fdee34ca0581b1cba3089cdbe2ae415c. Raw artifact evidence: parser preflight 33/33 adapters; pytest 128 passed, 1 warning in 12.94s; Docker capture 34/34. results.json SHA-256 740F39E2FA0C9E4D1B4D8267CFD9F781C9DCB6A57000D03BA95930AA0B1D4ED5; it contains 34 cases, zero nonzero return codes, and 34 stdout/stderr pairs. RDAP image aletheia/rdap:rfc9082 was recorded with image ID sha256:38022dd0fb8e99ec7f531f8370f45543bccd8ca92913a5cba2f6e547e2fbccef; phase5c-rdap offline health smoke rc=0. Manifest status verified-fixture; fixture is synthetic; no live RDAP lookup. Earlier run 38269210962 failed a stale pending-count test: expected 11, actual 12 because RDAP supports DOMAIN. Fixed in 3d5d528 and verified by green run 38270478612, then manifest and docs verified in run 38272314026. last_commit and last_ci_verified_commit both record e160c5e because the next final state commit cannot record its own hash. The state-only commit push-triggered CI run should be checked and reported but is intentionally not recursively written back into this state file. Docker is unavailable locally. Do not stage ci-artifacts-* folders. Do not modify adapter discovery registries or begin Phase 8 without user direction."
 }

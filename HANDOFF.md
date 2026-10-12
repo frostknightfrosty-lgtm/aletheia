@@ -3,7 +3,7 @@
 See `docs/DIRECTIVE_AMENDMENT_FLORIDA.md` for the current project tier system and policy framework.
 See `docs/PROJECT_DIRECTION.md` for the Roadmap — Future Features section, including multi-seed investigations.
 
-Last updated: 2026-10-12T15:42:31Z
+Last updated: 2026-10-12T15:52:13Z
 
 ## Current state
 
@@ -15,15 +15,15 @@ Last updated: 2026-10-12T15:42:31Z
 
 ## CI evidence
 
-Latest successful Docker Verification run: [38270478612](https://github.com/frostknightfrosty-lgtm/aletheia/actions/runs/38270478612), on commit `33185c7fbbe253562f6b644955bf2ff5ede79c0e`.
+Latest successful Docker Verification run: [38272314026](https://github.com/frostknightfrosty-lgtm/aletheia/actions/runs/38272314026), on commit `e160c5e9fdee34ca0581b1cba3089cdbe2ae415c`.
 
 Raw artifact evidence:
 
 - `ci-parser-preflight.txt`: `PARSER PREFLIGHT: PASS — 33/33 adapters have parser coverage`
-- `ci-artifacts/pytest-full.log`: `128 passed, 1 warning in 13.87s`
+- `ci-artifacts/pytest-full.log`: `128 passed, 1 warning in 12.94s`
 - `ci-artifacts/docker-integration/capture.log`: `DOCKER CAPTURE: PASS — 34/34 cases captured`
-- `results.json`: 34 cases, zero nonzero return codes; 34 `.stdout` and 34 `.stderr` files.
-- `phase5c-rdap`: image `aletheia/rdap:rfc9082`, offline `--health` command, return code 0.
+- `results.json`: SHA-256 `740F39E2FA0C9E4D1B4D8267CFD9F781C9DCB6A57000D03BA95930AA0B1D4ED5`; 34 cases, zero nonzero return codes; 34 `.stdout` and 34 `.stderr` files.
+- `phase5c-rdap`: image `aletheia/rdap:rfc9082`, offline `--health` command, return code 0; image ID was recorded in `image-ids-and-dockerfile-sha256.txt`.
 - Build and image-ID recording steps passed. The test suite had no skips in this run.
 
 Run 38269210962 failed because `tests/test_phase3_manifest.py` expected 11 domain-capable adapters. RDAP correctly increased the router's pending list to 12. Commit `3d5d52861b9e0e9b43dbc7bb15f2c3c69b1f3f7b` updated the expected set/count and asserted that `rdap` is present. The next run, 38270478612, passed.
@@ -35,9 +35,11 @@ Run 38269210962 failed because `tests/test_phase3_manifest.py` expected 11 domai
 - `3d5d52861b9e0e9b43dbc7bb15f2c3c69b1f3f7b` — update domain pending expectation for RDAP
 - `33185c7fbbe253562f6b644955bf2ff5ede79c0e` — state update accompanying the retry
 - `e73524892fabc6f648531d1b72d3a23558b0f46c` — mark RDAP `verified-fixture` from run 38270478612
-- `6952072d808fd59bc417c8d920116e98fe8c3a56` — state update recording the CI evidence
+- `6952072d808fd59bc417c8d920116e98fe8c3a56` — state update recording the first green CI evidence
+- `50d7e90109197c67e410f4ed9a976a913461fb85` — Florida framework and RDAP verification documentation
+- `e160c5e9fdee34ca0581b1cba3089cdbe2ae415c` — state update before final documentation CI
 
-The manifest-verification metadata commit `e735248` followed the green run. The next push-triggered CI run will also test that metadata update; refresh this handoff from its result before claiming that commit was verified.
+Run 38272314026 verified the manifest metadata update (`e735248`) and the Florida documentation on commit `e160c5e`. The final state-file commit is intentionally a separate snapshot; its push-triggered CI result is reported separately and is not self-recorded to avoid an endless state-commit loop.
 
 ## Florida project framework
 
@@ -57,4 +59,4 @@ Multi-seed investigations are documented as a Phase 9+ roadmap item only; no imp
 
 ## Next action
 
-Finish and CI-verify the Florida policy, roadmap, handoff, gate, and changelog updates. Then record the final verified HEAD and run in `RESUME_STATE.json`. After this Phase 5c increment, await user direction before starting Phase 8 work (audit chain, storage backends, or egress proxy).
+Phase 5c RDAP and Florida framework documentation are complete and CI-verified. Await user direction before starting Phase 8 work (audit chain, storage backends, or egress proxy).
