@@ -1,12 +1,12 @@
 {
   "session_id": "2ba610de-14d2-4fab-925f-52a87db7e537",
-  "last_updated": "2026-10-12T15:28:00Z",
-  "last_commit": "3d5d52861b9e0e9b43dbc7bb15f2c3c69b1f3f7b",
-  "last_ci_verified_commit": "89c513e139b275b3554a0909251156d9d6bfa439",
-  "last_ci_run": "38269210962",
-  "last_ci_status": "red",
-  "current_phase": "Phase 5c — RDAP implementation and CI verification",
-  "current_task": "RDAP implementation commit efc8eaac9f5aa330f62e3a3ad0db97ce1b527b95 was tested in CI run 38269210962. Image build passed and capture passed 34/34; full suite had 1 stale domain pending-count failure (expected 11, actual 12 because RDAP supports DOMAIN). Commit 3d5d52861b9e0e9b43dbc7bb15f2c3c69b1f3f7b updates that expected set/count and passed its targeted local test. Push this fix and state update, then verify in CI.",
+  "last_updated": "2026-10-12T15:39:15Z",
+  "last_commit": "e73524892fabc6f648531d1b72d3a23558b0f46c",
+  "last_ci_verified_commit": "33185c7fbbe253562f6b644955bf2ff5ede79c0e",
+  "last_ci_run": "38270478612",
+  "last_ci_status": "green",
+  "current_phase": "Phase 5c — RDAP CI-verified; Florida documentation finalizing",
+  "current_task": "RDAP is verified-fixture from Docker Verification run 38270478612 on commit 33185c7fbbe253562f6b644955bf2ff5ede79c0e. The manifest update is committed in e73524892fabc6f648531d1b72d3a23558b0f46c; that metadata-only commit has not yet been reverified in CI. Finish Florida policy/roadmap docs, HANDOFF, CHANGELOG, and GATES updates, then verify the pushed documentation and metadata state in CI.",
   "current_status": "in_progress",
   "completed_phases": [
     "Original Phases 1–7 baseline (subject to audit gaps documented in HANDOFF.md)",
@@ -20,7 +20,7 @@
     "Phase 5c Gravatar adapter implemented and Docker CI verified-fixture: run 38179832021 on commit 200ada277886ee961c90c668bfe4aa36fc5f2899 (parser preflight 32/32; 119 passed, 1 warning; capture 33/33; no live lookup)"
   ],
   "pending_phases": [
-    "Push domain pending-count fix 3d5d528, then verify in CI and mark RDAP verified-fixture only on green evidence",
+    "Finish and CI-verify Florida policy, roadmap, and handoff documentation; then final state refresh",
     "Commit the Florida framework and multi-seed roadmap documentation updates",
     "Audit chain",
     "Storage backends",
@@ -33,14 +33,15 @@
   "open_gates": [
     "User-owned email target required before XposedOrNot live lookup"
   ],
-  "next_action": "Push commit 3d5d528 and this state update together to main; wait for the push-triggered Docker Verification run and inspect the artifact with gh. CI run 38269210962 on commit 7e7f322ee8b2dbf7da63a1b324a9e25e4f70054e failed only at tests/test_phase3_manifest.py:19: expected 11 pending adapters, actual 12; the capture artifact says 34/34 and all return codes were 0. The fix now expects 12 and explicitly checks rdap is included. If the next run is green, update RDAP manifest status to verified-fixture with run/commit/evidence and commit that separately with state. Then commit the Florida framework, NOT_INTEGRATED, HANDOFF, AUTONOMOUS_DIRECTIVE, and GATES documentation updates, with separate state updates. Do not edit adapter discovery registries, perform live lookups, or begin Phase 8.",
+  "next_action": "Commit the Florida framework and multi-seed roadmap docs, updated NOT_INTEGRATED status, current HANDOFF, CHANGELOG, and GATES correction as one documentation increment; then update RESUME_STATE separately, push both, and verify the push-triggered CI artifact. After that, record the final HEAD/run/status in a separate state commit and verify any resulting run without manual dispatch.",
   "files_in_flight": [
     "AUTONOMOUS_DIRECTIVE.md",
     "GATES.md",
     "HANDOFF.md",
+    "CHANGELOG.md",
     "docs/PROJECT_DIRECTION.md",
     "docs/NOT_INTEGRATED.md",
     "docs/DIRECTIVE_AMENDMENT_FLORIDA.md"
   ],
-  "notes_for_next_session": "Latest green CI remains run 38264456202 (https://github.com/frostknightfrosty-lgtm/aletheia/actions/runs/38264456202), commit 89c513e139b275b3554a0909251156d9d6bfa439: parser 32/32, 119 passed, capture 33/33. New RDAP run 38269210962 (https://github.com/frostknightfrosty-lgtm/aletheia/actions/runs/38269210962) on commit 7e7f322ee8b2dbf7da63a1b324a9e25e4f70054e built every image successfully and captured 34/34 with all return codes 0, but pytest failed 1 and passed 127: tests/test_phase3_manifest.py:19 expected 11 pending adapters but got 12. Root cause: RDAP correctly supports DOMAIN and is included by Orchestrator. Updated the test in commit 3d5d52861b9e0e9b43dbc7bb15f2c3c69b1f3f7b to expect 12 and explicitly include rdap; targeted test passed 1/1 and RDAP/manifest tests passed 26/26 locally. This fix and state update have not been pushed yet. Docker is unavailable locally. RDAP manifest status remains unknown until green CI. `last_commit` points to the immediately prior code commit since a state file cannot contain its own commit hash; last_ci_verified_commit remains 89c513e. GitHub CLI is authenticated as frostknightfrosty-lgtm; use repo frostknightfrosty-lgtm/aletheia. Do not stage ci-artifacts-* folders. The owner changed Florida project policy on 2026-10-12; see docs/DIRECTIVE_AMENDMENT_FLORIDA.md. Do not touch adapter discovery registries."
+  "notes_for_next_session": "RDAP implementation commit efc8eaac9f5aa330f62e3a3ad0db97ce1b527b95 plus domain test fix and state commits are on main. Run 38269210962 failed only because a preexisting pending count expected 11 instead of 12 after RDAP began supporting DOMAIN; build passed and capture was 34/34. Fix in 3d5d528 updated the count/set and explicitly asserts rdap; local targeted test passed. Run 38270478612 (https://github.com/frostknightfrosty-lgtm/aletheia/actions/runs/38270478612) on commit 33185c7fbbe253562f6b644955bf2ff5ede79c0e is green. Raw artifact evidence: PARSER PREFLIGHT: PASS — 33/33 adapters have parser coverage; 128 passed, 1 warning in 13.87s; DOCKER CAPTURE: PASS — 34/34 cases captured. results.json has 34 cases, 0 nonzero return codes, 34 stdout files and 34 stderr files; phase5c-rdap health smoke returned 0. The RDAP fixture is synthetic; no live RDAP lookup occurred. Manifest was changed to verified-fixture in e73524892fabc6f648531d1b72d3a23558b0f46c based on that run; this metadata commit is not yet included in a green run. Docker is unavailable locally. Do not stage ci-artifacts-* folders or modify adapter discovery registries. The owner changed Florida project policy on 2026-10-12; preserve legal caveats in docs/DIRECTIVE_AMENDMENT_FLORIDA.md."
 }
