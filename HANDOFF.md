@@ -3,7 +3,7 @@
 See `docs/DIRECTIVE_AMENDMENT_FLORIDA.md` for the current project tier system and policy framework.
 See `docs/PROJECT_DIRECTION.md` for the Roadmap — Future Features section, including multi-seed investigations.
 
-Last updated: 2026-10-12T16:03:11Z
+Last updated: 2026-10-12T16:12:14Z
 
 ## Current state
 
@@ -15,14 +15,14 @@ Last updated: 2026-10-12T16:03:11Z
 
 ## CI evidence
 
-Latest successful Docker Verification run: [38273505822](https://github.com/frostknightfrosty-lgtm/aletheia/actions/runs/38273505822), on commit `67d19e662a8830b3c392c2226e0d78ddcdd438a8`.
+Latest successful Docker Verification run: [38274729412](https://github.com/frostknightfrosty-lgtm/aletheia/actions/runs/38274729412), on commit `09ed1acfeac0167feff854cf77ccccbd0b882340`.
 
 Raw artifact evidence:
 
 - `ci-parser-preflight.txt`: `PARSER PREFLIGHT: PASS — 33/33 adapters have parser coverage`
-- `ci-artifacts/pytest-full.log`: `128 passed, 1 warning in 13.31s`
+- `ci-artifacts/pytest-full.log`: `128 passed, 1 warning in 12.79s`
 - `ci-artifacts/docker-integration/capture.log`: `DOCKER CAPTURE: PASS — 34/34 cases captured`
-- `results.json`: SHA-256 `FAAF323A67FAB9FD1CEA1F1F252C98122FABBB7C62FDA08285F746980477FC2C`; 34 cases, zero nonzero return codes; 34 `.stdout` and 34 `.stderr` files.
+- `results.json`: SHA-256 `185C3643B8FE44774F2A743B8ACD8BE862632BEB2802EA6A4AA23AB18569AED5`; 34 cases, zero nonzero return codes; 34 `.stdout` and 34 `.stderr` files.
 - `phase5c-rdap`: image `aletheia/rdap:rfc9082`, offline `--health` command, return code 0; image ID was recorded in `image-ids-and-dockerfile-sha256.txt`.
 - Build and image-ID recording steps passed. The test suite had no skips in this run.
 
@@ -39,8 +39,9 @@ Run 38269210962 failed because `tests/test_phase3_manifest.py` expected 11 domai
 - `50d7e90109197c67e410f4ed9a976a913461fb85` — Florida framework and RDAP verification documentation
 - `e160c5e9fdee34ca0581b1cba3089cdbe2ae415c` — state update before final documentation CI
 - `67d19e662a8830b3c392c2226e0d78ddcdd438a8` — final Phase 5c state update; verified by run 38273505822
+- `09ed1acfeac0167feff854cf77ccccbd0b882340` — state refresh verified by run 38274729412
 
-Run 38273505822 verified the manifest metadata update (`e735248`), Florida documentation, and final state update on commit `67d19e6`. This evidence refresh is in its own state commit; the next state-only push run is checked and reported without starting an endless chain of state commits.
+Run 38274729412 verified the manifest metadata update (`e735248`), Florida documentation, and state refresh on commit `09ed1ac`. The upcoming state-only commit records that run; its push-triggered CI result is checked and reported without starting an endless chain of state commits.
 
 ## Florida project framework
 
