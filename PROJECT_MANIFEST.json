@@ -902,8 +902,8 @@
       "output_schema": "GovernmentRecordsUSFinding[]",
       "legal_notes": "Composite adapter querying 11 US government records sub-sources via their public APIs. Sub-sources requiring free API keys (OCC, SAM.gov, FOIA.gov) will be skipped if the corresponding environment variable is not set. Skip reasons are recorded in output. Tier 1 sub-sources (FINRA, FDIC, Federal Reserve, USAspending, LDA anonymous, NHTSA, BOP, NYC Open Data anonymous) run without keys. All sub-sources are public government data APIs; no unauthorized access, CAPTCHA bypass, or credential use against third-party accounts. Rate limits are per-sub-source; the adapter queries each at most once per run. Respect provider quotas and 429 responses.",
       "network": "required",
-      "last_audited": "2026-10-13T00:00:00Z",
-      "verification_status": "unknown",
+      "last_audited": "2026-10-14T00:00:00Z",
+      "verification_status": "verified-fixture",
       "fixture_provenance": "synthetic",
       "legal_tier": 1,
       "enabled_by_default": true,
@@ -958,7 +958,7 @@
           "requires_key": false
         }
       ],
-      "note": "Synthetic fixture parser tests pass; Docker verification is pending a corrected CI run. CI run 38323854024 on commit edcc433 did NOT verify this adapter and its evidence line was retracted: the capture script at that commit had been rewritten to run runner.py outside Docker, printed a PASS summary even though 18 of 35 phases returned nonzero, and emitted no DOCKER CAPTURE line at all. The adapter's parser tests were also vacuous at that commit (they never called parse); they now do. fixture file: tests/fixtures/government_records_us.json. No live API lookups have occurred."
+      "note": "Synthetic fixture parser tests and the Docker health smoke passed in CI run 38644757019 on commit e87777bf0ae873070c1aa9c49973a2aab0547a75 (https://github.com/frostknightfrosty-lgtm/aletheia/actions/runs/38644757019). Raw evidence copied from the artifact: PARSER PREFLIGHT: PASS \u2014 35/35 adapters have parser coverage; 180 passed, 1 warning in 17.00s; DOCKER CAPTURE: PASS \u2014 36/36 cases captured. results.json has 36 entries with 0 nonzero return codes and 36 stdout/stderr pairs; SHA-256 AF6DEC8F9F8E005F296A2254FB28C254F29F2AC5100C9E73CA1E2591687F970C. Case phase9-gov-records-us returned 0 with stdout ok under --network none. fixture file: tests/fixtures/government_records_us.json. No live API lookups have occurred."
     }
   ],
   "phase_1_scope": {
