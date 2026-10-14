@@ -1,13 +1,13 @@
 {
   "session_id": "2ba610de-14d2-4fab-925f-52a87db7e537",
-  "last_updated": "2026-10-14T22:01:32Z",
-  "last_commit": "8fb3107637e9a88b8a611dcc568c46cb18639953",
-  "last_ci_verified_commit": "7f06d100930fc7457774aca7112762a889e95b86",
-  "last_ci_run": "38303951248",
+  "last_updated": "2026-10-14T22:40:00Z",
+  "last_commit": "58d48ee",
+  "last_ci_verified_commit": "e87777bf0ae873070c1aa9c49973a2aab0547a75",
+  "last_ci_run": "38644757019",
   "last_ci_status": "green",
   "current_phase": "Phase 9 — batch adapter implementation",
-  "current_task": "Docker verification regression repaired; government_records_us verification retracted pending a corrected CI run",
-  "current_status": "in_progress",
+  "current_task": "Docker verification regression repaired and CI-verified; government_records_us restored to verified-fixture",
+  "current_status": "complete",
   "completed_phases": [
     "Original Phases 1–7 baseline (subject to audit gaps documented in HANDOFF.md)",
     "State refresh CI verified: run 38264456202 on commit 89c513e139b275b3554a0909251156d9d6bfa439 (parser preflight 32/32; 119 passed, 1 warning; Docker capture 33/33)",
@@ -23,7 +23,8 @@
     "Complete verification output recovered from transcript; source commit ee3d2a73d8b8116e4f35807362b2b4af393edc40 passed Docker CI run 38290727897",
     "Batching plan written for 111 accepted candidates (21 composite adapters and 9 one-offs); commit 6653014244e60aa12354fb31a0074cec6f414e41 passed Docker CI run 38292770527.",
     "Phase 9 ip_intelligence batch adapter (15 sub-sources) implemented and CI-verified as verified-fixture: run 38303951248 on commit 7f06d100930fc7457774aca7112762a889e95b86 (parser 34/34; 152 passed, 1 warning in 12.87s; capture 35/35 cases, results.json 35 entries with 0 nonzero return codes).",
-    "RED FLAG INVESTIGATION (2026-10-14): the government_records_us run 38323854024 was found to be materially misreported. Its claimed 'DOCKER CAPTURE: PASS — 35/35 phases captured' evidence line does not exist in the run log or artifacts; the real capture.log said '=== Summary: 35 phases captured ===' with 18 of 35 phases returning nonzero, and the rewritten capture script never invoked docker and returned 0 unconditionally. Commit 8fb3107 restored docker-run capture (36 cases), restored the 36 container smoke tests deleted in edcc433, made the government_records_us parse tests actually call parse(), removed parser_test_exempt, retracted the adapter to verification_status 'unknown', and deleted the scratch script that hard-coded the false evidence line."
+    "RED FLAG INVESTIGATION (2026-10-14): the government_records_us run 38323854024 was found to be materially misreported. Its claimed 'DOCKER CAPTURE: PASS — 35/35 phases captured' evidence line does not exist in the run log or artifacts; the real capture.log said '=== Summary: 35 phases captured ===' with 18 of 35 phases returning nonzero, and the rewritten capture script never invoked docker and returned 0 unconditionally. Commit 8fb3107 restored docker-run capture (36 cases), restored the 36 container smoke tests deleted in edcc433, made the government_records_us parse tests actually call parse(), removed parser_test_exempt, retracted the adapter to verification_status 'unknown', and deleted the scratch script that hard-coded the false evidence line.",
+    "CORRECTED VERIFICATION (2026-10-14): commit e87777b passed Docker Verification run 38644757019. Artifacts copied from the download: PARSER PREFLIGHT: PASS — 35/35 adapters have parser coverage; 180 passed, 1 warning in 17.00s; DOCKER CAPTURE: PASS — 36/36 cases captured. results.json: 36 entries, 0 nonzero return codes, 36 stdout/stderr pairs, SHA-256 AF6DEC8F9F8E005F296A2254FB28C254F29F2AC5100C9E73CA1E2591687F970C. government_records_us re-marked verified-fixture from this run in commit 58d48ee."
   ],
   "pending_phases": [
     "Phase 8 - audit chain, storage backends, and egress proxy (await user direction)",
@@ -35,9 +36,10 @@
   "open_gates": [
     "Gate 2 - user-owned target required before any live investigation",
     "Gate 3 - verify required API keys and costs before a phase depends on them",
-    "Gate 5 - no adapter may be marked verified-fixture from a typed or predicted evidence line; the line must be copied from the downloaded CI artifact. This gate was opened because run 38323854024 violated it."
+    "Gate 5 - no adapter may be marked verified-fixture from a typed or predicted evidence line; the line must be copied from the downloaded CI artifact. This gate was opened because run 38323854024 violated it.",
+    "Gate 6 - RESOLVED 2026-10-14: government_records_us re-verified from run 38644757019 with copied artifact lines."
   ],
-  "next_action": "Push commit 8fb3107, confirm Docker CI is genuinely green (parser 35/35; ~180 passed; capture 36/36 cases with results.json showing 0 nonzero), then re-mark government_records_us verified-fixture from the artifact and begin corporate_registry.",
+  "next_action": "Implement corporate_registry (6 sub-sources) per docs/BATCHING_PLAN.md. Research is done; see notes_for_next_session for the verified endpoint facts.",
   "files_in_flight": [],
-  "notes_for_next_session": "government_records_us is NO LONGER verified-fixture. Its run 38323854024 claimed 'DOCKER CAPTURE: PASS — 35/35 phases captured'; that string appears zero times in the CI job log (ci-log, 1.1 MB) and zero times in capture.log. The scratch script update_manifest_verified.py hard-coded it. The rewrite in edcc433 replaced 35 real 'docker run' smoke tests in tests/test_docker_integration.py with 4 non-Docker tests that made live network calls, which is why pytest fell 152 -> 146 and runtime fell 12.87s -> 2.61s: 152 - 35 + 4 + 25 new gov tests = 146 exactly. Restored state: 36 docker cases in ci/capture_docker_integration.py and 36 container smoke tests. Local run: 144 passed, 36 skipped (no Docker CLI on this workstation), 180 collected. Locally pytest needed 'rapidfuzz' and 'reportlab' installed, which are transitive deps present via 'pip install -e .[dev]' in CI. Next: corporate_registry per docs/BATCHING_PLAN.md."
+  "notes_for_next_session": "corporate_registry endpoints verified against official docs on 2026-10-14. Companies House (UK): GET https://api.company-information.service.gov.uk/search/companies?q={term} , HTTP Basic with the API key as username and a blank password, free key, 600 requests per 5 minutes (https://developer.company-information.service.gov.uk/developer-guidelines). NZBN (NZ): GET https://api.business.govt.nz/gateway/nzbn/v5/entities?search-term={term} , header Ocp-Apim-Subscription-Key, free, rate limit NOT documented, and the exact query-string token could not be confirmed from the JS-rendered OpenAPI definition (https://portal.api.business.govt.nz/api/nzbn). KVK (NL): name search GET https://api.kvk.nl/api/v2/zoeken?naam={name} with header apikey is PAID and excludes private use; the only free route is the number-keyed Open Dataset GET https://opendata.kvk.nl/api/v1/hvds/basisbedrijfsgegevens/kvknummer/{kvknummer} , no auth, 1 request per minute per IP (https://developers.kvk.nl/documentation/open-dataset-basis-bedrijfsgegevens-api). INPI RNE (France): NO documented free search API - bulk SFTP and dataset APIs only (https://data.inpi.fr/content/editorial/Acces_API_Entreprises); the official free no-key alternative is GET https://recherche-entreprises.api.gouv.fr/search?q={term} , 7 requests per second per IP, documented at https://recherche-entreprises.api.gouv.fr/docs . ASIC (Australia): NO public search API, web-only via ASIC Connect, DSP applications closed until 2027, XML not JSON (https://www.asic.gov.au/online-services/information-for-intermediaries/application-programming-interfaces-apis). CIPC (South Africa): NO API at all, web-only ENTERPRISE SEARCH (https://eservices.cipc.co.za/). Only Companies House and NZBN are genuinely free, key-based, JSON, name-searchable. Do not invent endpoints for INPI, ASIC or CIPC; mark them unsupported with the documented reason. Gate 5 still applies to every evidence line: copy from the downloaded artifact, never type it."
 }
