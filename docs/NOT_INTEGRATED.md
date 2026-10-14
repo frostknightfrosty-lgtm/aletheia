@@ -61,6 +61,66 @@ The following source facts were documented when these proposals were excluded un
 
 The Phase 5c proposals **Gravatar** and **RDAP** are narrowly scoped integrations: Gravatar uses the official profile API with the email SHA-256 hash and a curated public-field allowlist; RDAP uses IANA bootstrap data for one exact domain/IP lookup. RDAP is `verified-fixture` based on Docker Verification run 38270478612 (synthetic fixture, parser coverage, image build, and offline health smoke only); no live RDAP lookup occurred. See `PROJECT_MANIFEST.json` and `docs/PHASE_5C_REGISTRY.md` for status and scope.
 
+## Phase 9 batch-plan source re-verification (2026-10-15)
+
+### FollowTheMoney / OpenSecrets — not integrated, adapter NOT built
+
+`docs/BATCHING_PLAN.md` listed a `corporate_financial_public_records` composite containing a
+"FollowTheMoney API" sub-source, described as "Tier 3 / Free API Key". Re-verification against the
+vendors' own documentation on 2026-10-15 found that premise is outdated on both readings, so
+**no adapter, runner, image, fixture, test, or manifest entry was created.**
+
+**1. OpenSecrets' public API was discontinued.** OpenSecrets' own API page states, verbatim:
+*"As of April 15, 2025, our API offerings have been discontinued."* The only remaining route it
+offers is a commercial arrangement (*"Reach out to commercial@opensecrets.org"*), which is
+paid-only and therefore barred by standing rule 4 ("Do not add paid-only adapters") and Gate 3.
+Source: https://www.opensecrets.org/open-data/api
+
+**2. FollowTheMoney's name-query request contract is not published.** FollowTheMoney (National
+Institute on Money in State Politics) merged into OpenSecrets; its site is explicitly
+unmaintained — *"This website displays state campaign finance data that is current through the
+2024 election year. While the data is current, the site isn't maintained as we integrate with
+OpenSecrets and you may find bugs."* What its official documentation does and does not contain:
+
+- **Verified:** base URL `https://api.followthemoney.org/` (live; returns `invalid mode` with no
+  `mode`); `APIKey` is the auth query parameter, obtained free with a myFollowTheMoney account
+  (*"The Institute's APIs are immediately available for use after you create a free myFollowTheMoney
+  account"*, *"The Institute grants you free access"*); `mode=json` is valid — an unauthenticated
+  probe returns exactly `{"error":"Invalid API Key"}`; the JSON response schema is
+  `{"metaInfo": {...}, "records": [...]}`.
+- **The only concrete documented request example** is the Entity Details API, keyed by a numeric
+  entity ID rather than a name:
+  `http://api.followthemoney.org/entity.php?eid=#######&APIKey=XXXXXXXX&mode=xml`
+- **Not published:** the request-parameter set for name-based ("Ask Anything") queries. The
+  official 80-page API PDF (`https://www.followthemoney.org/assets/FollowTheMoney-API.pdf`,
+  extracted and searched in full) contains **zero** occurrences of `api.followthemoney.org`,
+  `APIKey`, `mode=`, or `entity.php` — it documents the *response* tags only. The official
+  documentation instructs operators to build the query in the website UI and copy the generated
+  export link.
+- **Not published:** any rate limit. No numeric quota appears on the API page, the Documentation
+  page, the Support/FAQ page, or the PDF.
+
+Writing a name-search runner would therefore require inventing request parameters, which the
+no-fabrication rule forbids. The sub-source is **not implemented**. This is a documentation and
+availability finding, not a Tier 5 or licensing objection.
+
+Sources: https://followthemoney.org/our-data/apis/ ·
+https://followthemoney.org/our-data/apis/documentation/ ·
+https://followthemoney.org/our-data/apis/support/ ·
+https://www.followthemoney.org/assets/FollowTheMoney-API.pdf ·
+https://www.opensecrets.org/open-data/api
+
+Verification commands and raw output:
+
+```
+$ curl -s "https://api.followthemoney.org/?mode=json"
+{"error":"Invalid API Key"}
+$ curl -s "https://api.followthemoney.org/"      # no mode parameter
+invalid mode
+$ python -c "from pypdf import PdfReader; t=''.join(p.extract_text() or '' for p in PdfReader('FollowTheMoney-API.pdf').pages); print(len(t), [t.count(s) for s in ['api.followthemoney.org','APIKey','mode=','entity.php']])"
+95679 [0, 0, 0, 0]
+```
+
 ## Future re-addition
 
 The three removed integrations are absent from the current default registry. Any proposal to re-add one requires a new review of current pricing, terms, secrets handling, license, and default behavior. This note does not authorize an implementation.

@@ -12,6 +12,22 @@ Purpose: implement each composite adapter as one Docker container that queries r
 - Each composite is planned to have one manifest entry (`legal_tier`, `enabled_by_default: true`, `batch_grouping`), one Docker image, one fixture containing representative output from every sub-source, and one parser that dispatches by source identifier. Tests and capture cases must cover every source path.
 - The social profile composite must preserve the project’s read-only output constraint for CrossLinked: `name`, `username`, `email`, `company`, and `source_url` only.
 
+## Implementation status (2026-10-15) — plan checked against the built adapters
+
+This plan is a transcript of recovered verification notes. Its own planning-status section warns that
+it "does not independently re-verify upstream APIs, terms, availability, or quotas". Two rows have now
+been disproved on re-verification, and four composites have absorbed rows or sub-sources assigned
+elsewhere. Before implementing any remaining composite, diff its sub-source list against
+`PROJECT_MANIFEST.json` and build only what is not already live.
+
+| Row | Status |
+| --- | --- |
+| `ip_intelligence_geo` + `_reputation` + `_threat_exposure` | Merged into one `ip_intelligence` adapter (15 sub-sources). All three rows are complete. |
+| `government_records_us` | Complete as an 11-sub-source adapter. It implements its own 4 sub-sources **plus 7 the plan assigned to other rows**: `finra-brokercheck`, `fed-enforcement`, `occ-enforcement` (this plan's `sanctions_enforcement_watchlists`) and `fdic-bankfind`, `lda`, `usaspending`, `sam-gov` (this plan's `corporate_financial_public_records`). |
+| `corporate_registry` | Complete (8 sub-source entries). KVK is split into a paid name search and a free number-keyed Open Dataset, and the official French DINUM `recherche-entreprises` API stands in where INPI publishes no free search API. |
+| `sanctions_enforcement_watchlists` | Complete for the 3 sub-sources its row did not already have live: `uk-sanctions-list`, `swiss-seco`, `eu-consolidated-sanctions`. The row's other 3 sub-sources are in `government_records_us`; they are not duplicated. |
+| `corporate_financial_public_records` | **Not built — source unavailable.** 4 of its 5 sub-sources are already in `government_records_us`. The 5th, FollowTheMoney, publishes no request-parameter contract for name queries, and its parent OpenSecrets discontinued public API access on 2025-04-15 and now offers only a commercial route. See `docs/NOT_INTEGRATED.md`. |
+
 ## Composite adapters
 
 | Batch adapter | Sub-sources (from verification) | Input types | Output schema | Legal tier | Est. sessions |
