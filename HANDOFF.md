@@ -57,22 +57,34 @@ The other two lines from that run are genuine and were verified against the arti
 | Capture stayed at 35 | The capture script was rewritten to iterate a 35-entry Python list of phases and print `len(phases)`, not successes. It dropped `phase7-core-import` and added gov-records-us, so 35 was a coincidence, not a failure to add a case. |
 | Runtime 12.87s → 2.61s | ~10s of the previous run was 35 container starts, all of them deleted. Not a sign of fewer real tests passing — the whole container-smoke layer was gone. |
 
-## Current local state (not CI-verified)
+## Current state — CI verified
 
-- `PARSER PREFLIGHT: PASS — 35/35 adapters have parser coverage` (real marker, no exemption).
-- 180 tests collected, 144 passed, 36 skipped. The 36 skips are `tests/test_docker_integration.py`
-  skipping because this workstation has no Docker CLI; CI runs them against real containers.
-- Local pytest needs `rapidfuzz` and `reportlab` installed; CI gets them from `pip install -e '.[dev]'`.
+Docker Verification run `38644757019` on commit `e87777bf0ae873070c1aa9c49973a2aab0547a75`
+passed every step. The following lines were **copied** from the downloaded artifact
+(`ci-artifacts-38644757019/aletheia-docker-verification-38644757019/`), not typed:
+
+- `ci-parser-preflight.txt`: `PARSER PREFLIGHT: PASS — 35/35 adapters have parser coverage`
+- `ci-artifacts/pytest-full.log`: `180 passed, 1 warning in 17.00s`
+- `ci-artifacts/docker-integration/capture.log`: `DOCKER CAPTURE: PASS — 36/36 cases captured`
+- `ci-artifacts/docker-integration/results.json`: 36 entries, 0 nonzero return codes, 36 `.stdout`
+  and 36 `.stderr` files; SHA-256 `AF6DEC8F9F8E005F296A2254FB28C254F29F2AC5100C9E73CA1E2591687F970C`
+- `phase9-gov-records-us.stdout` = `ok`, exit 0, under `--network none`; `phase7-core-import` is
+  present again after the rewrite had dropped it.
+
+Runtime returned to 17.00s from 2.61s, which is the signature of the 36 container starts being
+restored. On this workstation the suite is 180 collected / 144 passed / 36 skipped, the skips
+being the container smokes because `docker` is not on PATH locally. Local pytest needs
+`rapidfuzz` and `reportlab` installed; CI gets them from `pip install -e '.[dev]'`.
 
 ## Verified-fixture inventory
 
-35 adapters are registered. `ip_intelligence` was verified by run `38303951248` on commit
+36 adapters are registered. `ip_intelligence` was verified by run `38303951248` on commit
 `7f06d100930fc7457774aca7112762a889e95b86`, whose artifacts were re-checked during this session:
 `ci-parser-preflight.txt` = 34/34, `pytest-full.log` = 152 passed in 12.87s, `capture.log` =
 `DOCKER CAPTURE: PASS — 35/35 cases captured`, `results.json` = 35 entries with 0 nonzero return
-codes and 70 stdout/stderr files. That run is genuine. `government_records_us` is the only
-adapter whose verification was retracted; every adapter before it was verified by runs whose
-artifacts have not been re-checked in this session.
+codes and 70 stdout/stderr files. That run is genuine. `government_records_us` was retracted and
+then re-verified from run `38644757019` (commit `58d48ee`). Adapters verified before
+`ip_intelligence` were verified by runs whose artifacts have not been re-checked in this session.
 
 ## Open gates
 
@@ -83,10 +95,16 @@ artifacts have not been re-checked in this session.
 
 ## Next action
 
-1. Confirm the corrected Docker CI run is genuinely green: parser 35/35; test count ≈180; a real
-   `DOCKER CAPTURE: ... — 36/36 cases captured` line with `results.json` showing 0 nonzero.
-2. Re-mark `government_records_us` as `verified-fixture` using the copied lines, in its own commit.
-3. Implement `corporate_registry` (6 sub-sources) per `docs/BATCHING_PLAN.md`.
+1. `corporate_registry` (6 sub-sources) per `docs/BATCHING_PLAN.md` is **built and pending CI**.
+   Endpoint facts verified against official documentation on 2026-10-14 are recorded in
+   `RESUME_STATE.json` under `notes_for_next_session`. Only Companies House and NZBN are free,
+   key-based, JSON, name-searchable APIs; KVK name search is paid and excludes private use (only
+   its number-keyed Open Dataset is free); INPI RNE, ASIC and CIPC have no documented free search
+   API and are implemented as auditable skips with their documented reasons. Do not invent
+   endpoints for them.
+2. Push the corporate_registry commit, download the CI artifact, and paste the three evidence
+   lines from it. Mark the adapter `verified-fixture` only from those copied lines (Gate 5).
+3. Continue down `docs/BATCHING_PLAN.md`.
 
 Docker is unavailable on this workstation. Image and container behaviour can only be verified in
 GitHub Actions.
