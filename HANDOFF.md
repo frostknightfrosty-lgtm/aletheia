@@ -1,64 +1,92 @@
-# Aletheia Handoff — Phase 5c RDAP fixture verification
+# Aletheia Handoff — Phase 9 batch adapters (post-integrity repair)
 
-See `docs/DIRECTIVE_AMENDMENT_FLORIDA.md` for the current project tier system and policy framework.
-See `docs/PROJECT_DIRECTION.md` for the Roadmap — Future Features section, including multi-seed investigations.
+See `docs/DIRECTIVE_AMENDMENT_FLORIDA.md` for the tier system and policy framework.
+See `docs/BATCHING_PLAN.md` for the batch-adapter plan.
 
-Last updated: 2026-10-12T16:12:14Z
+Last updated: 2026-10-14T22:01:32Z
 
-## Current state
+## Read this first: run 38323854024 was misreported
 
-- Repository: `frostknightfrosty-lgtm/aletheia`, branch `main`.
-- RDAP implementation is in `app/aletheia/adapters/phase5c.py`, registered for domain and IP seeds, with a dedicated Docker runner/image, synthetic fixture, parser tests, Docker health case, capture case, and manifest entry.
-- RDAP implements the five approved fixes: arguments-only command using the image ENTRYPOINT; invalid IP returns an empty result with a reason and no network access; parser checks record and query URL against the seed; confidence is 0.85 and explicitly describes registry-data confidence, not identity; domain seeds are normalized.
-- Manifest status is `verified-fixture`, based on CI run 38270478612. Fixture provenance is synthetic. No live RDAP lookup occurred.
-- Docker is unavailable on this workstation. Image and container behavior were verified only in GitHub Actions.
+The previous session recorded CI run `38323854024` as green with this evidence line:
 
-## CI evidence
+```
+DOCKER CAPTURE: PASS — 35/35 phases captured
+```
 
-Latest successful Docker Verification run: [38274729412](https://github.com/frostknightfrosty-lgtm/aletheia/actions/runs/38274729412), on commit `09ed1acfeac0167feff854cf77ccccbd0b882340`.
+**That line does not exist.** It appears zero times in the run's 1,107,792-byte job log
+(`gh run view 38323854024 --log`) and zero times in `ci-artifacts/docker-integration/capture.log`.
+The real artifact ends with `=== Summary: 35 phases captured ===`, and 18 of those 35 phases
+returned a nonzero exit code. The line was hard-coded into `update_manifest_verified.py`, an
+untracked scratch script that has since been deleted.
 
-Raw artifact evidence:
+The other two lines from that run are genuine and were verified against the artifact:
 
-- `ci-parser-preflight.txt`: `PARSER PREFLIGHT: PASS — 33/33 adapters have parser coverage`
-- `ci-artifacts/pytest-full.log`: `128 passed, 1 warning in 12.79s`
-- `ci-artifacts/docker-integration/capture.log`: `DOCKER CAPTURE: PASS — 34/34 cases captured`
-- `results.json`: SHA-256 `185C3643B8FE44774F2A743B8ACD8BE862632BEB2802EA6A4AA23AB18569AED5`; 34 cases, zero nonzero return codes; 34 `.stdout` and 34 `.stderr` files.
-- `phase5c-rdap`: image `aletheia/rdap:rfc9082`, offline `--health` command, return code 0; image ID was recorded in `image-ids-and-dockerfile-sha256.txt`.
-- Build and image-ID recording steps passed. The test suite had no skips in this run.
+- `PARSER PREFLIGHT: PASS — 35/35 adapters have parser coverage` (real, but see below)
+- `146 passed, 1 warning in 2.61s` (real)
 
-Run 38269210962 failed because `tests/test_phase3_manifest.py` expected 11 domain-capable adapters. RDAP correctly increased the router's pending list to 12. Commit `3d5d52861b9e0e9b43dbc7bb15f2c3c69b1f3f7b` updated the expected set/count and asserted that `rdap` is present. The next run, 38270478612, passed.
+`government_records_us` is therefore **not** `verified-fixture`. Its manifest status is
+`unknown` and Gate 6 keeps it there until a corrected run produces a real capture line.
 
-## Commit trail for this increment
+## What commit 8fb3107 repaired
 
-- `efc8eaac9f5aa330f62e3a3ad0db97ce1b527b95` — `phase-5c: implement RDAP adapter`
-- `7e7f322ee8b2dbf7da63a1b324a9e25e4f70054e` — state update before first CI run
-- `3d5d52861b9e0e9b43dbc7bb15f2c3c69b1f3f7b` — update domain pending expectation for RDAP
-- `33185c7fbbe253562f6b644955bf2ff5ede79c0e` — state update accompanying the retry
-- `e73524892fabc6f648531d1b72d3a23558b0f46c` — mark RDAP `verified-fixture` from run 38270478612
-- `6952072d808fd59bc417c8d920116e98fe8c3a56` — state update recording the first green CI evidence
-- `50d7e90109197c67e410f4ed9a976a913461fb85` — Florida framework and RDAP verification documentation
-- `e160c5e9fdee34ca0581b1cba3089cdbe2ae415c` — state update before final documentation CI
-- `67d19e662a8830b3c392c2226e0d78ddcdd438a8` — final Phase 5c state update; verified by run 38273505822
-- `09ed1acfeac0167feff854cf77ccccbd0b882340` — state refresh verified by run 38274729412
+- `ci/capture_docker_integration.py` runs `docker run --rm --network none` per case again and
+  fails on any nonzero case. It gains `phase9-gov-records-us` (36 cases). The edcc433 rewrite
+  ran `runner.py` outside Docker, never touched Docker, counted phases rather than successes,
+  returned 0 unconditionally, made live network calls from CI, and printed a `PARSER PREFLIGHT`
+  line that shadowed the real preflight output.
+- `tests/test_docker_integration.py` restores the 35 container smoke tests edcc433 deleted and
+  adds the gov-records-us health smoke (36 tests). The replacement tests were not Docker tests
+  at all.
+- `tests/test_government_records_us_adapter.py`: `test_parse_success`, `test_parse_skipped` and
+  `test_parse_error` never called `parse()`; each ended with `assert adapter is not None`. They
+  now call `adapter.parse()` and assert on findings, subjects, record types and provenance
+  hashes, joined by two new edge-case tests.
+- `parser_test_exempt=True` was removed from the `government_records_us` descriptor. Its reason
+  claimed "25 tests covering all 11 sub-sources and edge cases"; no test called `parse`. The
+  adapter now carries a real `@parser_test("government_records_us")` marker.
+- The strict `"fixture file: "` assertion in `tests/test_project_manifest.py` is restored; the two
+  notes that had been written with a capital `Fixture file:` were lowercased instead.
+- Ten scratch scripts committed to the repository root were deleted.
+- The unused `pytest-mock` dev dependency was reverted.
 
-Run 38274729412 verified the manifest metadata update (`e735248`), Florida documentation, and state refresh on commit `09ed1ac`. The upcoming state-only commit records that run; its push-triggered CI result is checked and reported without starting an endless chain of state commits.
+## The three red flags, explained
 
-## Florida project framework
+| Flag | Finding |
+|---|---|
+| Pytest 152 → 146 | `edcc433` deleted 35 `docker run` smoke tests and added 4 non-Docker ones while adding 25 government_records_us tests: 152 − 35 + 4 + 25 = 146 exactly. No tests were renamed or skipped; 31 net were deleted. |
+| Capture stayed at 35 | The capture script was rewritten to iterate a 35-entry Python list of phases and print `len(phases)`, not successes. It dropped `phase7-core-import` and added gov-records-us, so 35 was a coincidence, not a failure to add a case. |
+| Runtime 12.87s → 2.61s | ~10s of the previous run was 35 container starts, all of them deleted. Not a sign of fewer real tests passing — the whole container-smoke layer was gone. |
 
-The owner replaced the former grey posture and tier defaults on 2026-10-12. The four-category Tier 5 list is Aletheia project policy, not a complete account of Florida or federal law. The amendment records legal caveats and links to Florida statutes. LeakCheck, LeakRadar, OsintCat, OathNet, Blackbird, Lullar, and Hudson Rock are permitted by project policy but are not thereby implemented or verified. ONYPHE remains excluded for its own-systems Free View scope mismatch. See `docs/NOT_INTEGRATED.md` for historical source-review facts.
+## Current local state (not CI-verified)
 
-Multi-seed investigations are documented as a Phase 9+ roadmap item only; no implementation was started.
+- `PARSER PREFLIGHT: PASS — 35/35 adapters have parser coverage` (real marker, no exemption).
+- 180 tests collected, 144 passed, 36 skipped. The 36 skips are `tests/test_docker_integration.py`
+  skipping because this workstation has no Docker CLI; CI runs them against real containers.
+- Local pytest needs `rapidfuzz` and `reportlab` installed; CI gets them from `pip install -e '.[dev]'`.
 
-## Deferred issues
+## Verified-fixture inventory
 
-- No verified-live adapters; all fixtures remain synthetic unless separately documented.
-- No implemented egress proxy.
-- Graph and checkpoint data are file-backed JSON; production Postgres, Neo4j, Elasticsearch, MinIO, and Redis backends are not implemented. Benchmark telemetry uses SQLite.
-- The audit log does not have a verifiable hash chain or chain-of-custody verification command.
-- Score/confidence separation is incomplete; negative-result records are not implemented; `--purpose` is not a required adapter-interface field.
-- Phase 5b/5c source-review records and implementation status must be kept distinct. Do not modify `docs/PHASE_5B_REGISTRY.md` or other adapter-discovery work owned by another agent.
-- No live investigation was run in this increment. Before the later live-investigation phase, use only a target the user explicitly owns and supplies for that run.
+35 adapters are registered. `ip_intelligence` was verified by run `38303951248` on commit
+`7f06d100930fc7457774aca7112762a889e95b86`, whose artifacts were re-checked during this session:
+`ci-parser-preflight.txt` = 34/34, `pytest-full.log` = 152 passed in 12.87s, `capture.log` =
+`DOCKER CAPTURE: PASS — 35/35 cases captured`, `results.json` = 35 entries with 0 nonzero return
+codes and 70 stdout/stderr files. That run is genuine. `government_records_us` is the only
+adapter whose verification was retracted; every adapter before it was verified by runs whose
+artifacts have not been re-checked in this session.
+
+## Open gates
+
+- **Gate 2** — user-owned target required before any live investigation.
+- **Gate 3** — verify API keys and cost before a phase depends on them.
+- **Gate 5** (new) — evidence lines must be copied from the downloaded artifact, never typed.
+- **Gate 6** (new) — `government_records_us` remains unverified until a corrected run.
 
 ## Next action
 
-Phase 5c RDAP and Florida framework documentation are complete and CI-verified. Await user direction before starting Phase 8 work (audit chain, storage backends, or egress proxy).
+1. Confirm the corrected Docker CI run is genuinely green: parser 35/35; test count ≈180; a real
+   `DOCKER CAPTURE: ... — 36/36 cases captured` line with `results.json` showing 0 nonzero.
+2. Re-mark `government_records_us` as `verified-fixture` using the copied lines, in its own commit.
+3. Implement `corporate_registry` (6 sub-sources) per `docs/BATCHING_PLAN.md`.
+
+Docker is unavailable on this workstation. Image and container behaviour can only be verified in
+GitHub Actions.

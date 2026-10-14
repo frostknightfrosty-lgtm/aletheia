@@ -1,10 +1,13 @@
 # Project Gates
 
-Last reviewed: 2026-10-12
+Last reviewed: 2026-10-14
 
 ## Open gates
 
-None currently blocking Phase 5c adapter implementation. Before any XposedOrNot live lookup, obtain an email address the user owns or is explicitly authorized to investigate.
+- **Gate 5 — evidence must be copied, never typed:** No adapter may be marked `verified-fixture` from a predicted, remembered, or hand-written evidence line. The three lines must be copied from the downloaded CI artifact for the exact run being cited. Opened 2026-10-14 after run `38323854024` was recorded with `DOCKER CAPTURE: PASS — 35/35 phases captured`, a line that does not exist anywhere in that run's log or artifacts and was hard-coded in `update_manifest_verified.py`.
+- **Gate 6 — government_records_us is unverified:** Its `verification_status` is `unknown` following the Gate 5 retraction. Do not describe it as verified until a corrected Docker run produces a real `DOCKER CAPTURE` line with `results.json` showing 0 nonzero return codes.
+
+None of the remaining gates block local adapter implementation. Before any XposedOrNot live lookup, obtain an email address the user owns or is explicitly authorized to investigate.
 
 ## Resolved gates
 
