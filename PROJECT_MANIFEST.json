@@ -974,7 +974,7 @@
       "legal_notes": "Composite adapter querying 8 corporate registry sub-sources: 5 implemented (Companies House, NZBN, KVK Open Dataset, KVK Zoeken, recherche-entreprises) and 3 unsupported (INPI RNE, ASIC, CIPC). Companies House and NZBN require free API keys and are skipped, with the skip reason recorded in output, when the corresponding environment variable is not set. KVK Zoeken is a paid subscription that excludes private use; it is skipped unless KVK_API_KEY is set and is never a default enabled dependency. The free KVK Open Dataset is a number-keyed lookup only. INPI RNE, ASIC and CIPC publish no free public search API and are always reported as skipped with their documented reason. No unauthorized access, CAPTCHA bypass, or credential use against third-party accounts. Rate limits are per-sub-source and the adapter queries each at most once per run.",
       "network": "required",
       "last_audited": "2026-10-14T00:00:00Z",
-      "verification_status": "unknown",
+      "verification_status": "verified-fixture",
       "fixture_provenance": "synthetic",
       "legal_tier": 3,
       "enabled_by_default": true,
@@ -1018,7 +1018,7 @@
           "requires_key": false
         }
       ],
-      "note": "Adapter and synthetic fixture parser tests only. Docker/CI verification is pending; no run ID or evidence line is recorded here. KVK Zoeken is a paid subscription excluding private use and is skipped unless KVK_API_KEY is set; INPI RNE, ASIC and CIPC are unsupported and always reported as skipped with their documented reason. fixture file: tests/fixtures/corporate_registry.json. No live API lookups have occurred."
+      "note": "Synthetic fixture parser tests and the Docker health smoke passed in CI run 38647832837 on commit e74e8b4b1b15ef71475a36caeeda9244842ac936 (https://github.com/frostknightfrosty-lgtm/aletheia/actions/runs/38647832837). Raw evidence copied from the artifact: PARSER PREFLIGHT: PASS \u2014 36/36 adapters have parser coverage; 210 passed, 1 warning in 23.25s; DOCKER CAPTURE: PASS \u2014 37/37 cases captured. results.json has 37 entries with 0 nonzero return codes and 37 stdout/stderr pairs; SHA-256 4AF2E893CBFEB196180CC2380A88E51AF318FAAEE96EC4D095C5A7A7B9A0BDFD. Case phase9-corp-registry returned 0 with stdout ok under --network none. KVK Zoeken is a paid subscription excluding private use and is skipped unless KVK_API_KEY is set; INPI RNE, ASIC and CIPC are unsupported and always reported as skipped with their documented reason. fixture file: tests/fixtures/corporate_registry.json. No live API lookups have occurred."
     }
   ],
   "phase_1_scope": {
