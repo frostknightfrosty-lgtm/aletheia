@@ -39,3 +39,4 @@ docker build -f docker/rdap/Dockerfile -t aletheia/rdap:rfc9082 docker/rdap
 docker build -f docker/ip_intelligence/Dockerfile -t aletheia/ip-intelligence:v1 docker/ip_intelligence
 docker build -f docker/government_records_us/Dockerfile -t aletheia/gov-records-us:v1 docker/government_records_us
 docker build -f docker/corporate_registry/Dockerfile -t aletheia/corp-registry:v1 docker/corporate_registry
+docker build -f docker/sanctions_enforcement_watchlists/Dockerfile -t aletheia/sanctions-watchlists:v1 docker/sanctions_enforcement_watchlists

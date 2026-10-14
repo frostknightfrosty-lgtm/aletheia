@@ -20,6 +20,7 @@ VERIFICATION_STATUSES = frozenset(
         "verified-live",
         "verified-fixture",
         "verified-source-read",
+        "unverified-fixture",
         "asserted",
         "unknown",
         "blocked",

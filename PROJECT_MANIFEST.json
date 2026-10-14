@@ -1019,6 +1019,44 @@
         }
       ],
       "note": "Synthetic fixture parser tests and the Docker health smoke passed in CI run 38647832837 on commit e74e8b4b1b15ef71475a36caeeda9244842ac936 (https://github.com/frostknightfrosty-lgtm/aletheia/actions/runs/38647832837). Raw evidence copied from the artifact: PARSER PREFLIGHT: PASS \u2014 36/36 adapters have parser coverage; 210 passed, 1 warning in 23.25s; DOCKER CAPTURE: PASS \u2014 37/37 cases captured. results.json has 37 entries with 0 nonzero return codes and 37 stdout/stderr pairs; SHA-256 4AF2E893CBFEB196180CC2380A88E51AF318FAAEE96EC4D095C5A7A7B9A0BDFD. Case phase9-corp-registry returned 0 with stdout ok under --network none. KVK Zoeken is a paid subscription excluding private use and is skipped unless KVK_API_KEY is set; INPI RNE, ASIC and CIPC are unsupported and always reported as skipped with their documented reason. fixture file: tests/fixtures/corporate_registry.json. No live API lookups have occurred."
+    },
+    {
+      "name": "sanctions_enforcement_watchlists",
+      "upstream": "https://github.com/frostknightfrosty-lgtm/aletheia/tree/main/docker/sanctions_enforcement_watchlists",
+      "license": "Composite adapter; sub-sources are official government sanctions list publications (UK FCDO, Swiss SECO, EU Financial Sanctions Files)",
+      "version_pin": "1.0",
+      "invocation": "HTTPS bulk list downloads via dedicated Docker runner (aletheia/sanctions-watchlists:v1)",
+      "input_types": [
+        "name",
+        "company_name",
+        "person_name"
+      ],
+      "output_schema": "SanctionsEnforcementWatchlistsFinding[]",
+      "legal_notes": "Composite adapter covering only the three sanctions-list sub-sources of the sanctions_enforcement_watchlists batch: uk-sanctions-list (UK Sanctions List, FCDO), swiss-seco (Swiss sanctions list, SECO/SESAM) and eu-consolidated-sanctions (EU consolidated financial sanctions list, Financial Sanctions Files). The batch plan assigns six sub-sources to this batch; finra-brokercheck, fed-enforcement and occ-enforcement are already implemented in government_records_us.py and are deliberately not duplicated here. All three sub-sources publish a bulk XML artefact; no JSON search API is claimed for any of them, and the runner downloads the published list once per run and filters it locally by name. A hit is a screening match on normalized name text, not a confirmed identity match, and must be reviewed against the published record. No API key, account or credential is used; only the fixed public download token published in the European Commission's own open-data dataset record is sent to the EU endpoint. No numeric rate limit is published for any of the three sub-sources.",
+      "network": "required",
+      "last_audited": "2026-10-15T00:00:00Z",
+      "verification_status": "unverified-fixture",
+      "fixture_provenance": "synthetic",
+      "legal_tier": 2,
+      "enabled_by_default": true,
+      "disabled_reason": null,
+      "batch_grouping": "sanctions_enforcement_watchlists",
+      "requires_key": false,
+      "sub_sources": [
+        {
+          "name": "uk-sanctions-list",
+          "requires_key": false
+        },
+        {
+          "name": "swiss-seco",
+          "requires_key": false
+        },
+        {
+          "name": "eu-consolidated-sanctions",
+          "requires_key": false
+        }
+      ],
+      "note": "Docker/CI verification is pending: the container image has not been built or run here, and no CI artifact has been read for this adapter, so no evidence line and no run citation are recorded. The status stays unverified-fixture until those lines can be copied from a real artifact. Batch-plan overlap recorded rather than hidden: the plan assigns six sub-sources to sanctions_enforcement_watchlists, but finra-brokercheck, fed-enforcement and occ-enforcement are already implemented in government_records_us.py and are not duplicated here, so this adapter covers only uk-sanctions-list, swiss-seco and eu-consolidated-sanctions. Each implemented sub-source downloads one bulk XML artefact linked from the source's own official publication page and matches names locally in the runner; no JSON search API is claimed for any of them. fixture file: tests/fixtures/sanctions_enforcement_watchlists.json. No live API lookups have occurred. The three published bulk artefacts were fetched during development to confirm their documented XML shapes (HTTP 200, text/xml); no investigative query was made against any subject."
     }
   ],
   "phase_1_scope": {

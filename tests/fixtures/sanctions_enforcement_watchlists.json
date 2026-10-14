@@ -1,0 +1,122 @@
+{
+  "input_type": "name",
+  "input_value": "Acme Holdings",
+  "timestamp": "2026-10-15T09:00:00+00:00",
+  "sources": [
+    {
+      "source": "uk-sanctions-list",
+      "skipped": false,
+      "skip_reason": null,
+      "timestamp": "2026-10-15T09:00:01+00:00",
+      "http_status": 200,
+      "error": null,
+      "raw_hash": "1f6f280d50871b97702e87c13511faa941ff92a0ed44bcdb78832ed7eed0a6a2",
+      "data": {
+        "list_source": "UK Sanctions List (FCDO)",
+        "list_publication_page": "https://www.gov.uk/government/publications/the-uk-sanctions-list",
+        "list_url": "https://sanctionslist.fcdo.gov.uk/docs/UK-Sanctions-List.xml",
+        "date_generated": "12/10/2026",
+        "query": "Acme Holdings",
+        "match_count": 1,
+        "truncated": false,
+        "matches": [
+          {
+            "unique_id": "RUS0999",
+            "ofsi_group_id": "99001",
+            "un_reference_number": "",
+            "primary_name": "ACME HOLDINGS LIMITED",
+            "subject_kind": "Entity",
+            "regime_name": "The Russia (Sanctions) (EU Exit) Regulations 2019",
+            "designation_source": "UK",
+            "sanctions_imposed": "Asset freeze",
+            "date_designated": "15/03/2022",
+            "last_updated": "12/10/2026",
+            "matched_names": [
+              "ACME HOLDINGS LIMITED",
+              "ACME HOLDING LTD"
+            ],
+            "name_count": 2
+          }
+        ]
+      }
+    },
+    {
+      "source": "swiss-seco",
+      "skipped": false,
+      "skip_reason": null,
+      "timestamp": "2026-10-15T09:00:02+00:00",
+      "http_status": 200,
+      "error": null,
+      "raw_hash": "d7321db33147227cb2567aaeaaad005bc0120bc9bf0c59f6de71f5d67baf3b06",
+      "data": {
+        "list_source": "Swiss sanctions list (SECO / SESAM)",
+        "list_publication_page": "https://www.seco.admin.ch/en/searching-for-subjects-sanctions",
+        "list_url": "https://www.sesam.search.admin.ch/sesam-search-web/pages/downloadXmlGesamtliste.xhtml?lang=de&action=downloadXmlGesamtlisteAction",
+        "list_type": "whole-list",
+        "list_date": "2026-10-05",
+        "query": "Acme Holdings",
+        "match_count": 1,
+        "truncated": false,
+        "matches": [
+          {
+            "ssid": "900001",
+            "subject_type": "entity",
+            "object_type": "",
+            "primary_name": "ACME HOLDINGS AG",
+            "matched_names": [
+              "ACME HOLDINGS AG",
+              "ACME HOLDINGS ANSTALT"
+            ],
+            "name_types": [
+              "alias",
+              "primary-name"
+            ],
+            "sanctions_set_ids": [
+              "4387"
+            ],
+            "program_key": "Belarus",
+            "program_origin": "EU",
+            "program_version_date": "2026-05-21"
+          }
+        ]
+      }
+    },
+    {
+      "source": "eu-consolidated-sanctions",
+      "skipped": false,
+      "skip_reason": null,
+      "timestamp": "2026-10-15T09:00:03+00:00",
+      "http_status": 200,
+      "error": null,
+      "raw_hash": "2f85fc19f59a55116d6cc4e715d3de814b27e5158009b52610566f2584d740c0",
+      "data": {
+        "list_source": "EU consolidated financial sanctions list (Financial Sanctions Files)",
+        "list_publication_page": "https://data.europa.eu/api/hub/search/datasets/consolidated-list-of-persons-groups-and-entities-subject-to-eu-financial-sanctions-fisma",
+        "list_url": "https://webgate.ec.europa.eu/fsd/fsf/public/files/xmlFullSanctionsList_1_1/content?token=dG9rZW4tMjAxNw",
+        "generation_date": "2026-10-12T12:27:34.779+02:00",
+        "global_file_id": "185689",
+        "query": "Acme Holdings",
+        "match_count": 1,
+        "truncated": false,
+        "matches": [
+          {
+            "logical_id": "900013",
+            "eu_reference_number": "EU.9000.13",
+            "united_nation_id": "",
+            "subject_type": "enterprise",
+            "designation_details": "Synthetic fixture entry used for parser coverage only.",
+            "remark": "",
+            "programme": "RUS",
+            "regulation_number_title": "269/2014 (OJ L78)",
+            "regulation_publication_date": "2014-03-17",
+            "primary_name": "ACME HOLDINGS OOO",
+            "matched_names": [
+              "ACME HOLDINGS OOO"
+            ],
+            "name_count": 1
+          }
+        ]
+      }
+    }
+  ]
+}

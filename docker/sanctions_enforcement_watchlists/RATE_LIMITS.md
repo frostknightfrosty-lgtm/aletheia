@@ -1,0 +1,23 @@
+# Rate Limits for sanctions_enforcement_watchlists Batch Adapter Sub-Sources
+
+Each sub-source's documented publication page, published artefact, authentication requirement and rate/usage limit, taken from the source's own official documentation. Where a provider publishes no numeric limit, this file says **not published** rather than inventing a number.
+
+| Sub-source | Publication page | Published artefact | Auth | Documented rate/usage limit | Official docs URL |
+|---|---|---|---|---|---|
+| uk-sanctions-list (UK) | https://www.gov.uk/government/publications/the-uk-sanctions-list | XML bulk file: https://sanctionslist.fcdo.gov.uk/docs/UK-Sanctions-List.xml (the page also links ODT, ODS, HTML, TXT, CSV and PDF versions and the schema at https://assets.publishing.service.gov.uk/media/6916e72cdb01ecfcf96fc96b/SanctionsListSchema-4.33.3.xsd) | None (unauthenticated) | not published | https://www.gov.uk/guidance/format-guide-for-the-uk-sanctions-list |
+| swiss-seco (Switzerland) | https://www.seco.admin.ch/en/searching-for-subjects-sanctions | XML whole list (SESAM): https://www.sesam.search.admin.ch/sesam-search-web/pages/downloadXmlGesamtliste.xhtml?lang=de&action=downloadXmlGesamtlisteAction | None (unauthenticated) | not published | https://www.seco.admin.ch/dam/en/sd-web/yd8kCF0JIDOx/XML%20Specification%20Document%20(XSD).xsd |
+| eu-consolidated-sanctions (EU) | https://data.europa.eu/api/hub/search/datasets/consolidated-list-of-persons-groups-and-entities-subject-to-eu-financial-sanctions-fisma | XML 1.1 export: https://webgate.ec.europa.eu/fsd/fsf/public/files/xmlFullSanctionsList_1_1/content?token=dG9rZW4tMjAxNw (the same dataset record also lists CSV, PDF and XSD distributions) | None (unauthenticated); the fixed public token published in the dataset record is sent as the token query parameter | not published | https://data.europa.eu/api/hub/search/datasets/consolidated-list-of-persons-groups-and-entities-subject-to-eu-financial-sanctions-fisma |
+
+---
+
+**Notes:**
+
+- **Batch-plan overlap with government_records_us (deliberate, documented).** The batch plan assigns six sub-sources to `sanctions_enforcement_watchlists`. Only three of them are implemented here. The other three — `finra-brokercheck`, `fed-enforcement` and `occ-enforcement` — are already implemented inside `app/aletheia/adapters/government_records_us.py` and are not duplicated in this adapter. This adapter therefore covers only the three government sanctions-list sub-sources above.
+- **No JSON search API is claimed for any sub-source.** Every one of the three publishes a bulk file. The runner downloads the published artefact once per run and filters it locally with a case-insensitive normalized substring test. No per-query endpoint was invented, and no third-party package is used (standard library `xml.etree.ElementTree` only).
+- **Rate limits: not published for all three.** None of the three publication pages states a numeric request quota, so none is claimed here. The runner issues one download per sub-source per run and respects HTTP status codes; implement backoff on 429/5xx responses.
+- **Download sizes (observed 2026-10-15 while writing the adapter).** UK Sanctions List XML about 22 MB; SECO whole list XML about 42 MB; EU XML 1.1 export about 25 MB. The runner caps any single download at 64 MB and reports a skip-free error finding if the cap is exceeded.
+- **UK: the OFSI Consolidated List has closed.** The GOV.UK page for the OFSI Consolidated List states that it closed on 28 January 2026 and that the UK Sanctions List is now the only source for all UK sanctions designations. This adapter therefore queries the UK Sanctions List, which is also the name of the sub-source.
+- **SECO: de-listed targets are excluded.** The SECO schema documents that a target's final `modification` element describes the de-listed event, so the runner skips any target whose last modification has `modification-type="de-listed"`.
+- **EU: the token is public and fixed.** The token `dG9rZW4tMjAxNw` appears in the download URLs of the European Commission's own dataset record (FPI catalogue) on the EU open data portal. No account, key or credential is used, and no private credential is stored in this repository.
+- **A hit is a screening match, not a confirmed identity match.** Name matching is normalized substring matching; homonyms and transliterations must be reviewed by a human against the published record.
+- **A clean screen produces no finding for that sub-source.** The runner records the source, timestamp, HTTP status and match count in its JSON stdout; the parser only emits a finding when at least one listed name matched, so a non-match is never reported as a sanction.
