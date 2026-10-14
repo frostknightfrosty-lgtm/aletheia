@@ -5,7 +5,7 @@ Last reviewed: 2026-10-14
 ## Open gates
 
 - **Gate 5 — evidence must be copied, never typed:** No adapter may be marked `verified-fixture` from a predicted, remembered, or hand-written evidence line. The three lines must be copied from the downloaded CI artifact for the exact run being cited. Opened 2026-10-14 after run `38323854024` was recorded with `DOCKER CAPTURE: PASS — 35/35 phases captured`, a line that does not exist anywhere in that run's log or artifacts and was hard-coded in `update_manifest_verified.py`.
-- **Gate 6 — government_records_us is unverified:** Its `verification_status` is `unknown` following the Gate 5 retraction. Do not describe it as verified until a corrected Docker run produces a real `DOCKER CAPTURE` line with `results.json` showing 0 nonzero return codes.
+- ~~**Gate 6 — government_records_us is unverified:**~~ **RESOLVED 2026-10-14.** Docker Verification run `38644757019` on commit `e87777bf0ae873070c1aa9c49973a2aab0547a75` produced `DOCKER CAPTURE: PASS — 36/36 cases captured` with `results.json` holding 36 entries and 0 nonzero return codes. `government_records_us` is `verified-fixture` again from commit `58d48ee`, using only lines copied from the downloaded artifact.
 
 None of the remaining gates block local adapter implementation. Before any XposedOrNot live lookup, obtain an email address the user owns or is explicitly authorized to investigate.
 
