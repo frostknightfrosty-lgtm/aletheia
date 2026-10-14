@@ -84,12 +84,12 @@ missing sub-sources only, and its manifest note says so.
 
 ## Next action
 
-1. Push the `sanctions_enforcement_watchlists` commit, wait for Docker Verification, download the
-   artifact, and copy the three evidence lines from it. Mark it `verified-fixture` only from those
-   copied lines, in its own commit.
-2. Implement `corporate_financial_public_records` scoped to FollowTheMoney, after verifying its
-   official endpoint.
-3. Continue down `docs/BATCHING_PLAN.md`, scoping each composite against what already exists.
+1. `corporate_financial_public_records` is **excluded, not pending** (Gate 7). Do not build it: FollowTheMoney
+   publishes no name-query contract and OpenSecrets discontinued its API on 2025-04-15. See `docs/NOT_INTEGRATED.md`.
+2. For the next composite, diff its sub-source list against `PROJECT_MANIFEST.json` first and build only what is
+   not already live. The plan is a transcript whose premises have now failed re-verification twice.
+3. Re-verify every endpoint against the vendor's own documentation before writing code, and paste the raw probe
+   output into `docs/NOT_INTEGRATED.md` when a source fails.
 
 Docker is unavailable on this workstation. Image and container behaviour can only be verified in
 GitHub Actions.
