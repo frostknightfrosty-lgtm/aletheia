@@ -805,7 +805,7 @@
       "network": "required",
       "last_audited": "2026-10-12T12:00:00Z",
       "verification_status": "verified-fixture",
-      "note": "Synthetic fixture parser and Docker health smoke passed in CI run 38303951248 on commit 7f06d100930fc7457774aca7112762a889e95b86 (https://github.com/frostknightfrosty-lgtm/aletheia/actions/runs/38303951248). Raw evidence: PARSER PREFLIGHT: PASS \u2014 34/34 adapters have parser coverage; 152 passed, 1 warning in 12.87s; DOCKER CAPTURE: PASS \u2014 35/35 cases captured. Fixture file: tests/fixtures/ip_intelligence.json. No live API lookups have occurred.",
+      "note": "Synthetic fixture parser and Docker health smoke passed in CI run 38303951248 on commit 7f06d100930fc7457774aca7112762a889e95b86 (https://github.com/frostknightfrosty-lgtm/aletheia/actions/runs/38303951248). Raw evidence: PARSER PREFLIGHT: PASS \u2014 34/34 adapters have parser coverage; 152 passed, 1 warning in 12.87s; DOCKER CAPTURE: PASS \u2014 35/35 cases captured. fixture file: tests/fixtures/ip_intelligence.json. No live API lookups have occurred.",
       "fixture_provenance": "synthetic",
       "legal_tier": 1,
       "enabled_by_default": true,
@@ -903,7 +903,7 @@
       "legal_notes": "Composite adapter querying 11 US government records sub-sources via their public APIs. Sub-sources requiring free API keys (OCC, SAM.gov, FOIA.gov) will be skipped if the corresponding environment variable is not set. Skip reasons are recorded in output. Tier 1 sub-sources (FINRA, FDIC, Federal Reserve, USAspending, LDA anonymous, NHTSA, BOP, NYC Open Data anonymous) run without keys. All sub-sources are public government data APIs; no unauthorized access, CAPTCHA bypass, or credential use against third-party accounts. Rate limits are per-sub-source; the adapter queries each at most once per run. Respect provider quotas and 429 responses.",
       "network": "required",
       "last_audited": "2026-10-13T00:00:00Z",
-      "verification_status": "verified-fixture",
+      "verification_status": "unknown",
       "fixture_provenance": "synthetic",
       "legal_tier": 1,
       "enabled_by_default": true,
@@ -958,7 +958,7 @@
           "requires_key": false
         }
       ],
-      "note": "Synthetic fixture parser and Docker health smoke passed in CI run 38323854024 on commit edcc433 (https://github.com/frostknightfrosty-lgtm/aletheia/actions/runs/38323854024). Raw evidence: PARSER PREFLIGHT: PASS \u2014 35/35 adapters have parser coverage; 146 passed, 1 warning in 2.61s; DOCKER CAPTURE: PASS \u2014 35/35 phases captured. Fixture file: tests/fixtures/government_records_us.json. No live API lookups have occurred."
+      "note": "Synthetic fixture parser tests pass; Docker verification is pending a corrected CI run. CI run 38323854024 on commit edcc433 did NOT verify this adapter and its evidence line was retracted: the capture script at that commit had been rewritten to run runner.py outside Docker, printed a PASS summary even though 18 of 35 phases returned nonzero, and emitted no DOCKER CAPTURE line at all. The adapter's parser tests were also vacuous at that commit (they never called parse); they now do. fixture file: tests/fixtures/government_records_us.json. No live API lookups have occurred."
     }
   ],
   "phase_1_scope": {

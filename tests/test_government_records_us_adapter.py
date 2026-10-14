@@ -1,9 +1,21 @@
 """Parser + fixture tests for the government_records_us batch adapter."""
 
+import hashlib
 import json
 from datetime import datetime, timezone
+from pathlib import Path
+from uuid import uuid4
 
-from aletheia.core.models import Finding, SeedType, EntityType, Provenance
+from parser_test_marker import parser_test
+
+from aletheia.core.models import (
+    AdapterRunRequest,
+    EntityType,
+    Finding,
+    Provenance,
+    Seed,
+    SeedType,
+)
 
 from aletheia.adapters.government_records_us import (
     GovernmentRecordsUSAdapter,
@@ -242,79 +254,185 @@ def test_finding_from_fixture():
 # ── run result parsing ─────────────────────────────────────────────────────────
 
 
+def _request(value: str = "John Smith") -> AdapterRunRequest:
+    return AdapterRunRequest(
+        run_id=uuid4(), seed=Seed(type=SeedType.PERSON_NAME, value=value), legal_only=True
+    )
+
+
+def _source(source: str, **overrides) -> dict:
+    entry = {
+        "source": source,
+        "skipped": False,
+        "skip_reason": None,
+        "timestamp": datetime.now(timezone.utc).isoformat(),
+        "http_status": 200,
+        "error": None,
+        "raw_hash": None,
+        "data": None,
+    }
+    entry.update(overrides)
+    return entry
+
+
+def _payload(sources: list[dict]) -> str:
+    return json.dumps(
+        {
+            "input_type": "person_name",
+            "input_value": "John Smith",
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "sources": sources,
+        }
+    )
+
+
+@parser_test("government_records_us")
 def test_parse_success():
     from aletheia.adapters.government_records_us import GovernmentRecordsUSAdapter
 
     fixture = load_fixture()
     json_stdout = json.dumps(fixture)
 
-    # Mock subprocess so runner returns fixture JSON
-    result = {
-        "status": "succeeded",
-        "findings": [],
-        "stderr_tail": "",
-        "stdout_tail": json_stdout[-4000:],
-        "exit_code": 0,
+    adapter = GovernmentRecordsUSAdapter()
+    result = adapter.parse(_request(), Path("."), json_stdout, "", 0)
+
+    assert result.status == "succeeded"
+    assert result.exit_code == 0
+    assert len(result.findings) == len(fixture["sources"]) == 4
+
+    by_source = {f.attributes["source"]: f for f in result.findings}
+    assert set(by_source) == {
+        "finra-brokercheck",
+        "bop-inmate-locator",
+        "occ-enforcement",
+        "fed-enforcement",
     }
 
-    adapter = GovernmentRecordsUSAdapter()
-    # We just verify the adapter can be constructed; full parse needs runner output.
-    assert adapter is not None
+    finra = by_source["finra-brokercheck"]
+    assert finra.value == "FINRA:1234567:John Smith"
+    assert finra.subject == "FINRA:1234567:John Smith"
+    assert finra.record_type == "broker_check"
+    assert finra.entity_name == "John Smith"
+    assert finra.attributes["details"]["crd"] == 1234567
+    assert finra.attributes["details"]["registrations"] == 3
+    assert finra.attributes["details"]["barred"] is False
+    assert finra.attributes["date"] == fixture["sources"][0]["timestamp"][:10]
+
+    bop = by_source["bop-inmate-locator"]
+    assert bop.value == "BOP:12345-060:SMITH"
+    assert bop.record_type == "inmate_record"
+    assert bop.attributes["details"]["count"] == 1
+
+    occ = by_source["occ-enforcement"]
+    assert occ.value == "OCC:First National Bank"
+    assert occ.record_type == "occ_enforcement"
+    assert occ.attributes["details"]["count"] == 1
+
+    fed = by_source["fed-enforcement"]
+    assert fed.value == "FED:First National Bank:John Smith"
+    assert fed.record_type == "enforcement_action"
+
+    for finding in result.findings:
+        assert finding.entity_type == EntityType.GOVERNMENT_RECORD
+        assert finding.provenance.tool == "government_records_us"
+        assert finding.provenance.source_url == f"sub-source:{finding.attributes['source']}"
+        assert finding.provenance.confidence == 0.80
+        raw = finding.attributes["raw_evidence"]
+        assert raw
+        assert finding.provenance.raw_evidence_sha256 == hashlib.sha256(
+            json.dumps(raw, sort_keys=True).encode()
+        ).hexdigest()
 
 
 def test_parse_skipped():
     """Test that skipped sub-sources produce a finding with skip reason."""
     from aletheia.adapters.government_records_us import GovernmentRecordsUSAdapter
 
-    # Build a minimal JSON payload with a skipped source
-    payload = {
-        "input_type": "person_name",
-        "input_value": "John Smith",
-        "timestamp": datetime.now(timezone.utc).isoformat(),
-        "sources": [
-            {
-                "source": "sam-gov",
-                "skipped": True,
-                "skip_reason": "SAM_API_KEY not set",
-                "timestamp": datetime.now(timezone.utc).isoformat(),
-                "http_status": 0,
-                "error": None,
-                "raw_hash": None,
-                "data": None,
-            }
-        ],
-    }
-    json_stdout = json.dumps(payload)
+    payload = _payload(
+        [
+            _source(
+                "sam-gov",
+                skipped=True,
+                skip_reason="SAM_API_KEY not set",
+                http_status=0,
+                data=None,
+            )
+        ]
+    )
 
     adapter = GovernmentRecordsUSAdapter()
-    assert adapter is not None
+    result = adapter.parse(_request(), Path("."), payload, "", 0)
+
+    assert result.status == "succeeded"
+    assert len(result.findings) == 1
+    finding = result.findings[0]
+    assert finding.attributes["source"] == "sam-gov"
+    assert finding.value == "sam-gov:skipped"
+    assert finding.record_type is None
+    assert finding.attributes["details"] == {
+        "skipped": True,
+        "reason": "SAM_API_KEY not set",
+    }
+    assert finding.attributes["raw_evidence"] == {
+        "skipped": True,
+        "reason": "SAM_API_KEY not set",
+    }
+    assert "Skipped: SAM_API_KEY not set" in finding.provenance.notes
 
 
 def test_parse_error():
     """Test that errored sub-sources produce a finding with error info."""
     from aletheia.adapters.government_records_us import GovernmentRecordsUSAdapter
 
-    payload = {
-        "input_type": "person_name",
-        "input_value": "John Smith",
-        "timestamp": datetime.now(timezone.utc).isoformat(),
-        "sources": [
-            {
-                "source": "finra-brokercheck",
-                "skipped": False,
-                "skip_reason": None,
-                "timestamp": datetime.now(timezone.utc).isoformat(),
-                "http_status": 500,
-                "error": "Internal Server Error",
-                "raw_hash": None,
-                "data": None,
-            }
-        ],
-    }
-    json_stdout = json.dumps(payload)
+    payload = _payload(
+        [_source("finra-brokercheck", http_status=500, error="Internal Server Error")]
+    )
 
     adapter = GovernmentRecordsUSAdapter()
-    assert adapter is not None
+    result = adapter.parse(_request(), Path("."), payload, "", 0)
+
+    assert result.status == "succeeded"
+    assert len(result.findings) == 1
+    finding = result.findings[0]
+    assert finding.attributes["source"] == "finra-brokercheck"
+    assert finding.value == "finra-brokercheck:error"
+    assert finding.attributes["details"] == {
+        "error": "Internal Server Error",
+        "http_status": 500,
+    }
+    assert "Error: Internal Server Error" in finding.provenance.notes
+
+    # A sub-source error must not be reported as a successful record.
+    assert finding.record_type is None
+    assert finding.attributes.get("raw_evidence") == {
+        "error": "Internal Server Error",
+        "http_status": 500,
+    }
+
+
+def test_parse_non_json_stdout_is_partial():
+    """Non-JSON runner output must not be treated as a successful parse."""
+    from aletheia.adapters.government_records_us import GovernmentRecordsUSAdapter
+
+    adapter = GovernmentRecordsUSAdapter()
+    result = adapter.parse(_request(), Path("."), "not json at all", "", 0)
+
+    assert result.status == "partial"
+    assert result.findings == []
+    assert "not valid JSON" in result.stderr_tail
+
+
+def test_parse_nonzero_exit_is_failed():
+    """A non-zero runner exit code must fail the run and produce no findings."""
+    from aletheia.adapters.government_records_us import GovernmentRecordsUSAdapter
+
+    adapter = GovernmentRecordsUSAdapter()
+    result = adapter.parse(_request(), Path("."), "", "boom", 1)
+
+    assert result.status == "failed"
+    assert result.exit_code == 1
+    assert result.findings == []
+    assert "boom" in result.stderr_tail
 
 
 # ── adapter wiring ─────────────────────────────────────────────────────────────
