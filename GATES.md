@@ -1,13 +1,37 @@
 # Project Gates
 
-Last reviewed: 2026-10-14
+Last reviewed: 2026-10-15
 
 ## Open gates
 
 - **Gate 5 — evidence must be copied, never typed:** No adapter may be marked `verified-fixture` from a predicted, remembered, or hand-written evidence line. The three lines must be copied from the downloaded CI artifact for the exact run being cited. Opened 2026-10-14 after run `38323854024` was recorded with `DOCKER CAPTURE: PASS — 35/35 phases captured`, a line that does not exist anywhere in that run's log or artifacts and was hard-coded in `update_manifest_verified.py`.
 - ~~**Gate 6 — government_records_us is unverified:**~~ **RESOLVED 2026-10-14.** Docker Verification run `38644757019` on commit `e87777bf0ae873070c1aa9c49973a2aab0547a75` produced `DOCKER CAPTURE: PASS — 36/36 cases captured` with `results.json` holding 36 entries and 0 nonzero return codes. `government_records_us` is `verified-fixture` again from commit `58d48ee`, using only lines copied from the downloaded artifact.
 
-None of the remaining gates block local adapter implementation. Before any XposedOrNot live lookup, obtain an email address the user owns or is explicitly authorized to investigate.
+None of the remaining gates block local adapter implementation.
+
+## Pre-7f06d10 verification audit (2026-10-15)
+
+**Cleared.** All 10 successful runs on commits before `7f06d10` were re-examined by downloading their
+artifacts: `38270478612`, `38272314026`, `38273505822`, `38274729412`, `38275780719`,
+`38275780791`, `38290727897`, `38291743287`, `38292770527`, `38293763683`. For every run,
+`ci-parser-preflight.txt`, the last line of `ci-artifacts/pytest-full.log`, the first line of
+`ci-artifacts/docker-integration/capture.log`, and `results.json` agree with each other: the capture
+count equals the number of `results.json` entries, every entry returns 0, and the stdout/stderr file
+counts match the entry count. Every `capture.log` begins with a real `DOCKER CAPTURE: PASS — N/N cases
+captured` line. **No fabricated evidence line was found in any of them.** The fabrication in run
+`38323854024` was isolated, not systematic.
+
+**Citation gap found and closed.** 29 of the 36 `verified-fixture` adapters cited no run at all — their
+notes claimed only "Fixture parser coverage passes" while asserting `verified-fixture`. Every one of
+those 29 has a passing capture case in run `38293763683` (commit
+`d784850ed5d869393c63e180cfb05035c070513e`), so the evidence was real but undocumented. Commit
+`70f4828` added the run, commit, copied run-level evidence lines, and the per-adapter case name and
+return code to each of the 29 notes. No `verification_status` changed and no assertion was weakened.
+
+**Standing rule going forward:** every `verified-fixture` adapter must cite a run whose artifact has
+been read. A new adapter starts at `unverified-fixture` and moves to `verified-fixture` only from
+copied artifact lines.
+ Before any XposedOrNot live lookup, obtain an email address the user owns or is explicitly authorized to investigate.
 
 ## Resolved gates
 
