@@ -1,7 +1,7 @@
 {
   "session_id": "2ba610de-14d2-4fab-925f-52a87db7e537",
   "last_updated": "2026-10-15T02:15:00Z",
-  "last_commit": "7459536",
+  "last_commit": "cca6076",
   "last_ci_verified_commit": "43bb9449d8667841a54bc5a5f6cf9b6f8cf362d8",
   "last_ci_run": "38652416329",
   "last_ci_status": "green",
@@ -39,8 +39,7 @@
   "open_gates": [
     "Gate 2 - user-owned target required before any live investigation",
     "Gate 3 - verify required API keys and costs before a phase depends on them",
-    "Gate 5 - no adapter may be marked verified-fixture from a typed or predicted evidence line; the line must be copied from the downloaded CI artifact. This gate was opened because run 38323854024 violated it.",
-    "Gate 6 - RESOLVED 2026-10-14: government_records_us re-verified from run 38644757019 with copied artifact lines."
+    "Gate 5 - no adapter may be marked verified-fixture from a typed or predicted evidence line; the line must be copied from the downloaded CI artifact. This gate was opened because run 38323854024 violated it."
   ],
   "next_action": "Implement corporate_financial_public_records scoped to FollowTheMoney only (fdic-bankfind, lda, usaspending and sam-gov already live in government_records_us); verify its official endpoint first per Gate 3/Gate 5.",
   "files_in_flight": [],
