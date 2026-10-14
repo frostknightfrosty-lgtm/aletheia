@@ -38,11 +38,11 @@ artifacts exactly (`gravatar`, `rdap`, `ip_intelligence`, `government_records_us
 
 ## Current CI-verified state
 
-- 36 adapters registered, all `verified-fixture`, all now citing an artifact-backed run.
-- 37 Docker integration cases; `PARSER PREFLIGHT: PASS — 36/36 adapters have parser coverage`.
+- 37 adapters registered, all `verified-fixture`, all citing an artifact-backed run.
+- 38 Docker integration cases; `PARSER PREFLIGHT: PASS — 37/37 adapters have parser coverage`.
 - Latest verified run: `38647832837` on commit `e74e8b4` —
   `210 passed, 1 warning in 23.25s`, `DOCKER CAPTURE: PASS — 37/37 cases captured`.
-- Local: 210 collected, 173 passed, 37 skipped (the container smokes; `docker` is not on PATH here).
+- Local: 245 collected, 207 passed, 38 skipped (the container smokes; `docker` is not on PATH here).
   Local pytest needs `rapidfuzz` and `reportlab`; CI gets them from `pip install -e '.[dev]'`.
 
 ## Plan divergence you must resolve before the next composites
