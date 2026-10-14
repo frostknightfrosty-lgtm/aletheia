@@ -38,3 +38,4 @@ docker build -f docker/gravatar/Dockerfile -t aletheia/gravatar:api-v3 docker/gr
 docker build -f docker/rdap/Dockerfile -t aletheia/rdap:rfc9082 docker/rdap
 docker build -f docker/ip_intelligence/Dockerfile -t aletheia/ip-intelligence:v1 docker/ip_intelligence
 docker build -f docker/government_records_us/Dockerfile -t aletheia/gov-records-us:v1 docker/government_records_us
+docker build -f docker/corporate_registry/Dockerfile -t aletheia/corp-registry:v1 docker/corporate_registry

@@ -1,0 +1,42 @@
+phase-9: implement corporate_registry batch adapter (8 sub-sources)
+
+New composite adapter covering company registries in six jurisdictions. Every
+endpoint and rate limit was verified against official documentation; where no
+free documented search API exists, the sub-source is implemented as an
+auditable skip with its documented reason instead of an invented endpoint.
+
+Supported sub-sources:
+- companies-house (UK): api.company-information.service.gov.uk/search/companies,
+  HTTP Basic with the API key as username, free key, 600 requests / 5 minutes
+- nzbn (NZ): api.business.govt.nz/gateway/nzbn/v5/entities, header
+  Ocp-Apim-Subscription-Key, free; the official rate limit is not published, so
+  RATE_LIMITS.md records it as not published rather than inventing a number
+- kvk-opendata (NL): opendata.kvk.nl HVDS, no auth, number-keyed only,
+  1 request / minute / IP
+- recherche-entreprises (FR): recherche-entreprises.api.gouv.fr, no auth, the
+  official DINUM API that surfaces RNE data, 7 requests / second / IP
+- kvk-zoeken (NL): api.kvk.nl/api/v2/zoeken, header apikey; this is a paid
+  subscription that excludes private use, so it is skipped unless KVK_API_KEY
+  is set and its skip reason says why
+
+Unsupported sub-sources, reported as skips with documented reasons:
+- inpi-rne (France): INPI publishes no free search API, bulk SFTP only
+- asic (Australia): no public JSON API, web-only, DSP applications closed
+  until 2027
+- cipc (South Africa): no API, web-only enterprise search
+
+Also:
+- EntityType.COMPANY_REGISTRY_RECORD added.
+- Docker image aletheia/corp-registry:v1, Dockerfile identical to the
+  government_records_us image (UID 10001, network-free --health).
+- Synthetic fixture with one entry per sub-source; 5 with data, 3 skipped.
+- 29 parser/contract tests including exactly one @parser_test marker on a test
+  that calls adapter.parse(). No parser_test_exempt.
+- Docker integration case phase9-corp-registry, capture CASES now 37, workflow
+  step renamed to 37 cases.
+- Manifest entry with verification_status "unknown": CI verification is
+  pending, and no run ID or evidence line is written here.
+
+Local: PARSER PREFLIGHT: PASS - 36/36 adapters have parser coverage;
+210 collected, 173 passed, 37 skipped (Docker CLI absent locally);
+0 failures. No live API lookups were performed.

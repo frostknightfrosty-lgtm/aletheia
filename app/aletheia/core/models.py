@@ -57,6 +57,7 @@ class EntityType(StrEnum):
     JURISDICTION = "jurisdiction"
     UNKNOWN = "unknown"
     GOVERNMENT_RECORD = "government_record"
+    COMPANY_REGISTRY_RECORD = "company_registry_record"
 
 
 class RelationshipType(StrEnum):

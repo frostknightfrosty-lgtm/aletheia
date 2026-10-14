@@ -1,0 +1,200 @@
+{
+  "input_type": "company_name",
+  "input_value": "Acme Holdings B.V.",
+  "timestamp": "2026-10-14T12:00:00+00:00",
+  "sources": [
+    {
+      "source": "companies-house",
+      "skipped": false,
+      "skip_reason": null,
+      "timestamp": "2026-10-14T12:00:01+00:00",
+      "http_status": 200,
+      "error": null,
+      "raw_hash": "4a72936801217f5dbccb3404130c555d52996ca4054202630ae608ebe423ba08",
+      "data": {
+        "items": [
+          {
+            "title": "ACME HOLDINGS LIMITED",
+            "company_number": "01234567",
+            "company_status": "active",
+            "company_type": "ltd",
+            "date_of_creation": "1998-04-15",
+            "address_snippet": "1 Example Street, London, EC1A 1AA",
+            "description": "01234567 - Incorporated on 15 April 1998",
+            "kind": "searchresults#company",
+            "links": {
+              "self": "/company/01234567"
+            }
+          }
+        ],
+        "total_results": 1,
+        "page_number": 1,
+        "kind": "search#companies"
+      }
+    },
+    {
+      "source": "nzbn",
+      "skipped": false,
+      "skip_reason": null,
+      "timestamp": "2026-10-14T12:00:02+00:00",
+      "http_status": 200,
+      "error": null,
+      "raw_hash": "df31d08dc5c404fd7c3ba3ef81540bb570bbf737898ee1c0e712f5ed6dcb74f1",
+      "data": {
+        "items": [
+          {
+            "nzbn": "9429000000000",
+            "entityName": "ACME HOLDINGS LIMITED",
+            "entityType": "NZ Limited Company",
+            "entityStatus": "Registered",
+            "registrationDate": "2005-03-01",
+            "sourceRegister": "NZ Companies Register",
+            "address": {
+              "addressType": "Registered",
+              "addressLine1": "1 Example Road",
+              "suburb": "Wellington Central",
+              "city": "Wellington",
+              "postCode": "6011",
+              "countryCode": "NZ"
+            }
+          }
+        ],
+        "totalItems": 1,
+        "page": 1,
+        "pageSize": 25
+      }
+    },
+    {
+      "source": "kvk-opendata",
+      "skipped": false,
+      "skip_reason": null,
+      "timestamp": "2026-10-14T12:00:03+00:00",
+      "http_status": 200,
+      "error": null,
+      "raw_hash": "bfd39db15b29733109874fa9aee72c4379e2c3c0730aac0053fb5d13ef45d8de",
+      "data": {
+        "kvkNummer": "12345678",
+        "naam": "Acme Holdings B.V.",
+        "handelsnamen": [
+          "Acme Holdings",
+          "Acme Holding B.V."
+        ],
+        "type": "Hoofdvestiging",
+        "formeleRegistratiedatum": "20010412",
+        "statutaireNaam": "Acme Holdings B.V.",
+        "indNonMailing": "Nee",
+        "adressen": [
+          {
+            "type": "bezoekadres",
+            "straatnaam": "Damrak",
+            "huisnummer": 1,
+            "postcode": "1011 LG",
+            "plaats": "Amsterdam",
+            "land": "Nederland"
+          }
+        ],
+        "sbiActiviteiten": [
+          {
+            "sbiCode": "6420",
+            "sbiOmschrijving": "Financiele holdings",
+            "indHoofdactiviteit": "Ja"
+          }
+        ]
+      }
+    },
+    {
+      "source": "kvk-zoeken",
+      "skipped": false,
+      "skip_reason": null,
+      "timestamp": "2026-10-14T12:00:04+00:00",
+      "http_status": 200,
+      "error": null,
+      "raw_hash": "b612fd8f46394472405741953578e998d3748ed3a8538ba71b3e2c759be3ee82",
+      "data": {
+        "resultaten": [
+          {
+            "kvkNummer": "12345678",
+            "naam": "Acme Holdings B.V.",
+            "type": "rechtspersoon",
+            "vestigingsnummer": "000012345678",
+            "plaats": "Amsterdam",
+            "actief": "Ja"
+          }
+        ],
+        "totaal": 1,
+        "pagina": 1
+      }
+    },
+    {
+      "source": "recherche-entreprises",
+      "skipped": false,
+      "skip_reason": null,
+      "timestamp": "2026-10-14T12:00:05+00:00",
+      "http_status": 200,
+      "error": null,
+      "raw_hash": "70ae3607ff21331bdc8050574fedab2ad891dc599a5125d69fff4b9e38aa9fd1",
+      "data": {
+        "results": [
+          {
+            "siren": "123456789",
+            "nom_complet": "ACME HOLDINGS",
+            "nom_raison_sociale": "ACME HOLDINGS",
+            "sigle": null,
+            "activite_principale": "64.20Z",
+            "etat_administratif": "A",
+            "date_creation": "2001-04-12",
+            "nature_juridique": "5710",
+            "siege": {
+              "siret": "12345678900012",
+              "adresse": "1 RUE DE L EXEMPLE 75001 PARIS",
+              "code_postal": "75001",
+              "commune": "Paris",
+              "activite_principale": "64.20Z",
+              "etat_administratif": "A"
+            },
+            "dirigeants": [
+              {
+                "nom": "MARTIN",
+                "prenoms": "CLAIRE",
+                "qualite": "Presidente"
+              }
+            ]
+          }
+        ],
+        "total_results": 1,
+        "page": 1,
+        "per_page": 10
+      }
+    },
+    {
+      "source": "inpi-rne",
+      "skipped": true,
+      "skip_reason": "INPI RNE exposes no documented free search API (bulk SFTP and dataset APIs only)",
+      "timestamp": "2026-10-14T12:00:06+00:00",
+      "http_status": 0,
+      "error": null,
+      "raw_hash": null,
+      "data": null
+    },
+    {
+      "source": "asic",
+      "skipped": true,
+      "skip_reason": "ASIC publishes no public JSON search API; ASIC Connect is web-only and DSP applications are closed until 2027",
+      "timestamp": "2026-10-14T12:00:07+00:00",
+      "http_status": 0,
+      "error": null,
+      "raw_hash": null,
+      "data": null
+    },
+    {
+      "source": "cipc",
+      "skipped": true,
+      "skip_reason": "CIPC provides no public API; enterprise search is web-only",
+      "timestamp": "2026-10-14T12:00:08+00:00",
+      "http_status": 0,
+      "error": null,
+      "raw_hash": null,
+      "data": null
+    }
+  ]
+}
