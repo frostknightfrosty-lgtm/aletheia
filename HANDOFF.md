@@ -2,7 +2,7 @@
 
 See `AUTONOMOUS_DIRECTIVE.md` for standing rules and `docs/BATCHING_PLAN.md` for the adapter plan.
 
-Last updated: 2026-10-16T06:05:00Z
+Last updated: 2026-10-16T18:05:00Z
 
 ## Read this first: the 38323854024 fabrication was isolated
 
@@ -38,17 +38,12 @@ artifacts exactly (`gravatar`, `rdap`, `ip_intelligence`, `government_records_us
 
 ## Current CI-verified state
 
-- 39 adapters registered, all `verified-fixture`, all citing an artifact-backed run.
-- 40 Docker integration cases; `PARSER PREFLIGHT: PASS — 39/39 adapters have parser coverage`.
-- Latest verified run: `38791430700` on commit `a7c394d` — `343 passed, 1 warning in 24.95s`,
-  `DOCKER CAPTURE: PASS — 40/40 cases captured`, `results.json` 40 entries with 0 nonzero return
-  codes, SHA-256 `5134BD59E5E6AAC2727088582414721A4308C01EF44E82A63221C1FD6B2964F6`.
-- Local: 303 passed, 40 skipped (the container smokes; `docker` is not on PATH here). Local pytest needs
-  `rapidfuzz` and `reportlab`; CI gets them from `pip install -e '.[dev]'`.
-- `ssl_tls` is the first composite whose image installs real tools rather than only python. Its `--health`
-  inventory (stderr, while stdout is exactly `ok`) reports `/usr/bin/testssl`, `/go/bin/certgraph`,
-  `/usr/bin/sslscan`, `/go/bin/tlsx` and the `qualys-ssl-labs` HTTP source, and asserts no subprocess is
-  started and no socket opened. Use that pattern for any later tool-based image.
+- 42 adapters registered; 43 Docker integration cases.
+- `crypto_blockchain` verified by run `38797483163` on `9f53012`: `PARSER PREFLIGHT: PASS — 40/40 adapters have parser coverage`; `383 passed, 1 warning in 16.35s`; `DOCKER CAPTURE: PASS — 41/41 cases captured`; `results.json` 41 entries, 0 nonzero, SHA-256 `627BB124FA5203605A4558C43D6C48B6831355EDF8B128D8EBEF2AED7F1686CF`.
+- `patents_trademarks` verified by run `38801355462` on `0ae35e4`: `PARSER PREFLIGHT: PASS — 41/41 adapters have parser coverage`; `422 passed, 1 warning in 19.09s`; `DOCKER CAPTURE: PASS — 42/42 cases captured`; `results.json` 42 entries, 0 nonzero, SHA-256 `3911D3AB11896E516A06B7650BA3E4F65880E2FD9B4E14CD72A6871ADF6E7F80`.
+- `email_auth` is committed at `9b949c7` with its manifest entry still `unverified-fixture`; its CI run was still in progress when this handoff was written. Confirm it, then mark it from copied artifact lines.
+- Local at handoff: 412 passed, 43 skipped (the container smokes; `docker` is not on PATH here).
+- **Reusable cross-check:** local (passed + skipped) equals CI passed, because CI runs exactly the container smokes that skip locally. crypto 342 + 41 = 383; patents 380 + 42 = 422. If that identity breaks, something was skipped or deleted.
 ## Plan divergence you must resolve before the next composites
 
 `docs/BATCHING_PLAN.md` lists 21 composites, but two already-implemented adapters absorbed part of
@@ -88,14 +83,16 @@ missing sub-sources only, and its manifest note says so.
 
 ## Next action
 
-1. Build `crypto_blockchain` next (mempool.space, Blockstream Esplora, Blockchair, Etherscan V2, BlockCypher,
-   Chainabuse). Verify every endpoint against vendor docs first; Etherscan V2 and Chainabuse need free keys,
-   so plan documented skip paths when those env vars are unset.
-2. Then `patents_trademarks`, `email_auth`, `code_search`, `search_engines`.
-3. Diff every composite sub-source list against `PROJECT_MANIFEST.json` before building.
-4. One composite per commit and per CI run. Mark `verified-fixture` only from artifact-copied lines (Gate 5).
-5. When a Dockerfile changes, expect the image build to be the first real check: there is no Docker CLI here.
-   Two `ssl_tls` runs failed and both were fixed from the artifact rather than retried blindly — do the same.
-6. `corporate_financial_public_records` stays **excluded** (Gate 7); see `docs/NOT_INTEGRATED.md`.
+1. Confirm the `email_auth` CI run is green, copy the three evidence lines from the downloaded artifact, and mark it
+   `verified-fixture` in a separate commit (Gate 5).
+2. Then build `code_search` (GitLab Search, Debian Code Search, PublicWWW), then `search_engines` (SearXNG,
+   Marginalia, Google Custom Search, Common Crawl Index). Verify every endpoint against vendor docs first and diff
+   the sub-source list against `PROJECT_MANIFEST.json`.
+3. One composite per commit and per CI run. Mark `verified-fixture` only from artifact-copied lines.
+4. **Known maintenance burden:** several earlier adapter tests hardcode derived counts — `tests/test_ssl_tls_adapter.py`
+   asserts the registry size, and `tests/test_phase3_manifest.py` asserts the DOMAIN-seed pending set. Every new
+   adapter must bump those. Updating a derived count is not weakening an assertion, but it should be called out in
+   the commit message, and the counts are worth moving into the manifest so they stop drifting.
+5. `corporate_financial_public_records` stays **excluded** (Gate 7); see `docs/NOT_INTEGRATED.md`.
 Docker is unavailable on this workstation. Image and container behaviour can only be verified in
 GitHub Actions.
