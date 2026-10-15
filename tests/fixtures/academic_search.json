@@ -1,0 +1,227 @@
+{
+  "input_type": "name",
+  "input_value": "Acme Holdings",
+  "timestamp": "2026-10-15T09:00:00+00:00",
+  "sources": [
+    {
+      "source": "openalex",
+      "skipped": false,
+      "skip_reason": null,
+      "timestamp": "2026-10-15T09:00:01+00:00",
+      "http_status": 200,
+      "error": null,
+      "raw_hash": "9cfa6b6bb73f2e2711bf2386356a5da9f58dffd6d25c520d6c8a96c6212c571a",
+      "data": {
+        "api_source": "OpenAlex works",
+        "api_documentation": "https://help.openalex.org/api/searching/",
+        "endpoint": "https://api.openalex.org/works",
+        "query": "Acme Holdings",
+        "record_count": 1,
+        "truncated": false,
+        "records": [
+          {
+            "record_id": "W2144093431",
+            "title": "Acme Holdings and the Governance of Synthetic Data: A Reproducible Study",
+            "doi": "10.9999/aletheia.synthetic.0001",
+            "authors": [
+              "Jane Acme",
+              "John Acme"
+            ],
+            "year": 2021,
+            "venue": "Journal of Synthetic Research",
+            "url": "https://openalex.org/W2144093431",
+            "type": "article",
+            "cited_by_count": 12,
+            "publication_date": "2021-05-04",
+            "is_oa": true
+          }
+        ]
+      }
+    },
+    {
+      "source": "crossref",
+      "skipped": false,
+      "skip_reason": null,
+      "timestamp": "2026-10-15T09:00:02+00:00",
+      "http_status": 200,
+      "error": null,
+      "raw_hash": "b60c1abe82ad5f48cb316801357ea4f75ae0caeecdb4365654691b0cee3d4359",
+      "data": {
+        "api_source": "Crossref REST API works",
+        "api_documentation": "https://api.crossref.org/swagger-docs",
+        "endpoint": "https://api.crossref.org/works",
+        "query": "Acme Holdings",
+        "record_count": 1,
+        "truncated": false,
+        "records": [
+          {
+            "record_id": "10.9999/aletheia.synthetic.0002",
+            "title": "A Synthetic Survey of Acme Holdings Disclosure Practice",
+            "doi": "10.9999/aletheia.synthetic.0002",
+            "authors": [
+              "Jane Acme"
+            ],
+            "year": 2019,
+            "venue": "Synthetic Review of Accounting",
+            "url": "https://doi.org/10.9999/aletheia.synthetic.0002",
+            "type": "journal-article",
+            "publisher": "Synthetic Press",
+            "issued": "2019",
+            "member": "9999"
+          }
+        ]
+      }
+    },
+    {
+      "source": "semantic-scholar",
+      "skipped": false,
+      "skip_reason": null,
+      "timestamp": "2026-10-15T09:00:03+00:00",
+      "http_status": 200,
+      "error": null,
+      "raw_hash": "a3bf719b3ca8b7d24cf3f60ec5e754cede3790a40ab6a4b7835d92166dae53ce",
+      "data": {
+        "api_source": "Semantic Scholar Academic Graph paper search",
+        "api_documentation": "https://api.semanticscholar.org/api-docs/graph",
+        "endpoint": "https://api.semanticscholar.org/graph/v1/paper/search",
+        "query": "Acme Holdings",
+        "record_count": 1,
+        "truncated": false,
+        "records": [
+          {
+            "record_id": "abcdef1234567890abcdef1234567890abcdef12",
+            "title": "Acme Holdings: A Synthetic Case Study in Citation Networks",
+            "doi": "10.9999/aletheia.synthetic.0003",
+            "authors": [
+              "Jane Acme",
+              "R. Synthetic"
+            ],
+            "year": 2022,
+            "venue": "Proceedings of the Synthetic Conference",
+            "url": "https://www.semanticscholar.org/paper/abcdef1234567890abcdef1234567890abcdef12",
+            "type": "paper",
+            "publication_date": "2022-08-15",
+            "citation_count": 4,
+            "external_ids": {
+              "CorpusId": "99999999",
+              "DOI": "10.9999/aletheia.synthetic.0003"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "source": "arxiv",
+      "skipped": false,
+      "skip_reason": null,
+      "timestamp": "2026-10-15T09:00:04+00:00",
+      "http_status": 200,
+      "error": null,
+      "raw_hash": "3daa0b93daff34cbeae7b3b67c0bee959f861b3ea01d1c545ff55ca41830b41a",
+      "data": {
+        "api_source": "arXiv API",
+        "api_documentation": "https://info.arxiv.org/help/api/user-manual.html",
+        "endpoint": "http://export.arxiv.org/api/query",
+        "query": "Acme Holdings",
+        "record_count": 1,
+        "truncated": false,
+        "records": [
+          {
+            "record_id": "2601.09999v1",
+            "title": "Synthetic Preprint on Acme Holdings Entity Resolution",
+            "doi": "",
+            "authors": [
+              "Jane Acme"
+            ],
+            "year": 2026,
+            "venue": "arXiv",
+            "url": "http://arxiv.org/abs/2601.09999v1",
+            "type": "preprint",
+            "published": "2026-01-14T00:00:00Z",
+            "updated": "2026-01-14T00:00:00Z",
+            "primary_category": "cs.DL",
+            "comment": "12 pages, synthetic fixture entry"
+          }
+        ]
+      }
+    },
+    {
+      "source": "core",
+      "skipped": false,
+      "skip_reason": null,
+      "timestamp": "2026-10-15T09:00:05+00:00",
+      "http_status": 200,
+      "error": null,
+      "raw_hash": "edc4f36cf177380d95d347398e1c855b07479c1a4022459f73424feebe40b807",
+      "data": {
+        "api_source": "CORE API v3 works search",
+        "api_documentation": "https://api.core.ac.uk/docs/v3",
+        "endpoint": "https://api.core.ac.uk/v3/search/works/",
+        "query": "Acme Holdings",
+        "record_count": 1,
+        "truncated": false,
+        "records": [
+          {
+            "record_id": "99999999",
+            "title": "Open Access Outputs of Acme Holdings: A Synthetic Deposit Record",
+            "doi": "10.9999/aletheia.synthetic.0004",
+            "authors": [
+              "Jane Acme",
+              "P. Synthetic"
+            ],
+            "year": 2020,
+            "venue": "Synthetic Repository Press",
+            "url": "https://core.ac.uk/download/99999999.pdf",
+            "type": "research",
+            "publisher": "Synthetic Repository Press",
+            "download_url": "https://core.ac.uk/download/99999999.pdf",
+            "arxiv_id": ""
+          }
+        ]
+      }
+    },
+    {
+      "source": "openaire",
+      "skipped": false,
+      "skip_reason": null,
+      "timestamp": "2026-10-15T09:00:06+00:00",
+      "http_status": 200,
+      "error": null,
+      "raw_hash": "3849351ecf2bca290337e39bce9d95010f40ab622ede3115c3f1f72c58dae3b3",
+      "data": {
+        "api_source": "OpenAIRE Graph API V3 research products",
+        "api_documentation": "https://graph.openaire.eu/docs/apis/graph-api/",
+        "endpoint": "https://api.openaire.eu/graph/v3/research-products",
+        "query": "Acme Holdings",
+        "record_count": 1,
+        "truncated": false,
+        "records": [
+          {
+            "record_id": "doi_dedup::10.9999/aletheia.synthetic.0005",
+            "title": "Acme Holdings Research Products in the OpenAIRE Graph: A Synthetic Record",
+            "doi": "10.9999/aletheia.synthetic.0005",
+            "authors": [
+              "Jane Acme"
+            ],
+            "year": 2023,
+            "venue": "Synthetic Open Science Journal",
+            "url": "https://api.openaire.eu/graph/v3/research-products/doi_dedup::10.9999/aletheia.synthetic.0005",
+            "type": "publication",
+            "publisher": "Synthetic Open Science Press",
+            "publication_date": "2023-03-02"
+          }
+        ]
+      }
+    },
+    {
+      "source": "unpaywall",
+      "skipped": true,
+      "skip_reason": "Unpaywall documents no title, keyword or author search: its only live endpoint is a DOI lookup (GET /v2/:doi) and the documented title search (GET /v2/search?query=...) was retired on 18 September 2026 and now returns 410 Gone, so no documented search contract exists for this adapter's name-based input types.",
+      "timestamp": "2026-10-15T09:00:07+00:00",
+      "http_status": 0,
+      "error": null,
+      "raw_hash": null,
+      "data": null
+    }
+  ]
+}

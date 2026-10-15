@@ -40,3 +40,4 @@ docker build -f docker/ip_intelligence/Dockerfile -t aletheia/ip-intelligence:v1
 docker build -f docker/government_records_us/Dockerfile -t aletheia/gov-records-us:v1 docker/government_records_us
 docker build -f docker/corporate_registry/Dockerfile -t aletheia/corp-registry:v1 docker/corporate_registry
 docker build -f docker/sanctions_enforcement_watchlists/Dockerfile -t aletheia/sanctions-watchlists:v1 docker/sanctions_enforcement_watchlists
+docker build -f docker/academic_search/Dockerfile -t aletheia/academic-search:v1 docker/academic_search

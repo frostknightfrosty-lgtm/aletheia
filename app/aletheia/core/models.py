@@ -58,6 +58,7 @@ class EntityType(StrEnum):
     UNKNOWN = "unknown"
     GOVERNMENT_RECORD = "government_record"
     COMPANY_REGISTRY_RECORD = "company_registry_record"
+    ACADEMIC_RECORD = "academic_record"
 
 
 class RelationshipType(StrEnum):
