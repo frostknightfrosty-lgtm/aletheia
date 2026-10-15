@@ -2,7 +2,7 @@
 
 See `AUTONOMOUS_DIRECTIVE.md` for standing rules and `docs/BATCHING_PLAN.md` for the adapter plan.
 
-Last updated: 2026-10-16T18:05:00Z
+Last updated: 2026-10-17T06:05:00Z
 
 ## Read this first: the 38323854024 fabrication was isolated
 
@@ -38,12 +38,12 @@ artifacts exactly (`gravatar`, `rdap`, `ip_intelligence`, `government_records_us
 
 ## Current CI-verified state
 
-- **42 adapters registered, all `verified-fixture`; 43 Docker integration cases.**
-- `crypto_blockchain` verified by run `38797483163` on `9f53012`: `PARSER PREFLIGHT: PASS — 40/40 adapters have parser coverage`; `383 passed, 1 warning in 16.35s`; `DOCKER CAPTURE: PASS — 41/41 cases captured`; `results.json` 41 entries, 0 nonzero, SHA-256 `627BB124FA5203605A4558C43D6C48B6831355EDF8B128D8EBEF2AED7F1686CF`.
-- `patents_trademarks` verified by run `38801355462` on `0ae35e4`: `PARSER PREFLIGHT: PASS — 41/41 adapters have parser coverage`; `422 passed, 1 warning in 19.09s`; `DOCKER CAPTURE: PASS — 42/42 cases captured`; `results.json` 42 entries, 0 nonzero, SHA-256 `3911D3AB11896E516A06B7650BA3E4F65880E2FD9B4E14CD72A6871ADF6E7F80`.
-- `email_auth` verified by run `38803797734` on `9b949c7`: `PARSER PREFLIGHT: PASS — 42/42 adapters have parser coverage`; `455 passed, 1 warning in 20.21s`; `DOCKER CAPTURE: PASS — 43/43 cases captured`; `results.json` 43 entries, 0 nonzero, SHA-256 `02890FB948734A81E51AA5B0B5BBF2B93D2D4A7F7C3A58A36659749142946C4C`. Its `--health` inventory reports `checkdmarc` `package_version 6.0.4`, which is direct evidence the image pip pin installed.
-- Local at handoff: 412 passed, 43 skipped (the container smokes; `docker` is not on PATH here).
-- **Reusable cross-check:** local (passed + skipped) equals CI passed, because CI runs exactly the container smokes that skip locally. crypto 342 + 41 = 383; patents 380 + 42 = 422. If that identity breaks, something was skipped or deleted.
+- **44 adapters registered, all `verified-fixture`; 45 Docker integration cases.**
+- `code_search` verified by run `38811234205` on `f59458f`: parser `43/43`, `484 passed, 1 warning in 20.60s`, capture `44/44`.
+- `search_engines` verified by run `38813318506` on `316172b`: parser `44/44`, `518 passed, 1 warning in 15.38s`, capture `45/45`.
+- The count-drift burden is fixed: a new adapter should now require **no** edits to any other test file. If one is needed, treat it as a regression.
+- Local at handoff: 473 passed, 45 skipped (the container smokes; `docker` is not on PATH here).
+- **Reusable cross-check:** local (passed + skipped) equals CI passed exactly, because CI runs the container smokes that skip locally. It held three times this session: 412+43=455, 440+44=484, 473+45=518. If it breaks, a test was skipped or deleted.
 ## Plan divergence you must resolve before the next composites
 
 `docs/BATCHING_PLAN.md` lists 21 composites, but two already-implemented adapters absorbed part of
@@ -83,16 +83,15 @@ missing sub-sources only, and its manifest note says so.
 
 ## Next action
 
-1. Confirm the `email_auth` CI run is green, copy the three evidence lines from the downloaded artifact, and mark it
-   `verified-fixture` in a separate commit (Gate 5).
-2. Then build `code_search` (GitLab Search, Debian Code Search, PublicWWW), then `search_engines` (SearXNG,
-   Marginalia, Google Custom Search, Common Crawl Index). Verify every endpoint against vendor docs first and diff
-   the sub-source list against `PROJECT_MANIFEST.json`.
-3. One composite per commit and per CI run. Mark `verified-fixture` only from artifact-copied lines.
-4. **Known maintenance burden:** several earlier adapter tests hardcode derived counts — `tests/test_ssl_tls_adapter.py`
-   asserts the registry size, and `tests/test_phase3_manifest.py` asserts the DOMAIN-seed pending set. Every new
-   adapter must bump those. Updating a derived count is not weakening an assertion, but it should be called out in
-   the commit message, and the counts are worth moving into the manifest so they stop drifting.
+1. Pick the next composite from `docs/BATCHING_PLAN.md`. Still unimplemented: `geolocation_image`, `transport_movement`,
+   `transport_asset_registry`, `leak_checkers`, `research_discovery`, `social_username`, `social_profile`, `darkweb_search`,
+   `technical_surface_search`.
+2. Diff its sub-source list against `PROJECT_MANIFEST.json` first, then verify every endpoint against vendor docs before
+   writing code. `technical_surface_search` must NOT re-implement `checkdmarc` or `scan-mx`, which live in `email_auth`.
+3. One composite per commit and per CI run; mark `verified-fixture` only from artifact-copied lines (Gate 5).
+4. Preferred build shape: pre-verify the endpoints yourself, then hand one composite to a subagent forbidden from
+   touching `PROJECT_MANIFEST.json` or `tests/test_project_manifest.py`; verify its output independently, add the manifest
+   entry, commit, push, wait for CI, and copy the evidence.
 5. `corporate_financial_public_records` stays **excluded** (Gate 7); see `docs/NOT_INTEGRATED.md`.
 Docker is unavailable on this workstation. Image and container behaviour can only be verified in
 GitHub Actions.

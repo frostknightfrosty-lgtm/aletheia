@@ -1,12 +1,12 @@
 {
   "session_id": "2ba610de-14d2-4fab-925f-52a87db7e537",
-  "last_updated": "2026-10-16T18:00:00Z",
+  "last_updated": "2026-10-17T06:00:00Z",
   "last_commit": "bfd60de",
-  "last_ci_verified_commit": "9b949c727cad61425fe2cd940e5837b87dae9762",
-  "last_ci_run": "38803797734",
+  "last_ci_verified_commit": "316172b",
+  "last_ci_run": "38813318506",
   "last_ci_status": "green",
   "current_phase": "Phase 9 — batch adapter implementation",
-  "current_task": "crypto_blockchain, patents_trademarks and email_auth all implemented and CI-verified",
+  "current_task": "count-drift fix landed; code_search and search_engines implemented and CI-verified",
   "current_status": "complete",
   "completed_phases": [
     "Original Phases 1–7 baseline (subject to audit gaps documented in HANDOFF.md)",
@@ -33,7 +33,10 @@
     "Phase 9 ssl_tls adapter implemented and CI-verified after two honestly-failed runs: run 38669069783 failed the image build (E: Version 2.0.7-1 for sslscan was not found; fixed by commit 7b0ccbc removing the exact apt pins and echoing resolved versions with dpkg-query), and run 38789002369 failed one test because query_testssl/query_sslscan returned the artefact parse error instead of the tool exit code (fixed by commit a7c394d checking code != 0 first). Final verification: run 38791430700 on commit a7c394d, parser 39/39, 343 passed, capture 40/40, results.json 40 entries with 0 nonzero, SHA-256 5134BD59E5E6AAC2727088582414721A4308C01EF44E82A63221C1FD6B2964F6. Sub-sources qualys-ssl-labs, testssl, certgraph, sslscan, tlsx; cipherscan dropped (no releases or tags).",
     "Phase 9 crypto_blockchain adapter (6 sub-sources + crypttrace dropped) implemented and CI-verified: run 38797483163 on commit 9f53012d866c82c71ebd1a278e72f260181be099 (parser 40/40; 383 passed, 1 warning in 16.35s; capture 41/41; results.json 41 entries, 0 nonzero, SHA-256 627BB124FA5203605A4558C43D6C48B6831355EDF8B128D8EBEF2AED7F1686CF).",
     "Phase 9 patents_trademarks adapter (4 sub-sources + patentsview/google-patents-bigquery/euipo-esearch-plus dropped) implemented and CI-verified: run 38801355462 on commit 0ae35e49e7cc146fa432fe867432664861079441 (parser 41/41; 422 passed, 1 warning in 19.09s; capture 42/42; results.json 42 entries, 0 nonzero, SHA-256 3911D3AB11896E516A06B7650BA3E4F65880E2FD9B4E14CD72A6871ADF6E7F80).",
-    "Phase 9 email_auth adapter (scan-mx and checkdmarc, no drops) implemented and committed as 9b949c7; local 412 passed / 43 skipped; CI verification pending at the time of this state update."
+    "Phase 9 email_auth adapter (scan-mx and checkdmarc, no drops) implemented and committed as 9b949c7; local 412 passed / 43 skipped; CI verification pending at the time of this state update.",
+    "Tests: removed the count-drift burden. tests/test_ssl_tls_adapter.py and tests/test_email_auth_adapter.py now assert set(registry) == the manifest Docker-declared adapter set, and tests/test_phase3_manifest.py asserts the run pending set == the live registry DOMAIN-capable set. Both were proved to still fail when the source of truth is tampered with. Commits 4c2b38f and the email_auth follow-up in f59458f. The phase3/4/5 adapter tests were left alone: they assert frozen phase-specific registries, not the live one.",
+    "Phase 9 code_search adapter (1 sub-source debian-code-search; dropped gitlab-search and publicwww) CI-verified: run 38811234205 on commit f59458fa0a9f34dde19690bdd8dacf7686f80223 (parser 43/43; 484 passed in 20.60s; capture 44/44; SHA-256 9E5B842F42F7545DA089B7F92154161C1A1D18F8042C08276D81477AE61F5601).",
+    "Phase 9 search_engines adapter (2 sub-sources marginalia and common-crawl-index; dropped searxng and google-custom-search) CI-verified: run 38813318506 on commit 316172b (parser 44/44; 518 passed in 15.38s; capture 45/45; SHA-256 536C538DE9EA54A2836B40BA79D120F89ADB7D033E05028A7BFCEBB875885049)."
   ],
   "pending_phases": [
     "Phase 8 - audit chain, storage backends, and egress proxy (await user direction)",
@@ -47,7 +50,7 @@
     "Gate 3 - verify required API keys and costs before a phase depends on them",
     "Gate 5 - no adapter may be marked verified-fixture from a typed or predicted evidence line; the line must be copied from the downloaded CI artifact. This gate was opened because run 38323854024 violated it."
   ],
-  "next_action": "Confirm the email_auth CI run is green, copy its three evidence lines from the artifact, and mark email_auth verified-fixture. Then build code_search (GitLab Search, Debian Code Search, PublicWWW) - verify each endpoint from vendor docs first and diff against PROJECT_MANIFEST.json.",
+  "next_action": "Pick the next composite from docs/BATCHING_PLAN.md, diff its sub-source list against PROJECT_MANIFEST.json, then verify each endpoint against vendor docs before writing code. Remaining unimplemented composites include geolocation_image, transport_movement, transport_asset_registry, leak_checkers, research_discovery, social_username, social_profile, darkweb_search and technical_surface_search. technical_surface_search must NOT re-implement checkdmarc or scan-mx (they live in email_auth).",
   "files_in_flight": [],
-  "notes_for_next_session": "42 adapters registered; 43 Docker integration cases. crypto_blockchain and patents_trademarks are verified-fixture; email_auth is committed at 9b949c7 with its manifest entry still unverified-fixture pending CI. New adapters start at unverified-fixture and move to verified-fixture only from copied artifact lines (Gate 5). IMPORTANT emerging maintenance burden: several earlier adapter tests hardcode the registry size (tests/test_ssl_tls_adapter.py) and the DOMAIN pending set (tests/test_phase3_manifest.py), so every new adapter requires bumping those counts; that is a derived-count update, not a weakened assertion. A consistency check worth reusing: locally N passed + M skipped should equal CI passed, because CI runs the M container smokes that skip locally (verified for crypto: 342+41=383; patents: 380+42=422). Remaining composites in the requested order: code_search, search_engines. Docker is unavailable locally, so any Dockerfile change is first exercised in CI."
+  "notes_for_next_session": "44 adapters registered, all verified-fixture, all citing an artifact-backed run; 45 Docker integration cases. New adapters start at unverified-fixture and move to verified-fixture only from copied artifact lines (Gate 5). The count-drift fix means a new adapter should require NO edits to any other test file; if it does, that is a regression worth reporting. Consistency check to apply every time: local (passed + skipped) must equal CI passed. It held three times this session: 412+43=455, 440+44=484, 473+45=518. Build pattern that worked: pre-verify the endpoints yourself, delegate one composite to a subagent forbidden from touching PROJECT_MANIFEST.json or tests/test_project_manifest.py, then independently verify, add the manifest entry, commit, push, wait for CI, copy evidence. Docker is unavailable locally."
 }
