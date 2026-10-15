@@ -1,0 +1,62 @@
+{
+  "input_type": "name",
+  "input_value": "AletheiaSyntheticCodeQuery",
+  "timestamp": "2026-10-16T09:00:00+00:00",
+  "sources": [
+    {
+      "source": "debian-code-search",
+      "skipped": false,
+      "skip_reason": null,
+      "timestamp": "2026-10-16T09:00:01+00:00",
+      "http_status": 200,
+      "error": null,
+      "raw_hash": "04fbabc7950022afb5713e34990359b4f47da837a8c7503a2dd3b131926d180f",
+      "data": {
+        "api_source": "Debian Code Search (GET /api/v1/search)",
+        "api_documentation": "https://codesearch.debian.net/",
+        "openapi_specification": "https://codesearch.debian.net/openapi.json",
+        "endpoint": "https://codesearch.debian.net/api/v1/search?query=AletheiaSyntheticCodeQuery",
+        "invocation": "GET https://codesearch.debian.net/api/v1/search?query=<query> (optional match_mode=<match_mode>)",
+        "query": "AletheiaSyntheticCodeQuery",
+        "match_mode": null,
+        "record_count": 1,
+        "records": [
+          {
+            "record_id": "AletheiaSyntheticCodeQuery",
+            "detail": "Debian Code Search response document for query 'AletheiaSyntheticCodeQuery' recorded verbatim (object); the OpenAPI response schema was not part of the verified contract, so no field name is assumed.",
+            "response_type": "object"
+          }
+        ],
+        "response": {
+          "synthetic": true,
+          "note": "Synthetic response document for this fixture; no live API lookup occurred.",
+          "query": "AletheiaSyntheticCodeQuery",
+          "items": [
+            "synthetic-package/path/example.py"
+          ]
+        },
+        "truncated": false
+      }
+    },
+    {
+      "source": "gitlab-search",
+      "skipped": true,
+      "skip_reason": "GitLab's own Search API docs state verbatim \"Every call to this API requires authentication.\" (https://docs.gitlab.com/api/search/), and a live probe of GET https://gitlab.com/api/v4/search?scope=blobs&search=test returned HTTP 401. The code-search scope therefore cannot be used without a token, and no token flow is implemented.",
+      "timestamp": "2026-10-16T09:00:02+00:00",
+      "http_status": 0,
+      "error": null,
+      "raw_hash": null,
+      "data": null
+    },
+    {
+      "source": "publicwww",
+      "skipped": true,
+      "skip_reason": "PublicWWW's own API authentication docs state verbatim \"A paid plan is required: without one, every endpoint except / and /v1/account answers 403 plan_required.\" (https://publicwww.com/docs/api/authentication/). A paid-only source is barred by standing rule 4, so it is not implemented. (Its documented base URL is https://api.publicwww.com with an Authorization: Bearer header, recorded for context only.)",
+      "timestamp": "2026-10-16T09:00:03+00:00",
+      "http_status": 0,
+      "error": null,
+      "raw_hash": null,
+      "data": null
+    }
+  ]
+}

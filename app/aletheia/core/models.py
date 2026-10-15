@@ -71,6 +71,10 @@ class EntityType(StrEnum):
     # DNS-record results from the scan.mx API or the checkdmarc library. Added
     # for the email_auth batch adapter; no existing EntityType covered it.
     EMAIL_AUTH_RECORD = "email_auth_record"
+    # Composite technical-surface finding: a source-code search match returned by
+    # the code_search batch adapter, carrying a typed finding_kind. Added for the
+    # code_search batch adapter; no existing EntityType covered it.
+    TECHNICAL_FINDING = "technical_finding"
 
 
 class RelationshipType(StrEnum):

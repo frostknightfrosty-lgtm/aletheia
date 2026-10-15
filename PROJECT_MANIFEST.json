@@ -1278,6 +1278,35 @@
         }
       ],
       "note": "Synthetic fixture parser tests and the Docker health smoke passed in CI run 38803797734 on commit 9b949c727cad61425fe2cd940e5837b87dae9762 (https://github.com/frostknightfrosty-lgtm/aletheia/actions/runs/38803797734). Raw evidence copied from the artifact: PARSER PREFLIGHT: PASS \u2014 42/42 adapters have parser coverage; 455 passed, 1 warning in 20.21s; DOCKER CAPTURE: PASS \u2014 43/43 cases captured. results.json has 43 entries with 0 nonzero return codes and 43 stdout/stderr pairs; SHA-256 02890FB948734A81E51AA5B0B5BBF2B93D2D4A7F7C3A58A36659749142946C4C. Case phase9-email-auth returned 0 with stdout ok under --network none, and its --health inventory confirms scan-mx is usable as an http_api source and that the checkdmarc library imported with package_version 6.0.4, proving the image pin installed. No candidate was dropped. fixture file: tests/fixtures/email_auth.json. No live API lookups have occurred."
+    },
+    {
+      "name": "code_search",
+      "upstream": "https://github.com/frostknightfrosty-lgtm/aletheia/tree/main/docker/code_search",
+      "license": "Debian Code Search (open-source code search over Debian source packages; https://codesearch.debian.net/)",
+      "version_pin": "1.0",
+      "invocation": "HTTPS JSON Debian Code Search API via dedicated Docker runner (aletheia/code-search:v1)",
+      "input_types": [
+        "name"
+      ],
+      "output_schema": "TechnicalFinding[]",
+      "legal_notes": "Composite adapter covering the single verified sub-source of the code_search batch: debian-code-search, the Debian Code Search JSON API at GET https://codesearch.debian.net/api/v1/search. The two other candidates are dropped and never queried; the runner reports each once per run as a skipped source carrying its documented reason. Every endpoint, query-parameter name, authentication requirement, documented rate limit and documentation URL was read from the project's own OpenAPI specification (https://codesearch.debian.net/openapi.json, title Debian Code Search, version 1.4.0) and its own API-key FAQ (https://codesearch.debian.net/apikeys/faq); none was inferred from an example response. All of it is recorded in docker/code_search/RATE_LIMITS.md. Debian Code Search requires a free personal API key carried in the HTTP header x-dcs-apikey, obtained by logging in through salsa.debian.org or by emailing stapelberg@debian.org for a non-personal key. When DEBIAN_CODE_SEARCH_API_KEY is unset the sub-source is reported as a documented skip rather than sending a request the documentation says will be rejected with HTTP 403; no credential is stored in this repository and no key is printed or recorded. Debian Code Search publishes no numeric rate limit: the OpenAPI specification states none and the FAQ only explains that keys exist so the service can throttle individual callers, so the limit is recorded as not published and at most one request is issued per run. A source-code match is a hit in a published Debian source package, not proof that a person or organisation wrote, owns or operates that code. Every run contacts a third-party code-search service, so it needs authorization and the adapter requires the assertion.",
+      "network": "required",
+      "last_audited": "2026-10-16T00:00:00Z",
+      "verification_status": "unverified-fixture",
+      "fixture_provenance": "synthetic",
+      "legal_tier": 3,
+      "enabled_by_default": true,
+      "disabled_reason": null,
+      "batch_grouping": "code_search",
+      "requires_key": true,
+      "sub_sources": [
+        {
+          "name": "debian-code-search",
+          "requires_key": true,
+          "key_cost": "free"
+        }
+      ],
+      "note": "One sub-source implemented after verifying its contract from the project's own OpenAPI specification (https://codesearch.debian.net/openapi.json): debian-code-search, server https://codesearch.debian.net/api/v1, GET /search with required parameter query and optional match_mode, API key in the x-dcs-apikey header. Two candidates are dropped and reported once per run as audited skips: gitlab-search, because GitLab's own Search API documentation states verbatim that every call to the API requires authentication and a live probe of the blobs scope returned HTTP 401; and publicwww, because its own API authentication documentation states verbatim that a paid plan is required and that every endpoint except / and /v1/account answers 403 plan_required, which standing rule 4 forbids. Known limitation: the OpenAPI specification does not expose a response schema for /search, so the runner records the parsed JSON document verbatim as one normalized record rather than inventing field names; typed per-match extraction should be added once the response schema is read from the spec. Docker/CI verification is pending; no run ID and no CI evidence line is recorded here, and the local suite is not evidence of a container run. fixture file: tests/fixtures/code_search.json. No live API lookups have occurred."
     }
   ],
   "phase_1_scope": {

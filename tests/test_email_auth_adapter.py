@@ -21,6 +21,7 @@ from aletheia.core.models import (
     Seed,
     SeedType,
 )
+from aletheia.core.project_manifest import load_project_manifest
 
 from aletheia.adapters.email_auth import (
     SUPPORTED_SUB_SOURCES,
@@ -538,7 +539,17 @@ def test_adapter_is_registered_and_not_parser_test_exempt():
 
     registry = phase7_adapters()
     assert "email_auth" in registry
-    assert len(registry) == 42
+    # Derived from PROJECT_MANIFEST.json rather than hardcoded, so adding an adapter does not
+    # require editing this file. Set equality is stronger than a count: it fails if the registry
+    # has an adapter the manifest does not declare, or vice versa.
+    manifest = load_project_manifest(ROOT / "PROJECT_MANIFEST.json")
+    declared = {
+        entry["name"]
+        for entry in manifest["tool_inventory"]
+        if "Docker" in str(entry.get("invocation", ""))
+    }
+    assert declared, "expected the manifest to declare at least one Docker-invoked adapter"
+    assert set(registry) == declared
 
     descriptor = registry["email_auth"].descriptor
     assert descriptor.name == "email_auth"
