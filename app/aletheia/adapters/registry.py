@@ -24,6 +24,7 @@ from aletheia.adapters.sanctions_enforcement_watchlists import SanctionsEnforcem
 from aletheia.adapters.academic_search import AcademicSearchAdapter
 from aletheia.adapters.ssl_tls import SslTlsAdapter
 from aletheia.adapters.ip_intelligence import IPIntelligenceAdapter
+from aletheia.adapters.crypto_blockchain import CryptoBlockchainAdapter
 
 
 def phase1_adapters() -> dict[str, Adapter]:
@@ -77,4 +78,5 @@ def phase7_adapters() -> dict[str, Adapter]:
     adapters[SanctionsEnforcementWatchlistsAdapter.descriptor.name] = SanctionsEnforcementWatchlistsAdapter()
     adapters[AcademicSearchAdapter.descriptor.name] = AcademicSearchAdapter()
     adapters[SslTlsAdapter.descriptor.name] = SslTlsAdapter()
+    adapters[CryptoBlockchainAdapter.descriptor.name] = CryptoBlockchainAdapter()
     return adapters

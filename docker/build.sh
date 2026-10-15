@@ -42,3 +42,4 @@ docker build -f docker/corporate_registry/Dockerfile -t aletheia/corp-registry:v
 docker build -f docker/sanctions_enforcement_watchlists/Dockerfile -t aletheia/sanctions-watchlists:v1 docker/sanctions_enforcement_watchlists
 docker build -f docker/academic_search/Dockerfile -t aletheia/academic-search:v1 docker/academic_search
 docker build -f docker/ssl_tls/Dockerfile -t aletheia/ssl-tls:v1 docker/ssl_tls
+docker build -f docker/crypto_blockchain/Dockerfile -t aletheia/crypto-blockchain:v1 docker/crypto_blockchain

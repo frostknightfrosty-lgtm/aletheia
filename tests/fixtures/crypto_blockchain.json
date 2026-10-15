@@ -1,0 +1,172 @@
+{
+  "input_type": "crypto_address",
+  "input_value": "1SyntheticCryptoAddrForFixture",
+  "timestamp": "2026-10-16T09:00:00+00:00",
+  "sources": [
+    {
+      "source": "mempool-space",
+      "skipped": false,
+      "skip_reason": null,
+      "timestamp": "2026-10-16T09:00:01+00:00",
+      "http_status": 200,
+      "error": null,
+      "raw_hash": "9112c4abc0dd02395155e44ecfb2d2a1572b6938eef7d69b3bd593b26c20a4ff",
+      "data": {
+        "api_source": "mempool.space REST API (Bitcoin)",
+        "api_documentation": "https://mempool.space/docs/api/rest",
+        "address_family": "bitcoin",
+        "endpoint": "https://mempool.space/api/address/1SyntheticCryptoAddrForFixture",
+        "invocation": "GET https://mempool.space/api/address/<address>",
+        "query": "1SyntheticCryptoAddrForFixture",
+        "record_count": 1,
+        "records": [
+          {
+            "record_id": "1SyntheticCryptoAddrForFixture",
+            "detail": "mempool.space address summary: 7 confirmed transactions, funded 15007599040 sat, spent 15007599040 sat",
+            "chain_tx_count": 7,
+            "chain_funded_txo_count": 5,
+            "chain_funded_txo_sum": 15007599040,
+            "chain_spent_txo_count": 5,
+            "chain_spent_txo_sum": 15007599040,
+            "mempool_tx_count": 0,
+            "mempool_funded_txo_sum": 0
+          }
+        ],
+        "truncated": false
+      }
+    },
+    {
+      "source": "blockstream-esplora",
+      "skipped": false,
+      "skip_reason": null,
+      "timestamp": "2026-10-16T09:00:02+00:00",
+      "http_status": 200,
+      "error": null,
+      "raw_hash": "aa25a3b4f1432791a96841d249936c9dbc85e02798d14d5c87422ff3c59a83a5",
+      "data": {
+        "api_source": "Blockstream Esplora HTTP API (Bitcoin)",
+        "api_documentation": "https://github.com/Blockstream/esplora/blob/master/API.md",
+        "address_family": "bitcoin",
+        "endpoint": "https://blockstream.info/api/address/1SyntheticCryptoAddrForFixture",
+        "invocation": "GET https://blockstream.info/api/address/<address>",
+        "query": "1SyntheticCryptoAddrForFixture",
+        "record_count": 1,
+        "records": [
+          {
+            "record_id": "1SyntheticCryptoAddrForFixture",
+            "detail": "Blockstream Esplora address summary: 7 confirmed transactions, funded 15007599040 sat, spent 15007599040 sat",
+            "chain_tx_count": 7,
+            "chain_funded_txo_count": 5,
+            "chain_funded_txo_sum": 15007599040,
+            "chain_spent_txo_count": 5,
+            "chain_spent_txo_sum": 15007599040,
+            "mempool_tx_count": 0,
+            "mempool_funded_txo_sum": 0
+          }
+        ],
+        "truncated": false
+      }
+    },
+    {
+      "source": "blockchair",
+      "skipped": false,
+      "skip_reason": null,
+      "timestamp": "2026-10-16T09:00:03+00:00",
+      "http_status": 200,
+      "error": null,
+      "raw_hash": "e258b5ee9a0c2d1217ddbb985d0803a2e71b32295fb5098683084fd3e4a513a4",
+      "data": {
+        "api_source": "Blockchair API (bitcoin address dashboard)",
+        "api_documentation": "https://blockchair.com/api/docs",
+        "address_family": "bitcoin",
+        "chain": "bitcoin",
+        "context_code": 200,
+        "endpoint": "https://api.blockchair.com/bitcoin/dashboards/address/1SyntheticCryptoAddrForFixture",
+        "invocation": "GET https://api.blockchair.com/<chain>/dashboards/address/<address>",
+        "query": "1SyntheticCryptoAddrForFixture",
+        "record_count": 1,
+        "records": [
+          {
+            "record_id": "1SyntheticCryptoAddrForFixture",
+            "detail": "Blockchair bitcoin address dashboard: balance 0, transaction_count 7",
+            "balance": 0,
+            "transaction_count": 7,
+            "received": 15007599040,
+            "spent": 15007599040,
+            "type": "address",
+            "first_seen_receiving": "2026-01-02 03:04:05",
+            "last_seen_receiving": "2026-06-07 08:09:10",
+            "first_seen_spending": "2026-02-03 04:05:06",
+            "last_seen_spending": "2026-06-08 09:10:11"
+          }
+        ],
+        "truncated": false
+      }
+    },
+    {
+      "source": "etherscan-v2",
+      "skipped": true,
+      "skip_reason": "ETHERSCAN_API_KEY is not set. The Etherscan API V2 documents a mandatory apikey query parameter and answers NOTOK \"Missing/Invalid API Key\" without one, so the sub-source is not queried.",
+      "timestamp": "2026-10-16T09:00:04+00:00",
+      "http_status": 0,
+      "error": null,
+      "raw_hash": null,
+      "data": null
+    },
+    {
+      "source": "blockcypher",
+      "skipped": false,
+      "skip_reason": null,
+      "timestamp": "2026-10-16T09:00:05+00:00",
+      "http_status": 200,
+      "error": null,
+      "raw_hash": "08b36b6b983d2b62dd9a8a83548d0d42007830b903c087b53d422fce00eff75a",
+      "data": {
+        "api_source": "BlockCypher Address Endpoint (btc/main)",
+        "api_documentation": "https://www.blockcypher.com/dev/bitcoin/",
+        "address_family": "bitcoin",
+        "coin": "btc",
+        "network": "main",
+        "endpoint": "https://api.blockcypher.com/v1/btc/main/addrs/1SyntheticCryptoAddrForFixture",
+        "invocation": "GET https://api.blockcypher.com/v1/<coin>/main/addrs/<address>",
+        "query": "1SyntheticCryptoAddrForFixture",
+        "record_count": 1,
+        "records": [
+          {
+            "record_id": "1SyntheticCryptoAddrForFixture",
+            "detail": "BlockCypher btc address: balance 0, final_balance 0, n_tx 7",
+            "balance": 0,
+            "final_balance": 0,
+            "total_received": 15007599040,
+            "total_sent": 15007599040,
+            "unconfirmed_balance": 0,
+            "n_tx": 7,
+            "unconfirmed_n_tx": 0,
+            "final_n_tx": 7
+          }
+        ],
+        "truncated": false
+      }
+    },
+    {
+      "source": "chainabuse",
+      "skipped": true,
+      "skip_reason": "CHAINABUSE_API_KEY is not set. The Chainabuse Get Reports API documents HTTP Basic authentication with the API key as the username (the password may be blank) and answers HTTP 401 {\"message\":\"Invalid credentials\"} without credentials, so the sub-source is not queried.",
+      "timestamp": "2026-10-16T09:00:06+00:00",
+      "http_status": 0,
+      "error": null,
+      "raw_hash": null,
+      "data": null
+    },
+    {
+      "source": "crypttrace",
+      "skipped": true,
+      "skip_reason": "crypttrace publishes no documented importable API: its own PyPI page and GitHub README (https://pypi.org/project/crypttrace/ and https://github.com/bobslayerX/crypttrace) document only a terminal CLI (pipx install \"crypttrace[web]\" then the crypttrace command) and a local web app. Neither page publishes a library import example or any documented Python API surface, so no importable API can be verified from its own project page.",
+      "timestamp": "2026-10-16T09:00:07+00:00",
+      "http_status": 0,
+      "error": null,
+      "raw_hash": null,
+      "data": null
+    }
+  ]
+}

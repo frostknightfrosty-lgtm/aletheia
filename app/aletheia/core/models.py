@@ -27,6 +27,7 @@ class SeedType(StrEnum):
     VIN = "vin"
     PERSON_NAME = "person_name"
     LOBBYIST_NAME = "lobbyist_name"
+    CRYPTO_ADDRESS = "crypto_address"
 
 
 class EntityType(StrEnum):
@@ -60,6 +61,7 @@ class EntityType(StrEnum):
     COMPANY_REGISTRY_RECORD = "company_registry_record"
     ACADEMIC_RECORD = "academic_record"
     TLS_OBSERVATION = "tls_observation"
+    BLOCKCHAIN_INTEL_RECORD = "blockchain_intel_record"
 
 
 class RelationshipType(StrEnum):

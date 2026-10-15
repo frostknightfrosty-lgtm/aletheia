@@ -1,0 +1,57 @@
+# Rate Limits, Authentication and Pins for the crypto_blockchain Batch Adapter Sub-Sources
+
+Every endpoint, query-parameter name, authentication requirement and documented limit below was read from the sub-source's own official documentation, and every implemented endpoint was additionally exercised by a keyless HTTP probe where the network allowed it. Where a source publishes no numeric limit this file says **not published** rather than inventing a number. No endpoint, parameter name or version here was inferred from an example response.
+
+**Environment-variable names are this adapter's own configuration names, not vendor-published facts.** No vendor in this batch publishes an environment-variable name. Each name below is mapped to the exact credential the vendor's own documentation requires (an `apikey` query parameter, a `key` query parameter, a `token` query parameter, or HTTP Basic auth). The adapter chooses only the variable name; it invents no vendor fact.
+
+## Sub-source summary
+
+| Sub-source | Chain scope | Address endpoint (verbatim from the vendor's docs) | Txid endpoint (verbatim from the vendor's docs) | Auth (env var) | Documented limit | Format | Official docs URL |
+|---|---|---|---|---|---|---|---|
+| mempool-space | Bitcoin only | `GET https://mempool.space/api/address/:address` | `GET https://mempool.space/api/tx/:txid` | None | **not published** — the REST reference states: "Note that we enforce rate limits. If you exceed these limits, you will get an HTTP 429 error. If you repeatedly exceed the limits, you may be banned from accessing the service altogether." No number is published. | JSON | https://mempool.space/docs/api/rest |
+| blockstream-esplora | Bitcoin only | `GET https://blockstream.info/api/address/:address` | `GET https://blockstream.info/api/tx/:txid` | None | **not published** | JSON | https://github.com/Blockstream/esplora/blob/master/API.md |
+| blockchair | Bitcoin and Ethereum | `GET https://api.blockchair.com/{chain}/dashboards/address/{address}` where `{chain}` is `bitcoin` or `ethereum` | `GET https://api.blockchair.com/{chain}/dashboards/transaction/{hash}` | Optional free key in the `key` query parameter (`BLOCKCHAIR_API_KEY`). The docs state a key is required for applications and that a free Public API key can be requested from info@blockchair.com; keyless use is tolerated "occasionally" and resource-heavy keyless use is answered with HTTP 430. | **30 requests per minute** ("it has been free to use ... with a limit of 30 requests per minute"). HTTP 430 is returned when a client is temporarily blacklisted for exceeding resource use; HTTP 435 for exceeding the parallel-request limit. | JSON | https://blockchair.com/api/docs (vendor mirror: https://github.com/Blockchair/Blockchair.Support/blob/master/API.md) |
+| etherscan-v2 | Ethereum (`chainid=1`) | `GET https://api.etherscan.io/v2/api?chainid=1&module=account&action=txlist&address={address}&page=1&offset=25&sort=desc&apikey={apikey}` (address balance uses `action=balance&tag=latest`) | Not queried by this runner. The documented V2 proxy module exposes `module=proxy&action=eth_getTransactionByHash&txhash={hash}`. | Free API key in the `apikey` query parameter (`ETHERSCAN_API_KEY`); a request without one is answered `{"status":"0","message":"NOTOK","result":"Missing/Invalid API Key"}` (observed on a keyless probe). | Free tier: **3 calls/second, up to 100,000 calls/day**. | JSON | https://docs.etherscan.io/make-your-first-call and https://docs.etherscan.io/rate-limits |
+| blockcypher | Bitcoin (`btc/main`) and Ethereum (`eth/main`) | `GET https://api.blockcypher.com/v1/{coin}/main/addrs/{address}` where `{coin}` is `btc` or `eth` | `GET https://api.blockcypher.com/v1/{coin}/main/txs/{txid}` | Optional token as a URL parameter, `?token={token}` (`BLOCKCYPHER_API_TOKEN`); "Adding your token as URL parameter". | **Default, non-registered limit 3 requests/second** ("the default, non-registered rate limit per second is 3"). Registered token limits are read from `GET https://api.blockcypher.com/v1/tokens/{token}` and the docs' example shows `"api/second": 500` and `"api/hour": 10000`. | JSON | https://www.blockcypher.com/dev/bitcoin/ |
+| chainabuse | Multi-chain screening (chain filter is optional and not sent) | `GET https://api.chainabuse.com/v0/reports?address={address}` | Not offered: the API screens addresses, token IDs and domains; it documents no transaction-by-hash lookup. | HTTP Basic, API key as the username with a blank password (`CHAINABUSE_API_KEY`); a request without credentials is answered `HTTP 401 {"message":"Invalid credentials"}` (observed on a keyless probe). | Standard API key: **10 calls per month** (1 call = a maximum of 50 reports). Partner access: **max 5,000 calls/hour**, response time P50 75 ms / P95 607 ms. | JSON | https://docs.chainabuse.com/reference/reports-1 |
+
+Chain scope: the runner classifies the seed as a Bitcoin address, an Ethereum address or unknown and only sends it to sub-sources whose documentation accepts that chain. A chain mismatch is reported as a documented skip with the reason, never sent to an endpoint whose documentation does not accept it.
+
+## Phase A keyless probe results (verbatim)
+
+Probes were run from the development host on 2026-10-16 with a plain `urllib` GET and a 25 s timeout. `status=0` means the request failed at the network layer (no HTTP response was received).
+
+| Probe URL | Result |
+|---|---|
+| `https://mempool.space/api/address/1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa` | `status=0` — `URLError: <urlopen error [WinError 10054] An existing connection was forcibly closed by the remote host>` (and `curl: (35) Recv failure: Connection was reset`). The host was unreachable from this network. The endpoint and parameter were therefore verified from the project's own REST reference instead (the page documents `curl -sSL "https://mempool.space/api/address/<address>"`). |
+| `https://mempool.space/api/tx/4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b` | `status=0` — connection reset, as above. |
+| `https://blockstream.info/api/address/1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa` | `status=200`, `content-type=application/json`, body head `{"address":"1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa","chain_stats":{"funded_txo_count":80405,...` |
+| `https://blockstream.info/api/tx/4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b` | `status=200`, `content-type=application/json`, body head `{"txid":"4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b","version":1,...` |
+| `https://api.blockchair.com/bitcoin/dashboards/address/1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa` | `status=430`, `content-type=application/json`, body head `{"data":null,"context":{"code":430,"error":"Your IP address is temporary blacklisted due to exceeding usage of API resources. Please apply for an API key by contacting us at info@blockchair.com",...` — the documented over-use error, not a contract failure. |
+| `https://api.blockchair.com/ethereum/dashboards/address/0xde0b295669a9fd93d5f28d9ec85e40f4cb697bae` | `status=430`, as above. |
+| `https://api.etherscan.io/v2/api?chainid=1&module=account&action=balance&address=0xde0b...&tag=latest` (no key) | `status=200`, body `{"status":"0","message":"NOTOK","result":"Missing/Invalid API Key"}` — confirms the documented mandatory `apikey`. |
+| `https://api.blockcypher.com/v1/btc/main/addrs/1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa` | `status=200`, `content-type=application/json`, body head `{   "address": "1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa",   "total_received": 10767376039, ...` |
+| `https://api.blockcypher.com/v1/eth/main/addrs/0xde0b295669a9fd93d5f28d9ec85e40f4cb697bae` | `status=200`, `content-type=application/json`, body head `{   "address": "0xde0b295669a9fd93d5f28d9ec85e40f4cb697bae",   "total_received": 11918279661583891664050018, ...` |
+| `https://api.blockcypher.com/v1/btc/main/txs/4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b` | `status=200`, `content-type=application/json`, body head `{   "block_hash": "000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f", ...` |
+| `https://api.chainabuse.com/v0/reports?address=1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa` (no credentials) | `status=401`, `content-type=application/json; charset=utf-8`, body `{"message":"Invalid credentials"}` — confirms the documented HTTP Basic authentication. |
+
+## Dropped candidate
+
+| Candidate | Reason it was dropped | Source URL |
+|---|---|---|
+| crypttrace | The batching plan lists crypttrace as a Python package for wallet-flow analysis, but its own project page documents **no importable API**. The PyPI page and the GitHub README document only a terminal CLI (`pipx install "crypttrace[web]"`, then the `crypttrace` command) and a local Flask web app; neither publishes a library import example or any documented Python API surface. Because no documented importable API exists to verify, the candidate is dropped rather than guessed. The runner still reports it once per run as a skipped source carrying this exact reason, and never installs or imports it. | https://pypi.org/project/crypttrace/ and https://github.com/bobslayerX/crypttrace |
+
+## Overlap with existing adapters
+
+**None.** The batch owner checked `PROJECT_MANIFEST.json` and found no existing adapter covering any of these sub-sources: no manifest entry covers mempool.space, Blockstream Esplora, Blockchair, the Etherscan API V2, BlockCypher or Chainabuse, and none of the seven candidates is implemented inside another adapter. Every sub-source here is therefore implemented in `docker/crypto_blockchain/runner.py` and none is deferred to a sibling adapter. (`ip_intelligence` covers IP address intelligence, `sanctions_enforcement_watchlists` covers government sanctions lists and `academic_search` covers scholarly records; none of them queries an on-chain explorer or Chainabuse.)
+
+## Version pins
+
+None of the six sub-sources is a locally installed tool, so there is no artefact to pin. The image is `python:3.13-slim-bookworm` and the only versioned API surface used is the Etherscan API V2 (`/v2/api`) and the Chainabuse Public API v1.2, both recorded above. No version was invented. This adapter's own descriptor is pinned at `version_pin="1.0"`.
+
+## Notes
+
+- **--health never touches the network.** `docker run --rm --network none <image> --health` prints exactly `ok` on stdout and an inventory JSON line on stderr listing each sub-source, its kind (`http_api` or `dropped`), its endpoint and whether its credential environment variable is configured, with `"network_used": false`. It opens no socket and reads no secret value into the output (only a boolean).
+- **Secrets are never printed or recorded.** The Etherscan `apikey`, the Blockchair `key` and the BlockCypher `token` are sent only in the request URL, and the recorded `endpoint` contains `<configured>` in their place. The Chainabuse API key is sent only in the `Authorization: Basic` header.
+- **One request per sub-source per run.** The runner issues at most one HTTP request per implemented sub-source (six requests total) and never paginates. Etherscan's `offset` is capped at 25 records and Chainabuse's report list is truncated to 25 records, with the untruncated count recorded in `record_count`/`count`.
+- **A hit is not a conclusion.** A Chainabuse report is a user or partner submission, not a court finding, and an on-chain address summary is not attributable to a person without further evidence.

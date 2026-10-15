@@ -64,7 +64,7 @@ jobs:
           set -o pipefail
           python -m pytest -q 2>&1 | tee ci-artifacts/pytest-full.log
 
-      - name: Capture raw output for all 40 Docker integration cases
+      - name: Capture raw output for all 41 Docker integration cases
         if: always()
         run: |
           set -euo pipefail
