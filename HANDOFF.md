@@ -2,7 +2,7 @@
 
 See `AUTONOMOUS_DIRECTIVE.md` for standing rules and `docs/BATCHING_PLAN.md` for the adapter plan.
 
-Last updated: 2026-10-15T00:45:00Z
+Last updated: 2026-10-16T00:40:00Z
 
 ## Read this first: the 38323854024 fabrication was isolated
 
@@ -38,11 +38,13 @@ artifacts exactly (`gravatar`, `rdap`, `ip_intelligence`, `government_records_us
 
 ## Current CI-verified state
 
-- 37 adapters registered, all `verified-fixture`, all citing an artifact-backed run.
-- 38 Docker integration cases; `PARSER PREFLIGHT: PASS — 37/37 adapters have parser coverage`.
-- Latest verified run: `38647832837` on commit `e74e8b4` —
-  `210 passed, 1 warning in 23.25s`, `DOCKER CAPTURE: PASS — 37/37 cases captured`.
-- Local: 245 collected, 207 passed, 38 skipped (the container smokes; `docker` is not on PATH here).
+- 38 adapters registered, all `verified-fixture`, all citing an artifact-backed run.
+- 39 Docker integration cases; `PARSER PREFLIGHT: PASS — 38/38 adapters have parser coverage`.
+- Latest verified run: `38658742093` on commit `9a24be885d88e740f078b6bdf5c62944f5002024` —
+  `292 passed, 1 warning in 15.83s`, `DOCKER CAPTURE: PASS — 39/39 cases captured`,
+  `results.json` 39 entries with 0 nonzero return codes, SHA-256
+  `1C91399BD3271A49AA69437E683921449EA625BCC290D29A416FC8EEF4946B60`.
+- Local: 292 collected, 253 passed, 39 skipped (the container smokes; `docker` is not on PATH here).
   Local pytest needs `rapidfuzz` and `reportlab`; CI gets them from `pip install -e '.[dev]'`.
 
 ## Plan divergence you must resolve before the next composites
@@ -84,12 +86,14 @@ missing sub-sources only, and its manifest note says so.
 
 ## Next action
 
-1. `corporate_financial_public_records` is **excluded, not pending** (Gate 7). Do not build it: FollowTheMoney
-   publishes no name-query contract and OpenSecrets discontinued its API on 2025-04-15. See `docs/NOT_INTEGRATED.md`.
-2. For the next composite, diff its sub-source list against `PROJECT_MANIFEST.json` first and build only what is
-   not already live. The plan is a transcript whose premises have now failed re-verification twice.
-3. Re-verify every endpoint against the vendor's own documentation before writing code, and paste the raw probe
-   output into `docs/NOT_INTEGRATED.md` when a source fails.
+1. Build `ssl_tls` next (Qualys SSL Labs, testssl.sh, CipherScan, CertGraph, sslscan, tlsx). Verify each
+   sub-source against its vendor documentation first; several are local TLS probe tools rather than HTTP APIs,
+   so plan for local-tool sub-sources instead of endpoints.
+2. Then `crypto_blockchain`, `patents_trademarks`, `email_auth`, `code_search`, `search_engines`, in that order.
+3. Diff every composite sub-source list against `PROJECT_MANIFEST.json` before building. None of the remaining
+   six overlap anything already live as of this handoff.
+4. One composite per commit and per CI run. Mark `verified-fixture` only from artifact-copied lines (Gate 5).
+5. `corporate_financial_public_records` stays **excluded** (Gate 7); see `docs/NOT_INTEGRATED.md`.
 
 Docker is unavailable on this workstation. Image and container behaviour can only be verified in
 GitHub Actions.
