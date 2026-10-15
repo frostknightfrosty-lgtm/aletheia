@@ -38,10 +38,10 @@ artifacts exactly (`gravatar`, `rdap`, `ip_intelligence`, `government_records_us
 
 ## Current CI-verified state
 
-- 42 adapters registered; 43 Docker integration cases.
+- **42 adapters registered, all `verified-fixture`; 43 Docker integration cases.**
 - `crypto_blockchain` verified by run `38797483163` on `9f53012`: `PARSER PREFLIGHT: PASS — 40/40 adapters have parser coverage`; `383 passed, 1 warning in 16.35s`; `DOCKER CAPTURE: PASS — 41/41 cases captured`; `results.json` 41 entries, 0 nonzero, SHA-256 `627BB124FA5203605A4558C43D6C48B6831355EDF8B128D8EBEF2AED7F1686CF`.
 - `patents_trademarks` verified by run `38801355462` on `0ae35e4`: `PARSER PREFLIGHT: PASS — 41/41 adapters have parser coverage`; `422 passed, 1 warning in 19.09s`; `DOCKER CAPTURE: PASS — 42/42 cases captured`; `results.json` 42 entries, 0 nonzero, SHA-256 `3911D3AB11896E516A06B7650BA3E4F65880E2FD9B4E14CD72A6871ADF6E7F80`.
-- `email_auth` is committed at `9b949c7` with its manifest entry still `unverified-fixture`; its CI run was still in progress when this handoff was written. Confirm it, then mark it from copied artifact lines.
+- `email_auth` verified by run `38803797734` on `9b949c7`: `PARSER PREFLIGHT: PASS — 42/42 adapters have parser coverage`; `455 passed, 1 warning in 20.21s`; `DOCKER CAPTURE: PASS — 43/43 cases captured`; `results.json` 43 entries, 0 nonzero, SHA-256 `02890FB948734A81E51AA5B0B5BBF2B93D2D4A7F7C3A58A36659749142946C4C`. Its `--health` inventory reports `checkdmarc` `package_version 6.0.4`, which is direct evidence the image pip pin installed.
 - Local at handoff: 412 passed, 43 skipped (the container smokes; `docker` is not on PATH here).
 - **Reusable cross-check:** local (passed + skipped) equals CI passed, because CI runs exactly the container smokes that skip locally. crypto 342 + 41 = 383; patents 380 + 42 = 422. If that identity breaks, something was skipped or deleted.
 ## Plan divergence you must resolve before the next composites
