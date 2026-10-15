@@ -1202,6 +1202,50 @@
         }
       ],
       "note": "Synthetic fixture parser tests and the Docker health smoke passed in CI run 38797483163 on commit 9f53012d866c82c71ebd1a278e72f260181be099 (https://github.com/frostknightfrosty-lgtm/aletheia/actions/runs/38797483163). Raw evidence copied from the artifact: PARSER PREFLIGHT: PASS \u2014 40/40 adapters have parser coverage; 383 passed, 1 warning in 16.35s; DOCKER CAPTURE: PASS \u2014 41/41 cases captured. results.json has 41 entries with 0 nonzero return codes and 41 stdout/stderr pairs; SHA-256 627BB124FA5203605A4558C43D6C48B6831355EDF8B128D8EBEF2AED7F1686CF. Case phase9-crypto-blockchain returned 0 with stdout ok under --network none. Six sub-sources are implemented: mempool-space, blockstream-esplora, blockchair, etherscan-v2, blockcypher and chainabuse. crypttrace is dropped because its own PyPI page and README document only a terminal CLI and a local web app, with no documented importable Python API; the runner reports it once per run as skipped with that reason. fixture file: tests/fixtures/crypto_blockchain.json. No live API lookups have occurred."
+    },
+    {
+      "name": "patents_trademarks",
+      "upstream": "https://github.com/frostknightfrosty-lgtm/aletheia/tree/main/docker/patents_trademarks",
+      "license": "Composite adapter; sub-sources are the USPTO Open Data Portal API, the USPTO Trademark Status and Document Retrieval (TSDR) API and the EPO Open Patent Services (OPS) API",
+      "version_pin": "1.0",
+      "invocation": "HTTPS patent and trademark APIs via dedicated Docker runner (aletheia/patents-trademarks:v1)",
+      "input_types": [
+        "intellectual_property"
+      ],
+      "output_schema": "PatentsTrademarksFinding[]",
+      "legal_notes": "Composite adapter covering the four verified sub-sources of the patents_trademarks batch: uspto-open-data (USPTO Open Data Portal patent application search), uspto-patent-assignment (USPTO Open Data Portal patent application assignment data), uspto-tsdr (USPTO Trademark Status and Document Retrieval case status) and epo-ops (EPO Open Patent Services published-data search). This composite absorbs EPO OPS and Google Patents from the plan's separate research_discovery row: EPO OPS is implemented here as epo-ops and must not be implemented again by research_discovery, and Google Patents is dropped as google-patents-bigquery. patentsview and euipo-esearch-plus are also dropped; each dropped candidate is reported once per run as an audited skip with its documented reason, and no endpoint or parameter was invented for it. Every endpoint, query-parameter name, authentication requirement, documented rate limit and documentation URL was read from the provider's own documentation or confirmed against the live provider endpoint and is recorded in docker/patents_trademarks/RATE_LIMITS.md. All four sub-sources require free credentials and are reported as documented skips when the matching environment variable is unset; no key is ever printed or recorded. A patent or trademark register record is a source observation, not proof of ownership, inventorship or use. Every run contacts third-party patent and trademark registries, so it requires authorization and the adapter requires the assertion.",
+      "network": "required",
+      "last_audited": "2026-10-16T00:00:00Z",
+      "verification_status": "unverified-fixture",
+      "fixture_provenance": "synthetic",
+      "legal_tier": 3,
+      "enabled_by_default": true,
+      "disabled_reason": null,
+      "batch_grouping": "patents_trademarks",
+      "requires_key": false,
+      "sub_sources": [
+        {
+          "name": "uspto-open-data",
+          "requires_key": true,
+          "key_cost": "free"
+        },
+        {
+          "name": "uspto-patent-assignment",
+          "requires_key": true,
+          "key_cost": "free"
+        },
+        {
+          "name": "uspto-tsdr",
+          "requires_key": true,
+          "key_cost": "free"
+        },
+        {
+          "name": "epo-ops",
+          "requires_key": true,
+          "key_cost": "free"
+        }
+      ],
+      "note": "Four sub-sources implemented after re-verifying each provider's own documentation and live endpoint: uspto-open-data, uspto-patent-assignment (both USPTO Open Data Portal, free X-API-KEY), uspto-tsdr (USPTO TSDR, free USPTO-API-KEY, 60 requests per key per minute documented) and epo-ops (EPO OPS, free consumer key and secret, OAuth2 client credentials; requests-per-second not published). Three candidates were dropped: patentsview, whose documented API host search.patentsview.org no longer resolves (NXDOMAIN from both the system resolver and 1.1.1.1, independently confirmed); google-patents-bigquery, which requires a Google Cloud project, service-account credentials and a third-party client library, with no unauthenticated or free-key path to the public dataset; and euipo-esearch-plus, whose API access requires an account plus sandbox and production approval rather than a free key. All three are reported once per run as audited skips with those reasons. This composite absorbs EPO OPS and Google Patents from the plan's separate research_discovery row. Docker/CI verification is pending; no run ID and no CI evidence line is recorded here, and the local suite is not evidence of a container run. fixture file: tests/fixtures/patents_trademarks.json. No live API lookups have occurred."
     }
   ],
   "phase_1_scope": {

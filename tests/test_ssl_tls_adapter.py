@@ -750,7 +750,7 @@ def test_adapter_is_registered_and_not_parser_test_exempt():
 
     registry = phase7_adapters()
     assert "ssl_tls" in registry
-    assert len(registry) == 40
+    assert len(registry) == 41
 
     descriptor = registry["ssl_tls"].descriptor
     assert descriptor.name == "ssl_tls"

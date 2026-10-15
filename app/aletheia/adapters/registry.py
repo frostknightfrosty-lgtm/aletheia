@@ -25,6 +25,7 @@ from aletheia.adapters.academic_search import AcademicSearchAdapter
 from aletheia.adapters.ssl_tls import SslTlsAdapter
 from aletheia.adapters.ip_intelligence import IPIntelligenceAdapter
 from aletheia.adapters.crypto_blockchain import CryptoBlockchainAdapter
+from aletheia.adapters.patents_trademarks import PatentsTrademarksAdapter
 
 
 def phase1_adapters() -> dict[str, Adapter]:
@@ -79,4 +80,5 @@ def phase7_adapters() -> dict[str, Adapter]:
     adapters[AcademicSearchAdapter.descriptor.name] = AcademicSearchAdapter()
     adapters[SslTlsAdapter.descriptor.name] = SslTlsAdapter()
     adapters[CryptoBlockchainAdapter.descriptor.name] = CryptoBlockchainAdapter()
+    adapters[PatentsTrademarksAdapter.descriptor.name] = PatentsTrademarksAdapter()
     return adapters

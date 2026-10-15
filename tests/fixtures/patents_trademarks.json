@@ -1,0 +1,160 @@
+{
+  "input_type": "intellectual_property",
+  "input_value": "99999999",
+  "timestamp": "2026-10-16T09:00:00+00:00",
+  "sources": [
+    {
+      "source": "uspto-open-data",
+      "skipped": false,
+      "skip_reason": null,
+      "timestamp": "2026-10-16T09:00:01+00:00",
+      "http_status": 200,
+      "error": null,
+      "raw_hash": "55d1b3f38ae916f8723e2269f6425c316a852149689e89a2b044d1c2ab2c4377",
+      "data": {
+        "api_source": "USPTO Open Data Portal Patent Search API",
+        "api_documentation": "https://data.uspto.gov/apis",
+        "endpoint": "https://api.uspto.gov/api/v1/patent/applications/search?q=99999999&rows=25&start=0",
+        "invocation": "GET https://api.uspto.gov/api/v1/patent/applications/search?q=<query>",
+        "query": "99999999",
+        "record_count": 1,
+        "truncated": false,
+        "records": [
+          {
+            "record_id": "99999999",
+            "detail": "USPTO patent application 99999999: Synthetic widget assembly",
+            "application_number": "99999999",
+            "patent_number": "9999999",
+            "invention_title": "Synthetic widget assembly",
+            "application_filing_date": "2020-01-02",
+            "grant_date": "2021-03-04",
+            "application_status_code": "Patented Case",
+            "application_status_date": "2021-03-04",
+            "application_type_label_name": "Utility",
+            "inventors": [
+              "Synthetic Inventor"
+            ],
+            "applicants": [
+              "Synthetic Applicant Corporation"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "source": "uspto-patent-assignment",
+      "skipped": false,
+      "skip_reason": null,
+      "timestamp": "2026-10-16T09:00:02+00:00",
+      "http_status": 200,
+      "error": null,
+      "raw_hash": "3bb9157e01e0c9fc504ef562217068d6899e3f0cd3beb53b5a83afe3dd57799d",
+      "data": {
+        "api_source": "USPTO Open Data Portal Patent Assignment Data",
+        "api_documentation": "https://data.uspto.gov/apis",
+        "endpoint": "https://api.uspto.gov/api/v1/patent/applications/99999999/assignment",
+        "invocation": "GET https://api.uspto.gov/api/v1/patent/applications/<applicationNumberText>/assignment",
+        "query": "99999999",
+        "record_count": 1,
+        "truncated": false,
+        "application_number": "99999999",
+        "records": [
+          {
+            "record_id": "99999999",
+            "detail": "USPTO Open Data Portal patent assignment data for application 99999999",
+            "application_number": "99999999",
+            "assignment": {
+              "synthetic": true,
+              "assignmentData": [
+                {
+                  "assignmentId": "99999999-0001",
+                  "assignorName": "Synthetic Inventor",
+                  "assigneeName": "Synthetic Applicant Corporation",
+                  "assignmentRecordedDate": "2021-04-05"
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "source": "uspto-tsdr",
+      "skipped": false,
+      "skip_reason": null,
+      "timestamp": "2026-10-16T09:00:03+00:00",
+      "http_status": 200,
+      "error": null,
+      "raw_hash": "c00ae60e1ad0257cb449d199ad43a35f2bbf302106c0e84f4096d9604d6d40f9",
+      "data": {
+        "api_source": "USPTO TSDR Trademark Case Status API",
+        "api_documentation": "https://www.uspto.gov/sites/default/files/documents/tm-enterprise-api-user-guide-v2.pdf",
+        "endpoint": "https://tsdrapi.uspto.gov/ts/cd/casestatus/sn99999999/info.xml",
+        "invocation": "GET https://tsdrapi.uspto.gov/ts/cd/casestatus/sn<serial>/info.xml",
+        "query": "99999999",
+        "record_count": 1,
+        "truncated": false,
+        "records": [
+          {
+            "record_id": "99999999",
+            "detail": "USPTO TSDR trademark case status for serial 99999999",
+            "application_number": "99999999",
+            "registration_number": "9999999",
+            "mark_verbal_element_text": "SYNTHETIC MARK",
+            "status_description": "Registered",
+            "status_date": "2021-03-04",
+            "filing_date": "2020-01-02",
+            "case_status_data": {
+              "ApplicationNumber": "99999999",
+              "RegistrationNumber": "9999999",
+              "MarkVerbalElementText": "SYNTHETIC MARK",
+              "MarkCurrentStatusExternalDescriptionText": "Registered",
+              "StatusDate": "2021-03-04",
+              "FilingDate": "2020-01-02"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "source": "epo-ops",
+      "skipped": true,
+      "skip_reason": "EPO_OPS_CONSUMER_KEY and EPO_OPS_CONSUMER_SECRET are not set. The EPO OPS token endpoint documents OAuth 2.0 client credentials and answers HTTP 401 {\"error\":\"ClientId is Invalid\"} without valid credentials, so the sub-source is not queried.",
+      "timestamp": "2026-10-16T09:00:04+00:00",
+      "http_status": 0,
+      "error": null,
+      "raw_hash": null,
+      "data": null
+    },
+    {
+      "source": "patentsview",
+      "skipped": true,
+      "skip_reason": "The PatentsView Search API host does not exist: search.patentsview.org returns NXDOMAIN from the system resolver and from 1.1.1.1 and 8.8.8.8, and the legacy hosts api.patentsview.org and patentsview.org now serve the USPTO Open Data Portal single-page application instead of any PatentsView API reference. The legacy PatentsView API was retired and no reachable PatentsView request contract exists, so no endpoint or parameter is invented for it.",
+      "timestamp": "2026-10-16T09:00:05+00:00",
+      "http_status": 0,
+      "error": null,
+      "raw_hash": null,
+      "data": null
+    },
+    {
+      "source": "google-patents-bigquery",
+      "skipped": true,
+      "skip_reason": "The Google Patents public dataset is reachable only through BigQuery, which requires a Google Cloud project authenticated with Application Default Credentials or a service-account key plus the google-cloud-bigquery client library; Google documents no unauthenticated or free-key HTTP path to bigquery-public-data.google_patents. The runner uses the Python standard library only, so the candidate is dropped rather than adding a third-party dependency.",
+      "timestamp": "2026-10-16T09:00:06+00:00",
+      "http_status": 0,
+      "error": null,
+      "raw_hash": null,
+      "data": null
+    },
+    {
+      "source": "euipo-esearch-plus",
+      "skipped": true,
+      "skip_reason": "EUIPO exposes its trademark and design APIs only through the EUIPO API Portal, which requires an account, a sandbox access request and a separate production-access application under the EUIPO conditions of use; there is no free-key or unauthenticated search endpoint. The older eSearch plus/copla endpoints reset the connection (WinError 10054) and the EUIPO API page answered HTTP 403, so the request contract cannot be verified and the approval path cannot be completed here.",
+      "timestamp": "2026-10-16T09:00:07+00:00",
+      "http_status": 0,
+      "error": null,
+      "raw_hash": null,
+      "data": null
+    }
+  ]
+}

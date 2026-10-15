@@ -28,6 +28,10 @@ class SeedType(StrEnum):
     PERSON_NAME = "person_name"
     LOBBYIST_NAME = "lobbyist_name"
     CRYPTO_ADDRESS = "crypto_address"
+    # Composite IP seed: a patent number, a trademark serial/registration number,
+    # an assignee/inventor name, or a free-text patent/trademark query. Added for
+    # the patents_trademarks batch adapter; no existing SeedType covered it.
+    INTELLECTUAL_PROPERTY = "intellectual_property"
 
 
 class EntityType(StrEnum):
@@ -62,6 +66,7 @@ class EntityType(StrEnum):
     ACADEMIC_RECORD = "academic_record"
     TLS_OBSERVATION = "tls_observation"
     BLOCKCHAIN_INTEL_RECORD = "blockchain_intel_record"
+    INTELLECTUAL_PROPERTY_RECORD = "intellectual_property_record"
 
 
 class RelationshipType(StrEnum):

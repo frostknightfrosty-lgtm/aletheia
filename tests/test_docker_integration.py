@@ -147,3 +147,9 @@ def test_phase9_crypto_blockchain_container_health():
     r = _run(["docker", "run", "--rm", "--network", "none", "aletheia/crypto-blockchain:v1", "--health"])
     assert r.returncode == 0, r.stderr or r.stdout
     assert r.stdout.strip() == "ok", r.stdout + r.stderr
+
+
+def test_phase9_patents_trademarks_container_health():
+    r = _run(["docker", "run", "--rm", "--network", "none", "aletheia/patents-trademarks:v1", "--health"])
+    assert r.returncode == 0, r.stderr or r.stdout
+    assert r.stdout.strip() == "ok", r.stdout + r.stderr
