@@ -521,13 +521,15 @@ def query_testssl(host: str) -> SourceResult:
     try:
         if error:
             return SourceResult("testssl", error=error)
+        if code != 0:
+            # A non-zero exit is a tool failure. Report it directly rather than
+            # letting the missing or partial artefact surface as a parse error,
+            # which would hide the exit code that identifies the failure.
+            return SourceResult("testssl", error=_local_tool_error("testssl", code, stderr))
         records, parse_error = _testssl_records(json_path)
         if not records:
-            if parse_error or code != 0:
-                return SourceResult(
-                    "testssl",
-                    error=parse_error or _local_tool_error("testssl", code, stderr),
-                )
+            if parse_error:
+                return SourceResult("testssl", error=parse_error)
             return SourceResult("testssl")
         data = _payload(
             api_source="testssl.sh",
@@ -756,10 +758,14 @@ def query_sslscan(host: str) -> SourceResult:
     try:
         if error:
             return SourceResult("sslscan", error=error)
+        if code != 0:
+            # Same ordering rule as testssl: the tool's exit code is the failure
+            # signal and must not be replaced by an artefact parse error.
+            return SourceResult("sslscan", error=_local_tool_error("sslscan", code, stderr))
         records, parse_error = _sslscan_records(xml_path)
         if not records:
-            if parse_error or code != 0:
-                return SourceResult("sslscan", error=parse_error or _local_tool_error("sslscan", code, stderr))
+            if parse_error:
+                return SourceResult("sslscan", error=parse_error)
             return SourceResult("sslscan")
         data = _payload(
             api_source="sslscan SSL/TLS scanner",
