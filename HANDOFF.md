@@ -2,7 +2,7 @@
 
 See `AUTONOMOUS_DIRECTIVE.md` for standing rules and `docs/BATCHING_PLAN.md` for the adapter plan.
 
-Last updated: 2026-10-16T00:40:00Z
+Last updated: 2026-10-16T06:05:00Z
 
 ## Read this first: the 38323854024 fabrication was isolated
 
@@ -38,15 +38,17 @@ artifacts exactly (`gravatar`, `rdap`, `ip_intelligence`, `government_records_us
 
 ## Current CI-verified state
 
-- 38 adapters registered, all `verified-fixture`, all citing an artifact-backed run.
-- 39 Docker integration cases; `PARSER PREFLIGHT: PASS — 38/38 adapters have parser coverage`.
-- Latest verified run: `38658742093` on commit `9a24be885d88e740f078b6bdf5c62944f5002024` —
-  `292 passed, 1 warning in 15.83s`, `DOCKER CAPTURE: PASS — 39/39 cases captured`,
-  `results.json` 39 entries with 0 nonzero return codes, SHA-256
-  `1C91399BD3271A49AA69437E683921449EA625BCC290D29A416FC8EEF4946B60`.
-- Local: 292 collected, 253 passed, 39 skipped (the container smokes; `docker` is not on PATH here).
-  Local pytest needs `rapidfuzz` and `reportlab`; CI gets them from `pip install -e '.[dev]'`.
-
+- 39 adapters registered, all `verified-fixture`, all citing an artifact-backed run.
+- 40 Docker integration cases; `PARSER PREFLIGHT: PASS — 39/39 adapters have parser coverage`.
+- Latest verified run: `38791430700` on commit `a7c394d` — `343 passed, 1 warning in 24.95s`,
+  `DOCKER CAPTURE: PASS — 40/40 cases captured`, `results.json` 40 entries with 0 nonzero return
+  codes, SHA-256 `5134BD59E5E6AAC2727088582414721A4308C01EF44E82A63221C1FD6B2964F6`.
+- Local: 303 passed, 40 skipped (the container smokes; `docker` is not on PATH here). Local pytest needs
+  `rapidfuzz` and `reportlab`; CI gets them from `pip install -e '.[dev]'`.
+- `ssl_tls` is the first composite whose image installs real tools rather than only python. Its `--health`
+  inventory (stderr, while stdout is exactly `ok`) reports `/usr/bin/testssl`, `/go/bin/certgraph`,
+  `/usr/bin/sslscan`, `/go/bin/tlsx` and the `qualys-ssl-labs` HTTP source, and asserts no subprocess is
+  started and no socket opened. Use that pattern for any later tool-based image.
 ## Plan divergence you must resolve before the next composites
 
 `docs/BATCHING_PLAN.md` lists 21 composites, but two already-implemented adapters absorbed part of
@@ -86,14 +88,14 @@ missing sub-sources only, and its manifest note says so.
 
 ## Next action
 
-1. Build `ssl_tls` next (Qualys SSL Labs, testssl.sh, CipherScan, CertGraph, sslscan, tlsx). Verify each
-   sub-source against its vendor documentation first; several are local TLS probe tools rather than HTTP APIs,
-   so plan for local-tool sub-sources instead of endpoints.
-2. Then `crypto_blockchain`, `patents_trademarks`, `email_auth`, `code_search`, `search_engines`, in that order.
-3. Diff every composite sub-source list against `PROJECT_MANIFEST.json` before building. None of the remaining
-   six overlap anything already live as of this handoff.
+1. Build `crypto_blockchain` next (mempool.space, Blockstream Esplora, Blockchair, Etherscan V2, BlockCypher,
+   Chainabuse). Verify every endpoint against vendor docs first; Etherscan V2 and Chainabuse need free keys,
+   so plan documented skip paths when those env vars are unset.
+2. Then `patents_trademarks`, `email_auth`, `code_search`, `search_engines`.
+3. Diff every composite sub-source list against `PROJECT_MANIFEST.json` before building.
 4. One composite per commit and per CI run. Mark `verified-fixture` only from artifact-copied lines (Gate 5).
-5. `corporate_financial_public_records` stays **excluded** (Gate 7); see `docs/NOT_INTEGRATED.md`.
-
+5. When a Dockerfile changes, expect the image build to be the first real check: there is no Docker CLI here.
+   Two `ssl_tls` runs failed and both were fixed from the artifact rather than retried blindly — do the same.
+6. `corporate_financial_public_records` stays **excluded** (Gate 7); see `docs/NOT_INTEGRATED.md`.
 Docker is unavailable on this workstation. Image and container behaviour can only be verified in
 GitHub Actions.
