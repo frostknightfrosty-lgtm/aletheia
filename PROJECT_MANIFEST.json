@@ -1166,7 +1166,7 @@
       "legal_notes": "Composite adapter covering the six verified sub-sources of the crypto_blockchain batch: mempool-space, blockstream-esplora, blockchair, etherscan-v2, blockcypher and chainabuse. The seventh candidate, crypttrace, is dropped and never queried; the runner reports it once per run as a skipped source with that exact reason. Every endpoint, query-parameter name, authentication requirement, documented rate limit and documentation URL was read from the provider's own official documentation and is recorded in docker/crypto_blockchain/RATE_LIMITS.md; none was inferred from an example response. The runner classifies the seed as a Bitcoin or Ethereum address and queries only the sub-sources whose documentation accepts that chain; a chain mismatch is a documented skip. etherscan-v2 and chainabuse require free keys and are skipped with a documented reason when their environment variable is unset; blockchair and blockcypher keys are optional. No credential is stored in this repository and no key is printed or recorded in runner output. A Chainabuse report is a user or partner submission, not a court finding, and an on-chain address summary is not attributable to a person or organisation without further evidence. Every run contacts third-party explorers and a screening provider, so it requires authorization and the adapter requires the assertion.",
       "network": "required",
       "last_audited": "2026-10-16T00:00:00Z",
-      "verification_status": "unverified-fixture",
+      "verification_status": "verified-fixture",
       "fixture_provenance": "synthetic",
       "legal_tier": 1,
       "enabled_by_default": true,
@@ -1201,7 +1201,7 @@
           "key_cost": "free"
         }
       ],
-      "note": "Six sub-sources implemented and verified against each provider's own official documentation before any code was written: mempool-space, blockstream-esplora, blockchair, etherscan-v2, blockcypher and chainabuse. crypttrace was dropped because its own PyPI page and README document only a terminal CLI and a local web app, with no documented importable Python API. Docker/CI verification is pending; no run ID and no CI evidence line is recorded here, and the local suite is not evidence of a container run. fixture file: tests/fixtures/crypto_blockchain.json. No live API lookups have occurred."
+      "note": "Synthetic fixture parser tests and the Docker health smoke passed in CI run 38797483163 on commit 9f53012d866c82c71ebd1a278e72f260181be099 (https://github.com/frostknightfrosty-lgtm/aletheia/actions/runs/38797483163). Raw evidence copied from the artifact: PARSER PREFLIGHT: PASS \u2014 40/40 adapters have parser coverage; 383 passed, 1 warning in 16.35s; DOCKER CAPTURE: PASS \u2014 41/41 cases captured. results.json has 41 entries with 0 nonzero return codes and 41 stdout/stderr pairs; SHA-256 627BB124FA5203605A4558C43D6C48B6831355EDF8B128D8EBEF2AED7F1686CF. Case phase9-crypto-blockchain returned 0 with stdout ok under --network none. Six sub-sources are implemented: mempool-space, blockstream-esplora, blockchair, etherscan-v2, blockcypher and chainabuse. crypttrace is dropped because its own PyPI page and README document only a terminal CLI and a local web app, with no documented importable Python API; the runner reports it once per run as skipped with that reason. fixture file: tests/fixtures/crypto_blockchain.json. No live API lookups have occurred."
     }
   ],
   "phase_1_scope": {
