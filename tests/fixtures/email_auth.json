@@ -1,0 +1,143 @@
+{
+  "input_type": "domain",
+  "input_value": "example.com",
+  "timestamp": "2026-10-16T09:00:00+00:00",
+  "sources": [
+    {
+      "source": "scan-mx",
+      "skipped": false,
+      "skip_reason": null,
+      "timestamp": "2026-10-16T09:00:01+00:00",
+      "http_status": 200,
+      "error": null,
+      "raw_hash": "c756bfe5ad73d17e5aee7fbccc774cd3d4aefb10df000f0023887165a60f4e6e",
+      "data": {
+        "api_source": "scan.mx email authentication and deliverability API",
+        "api_documentation": "https://api.scan.mx/",
+        "endpoint": "https://api.scan.mx/v1/check?domain=example.com",
+        "invocation": "GET https://api.scan.mx/v1/check?domain=<domain>",
+        "query": "example.com",
+        "record_count": 1,
+        "truncated": false,
+        "check_count": 2,
+        "records": [
+          {
+            "record_id": "example.com",
+            "detail": "scan.mx email-authentication report for example.com: grade A (score 95)",
+            "domain": "example.com",
+            "grade": "A",
+            "score": 95,
+            "provider": "Synthetic Mail Provider",
+            "email_configured": true,
+            "smtp_status": "n/a",
+            "permalink": "https://scan.mx/example.com",
+            "created_at": 1776320400,
+            "updated_at": 1776320400,
+            "expires_at": 1778912400,
+            "sections": {
+              "mx": {
+                "score": 100,
+                "grade": "A"
+              },
+              "spf": {
+                "score": 100,
+                "grade": "A"
+              },
+              "dmarc": {
+                "score": 90,
+                "grade": "A"
+              }
+            },
+            "checks": [
+              {
+                "id": "mx.presence",
+                "section": "mx",
+                "status": "pass",
+                "severity": "info",
+                "message": "Synthetic MX record found.",
+                "rfc": null,
+                "details": {
+                  "records": [
+                    {
+                      "preference": 10,
+                      "exchange": "mx.example.com",
+                      "ttl": 300
+                    }
+                  ]
+                }
+              },
+              {
+                "id": "dmarc.presence",
+                "section": "dmarc",
+                "status": "pass",
+                "severity": "info",
+                "message": "Synthetic DMARC record found.",
+                "rfc": "RFC 7489",
+                "details": {
+                  "record": "v=DMARC1; p=reject;"
+                }
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "source": "checkdmarc",
+      "skipped": false,
+      "skip_reason": null,
+      "timestamp": "2026-10-16T09:00:02+00:00",
+      "http_status": 200,
+      "error": null,
+      "raw_hash": "6e526182601bf3ee9c8a729727170dc9ddfe9542885d7f8873ea0721ab2c0b6f",
+      "data": {
+        "api_source": "checkdmarc (Python library, DNS records checked directly)",
+        "api_documentation": "https://domainaware.github.io/checkdmarc/api.html",
+        "module": "checkdmarc",
+        "invocation": "python: checkdmarc.check_domains([domain])",
+        "query": "example.com",
+        "record_count": 1,
+        "truncated": false,
+        "entry_point": "checkdmarc.check_domains",
+        "package_version": "6.0.4",
+        "package_url": "https://pypi.org/project/checkdmarc/",
+        "records": [
+          {
+            "record_id": "example.com",
+            "detail": "checkdmarc email-authentication result for example.com: 1 MX host(s); SPF v=spf1 -all; DMARC v=DMARC1; p=reject;",
+            "domain": "example.com",
+            "base_domain": "example.com",
+            "dnssec": false,
+            "mx": {
+              "hosts": [
+                {
+                  "hostname": "mx.example.com",
+                  "preference": 10,
+                  "addresses": [
+                    "192.0.2.1"
+                  ]
+                }
+              ],
+              "warnings": []
+            },
+            "spf": {
+              "record": "v=spf1 -all",
+              "valid": true,
+              "dns_lookups": 0,
+              "warnings": []
+            },
+            "dmarc": {
+              "record": "v=DMARC1; p=reject;",
+              "valid": true,
+              "tags": {
+                "v": "DMARC1",
+                "p": "reject"
+              },
+              "warnings": []
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

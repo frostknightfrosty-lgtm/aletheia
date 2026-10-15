@@ -44,3 +44,4 @@ docker build -f docker/academic_search/Dockerfile -t aletheia/academic-search:v1
 docker build -f docker/ssl_tls/Dockerfile -t aletheia/ssl-tls:v1 docker/ssl_tls
 docker build -f docker/crypto_blockchain/Dockerfile -t aletheia/crypto-blockchain:v1 docker/crypto_blockchain
 docker build -f docker/patents_trademarks/Dockerfile -t aletheia/patents-trademarks:v1 docker/patents_trademarks
+docker build -f docker/email_auth/Dockerfile -t aletheia/email-auth:v1 docker/email_auth

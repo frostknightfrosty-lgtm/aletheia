@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Execute the 42 Docker integration smoke cases and preserve raw stdout/stderr."""
+"""Execute the 43 Docker integration smoke cases and preserve raw stdout/stderr."""
 from __future__ import annotations
 import json
 import subprocess
@@ -50,6 +50,7 @@ CASES = [
     ("phase9-ssl-tls", "aletheia/ssl-tls:v1", ["--health"]),
     ("phase9-crypto-blockchain", "aletheia/crypto-blockchain:v1", ["--health"]),
     ("phase9-patents-trademarks", "aletheia/patents-trademarks:v1", ["--health"]),
+    ("phase9-email-auth", "aletheia/email-auth:v1", ["--health"]),
 ]
 
 def main() -> int:

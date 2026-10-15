@@ -67,6 +67,10 @@ class EntityType(StrEnum):
     TLS_OBSERVATION = "tls_observation"
     BLOCKCHAIN_INTEL_RECORD = "blockchain_intel_record"
     INTELLECTUAL_PROPERTY_RECORD = "intellectual_property_record"
+    # Composite email-authentication observation: MX/SPF/DMARC (and related)
+    # DNS-record results from the scan.mx API or the checkdmarc library. Added
+    # for the email_auth batch adapter; no existing EntityType covered it.
+    EMAIL_AUTH_RECORD = "email_auth_record"
 
 
 class RelationshipType(StrEnum):
