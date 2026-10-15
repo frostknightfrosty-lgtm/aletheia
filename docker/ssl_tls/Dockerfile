@@ -6,10 +6,17 @@ ENV GOTOOLCHAIN=local
 RUN go install github.com/projectdiscovery/tlsx/cmd/tlsx@v1.4.0
 # Pin: lanrat/certgraph releases page -> https://github.com/lanrat/certgraph/releases/tag/v0.1.3
 RUN go install github.com/lanrat/certgraph@v0.1.3
-# Pins: Debian bookworm testssl.sh 3.0.8+dfsg-1 -> https://packages.debian.org/bookworm/testssl.sh
-#        Debian bookworm sslscan 2.0.7-1 -> https://packages.debian.org/bookworm/sslscan
+# Debian packages for testssl.sh and sslscan are installed UNPINNED.
+# An exact version pin was tried first and failed in CI run 38669069783:
+#   E: Version '2.0.7-1' for 'sslscan' was not found
+# even though sources.debian.org lists 2.0.7-1 in bookworm (and 3.0.8+dfsg-1 for testssl.sh).
+# This base image's apt sources therefore do not resolve those exact versions, so the pin is not
+# reproducible here. The resolved versions are echoed into the build log instead, so every CI run
+# records exactly what was installed. Upstream latest for reference:
+#   testssl.sh https://github.com/testssl/testssl.sh/releases  |  sslscan https://github.com/rbsec/sslscan/releases
 RUN apt-get update \
- && apt-get install -y --no-install-recommends python3 sslscan=2.0.7-1 testssl.sh=3.0.8+dfsg-1 \
- && rm -rf /var/lib/apt/lists/*
+ && apt-get install -y --no-install-recommends python3 sslscan testssl.sh \
+ && rm -rf /var/lib/apt/lists/* \
+ && dpkg-query -W sslscan testssl.sh python3
 COPY runner.py /opt/runner.py
 ENTRYPOINT ["python3", "/opt/runner.py"]
