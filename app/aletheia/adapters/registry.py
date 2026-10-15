@@ -22,6 +22,7 @@ from aletheia.adapters.government_records_us import GovernmentRecordsUSAdapter
 from aletheia.adapters.corporate_registry import CorporateRegistryAdapter
 from aletheia.adapters.sanctions_enforcement_watchlists import SanctionsEnforcementWatchlistsAdapter
 from aletheia.adapters.academic_search import AcademicSearchAdapter
+from aletheia.adapters.ssl_tls import SslTlsAdapter
 from aletheia.adapters.ip_intelligence import IPIntelligenceAdapter
 
 
@@ -75,4 +76,5 @@ def phase7_adapters() -> dict[str, Adapter]:
     adapters[CorporateRegistryAdapter.descriptor.name] = CorporateRegistryAdapter()
     adapters[SanctionsEnforcementWatchlistsAdapter.descriptor.name] = SanctionsEnforcementWatchlistsAdapter()
     adapters[AcademicSearchAdapter.descriptor.name] = AcademicSearchAdapter()
+    adapters[SslTlsAdapter.descriptor.name] = SslTlsAdapter()
     return adapters

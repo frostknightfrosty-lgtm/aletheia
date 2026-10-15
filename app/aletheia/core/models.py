@@ -59,6 +59,7 @@ class EntityType(StrEnum):
     GOVERNMENT_RECORD = "government_record"
     COMPANY_REGISTRY_RECORD = "company_registry_record"
     ACADEMIC_RECORD = "academic_record"
+    TLS_OBSERVATION = "tls_observation"
 
 
 class RelationshipType(StrEnum):

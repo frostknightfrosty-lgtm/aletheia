@@ -1,0 +1,262 @@
+{
+  "input_type": "domain",
+  "input_value": "example.com",
+  "timestamp": "2026-10-16T09:00:00+00:00",
+  "sources": [
+    {
+      "source": "qualys-ssl-labs",
+      "skipped": false,
+      "skip_reason": null,
+      "timestamp": "2026-10-16T09:00:01+00:00",
+      "http_status": 200,
+      "error": null,
+      "raw_hash": "11098bf7978e06b2ae0a7a1a2fa7d86294d36041c46d5f9819a8f39f71c46373",
+      "data": {
+        "api_source": "Qualys SSL Labs Assessment API v4 (analyze)",
+        "api_documentation": "https://github.com/ssllabs/ssllabs-scan/blob/master/ssllabs-api-docs-v4.md",
+        "endpoint": "https://api.ssllabs.com/api/v4/analyze",
+        "invocation": "GET https://api.ssllabs.com/api/v4/analyze?host=<host>",
+        "source_kind": "http_api",
+        "tool": "api.ssllabs.com",
+        "tool_version": "2.4.1",
+        "command": [
+          "GET",
+          "https://api.ssllabs.com/api/v4/analyze?host=example.com"
+        ],
+        "exit_code": 0,
+        "query": "example.com",
+        "record_count": 1,
+        "truncated": false,
+        "assessment_status": "READY",
+        "criteria_version": "2009f",
+        "test_time": 1786000000000,
+        "is_public": false,
+        "records": [
+          {
+            "record_id": "93.184.216.34",
+            "detail": "grade A",
+            "severity": "ok",
+            "status_message": "Ready",
+            "server_name": "example.com",
+            "grade": "A",
+            "grade_trust_ignored": "A",
+            "has_warnings": false
+          }
+        ]
+      }
+    },
+    {
+      "source": "testssl",
+      "skipped": false,
+      "skip_reason": null,
+      "timestamp": "2026-10-16T09:00:02+00:00",
+      "http_status": 0,
+      "error": null,
+      "raw_hash": "a307b053eeab33bc826136a75f56b430a0c0cd9c317ffa77e80388db324db1c3",
+      "data": {
+        "api_source": "testssl.sh",
+        "api_documentation": "https://testssl.sh/",
+        "endpoint": null,
+        "invocation": "testssl [OPTIONS] <URI>  (JSON: --jsonfile-pretty <file>)",
+        "source_kind": "local_tool",
+        "tool": "testssl",
+        "tool_version": "3.0.8",
+        "command": [
+          "/usr/bin/testssl",
+          "--quiet",
+          "--jsonfile-pretty",
+          "/tmp/aletheia-testssl-fixture/testssl.json",
+          "example.com"
+        ],
+        "exit_code": 0,
+        "query": "example.com",
+        "record_count": 3,
+        "truncated": false,
+        "raw_output_lines": 3,
+        "raw_output_tail": "Synthetic testssl output excerpt\n protocol offering TLS 1.0\n overall grade A\n",
+        "records": [
+          {
+            "record_id": "protocols",
+            "detail": "Synthetic finding: TLS 1.0 is offered",
+            "severity": "low"
+          },
+          {
+            "record_id": "cipherlist",
+            "detail": "Synthetic finding: TLS 1.2 with a strong cipher list",
+            "severity": "ok"
+          },
+          {
+            "record_id": "vulnerabilities",
+            "detail": "Synthetic finding: no synthetic vulnerability was found",
+            "severity": "info"
+          }
+        ]
+      }
+    },
+    {
+      "source": "certgraph",
+      "skipped": false,
+      "skip_reason": null,
+      "timestamp": "2026-10-16T09:00:03+00:00",
+      "http_status": 0,
+      "error": null,
+      "raw_hash": "6d91ba46c257596cc82822cd4b950477b478e4389c3687473990da39615bc2b5",
+      "data": {
+        "api_source": "CertGraph certificate graph crawl",
+        "api_documentation": "https://github.com/lanrat/certgraph",
+        "endpoint": null,
+        "invocation": "certgraph [OPTION]... HOST...  (JSON: -json)",
+        "source_kind": "local_tool",
+        "tool": "certgraph",
+        "tool_version": "0.1.3",
+        "command": [
+          "/go/bin/certgraph",
+          "-json",
+          "-depth",
+          "1",
+          "example.com"
+        ],
+        "exit_code": 0,
+        "query": "example.com",
+        "record_count": 2,
+        "truncated": false,
+        "raw_output_lines": 8,
+        "raw_output_tail": "Synthetic certgraph output excerpt (json graph)\n",
+        "graph_depth": 1,
+        "num_domains": 1,
+        "records": [
+          {
+            "record_id": "domain:example.com",
+            "detail": "domain node at depth 0, status Good",
+            "severity": "info",
+            "node_type": "domain",
+            "depth": "0",
+            "status": "Good",
+            "root": "true",
+            "has_dns": "true",
+            "related": "www.example.com"
+          },
+          {
+            "record_id": "certificate:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+            "detail": "certificate node, found via http",
+            "severity": "info",
+            "node_type": "certificate"
+          }
+        ]
+      }
+    },
+    {
+      "source": "sslscan",
+      "skipped": false,
+      "skip_reason": null,
+      "timestamp": "2026-10-16T09:00:04+00:00",
+      "http_status": 0,
+      "error": null,
+      "raw_hash": "cb7056fa29fe6a554d0a966ebf4c631c2919860efbf632c6ef23ef9d3661e4f1",
+      "data": {
+        "api_source": "sslscan SSL/TLS scanner",
+        "api_documentation": "https://github.com/rbsec/sslscan",
+        "endpoint": null,
+        "invocation": "sslscan [options] [host:port | host]  (XML: --xml=<file>)",
+        "source_kind": "local_tool",
+        "tool": "sslscan",
+        "tool_version": "2.0.7",
+        "command": [
+          "/usr/bin/sslscan",
+          "--no-colour",
+          "--xml=/tmp/aletheia-sslscan-fixture/sslscan.xml",
+          "example.com"
+        ],
+        "exit_code": 0,
+        "query": "example.com",
+        "record_count": 3,
+        "truncated": false,
+        "raw_output_lines": 4,
+        "raw_output_tail": "Synthetic sslscan output excerpt\nAccepted  TLSv1.2  256 bits  ECDHE-RSA-AES256-GCM-SHA384\n",
+        "records": [
+          {
+            "record_id": "cipher:ECDHE-RSA-AES256-GCM-SHA384",
+            "detail": "ECDHE-RSA-AES256-GCM-SHA384 accepted",
+            "severity": "info",
+            "cipher": "ECDHE-RSA-AES256-GCM-SHA384",
+            "status": "accepted",
+            "tls_version": "TLSv1.2",
+            "bits": "256",
+            "cipher_id": "0xC030"
+          },
+          {
+            "record_id": "heartbleed:TLSv1.2",
+            "detail": "heartbleed vulnerable=0",
+            "severity": "info",
+            "tls_version": "TLSv1.2",
+            "vulnerable": "0"
+          },
+          {
+            "record_id": "compression",
+            "detail": "compression supported=0",
+            "severity": "info",
+            "supported": "0"
+          }
+        ]
+      }
+    },
+    {
+      "source": "tlsx",
+      "skipped": false,
+      "skip_reason": null,
+      "timestamp": "2026-10-16T09:00:05+00:00",
+      "http_status": 0,
+      "error": null,
+      "raw_hash": "ae9a60bf4adf041ff2ebc273672e76b2f62499d4968eb9ea526df16e8e48db50",
+      "data": {
+        "api_source": "tlsx TLS grabber",
+        "api_documentation": "https://github.com/projectdiscovery/tlsx",
+        "endpoint": null,
+        "invocation": "tlsx -u <host> -json -silent",
+        "source_kind": "local_tool",
+        "tool": "tlsx",
+        "tool_version": "1.4.0",
+        "command": [
+          "/go/bin/tlsx",
+          "-u",
+          "example.com",
+          "-json",
+          "-silent",
+          "-duc"
+        ],
+        "exit_code": 0,
+        "query": "example.com",
+        "record_count": 1,
+        "truncated": false,
+        "raw_output_lines": 1,
+        "raw_output_tail": "{\"cipher\": \"TLS_AES_256_GCM_SHA384\", \"host\": \"example.com\", \"port\": \"443\", \"probe_status\": true, \"tls_version\": \"tls13\"}\n",
+        "records": [
+          {
+            "record_id": "example.com:443",
+            "detail": "tls13 TLS_AES_256_GCM_SHA384",
+            "severity": "info",
+            "ip": "93.184.216.34",
+            "probe_status": true,
+            "tls_version": "tls13",
+            "cipher": "TLS_AES_256_GCM_SHA384",
+            "not_before": "2026-01-14T00:00:00Z",
+            "not_after": "2027-01-14T23:59:59Z",
+            "subject_cn": "www.example.com",
+            "subject_org": "Synthetic Example Organisation",
+            "sni": "example.com"
+          }
+        ]
+      }
+    },
+    {
+      "source": "cipherscan",
+      "skipped": true,
+      "skip_reason": "CipherScan publishes no releases and no version tags: the project's own releases list (https://github.com/mozilla/cipherscan/releases) and tags list (https://github.com/mozilla/cipherscan/tags) are both empty, so no pinned, verifiable release artefact exists. Its README additionally documents that it ships its own pre-built OpenSSL binaries for Linux/64 and Darwin/64 rather than depending on a package-managed OpenSSL, so it cannot be pinned and installed from the project's own releases page.",
+      "timestamp": "2026-10-16T09:00:06+00:00",
+      "http_status": 0,
+      "error": null,
+      "raw_hash": null,
+      "data": null
+    }
+  ]
+}
