@@ -1,0 +1,111 @@
+{
+  "input_type": "name",
+  "input_value": "SyntheticSearchQueryForFixture",
+  "timestamp": "2026-10-16T09:00:00+00:00",
+  "sources": [
+    {
+      "source": "marginalia",
+      "skipped": false,
+      "skip_reason": null,
+      "timestamp": "2026-10-16T09:00:01+00:00",
+      "http_status": 200,
+      "error": null,
+      "raw_hash": "7f57e68c77975a6649efbe3aff6960907745e5c6ac8ad5326f07ca66bea1955a",
+      "data": {
+        "api_source": "Marginalia Search API (public search index)",
+        "api_documentation": "https://about.marginalia-search.com/article/api/",
+        "endpoint": "https://api2.marginalia-search.com/search?query=SyntheticSearchQueryForFixture",
+        "invocation": "GET https://api2.marginalia-search.com/search?query=<query>",
+        "query": "SyntheticSearchQueryForFixture",
+        "record_count": 2,
+        "truncated": false,
+        "license": "CC-BY-NC-SA 4.0",
+        "key_source": "documented-public-default",
+        "records": [
+          {
+            "record_id": "https://example.invalid/synthetic-marginalia-one",
+            "detail": "Marginalia result Synthetic Marginalia Result One",
+            "title": "Synthetic Marginalia Result One",
+            "url": "https://example.invalid/synthetic-marginalia-one",
+            "snippet": "A synthetic first result used only by the fixture."
+          },
+          {
+            "record_id": "https://example.invalid/synthetic-marginalia-two",
+            "detail": "Marginalia result Synthetic Marginalia Result Two",
+            "title": "Synthetic Marginalia Result Two",
+            "url": "https://example.invalid/synthetic-marginalia-two",
+            "snippet": "A synthetic second result used only by the fixture."
+          }
+        ]
+      }
+    },
+    {
+      "source": "common-crawl-index",
+      "skipped": false,
+      "skip_reason": null,
+      "timestamp": "2026-10-16T09:00:02+00:00",
+      "http_status": 200,
+      "error": null,
+      "raw_hash": "19975fff88e36111919b0a72461217567419eac7e2e97ecad588b09d809da03d",
+      "data": {
+        "api_source": "Common Crawl CDXJ/URL index (CC-MAIN-2026-39)",
+        "api_documentation": "https://commoncrawl.org/get-started",
+        "endpoint": "https://index.commoncrawl.org/CC-MAIN-2026-39-index?url=SyntheticSearchQueryForFixture&output=json",
+        "invocation": "GET https://index.commoncrawl.org/<CC-MAIN-YYYY-NN>-index?url=<url>&output=json",
+        "query": "SyntheticSearchQueryForFixture",
+        "record_count": 2,
+        "truncated": false,
+        "crawl_id": "CC-MAIN-2026-39",
+        "crawl_id_source": "https://commoncrawl.org/get-started",
+        "records": [
+          {
+            "record_id": "https://example.invalid/synthetic-page-one",
+            "detail": "Common Crawl CC-MAIN-2026-39 index record for https://example.invalid/synthetic-page-one (status 200)",
+            "urlkey": "invalid,example)/synthetic-page-one",
+            "timestamp": "20260101000000",
+            "url": "https://example.invalid/synthetic-page-one",
+            "mime": "text/html",
+            "status": "200",
+            "digest": "SHA1:AAAABBBBCCCCDDDDEEEEFFFF0000111122223333",
+            "length": "1234",
+            "offset": "0",
+            "filename": "crawl-data/CC-MAIN-2026-39/segments/1/warc/CC-MAIN-20260101000000-00000.warc.gz"
+          },
+          {
+            "record_id": "https://example.invalid/synthetic-page-two",
+            "detail": "Common Crawl CC-MAIN-2026-39 index record for https://example.invalid/synthetic-page-two (status 200)",
+            "urlkey": "invalid,example)/synthetic-page-two",
+            "timestamp": "20260102000000",
+            "url": "https://example.invalid/synthetic-page-two",
+            "mime": "text/html",
+            "status": "200",
+            "digest": "SHA1:BBBBCCCCDDDDEEEEFFFF00001111222233334444",
+            "length": "5678",
+            "offset": "4321",
+            "filename": "crawl-data/CC-MAIN-2026-39/segments/2/warc/CC-MAIN-20260102000000-00001.warc.gz"
+          }
+        ]
+      }
+    },
+    {
+      "source": "searxng",
+      "skipped": true,
+      "skip_reason": "SearXNG is a self-hosted metasearch engine, not a public API. Its JSON output is an instance-side configuration (the search.formats setting documented at https://docs.searxng.org/dev/search_api.html) that public instances typically disable, and the brief forbids the runner from operating a self-hosted instance. No public instance with verifiable structured output is used.",
+      "timestamp": "2026-10-16T09:00:03+00:00",
+      "http_status": 0,
+      "error": null,
+      "raw_hash": null,
+      "data": null
+    },
+    {
+      "source": "google-custom-search",
+      "skipped": true,
+      "skip_reason": "Google's own documentation states verbatim \"The Custom Search JSON API is closed to new customers\" and \"This API is not available for new customers\", with the service discontinuation on January 1, 2027 (https://developers.google.com/custom-search/v1/overview). A new deployment cannot register.",
+      "timestamp": "2026-10-16T09:00:04+00:00",
+      "http_status": 0,
+      "error": null,
+      "raw_hash": null,
+      "data": null
+    }
+  ]
+}

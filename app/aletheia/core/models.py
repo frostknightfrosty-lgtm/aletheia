@@ -75,6 +75,11 @@ class EntityType(StrEnum):
     # the code_search batch adapter, carrying a typed finding_kind. Added for the
     # code_search batch adapter; no existing EntityType covered it.
     TECHNICAL_FINDING = "technical_finding"
+    # Composite web-search finding: a normalized search-engine or web-index
+    # result returned by the search_engines batch adapter. Added for the
+    # search_engines batch adapter; no existing EntityType covered a web-search
+    # result, so the plan's "WebSearchResult" output type maps to this member.
+    WEB_SEARCH_RESULT = "web_search_result"
 
 
 class RelationshipType(StrEnum):

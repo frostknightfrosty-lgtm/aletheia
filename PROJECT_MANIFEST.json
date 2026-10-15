@@ -1307,6 +1307,38 @@
         }
       ],
       "note": "One sub-source implemented after verifying its contract from the project's own OpenAPI specification (https://codesearch.debian.net/openapi.json): debian-code-search, server https://codesearch.debian.net/api/v1, GET /search with required parameter query and optional match_mode, API key in the x-dcs-apikey header. Two candidates are dropped and reported once per run as audited skips: gitlab-search, because GitLab's own Search API documentation states verbatim that every call to the API requires authentication and a live probe of the blobs scope returned HTTP 401; and publicwww, because its own API authentication documentation states verbatim that a paid plan is required and that every endpoint except / and /v1/account answers 403 plan_required, which standing rule 4 forbids. Known limitation: the OpenAPI specification does not expose a response schema for /search, so the runner records the parsed JSON document verbatim as one normalized record rather than inventing field names; typed per-match extraction should be added once the response schema is read from the spec. Docker/CI verification is pending; no run ID and no CI evidence line is recorded here, and the local suite is not evidence of a container run. fixture file: tests/fixtures/code_search.json. No live API lookups have occurred."
+    },
+    {
+      "name": "search_engines",
+      "upstream": "https://github.com/frostknightfrosty-lgtm/aletheia/tree/main/docker/search_engines",
+      "license": "Composite adapter; sub-sources are the Marginalia Search API (content provided under CC-BY-NC-SA 4.0, non-commercial) and the Common Crawl CDXJ/URL index (crawl data free to access by anyone from anywhere)",
+      "version_pin": "1.0",
+      "invocation": "HTTPS JSON search-engine and web-index APIs via dedicated Docker runner (aletheia/search-engines:v1)",
+      "input_types": [
+        "name"
+      ],
+      "output_schema": "WebSearchResult[]",
+      "legal_notes": "Composite adapter covering the two verified sub-sources of the search_engines batch: marginalia (GET https://api2.marginalia-search.com/search?query=<query>) and common-crawl-index (GET https://index.commoncrawl.org/<CC-MAIN-YYYY-NN>-index?url=<url>&output=json). The two other candidates, searxng and google-custom-search, are dropped and never queried; the runner reports each once per run as a skipped source carrying its documented reason. Every endpoint, query-parameter name, authentication requirement, documented rate limit and documentation URL was read from the provider's own documentation (https://about.marginalia-search.com/article/api/ and https://commoncrawl.org/get-started) and is recorded in docker/search_engines/RATE_LIMITS.md; none was inferred from an example response. Marginalia carries its key in the API-Key request header; MARGINALIA_API_KEY is used when set and otherwise falls back to the documented public development key, which cannot create custom filters and often hits a rate limit, with a free non-commercial key available by emailing contact@marginalia-search.com. Marginalia content is provided under CC-BY-NC-SA 4.0, which is non-commercial: results must not be used commercially and carry attribution and share-alike obligations. Common Crawl states that crawl data is free to access by anyone from anywhere. Neither sub-source publishes a numeric rate limit, so both are recorded as not published and at most one request is issued per sub-source per run; the Common Crawl crawl id is pinned to the explicit crawl CC-MAIN-2026-39, never a wildcard. No credential is stored in this repository and no key is printed or recorded. A web-search or web-index record is a source observation, not an authoritative record, and must be reviewed against the published page before it is relied on. Every run contacts third-party search and web-index services, so it requires authorization and the adapter requires the assertion.",
+      "network": "required",
+      "last_audited": "2026-10-16T00:00:00Z",
+      "verification_status": "unverified-fixture",
+      "fixture_provenance": "synthetic",
+      "legal_tier": 3,
+      "enabled_by_default": true,
+      "disabled_reason": null,
+      "batch_grouping": "search_engines",
+      "requires_key": false,
+      "sub_sources": [
+        {
+          "name": "marginalia",
+          "requires_key": false
+        },
+        {
+          "name": "common-crawl-index",
+          "requires_key": false
+        }
+      ],
+      "note": "Two sub-sources implemented, each verified against its provider's own documentation: marginalia (Marginalia Search API at https://api2.marginalia-search.com/search with the key in the API-Key header, defaulting to the documented public development key when MARGINALIA_API_KEY is unset, content under CC-BY-NC-SA 4.0 which is non-commercial) and common-crawl-index (the Common Crawl CDXJ/URL index at https://index.commoncrawl.org/, no authentication, crawl id pinned to CC-MAIN-2026-39 read from https://commoncrawl.org/get-started, never a wildcard). Neither publishes a numeric rate limit, recorded as not published. Two candidates are dropped and reported once per run as audited skips: searxng, because it is a self-hosted metasearch engine whose JSON output is an instance-side setting that public instances typically disable and the runner must not operate a self-hosted service; and google-custom-search, because Google's own documentation states verbatim that the Custom Search JSON API is closed to new customers and is not available for new customers, with discontinuation on 2027-01-01. Docker/CI verification is pending; no run ID and no CI evidence line is recorded here, and the local suite is not evidence of a container run. fixture file: tests/fixtures/search_engines.json. No live API lookups have occurred."
     }
   ],
   "phase_1_scope": {

@@ -28,6 +28,7 @@ from aletheia.adapters.crypto_blockchain import CryptoBlockchainAdapter
 from aletheia.adapters.patents_trademarks import PatentsTrademarksAdapter
 from aletheia.adapters.email_auth import EmailAuthAdapter
 from aletheia.adapters.code_search import CodeSearchAdapter
+from aletheia.adapters.search_engines import SearchEnginesAdapter
 
 
 def phase1_adapters() -> dict[str, Adapter]:
@@ -85,4 +86,5 @@ def phase7_adapters() -> dict[str, Adapter]:
     adapters[PatentsTrademarksAdapter.descriptor.name] = PatentsTrademarksAdapter()
     adapters[EmailAuthAdapter.descriptor.name] = EmailAuthAdapter()
     adapters[CodeSearchAdapter.descriptor.name] = CodeSearchAdapter()
+    adapters[SearchEnginesAdapter.descriptor.name] = SearchEnginesAdapter()
     return adapters

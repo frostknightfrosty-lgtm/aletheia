@@ -165,3 +165,9 @@ def test_phase9_code_search_container_health():
     r = _run(["docker", "run", "--rm", "--network", "none", "aletheia/code-search:v1", "--health"])
     assert r.returncode == 0, r.stderr or r.stdout
     assert r.stdout.strip() == "ok", r.stdout + r.stderr
+
+
+def test_phase9_search_engines_container_health():
+    r = _run(["docker", "run", "--rm", "--network", "none", "aletheia/search-engines:v1", "--health"])
+    assert r.returncode == 0, r.stderr or r.stdout
+    assert r.stdout.strip() == "ok", r.stdout + r.stderr
