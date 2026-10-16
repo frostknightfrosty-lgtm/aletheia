@@ -55,6 +55,7 @@ CASES = [
     ("phase9-search-engines", "aletheia/search-engines:v1", ["--health"]),
     ("phase9-geolocation-image", "aletheia/geolocation-image:v1", ["--health"]),
     ("phase9-transport-asset-registry", "aletheia/transport-asset-registry:v1", ["--health"]),
+    ("phase9-social-profile", "aletheia/social-profile:v1", ["--health"]),
 ]
 
 def main() -> int:

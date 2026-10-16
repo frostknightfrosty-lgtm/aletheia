@@ -12,7 +12,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="aletheia")
     sub = parser.add_subparsers(dest="cmd", required=True)
     inv = sub.add_parser("investigate")
-    inv.add_argument("--seed", required=True, help="type:value, e.g. username:alice, email:alice@example.com, phone:+14155552671, domain:example.com, or geolocation:51.5074,-0.1278, or name:Acme Corporation")
+    inv.add_argument("--seed", required=True, help="type:value, e.g. username:alice, email:alice@example.com, phone:+14155552671, domain:example.com, url:https://example.com/profile, or name:Acme Corporation")
     inv.add_argument("--legal-only", action="store_true", default=True)
     inv.add_argument("--data-dir", default=os.getenv("ALETHEIA_DATA_DIR", "./data"))
     inv.add_argument("--timeout", type=int, default=120)

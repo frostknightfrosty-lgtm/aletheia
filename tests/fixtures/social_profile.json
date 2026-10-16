@@ -1,0 +1,55 @@
+{
+  "input_type": "fixture",
+  "input_value": "synthetic-social-profile",
+  "sources": [
+    {
+      "source": "crosslinked",
+      "skipped": false,
+      "skip_reason": null,
+      "http_status": 200,
+      "error": null,
+      "data": {
+        "query_count_max": 2,
+        "records": [
+          {
+            "name": "alex example",
+            "username": "alex-example",
+            "company": "Example Corp",
+            "source_url": "https://www.linkedin.com/in/alex-example"
+          }
+        ]
+      }
+    },
+    {
+      "source": "slinky",
+      "skipped": false,
+      "skip_reason": null,
+      "http_status": 0,
+      "error": null,
+      "data": {
+        "records": [
+          {
+            "username": "example_user",
+            "source_url": "https://github.com/example_user"
+          }
+        ]
+      }
+    },
+    {
+      "source": "tiktok-hashtag-analysis",
+      "skipped": true,
+      "skip_reason": "Synthetic fixture: source is a documented non-querying drop.",
+      "http_status": 0,
+      "error": null,
+      "data": null
+    },
+    {
+      "source": "zehef",
+      "skipped": true,
+      "skip_reason": "Synthetic fixture: source is a documented non-querying drop.",
+      "http_status": 0,
+      "error": null,
+      "data": null
+    }
+  ]
+}

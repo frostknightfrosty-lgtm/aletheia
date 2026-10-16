@@ -1441,6 +1441,51 @@
         }
       ],
       "note": "Synthetic fixture parser tests and Docker health smoke passed in CI run 38888136680 on commit 274b1a6f0cda9f44cfdf1b25662dfc7d4895e570 (https://github.com/frostknightfrosty-lgtm/aletheia/actions/runs/38888136680). Raw evidence copied from the downloaded artifact: PARSER PREFLIGHT: PASS — 46/46 adapters have parser coverage; 534 passed, 1 warning in 21.43s; DOCKER CAPTURE: PASS — 47/47 cases captured. results.json has 47 entries with 0 nonzero return codes and 47 stdout/stderr pairs; SHA-256 e2d525d2dfbe5707fb83731fda68f40b2d5ed8ed19eb25a124b8570748d07cd6. Case phase9-transport-asset-registry returned 0 with stdout ok under --network none. Three keyless sources implemented: FAA Aircraft Registration, OpenRailwayMap facility API, and Planespotters photo-reference metadata. Three candidates are documented as non-querying drops: IMO GISIS (no verified public API contract), ERATV (migration is ongoing and its public UI may trigger CAPTCHA), and ERIS (no official source matching that name identified). fixture file: tests/fixtures/transport_asset_registry.json. No live source lookups occurred."
+    },
+    {
+      "name": "social_profile",
+      "upstream": "https://github.com/frostknightfrosty-lgtm/aletheia/tree/main/docker/social_profile",
+      "license": "Composite adapter using CrossLinked (GPL-3.0) and Slinky (BSD-3-Clause), isolated in a dedicated Docker image.",
+      "version_pin": "CrossLinked 0.3.0; Slinky e74a138b6bf7264c788871b2e0825455046d09ef",
+      "invocation": "Bounded public search HTML parser and offline URL parser via dedicated Docker runner (aletheia/social-profile:v1)",
+      "input_types": [
+        "company_name",
+        "url"
+      ],
+      "output_schema": "SocialProfileFinding[]",
+      "legal_notes": "CrossLinked is bounded to one HTTPS page per engine (Google/Bing), with TLS verification, no redirects/retries/proxy rotation, and no direct LinkedIn access. Search challenges are errors and are never bypassed. Only name, username, company and source_url are emitted; generated email patterns and job titles are omitted. Slinky parses HTTPS profile URLs offline. TikTok and Zehef are non-querying drops documented in docker/social_profile/RATE_LIMITS.md.",
+      "network": "required",
+      "last_audited": "2026-10-16T00:00:00Z",
+      "verification_status": "unverified-fixture",
+      "fixture_provenance": "synthetic",
+      "legal_tier": 2,
+      "enabled_by_default": true,
+      "disabled_reason": null,
+      "batch_grouping": "social_profile",
+      "requires_key": false,
+      "sub_sources": [
+        {
+          "name": "crosslinked",
+          "requires_key": false,
+          "enabled_by_default": true
+        },
+        {
+          "name": "slinky",
+          "requires_key": false,
+          "enabled_by_default": true
+        },
+        {
+          "name": "tiktok-hashtag-analysis",
+          "requires_key": false,
+          "enabled_by_default": false
+        },
+        {
+          "name": "zehef",
+          "requires_key": false,
+          "enabled_by_default": false
+        }
+      ],
+      "note": "Synthetic parser fixture is present; fixture file: tests/fixtures/social_profile.json. No live lookup has occurred. Implementation includes CrossLinked 0.3.0 (one HTTPS search page each from Google and Bing) and Slinky pinned to commit e74a138b6bf7264c788871b2e0825455046d09ef (offline URL parsing). TikTok hashtag analysis is dropped because upstream error handling retries headed and the dependency uses anti-detection browser behavior; Zehef is dropped from this group because it is email/breach oriented and includes an account-creation endpoint check. See docker/social_profile/RATE_LIMITS.md. CI verification pending."
     }
   ],
   "phase_1_scope": {

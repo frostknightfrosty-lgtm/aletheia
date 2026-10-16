@@ -18,6 +18,7 @@ class SeedType(StrEnum):
     EMAIL = "email"
     PHONE = "phone"
     DOMAIN = "domain"
+    URL = "url"
     IP = "ip"
     FILE_PATH = "file_path"
     IMAGE = "image"

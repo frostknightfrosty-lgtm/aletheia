@@ -99,7 +99,7 @@ def test_verified_live_accepts_existing_evidence(tmp_path):
 def test_verified_fixture_adapter_notes_name_existing_fixture_file():
     manifest = load_project_manifest(MANIFEST)
     adapters = [e for e in manifest["tool_inventory"] if "Docker" in str(e.get("invocation", ""))]
-    assert len(adapters) == 46
+    assert len(adapters) == 47
     for entry in adapters:
         assert entry["fixture_provenance"] == "synthetic"
         marker = "fixture file: "
