@@ -1,6 +1,6 @@
-# Aletheia Handoff — Phase 10 complete (hash-chained audit log), next Phase 11 (egress proxy)
+# Aletheia Handoff — Phase 11 complete (egress proxy, standalone component)
 
-Last updated: 2026-10-16T20:20:00Z
+Last updated: 2026-10-17T00:30:00Z
 
 ## Project boundaries
 
@@ -13,21 +13,27 @@ prerequisites are met. A tier classification is project policy, not a legal conc
 
 ## Repository and CI state
 
-- Latest CI-verified commit: `503710890140d573451ba5363a10655f979e2ed4`
-  (`phase-10: implement hash-chained audit log`).
-- Docker Verification run **38958865080** —
-  https://github.com/frostknightfrosty-lgtm/aletheia/actions/runs/38958865080 — **green**
-  (job 13m50s).
+- Latest CI-verified commit: `02ee8879330d5195d48f3a7d47b3c0aa28080422`
+  (`phase-11: implement egress proxy (standalone component)`).
+- Docker Verification run **38961709929** —
+  https://github.com/frostknightfrosty-lgtm/aletheia/actions/runs/38961709929 — **green**
+  (attempt 2; attempt 1 was cancelled after the image-build step stalled on a layer pull).
 - Evidence lines copied from the downloaded artifact
-  (`ci-artifacts-38958865080`), not typed:
+  (`ci-artifacts-38961709929`), not typed:
   - `PARSER PREFLIGHT: PASS — 49/49 adapters have parser coverage`
-  - `570 passed, 1 warning in 23.03s`
-  - `DOCKER CAPTURE: PASS — 50/50 cases captured`
-- `results.json`: 50 entries, 0 nonzero return codes; SHA-256
-  `DA17BD0DF2B83FA6C771ED3B76F45EC42BBF271A3E04A5F186CF5FCAF5C03460`.
-- Local consistency: **520 passed + 50 skipped = 570**, which equals the CI passed count
+  - `602 passed, 1 warning in 20.79s`
+  - `DOCKER CAPTURE: PASS — 51/51 cases captured`
+- `results.json`: 51 entries, 0 nonzero return codes; the `phase11-egress-proxy` case
+  (`docker run --rm --network none aletheia/egress-proxy:v1 --health`) returned 0; SHA-256
+  `DEED8B3B1C8F62BD77D0B835666672AA5504076211525C161D4EBA9B2C3EA1CF`.
+- Egress-proxy image built in CI (`#9 naming to docker.io/aletheia/egress-proxy:v1 done`),
+  image id `sha256:f5af6b1f42d9e8cdb5a637bef81534496aa194fe422e18e1187f61ec4ddd12a0`;
+  `docker/egress_proxy/Dockerfile` SHA-256
+  `eb7ce40f08eee36733d045d726bee8b6532ee4d196c4dccb2e42bc2ac8e761d1` (matches the local file).
+- Local consistency: **551 passed + 51 skipped = 602**, which equals the CI passed count
   exactly. CI runs the container smokes that skip without a local Docker CLI.
-- 49 registered adapters, all `verified-fixture`. No `verified-live` adapters.
+- 49 registered adapters, all `verified-fixture`. No `verified-live` adapters. One
+  infrastructure component (`egress_proxy`), now `verified-fixture`.
 
 ## Phase 10 — hash-chained audit log (complete)
 
@@ -59,25 +65,56 @@ digital signature, it does not authenticate the manifest against an actor who ca
 both files together, and it is **not** a legal-admissibility guarantee. The README and
 `docs/ADAPTER_CONTRACT.md` say the same thing.
 
+## Phase 11 — egress proxy, standalone component (complete)
+
+Implemented and CI-verified in commit `02ee887`; manifest status flipped in `255dc6d`.
+
+- `app/aletheia/core/egress.py` — new control-plane module. `EgressLogEntry` /
+  `parse_log_line` / `read_log` validate the proxy's JSONL schema; `TokenBucket` and
+  `AdapterRateLimiter` implement a per-adapter token bucket with optional JSON persistence
+  (atomic temp-file replace + `fsync`); `KillSwitch` reads an env flag or a flag file;
+  `EgressProxy` builds the `docker run` argv and the `HTTP_PROXY`/`HTTPS_PROXY` environment
+  for an adapter; `append_log_to_chain` writes each proxied request to the run's hash chain
+  (`chain.append`, so a tampered run refuses the append).
+- `docker/egress_proxy/proxy.py` — new. A standard-library `asyncio` forward proxy. Plain
+  HTTP is forwarded from an absolute-form target; HTTPS `CONNECT` is tunnelled. The kill
+  switch (403) and the token bucket (429) are applied before any upstream connection is
+  opened; an upstream connect failure logs 502. `--health` prints exactly `ok` and opens no
+  socket, so the container smoke runs under `--network none`. **Deviation, recorded:** the
+  module is not literally ASGI — ASGI cannot carry `CONNECT` tunnels — so the forwarder is a
+  stdlib `asyncio` server; the control-plane contract in `docs/EGRESS_PROXY_CONTRACT.md`
+  is unchanged.
+- `docker/egress_proxy/Dockerfile` — image `aletheia/egress-proxy:v1`, stdlib only, non-root
+  `aletheia` user, no third-party package.
+- `tests/test_egress.py` (31 tests) plus `tests/fixtures/egress_proxy_log.jsonl`; a
+  container-health smoke in `tests/test_docker_integration.py`; capture case
+  `phase11-egress-proxy` in `ci/capture_docker_integration.py`; a `docker/build.sh` target;
+  a `PROJECT_MANIFEST.json` entry as an infrastructure component with `enabled_by_default:
+  true` (invocation deliberately omits the substring `Docker` so the adapter set stays 49).
+- `docs/EGRESS_PROXY_CONTRACT.md` — created (it was missing). It is the design/contract
+  record for the component.
+
+### Honest limitation (recorded, not softened)
+
+The proxy log records what reached the proxy; it is **not** proof of what an adapter did
+before that point, and the chain it feeds is **tamper-evident relative to a preserved run
+manifest**, not a digital signature and not a legal-admissibility guarantee.
+
 ## Next action
 
-**Phase 11 — egress proxy, standalone component.** Per the session brief: build the proxy
-module (`app/aletheia/core/egress.py`), the image (`docker/egress_proxy/Dockerfile`, tag
-`aletheia/egress-proxy:v1`), the forwarder (`docker/egress_proxy/proxy.py`), a synthetic
-log fixture, `tests/test_egress.py`, a proxy container-health Docker integration case, a
-capture case, a `docker/build.sh` target, and a `PROJECT_MANIFEST.json` entry for
-`egress_proxy` as an infrastructure component with `enabled_by_default: true`. Do **not**
-wire the proxy into every adapter Dockerfile in this session — that is a later session.
-
-**Note:** `docs/EGRESS_PROXY_CONTRACT.md`, which the brief lists as required reading and as
-the governing design doc, **does not exist in the repository**. Phase 11 proceeds from the
-explicit deliverable list and must create that document as the design/contract record.
+**Phase 12 — not started.** The egress proxy is a standalone component only; it is **not**
+yet wired into the adapter Dockerfiles, so no adapter traffic is forced through it and there
+is no per-request proxy logging, rate limiting, kill switch, or network-level fail-closed
+behaviour in the running system. Wiring the proxy into the adapter images and the run
+network is the next session. The `docs/EGRESS_PROXY_CONTRACT.md` design record exists.
 
 ## Known deferred issues
 
-- `docs/EGRESS_PROXY_CONTRACT.md` is missing (see above).
-- No adapter traffic is yet forced through an egress proxy; no per-request proxy logging,
-  rate limiting, kill switch, or fail-closed behaviour exists in the running system.
+- No adapter traffic is yet forced through an egress proxy; the Phase 11 component
+  (`app/aletheia/core/egress.py`, `docker/egress_proxy`) exists and is CI-verified, but it is
+  not wired into the adapter Dockerfiles or the run network, so there is no per-request proxy
+  logging, rate limiting, kill switch, or network-level fail-closed behaviour in the running
+  system yet.
 - Graph/checkpoint storage is file-backed JSON; no Postgres/Neo4j/Elasticsearch/MinIO/Redis
   backends yet.
 - No `verified-live` adapters; every fixture is synthetic unless separately documented.

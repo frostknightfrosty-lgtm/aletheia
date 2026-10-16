@@ -1,5 +1,37 @@
 # Changelog
 
+## 2026-10-17 — Phase 11: egress proxy (standalone component) implemented and CI-verified
+- **Egress proxy, standalone.** `app/aletheia/core/egress.py` is the control-plane side:
+  JSONL schema parsing (`EgressLogEntry`, `parse_log_line`, `read_log`), a per-adapter
+  token-bucket rate limiter with optional atomic JSON persistence (`TokenBucket`,
+  `AdapterRateLimiter`), a single kill switch (`KillSwitch`), the container/argv and adapter
+  proxy-environment builder (`EgressProxy`), and `append_log_to_chain`, which writes each
+  proxied request into the run's hash-chained audit log from Phase 10.
+- `docker/egress_proxy/proxy.py` is a standard-library `asyncio` forward proxy (image
+  `aletheia/egress-proxy:v1`). Plain HTTP is forwarded from an absolute-form target; HTTPS
+  `CONNECT` is tunnelled. The kill switch (403) and the token bucket (429) are applied
+  before any upstream connection opens; an upstream connect failure logs 502. `--health`
+  prints exactly `ok` and opens no socket, so the container smoke runs under `--network none`.
+  **Recorded deviation:** it is not literally ASGI, because ASGI cannot carry `CONNECT`
+  tunnels; the `docs/EGRESS_PROXY_CONTRACT.md` control-plane contract is unchanged.
+- `docs/EGRESS_PROXY_CONTRACT.md` created (it was missing from the repository).
+- Scope: this is a **standalone** component. It is deliberately **not** wired into the
+  adapter Dockerfiles yet, so no adapter traffic is forced through it. That wiring is a
+  later session.
+- Verified by Docker Verification run `38961709929` on commit
+  `02ee8879330d5195d48f3a7d47b3c0aa28080422`
+  (https://github.com/frostknightfrosty-lgtm/aletheia/actions/runs/38961709929). Lines copied
+  from the downloaded artifact: `PARSER PREFLIGHT: PASS — 49/49 adapters have parser
+  coverage`; `602 passed, 1 warning in 20.79s`; `DOCKER CAPTURE: PASS — 51/51 cases captured`.
+  `results.json`: 51 entries, 0 nonzero return codes, the `phase11-egress-proxy` case
+  (`docker run --rm --network none aletheia/egress-proxy:v1 --health`) returned 0, SHA-256
+  `DEED8B3B1C8F62BD77D0B835666672AA5504076211525C161D4EBA9B2C3EA1CF`. The image built as
+  `sha256:f5af6b1f42d9e8cdb5a637bef81534496aa194fe422e18e1187f61ec4ddd12a0`; the Dockerfile
+  SHA-256 is `eb7ce40f08eee36733d045d726bee8b6532ee4d196c4dccb2e42bc2ac8e761d1`, matching the
+  local file. Local consistency: 551 passed + 51 Docker skips = 602 CI passed. Manifest entry
+  `egress_proxy` flipped to `verified-fixture` in commit `255dc6d`; no test was skipped,
+  deleted, or weakened.
+
 ## 2026-10-16 — Phase 10: hash-chained audit log implemented and CI-verified
 - **Audit chain.** Each run's `AUDIT.jsonl` is now a SHA-256 hash chain
   (`app/aletheia/core/chain.py`). Every entry carries a one-based `seq`, the previous
