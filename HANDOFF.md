@@ -1,113 +1,104 @@
-# Aletheia Handoff — Phase 9 batch adapters (post-audit)
+# Aletheia Handoff — Phase 10 complete (hash-chained audit log), next Phase 11 (egress proxy)
 
-See `AUTONOMOUS_DIRECTIVE.md` for standing rules and `docs/BATCHING_PLAN.md` for the adapter plan.
+Last updated: 2026-10-16T20:20:00Z
 
-## User-requested pause — darkweb_search source review (2026-10-16)
+## Project boundaries
 
-Current local HEAD at pause: `0f1876e4b46c73ececa9eef51d1a9403ae4f387b` (`state: record social_username verification in run 38901112098`). The worktree was clean before this handoff update. No adapter implementation or other project-code edits were made during the resumed turn. The user explicitly asked to pause because context was nearly exhausted.
+Aletheia is a free, open-source OSINT investigation platform under the Florida project
+policy (`docs/DIRECTIVE_AMENDMENT_FLORIDA.md`). Sources sit on five tiers; the only project
+gate is the Tier 5 hard floor: unauthorized computer access (including another person's
+credentials or CAPTCHA/paywall bypass), communications interception, criminal marketplace
+transactions, and stalking/harassment. Tier 1–4 sources run by default when their
+prerequisites are met. A tier classification is project policy, not a legal conclusion.
 
-The state-only push triggered Docker Verification run `38902790400`, URL https://github.com/frostknightfrosty-lgtm/aletheia/actions/runs/38902790400. Last checked status was `in_progress`; do not report it green. On resume, check its status and, if complete, download/read its artifact before citing it.
+## Repository and CI state
 
-The next unfinished eligible plan row is `darkweb_search`; `transport_movement` remains deferred under Gate 6 and is not excluded. Preliminary source review found:
+- Latest CI-verified commit: `503710890140d573451ba5363a10655f979e2ed4`
+  (`phase-10: implement hash-chained audit log`).
+- Docker Verification run **38958865080** —
+  https://github.com/frostknightfrosty-lgtm/aletheia/actions/runs/38958865080 — **green**
+  (job 13m50s).
+- Evidence lines copied from the downloaded artifact
+  (`ci-artifacts-38958865080`), not typed:
+  - `PARSER PREFLIGHT: PASS — 49/49 adapters have parser coverage`
+  - `570 passed, 1 warning in 23.03s`
+  - `DOCKER CAPTURE: PASS — 50/50 cases captured`
+- `results.json`: 50 entries, 0 nonzero return codes; SHA-256
+  `DA17BD0DF2B83FA6C771ED3B76F45EC42BBF271A3E04A5F186CF5FCAF5C03460`.
+- Local consistency: **520 passed + 50 skipped = 570**, which equals the CI passed count
+  exactly. CI runs the container smokes that skip without a local Docker CLI.
+- 49 registered adapters, all `verified-fixture`. No `verified-live` adapters.
 
-- Piano / `darknet-crawler` 0.1.2 is published on PyPI and documents a search CLI with engine allowlisting and Tor mode. Its official package page says it queries existing indexes and that broad arbitrary onion spidering is opt-in. The PyPI sdist was downloaded to the Windows temp directory and its SHA-256 matched the PyPI value `3e766ccddd2007303ed49f2efefc6eb00716993e71ae2c9acd0d3fc7446c7eed`. The published package source contains an `ahmia_onion` engine at `http://juhanurmihxlp77nkq76byazcldy2hlmovfu2epvl5ankdibsot4csyd.onion/search`; Ahmia's own About page confirms that onion address. The narrow candidate is one Piano query restricted to that engine, `--mode tor`, with no spider/fetch/enrichment.
-- Ahmia's current Terms of Service explicitly prohibit scraping or replicating the service without permission. The project’s Florida directive classifies public ToS-hostile scraping as allowed/Tier 2; this conflict must be recorded clearly if that source is implemented. No query was made.
-- OnionSearch's official README describes a scraper across 16 engines; its upstream source includes several entries marked offline and hard-coded service endpoints. The current review did not establish a reliable, current multi-engine scope.
-- TorBot's current official CLI takes a URL and crawls pages; it is not a keyword-search endpoint.
-- Intelligence X's official SDK/API docs require a registered API key in `X-Key`; it is not keyless.
+## Phase 10 — hash-chained audit log (complete)
 
-No final sub-source selection was made and no code was written. Next action: finish the above CI-run check, then continue the `darkweb_search` source review with only a documented, tightly selected, keyless index if usable; otherwise record the exact source drops and move to the next non-blocked plan row. Do not claim live-source verification from the CI health smoke.
+Implemented and CI-verified in commit `5037108`.
 
-Last updated: 2026-10-17T06:05:00Z
+- `app/aletheia/core/chain.py` — new. A SHA-256 hash chain over each run's `AUDIT.jsonl`.
+  Every entry carries `seq` (1-based), `prev_hash` (the previous entry's hash, or 64 zeroes
+  for the genesis entry) and `hash` (SHA-256 of the canonical UTF-8 JSON with `hash`
+  removed, keys sorted, compact separators). `append()` refuses to extend an invalid chain
+  or a chain whose tip disagrees with the run `MANIFEST.json` anchor. `verify()` checks
+  entry order, previous-hash links, entry hashes, the manifest `checkpoint_hash`, and the
+  manifest `chain_tip` anchor.
+- `app/aletheia/core/audit.py` — every `AuditLogger.log()` now appends through the chain.
+- `app/aletheia/core/orchestrator.py` — publishes the verified `chain_tip` into the manifest
+  on resume; a broken chain raises instead of being silently rewritten.
+- `app/aletheia/core/checkpoint.py` — unchanged; the manifest already persists arbitrary
+  keys, so `chain_tip` rides on the existing `CheckpointStore.save()` with its
+  `checkpoint_hash`.
+- `app/aletheia/phase2/service.py` — verifies the chain before any Phase 2 mutation.
+- `app/aletheia/cli/main.py` — new `aletheia verify-chain <RUN_ID> [--data-dir …]` command.
+- Tests: `tests/test_chain.py` (10 tests) plus `tests/test_phase2_service.py` chain-tip
+  assertion. Tamper detection is covered (edited entry, removed final entry, stale
+  manifest anchor, tampered checkpoint hash).
 
-## Read this first: the 38323854024 fabrication was isolated
+### Honest limitation (recorded, not softened)
 
-Run `38323854024` was recorded with the evidence line `DOCKER CAPTURE: PASS — 35/35 phases captured`.
-That line exists nowhere in the run's job log or artifacts; it was hard-coded into a scratch script.
-It was retracted, the deleted Docker verification was restored, and `government_records_us` was
-re-verified from run `38644757019` (commit `58d48ee`).
+The chain is **tamper-evident relative to a preserved manifest anchor**. It is **not** a
+digital signature, it does not authenticate the manifest against an actor who can rewrite
+both files together, and it is **not** a legal-admissibility guarantee. The README and
+`docs/ADAPTER_CONTRACT.md` say the same thing.
 
-**A full audit on 2026-10-15 confirmed the fabrication did not spread.** All 10 successful runs on
-commits before `7f06d10` were re-examined from downloaded artifacts:
+## Next action
 
-`38270478612`, `38272314026`, `38273505822`, `38274729412`, `38275780719`, `38275780791`,
-`38290727897`, `38291743287`, `38292770527`, `38293763683`.
+**Phase 11 — egress proxy, standalone component.** Per the session brief: build the proxy
+module (`app/aletheia/core/egress.py`), the image (`docker/egress_proxy/Dockerfile`, tag
+`aletheia/egress-proxy:v1`), the forwarder (`docker/egress_proxy/proxy.py`), a synthetic
+log fixture, `tests/test_egress.py`, a proxy container-health Docker integration case, a
+capture case, a `docker/build.sh` target, and a `PROJECT_MANIFEST.json` entry for
+`egress_proxy` as an infrastructure component with `enabled_by_default: true`. Do **not**
+wire the proxy into every adapter Dockerfile in this session — that is a later session.
 
-For every one of them the parser preflight file, the pytest tail, the first line of `capture.log`,
-and `results.json` agree with each other: the capture count equals the number of `results.json`
-entries, every entry returns 0, and the stdout/stderr file counts equal the entry count. Every
-`capture.log` begins with a real `DOCKER CAPTURE: PASS — N/N cases captured` line. **No fabricated
-evidence line was found.** The failure was one session, not a pattern.
+**Note:** `docs/EGRESS_PROXY_CONTRACT.md`, which the brief lists as required reading and as
+the governing design doc, **does not exist in the repository**. Phase 11 proceeds from the
+explicit deliverable list and must create that document as the design/contract record.
 
-## The citation gap the audit did find
+## Known deferred issues
 
-29 of the 36 `verified-fixture` adapters cited **no run at all** — their notes said only
-"Fixture parser coverage passes" while asserting `verified-fixture`. Every one of those 29 has a
-passing capture case in run `38293763683` (commit `d784850ed5d869393c63e180cfb05035c070513e`), so
-the evidence was real but undocumented. Commit `70f4828` added the run, commit, copied run-level
-evidence lines, and each adapter's own case name and return code to all 29 notes. No
-`verification_status` changed.
-
-The seven adapters that already cited a run all pass too. Five cite full lines that match their
-artifacts exactly (`gravatar`, `rdap`, `ip_intelligence`, `government_records_us`,
-`corporate_registry`); two cite a run whose capture case returns 0 (`xposedornot`, `phoneinfoga`).
-
-## Current CI-verified state
-
-- **44 adapters registered, all `verified-fixture`; 45 Docker integration cases.**
-- `code_search` verified by run `38811234205` on `f59458f`: parser `43/43`, `484 passed, 1 warning in 20.60s`, capture `44/44`.
-- `search_engines` verified by run `38813318506` on `316172b`: parser `44/44`, `518 passed, 1 warning in 15.38s`, capture `45/45`.
-- The count-drift burden is fixed: a new adapter should now require **no** edits to any other test file. If one is needed, treat it as a regression.
-- Local at handoff: 473 passed, 45 skipped (the container smokes; `docker` is not on PATH here).
-- **Reusable cross-check:** local (passed + skipped) equals CI passed exactly, because CI runs the container smokes that skip locally. It held three times this session: 412+43=455, 440+44=484, 473+45=518. If it breaks, a test was skipped or deleted.
-## Plan divergence you must resolve before the next composites
-
-`docs/BATCHING_PLAN.md` lists 21 composites, but two already-implemented adapters absorbed part of
-the plan:
-
-- `ip_intelligence` merged the plan's `ip_intelligence_geo`, `ip_intelligence_reputation` and
-  `ip_intelligence_threat_exposure` rows into one 15-sub-source adapter.
-- `government_records_us` already implements seven sub-sources the plan assigns elsewhere:
-  `finra-brokercheck`, `fed-enforcement`, `occ-enforcement` (planned for
-  `sanctions_enforcement_watchlists`) and `fdic-bankfind`, `lda`, `usaspending`, `sam-gov`
-  (planned for `corporate_financial_public_records`).
-
-So the two "next" composites have far less new work than the plan implies:
-`sanctions_enforcement_watchlists` needs only UK Sanctions List, Swiss SECO and EU Consolidated
-Sanctions; `corporate_financial_public_records` needs only FollowTheMoney. Implementing the plan
-rows literally would query the same endpoints from two adapters. This adapter is scoped to the
-missing sub-sources only, and its manifest note says so.
-
-## Deferred issues
-
-- No verified-live adapters; every fixture is synthetic unless separately documented.
-- No implemented egress proxy. Graph/checkpoint storage is file-backed JSON.
-- Audit log has no verifiable hash chain or chain-of-custody command.
+- `docs/EGRESS_PROXY_CONTRACT.md` is missing (see above).
+- No adapter traffic is yet forced through an egress proxy; no per-request proxy logging,
+  rate limiting, kill switch, or fail-closed behaviour exists in the running system.
+- Graph/checkpoint storage is file-backed JSON; no Postgres/Neo4j/Elasticsearch/MinIO/Redis
+  backends yet.
+- No `verified-live` adapters; every fixture is synthetic unless separately documented.
 - Score/confidence separation is incomplete; `--purpose` is not a required adapter field.
-- `docs/AUTONOMOUS_DIRECTIVE.md` does not exist; the directive lives at repo root as
-  `AUTONOMOUS_DIRECTIVE.md`, and `AGENT_SETUP.md` is also at the repo root. Both files reference
+- `AUTONOMOUS_DIRECTIVE.md` and `AGENT_SETUP.md` live at the repo root, but both reference
   `docs/AUTONOMOUS_DIRECTIVE.md`. Worth fixing or documenting.
-- The audit trail of unverified claims in `RESUME_STATE.json` before 2026-10-14 should be treated
-  as reconstructed, not as primary evidence.
+- The audit trail of unverified claims in `RESUME_STATE.json` before 2026-10-14 should be
+  treated as reconstructed, not primary evidence.
 
 ## Open gates
 
 - **Gate 2** — user-owned target required before any live investigation.
 - **Gate 3** — verify API keys and cost before a phase depends on them.
 - **Gate 5** — evidence lines must be copied from a downloaded artifact, never typed.
-- Gate 6 — RESOLVED 2026-10-14: `government_records_us` re-verified from run `38644757019`.
+- **Gate 6** — `transport_movement` and `darkweb_search` remain deferred pending user
+  action / source verification.
 
-## Next action
+## Briefing corrections (standing rule 10)
 
-1. Pick the next composite from `docs/BATCHING_PLAN.md`. Still unimplemented: `geolocation_image`, `transport_movement`,
-   `transport_asset_registry`, `leak_checkers`, `research_discovery`, `social_username`, `social_profile`, `darkweb_search`,
-   `technical_surface_search`.
-2. Diff its sub-source list against `PROJECT_MANIFEST.json` first, then verify every endpoint against vendor docs before
-   writing code. `technical_surface_search` must NOT re-implement `checkdmarc` or `scan-mx`, which live in `email_auth`.
-3. One composite per commit and per CI run; mark `verified-fixture` only from artifact-copied lines (Gate 5).
-4. Preferred build shape: pre-verify the endpoints yourself, then hand one composite to a subagent forbidden from
-   touching `PROJECT_MANIFEST.json` or `tests/test_project_manifest.py`; verify its output independently, add the manifest
-   entry, commit, push, wait for CI, and copy the evidence.
-5. `corporate_financial_public_records` stays **excluded** (Gate 7); see `docs/NOT_INTEGRATED.md`.
-Docker is unavailable on this workstation. Image and container behaviour can only be verified in
-GitHub Actions.
+- The session brief said Phase 10 was uncommitted, left one failing test double, and that
+  the local suite was 518 passed / 50 skipped (568 total). All three were stale: Phase 10
+  was already committed as `5037108` and pushed; the test double in `tests/test_chain.py`
+  already creates the per-adapter workspace (matching `Adapter.run`); and the real local
+  count is 520 passed / 50 skipped = 570, matching CI.

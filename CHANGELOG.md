@@ -1,5 +1,31 @@
 # Changelog
 
+## 2026-10-16 — Phase 10: hash-chained audit log implemented and CI-verified
+- **Audit chain.** Each run's `AUDIT.jsonl` is now a SHA-256 hash chain
+  (`app/aletheia/core/chain.py`). Every entry carries a one-based `seq`, the previous
+  entry's hash as `prev_hash` (64 zeroes for the genesis entry), and its own `hash`
+  (SHA-256 of the canonical UTF-8 JSON with `hash` removed, keys sorted, compact
+  separators). `append()` refuses to extend an invalid chain, a chain whose tip disagrees
+  with the run `MANIFEST.json` anchor, or a run whose `checkpoint_hash` is invalid.
+  `AuditLogger.log()` routes every event through the chain; the orchestrator and
+  `Phase2Service` verify the chain before publishing a tip or mutating a run; and the CLI
+  adds `aletheia verify-chain <RUN_ID>`.
+- **Honest limitation, stated in the README and `docs/ADAPTER_CONTRACT.md`:** the chain is
+  tamper-EVIDENT relative to a preserved manifest anchor. It is not a digital signature,
+  it does not authenticate the manifest against an actor able to rewrite both files, and
+  it is not a legal-admissibility guarantee.
+- Verified by Docker Verification run `38958865080` on commit
+  `503710890140d573451ba5363a10655f979e2ed4`
+  (https://github.com/frostknightfrosty-lgtm/aletheia/actions/runs/38958865080). Lines
+  copied from the downloaded artifact: `PARSER PREFLIGHT: PASS — 49/49 adapters have
+  parser coverage`; `570 passed, 1 warning in 23.03s`; `DOCKER CAPTURE: PASS — 50/50 cases
+  captured`. `results.json`: 50 entries, 0 nonzero return codes, SHA-256
+  `DA17BD0DF2B83FA6C771ED3B76F45EC42BBF271A3E04A5F186CF5FCAF5C03460`. Local consistency:
+  520 passed + 50 Docker skips = 570 CI passed.
+- Tamper-detection tests cover an edited middle entry, a removed final entry, a stale
+  manifest anchor that must not be advanced, and a tampered `checkpoint_hash` that must not
+  be repaired by an append. No test was skipped, deleted, or weakened.
+
 ## 2026-10-17— count-drift fix, code_search and search_engines
 - **Count-drift fix.** tests/test_ssl_tls_adapter.py and tests/test_email_auth_adapter.py now assert `set(registry)` equals the set of adapters PROJECT_MANIFEST.json declares as Docker-invoked, and tests/test_phase3_manifest.py asserts the run pending set equals the live registry DOMAIN-capable set. Both are derived and strictly stronger than the literals they replaced, and both were proved to still fail when the source of truth is tampered with. A new adapter no longer requires editing any other test file. The phase3/4/5 adapter tests were deliberately left alone because they assert against frozen phase-specific registries. Verified by run `38807150831` on `4c2b38f`: `PARSER PREFLIGHT: PASS — 42/42 adapters have parser coverage`; `455 passed, 1 warning in 21.03s`; `DOCKER CAPTURE: PASS — 43/43 cases captured`.
 - **code_search** (1 sub-source, 2 drops). Implemented `debian-code-search`, whose contract came from the project own OpenAPI specification (`https://codesearch.debian.net/api/v1`, `GET /search` with required `query` and optional `match_mode`, free key in the `x-dcs-apikey` header). Dropped `gitlab-search` (GitLab own documentation states every call to the Search API requires authentication, and a live probe of the blobs scope returned HTTP 401) and `publicwww` (its own authentication documentation states a paid plan is required, which standing rule 4 forbids). Verified by run `38811234205` on `f59458f`: `PARSER PREFLIGHT: PASS — 43/43 adapters have parser coverage`; `484 passed, 1 warning in 20.60s`; `DOCKER CAPTURE: PASS — 44/44 cases captured`.
