@@ -1456,7 +1456,7 @@
       "legal_notes": "CrossLinked is bounded to one HTTPS page per engine (Google/Bing), with TLS verification, no redirects/retries/proxy rotation, and no direct LinkedIn access. Search challenges are errors and are never bypassed. Only name, username, company and source_url are emitted; generated email patterns and job titles are omitted. Slinky parses HTTPS profile URLs offline. TikTok and Zehef are non-querying drops documented in docker/social_profile/RATE_LIMITS.md.",
       "network": "required",
       "last_audited": "2026-10-16T00:00:00Z",
-      "verification_status": "unverified-fixture",
+      "verification_status": "verified-fixture",
       "fixture_provenance": "synthetic",
       "legal_tier": 2,
       "enabled_by_default": true,
@@ -1485,7 +1485,7 @@
           "enabled_by_default": false
         }
       ],
-      "note": "Synthetic parser fixture is present; fixture file: tests/fixtures/social_profile.json. No live lookup has occurred. Implementation includes CrossLinked 0.3.0 (one HTTPS search page each from Google and Bing) and Slinky pinned to commit e74a138b6bf7264c788871b2e0825455046d09ef (offline URL parsing). TikTok hashtag analysis is dropped because upstream error handling retries headed and the dependency uses anti-detection browser behavior; Zehef is dropped from this group because it is email/breach oriented and includes an account-creation endpoint check. See docker/social_profile/RATE_LIMITS.md. CI verification pending."
+      "note": "Synthetic parser fixture passed; fixture file: tests/fixtures/social_profile.json. No live source lookups occurred. Verified in Docker Verification run 38893145959 on commit ee8da34ec42df0e4d29362b04949b2b113f988b7 (https://github.com/frostknightfrosty-lgtm/aletheia/actions/runs/38893145959). Raw artifact evidence: PARSER PREFLIGHT: PASS — 47/47 adapters have parser coverage; 543 passed, 1 warning in 22.69s; DOCKER CAPTURE: PASS — 48/48 cases captured. results.json has 48 entries with 0 nonzero return codes and 48 stdout/stderr pairs; SHA-256 453552AFED1CAE3DD3CFC9EC2A82AD9DDB6DC84C857E2C69510FF86642EA6314. Case phase9-social-profile returned 0 with stdout ok under --network none, which confirms container startup only. Implementation includes CrossLinked 0.3.0 (one HTTPS search page each from Google and Bing) and Slinky pinned to commit e74a138b6bf7264c788871b2e0825455046d09ef (offline URL parsing). TikTok hashtag analysis is dropped because upstream error handling retries headed and the dependency uses anti-detection browser behavior; Zehef is dropped from this group because it is email/breach oriented and includes an account-creation endpoint check. See docker/social_profile/RATE_LIMITS.md."
     }
   ],
   "phase_1_scope": {
