@@ -1549,7 +1549,7 @@
       "legal_notes": "LeakIX uses its documented GET /search API with scope=leak, q, page=0, and api-key header (https://docs.leakix.net/docs/api/search/); its docs specify approximately 1 request/second. GrayhatWarfare uses GET /api/v2/files with keywords, limit=25, start=0 and Authorization: Bearer token (https://buckets.grayhatwarfare.com/docs/api/v2); no returned file is fetched. Both credentials are optional at runtime but required for their respective sources, are read from environment variables, and are never emitted. BreachDirectory is skipped because its official site returned HTTP 403 during this review and no first-party contract could be verified; no endpoint is guessed. Leak-Lookup is skipped because its terms require self-search or written authorization, which this adapter cannot verify (https://leak-lookup.com/support/terms#use-of-service). Broń Vault is skipped because its official README describes a self-hosted Docker application accepting uploaded local log archives, not a public hosted source; see https://github.com/ITSEC-Research/bron-vault. Exact notes are in docker/leak_checkers/RATE_LIMITS.md.",
       "network": "required",
       "last_audited": "2026-10-16T00:00:00Z",
-      "verification_status": "unknown",
+      "verification_status": "verified-fixture",
       "fixture_provenance": "synthetic",
       "legal_tier": 4,
       "enabled_by_default": true,
@@ -1588,7 +1588,7 @@
           "disabled_reason": "Self-hosted app requiring local log uploads and a separate operator-managed deployment."
         }
       ],
-      "note": "Synthetic fixture parser coverage is implemented but CI verification is pending; fixture file: tests/fixtures/leak_checkers.json. No live source lookups have occurred. Two implemented sources: leakix and grayhatwarfare; three candidates are explicit skips with source-specific evidence in docker/leak_checkers/RATE_LIMITS.md."
+      "note": "Synthetic fixture and Docker health smoke verified in Docker Verification run 38952489236 on commit 2fc9933d375917c133fc4af44db26dc07c2949d4 (https://github.com/frostknightfrosty-lgtm/aletheia/actions/runs/38952489236). Raw artifact evidence: PARSER PREFLIGHT: PASS — 49/49 adapters have parser coverage; 560 passed, 1 warning in 16.17s; DOCKER CAPTURE: PASS — 50/50 cases captured. results.json contains 50 entries with 0 nonzero return codes; phase9-leak-checkers returned 0 with stdout ok under --network none. fixture file: tests/fixtures/leak_checkers.json. No live source lookups occurred. Two implemented sources: leakix and grayhatwarfare; three candidates are documented skips in docker/leak_checkers/RATE_LIMITS.md."
     }
   ],
   "phase_1_scope": {
