@@ -177,3 +177,9 @@ def test_phase9_geolocation_image_container_health():
     r = _run(["docker", "run", "--rm", "--network", "none", "aletheia/geolocation-image:v1", "--health"])
     assert r.returncode == 0, r.stderr or r.stdout
     assert r.stdout.strip() == "ok", r.stdout + r.stderr
+
+
+def test_phase9_transport_asset_registry_container_health():
+    r = _run(["docker", "run", "--rm", "--network", "none", "aletheia/transport-asset-registry:v1", "--health"])
+    assert r.returncode == 0, r.stderr or r.stdout
+    assert r.stdout.strip() == "ok", r.stdout + r.stderr

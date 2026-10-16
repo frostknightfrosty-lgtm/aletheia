@@ -30,6 +30,7 @@ from aletheia.adapters.email_auth import EmailAuthAdapter
 from aletheia.adapters.code_search import CodeSearchAdapter
 from aletheia.adapters.search_engines import SearchEnginesAdapter
 from aletheia.adapters.geolocation_image import GeolocationImageAdapter
+from aletheia.adapters.transport_asset_registry import TransportAssetRegistryAdapter
 
 
 def phase1_adapters() -> dict[str, Adapter]:
@@ -89,4 +90,5 @@ def phase7_adapters() -> dict[str, Adapter]:
     adapters[CodeSearchAdapter.descriptor.name] = CodeSearchAdapter()
     adapters[SearchEnginesAdapter.descriptor.name] = SearchEnginesAdapter()
     adapters[GeolocationImageAdapter.descriptor.name] = GeolocationImageAdapter()
+    adapters[TransportAssetRegistryAdapter.descriptor.name] = TransportAssetRegistryAdapter()
     return adapters

@@ -1387,6 +1387,60 @@
         }
       ],
       "note": "Synthetic fixture parser tests and Docker health smoke passed in CI run 38882456490 on commit bcbdee911c6527d4450ad88bae000cdae4aa8485 (https://github.com/frostknightfrosty-lgtm/aletheia/actions/runs/38882456490). Raw evidence copied from the downloaded artifact: PARSER PREFLIGHT: PASS — 45/45 adapters have parser coverage; 525 passed, 1 warning in 21.93s; DOCKER CAPTURE: PASS — 46/46 cases captured. results.json has 46 entries with 0 nonzero return codes and 46 stdout/stderr pairs; SHA-256 308EDE70B65BA1D55D72281BABE7A2ECDA88459DCBD94861F4B870B15EA57E3B. Case phase9-geolocation-image returned 0 with stdout ok under --network none. Five sub-sources implemented: mapillary, nominatim, copernicus-stac, dfit and steg-analyzer. Seven candidates were dropped and documented with citations: Dropped PicImageSearch because its GitHub project documents an aggregator over third-party engines without one bounded downstream request contract (https://github.com/kitUIN/PicImageSearch); dropped tracelines because its PyPI documentation describes an operator-deployed coverage proxy that overlaps direct Mapillary (https://pypi.org/project/tracelines/0.2.0/); dropped ShadowFinder because its Bellingcat documentation requires object height and shadow-length or sun-altitude inputs plus date/time (https://github.com/bellingcat/ShadowFinder); dropped pybdshadow because its official docs require building geometry and a datetime (https://pybdshadow.readthedocs.io/en/stable/); dropped youtube-geofind because its documented YouTube Data API search endpoint is already queried by the existing youtube-api adapter (https://developers.google.com/youtube/v3/docs/search/list); dropped GeoLocator because the reviewed upstream implementation requires a prebuilt panorama index/model setup rather than a bounded single-image API (https://github.com/Developer-Mike/geolocator); dropped Betaface because its product page states the public service is temporarily down and gives no current usable request contract (https://www.betaface.com/products.html). fixture file: tests/fixtures/geolocation_image.json. No live API lookups have occurred."
+    },
+    {
+      "name": "transport_asset_registry",
+        "upstream": "https://github.com/frostknightfrosty-lgtm/aletheia/tree/main/docker/transport_asset_registry",
+      "license": "Composite adapter: FAA public aircraft registration data; OpenStreetMap / OpenRailwayMap facility data (ODbL); and Planespotters public aircraft-photo metadata.",
+      "version_pin": "1.0",
+      "invocation": "FAA CSV download and public HTTPS JSON APIs via dedicated Docker runner (aletheia/transport-asset-registry:v1)",
+      "input_types": [
+        "name"
+      ],
+      "output_schema": "TransportAssetFinding[]",
+      "legal_notes": "Implements exact FAA N-number lookup from the public CSV archive, bounded OpenRailwayMap facility lookup, and Planespotters photo-reference metadata. FAA registrant names and addresses are discarded; Planespotters images are never downloaded. IMO GISIS, ERATV, and the ambiguous ERIS candidate are documented non-querying drops in docker/transport_asset_registry/RATE_LIMITS.md.",
+      "network": "required",
+      "last_audited": "2026-10-16T00:00:00Z",
+      "verification_status": "unverified-fixture",
+      "fixture_provenance": "synthetic",
+      "legal_tier": 1,
+      "enabled_by_default": true,
+      "disabled_reason": null,
+      "batch_grouping": "transport_asset_registry",
+      "requires_key": false,
+      "sub_sources": [
+        {
+          "name": "faa-aircraft-registration",
+          "requires_key": false,
+          "enabled_by_default": true
+        },
+        {
+          "name": "openrailwaymap",
+          "requires_key": false,
+          "enabled_by_default": true
+        },
+        {
+          "name": "planespotters",
+          "requires_key": false,
+          "enabled_by_default": true
+        },
+        {
+          "name": "imo-gisis",
+          "requires_key": false,
+          "enabled_by_default": false
+        },
+        {
+          "name": "eratv",
+          "requires_key": false,
+          "enabled_by_default": false
+        },
+        {
+          "name": "eris",
+          "requires_key": false,
+          "enabled_by_default": false
+        }
+      ],
+        "note": "Synthetic fixture only; fixture file: tests/fixtures/transport_asset_registry.json. No live container run has occurred. Three keyless sources are implemented. IMO GISIS, ERATV, and ERIS are recorded as non-querying skips with evidence in docker/transport_asset_registry/RATE_LIMITS.md."
     }
   ],
   "phase_1_scope": {

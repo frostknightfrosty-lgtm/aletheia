@@ -83,6 +83,9 @@ class EntityType(StrEnum):
     # Composite geolocation/image observation: a normalized place, street-level
     # image, satellite catalogue item, or bounded local image-forensics result.
     GEO_EVIDENCE = "geo_evidence"
+    # Composite transport asset registry observation (aircraft registry, aircraft
+    # photo metadata, or railway facility data).
+    TRANSPORT_ASSET_RECORD = "transport_asset_record"
 
 
 class RelationshipType(StrEnum):

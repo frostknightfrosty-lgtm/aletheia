@@ -1,0 +1,109 @@
+{
+  "input_type": "name",
+  "input_value": "N123AB",
+  "timestamp": "2026-10-16T09:00:00+00:00",
+  "sources": [
+    {
+      "source": "faa-aircraft-registration",
+      "skipped": false,
+      "skip_reason": null,
+      "timestamp": "2026-10-16T09:00:01+00:00",
+      "http_status": 200,
+      "error": null,
+      "raw_hash": null,
+      "data": {
+        "api_source": "FAA Releasable Aircraft Database",
+        "api_documentation": "https://www.faa.gov/licenses_certificates/aircraft_certification/aircraft_registry/releasable_aircraft_download/index.cfm",
+        "endpoint": "https://registry.faa.gov/database/ReleasableAircraft.zip",
+        "query": "N123AB",
+        "record_count": 1,
+        "records": [
+          {
+            "record_id": "N123AB",
+            "record_type": "faa_aircraft_registration",
+            "registration": "N123AB",
+            "serial_number": "SYNTHETIC-001",
+            "manufacturer_model_code": "SYNTH01",
+            "year_manufactured": "2020",
+            "aircraft_type_code": "4",
+            "engine_type_code": "1",
+            "status_code": "V",
+            "mode_s_code": "A1B2C3D4",
+            "mode_s_code_hex": "A1B2C3D4",
+            "endpoint": "https://registry.faa.gov/database/ReleasableAircraft.zip",
+            "documentation": "https://www.faa.gov/licenses_certificates/aircraft_certification/aircraft_registry/media/ardata.pdf",
+            "detail": "Synthetic FAA-shaped aircraft record; no real owner data."
+          }
+        ]
+      }
+    },
+    {
+      "source": "openrailwaymap",
+      "skipped": true,
+      "skip_reason": "OpenRailwayMap facility search is only used for a railway facility name or uic:<reference> seed.",
+      "timestamp": "2026-10-16T09:00:02+00:00",
+      "http_status": 0,
+      "error": null,
+      "raw_hash": null,
+      "data": null
+    },
+    {
+      "source": "planespotters",
+      "skipped": false,
+      "skip_reason": null,
+      "timestamp": "2026-10-16T09:00:03+00:00",
+      "http_status": 200,
+      "error": null,
+      "raw_hash": null,
+      "data": {
+        "api_source": "Planespotters public photo metadata endpoint",
+        "api_documentation": "https://www.planespotters.net/legal/termsofuse?desktop=true",
+        "endpoint": "https://api.planespotters.net/pub/photos/reg/N123AB",
+        "invocation": "GET https://api.planespotters.net/pub/photos/reg/<registration>",
+        "query": "N123AB",
+        "record_count": 1,
+        "records": [
+          {
+            "record_id": "synthetic-photo-001",
+            "registration": "N123AB",
+            "hex_identifier": null,
+            "record_type": "aircraft_photo_reference",
+            "photographer": "Synthetic Photographer",
+            "source_page": "https://www.planespotters.net/airframe/synthetic-record",
+            "detail": "Synthetic photo metadata; image bytes and preview URLs are omitted."
+          }
+        ]
+      }
+    },
+    {
+      "source": "imo-gisis",
+      "skipped": true,
+      "skip_reason": "IMO GISIS has public browser search but no verified public API request contract.",
+      "timestamp": "2026-10-16T09:00:04+00:00",
+      "http_status": 0,
+      "error": null,
+      "raw_hash": null,
+      "data": null
+    },
+    {
+      "source": "eratv",
+      "skipped": true,
+      "skip_reason": "ERATV data migration into the public Knowledge Graph is ongoing; the UI may issue CAPTCHA challenges.",
+      "timestamp": "2026-10-16T09:00:05+00:00",
+      "http_status": 0,
+      "error": null,
+      "raw_hash": null,
+      "data": null
+    },
+    {
+      "source": "eris",
+      "skipped": true,
+      "skip_reason": "No official railway asset registry/API corresponding to the name ERIS was identified.",
+      "timestamp": "2026-10-16T09:00:06+00:00",
+      "http_status": 0,
+      "error": null,
+      "raw_hash": null,
+      "data": null
+    }
+  ]
+}
