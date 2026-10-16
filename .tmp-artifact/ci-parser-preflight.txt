@@ -1,0 +1,1 @@
+PARSER PREFLIGHT: PASS — 48/48 adapters have parser coverage

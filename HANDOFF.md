@@ -2,6 +2,22 @@
 
 See `AUTONOMOUS_DIRECTIVE.md` for standing rules and `docs/BATCHING_PLAN.md` for the adapter plan.
 
+## User-requested pause — darkweb_search source review (2026-10-16)
+
+Current local HEAD at pause: `0f1876e4b46c73ececa9eef51d1a9403ae4f387b` (`state: record social_username verification in run 38901112098`). The worktree was clean before this handoff update. No adapter implementation or other project-code edits were made during the resumed turn. The user explicitly asked to pause because context was nearly exhausted.
+
+The state-only push triggered Docker Verification run `38902790400`, URL https://github.com/frostknightfrosty-lgtm/aletheia/actions/runs/38902790400. Last checked status was `in_progress`; do not report it green. On resume, check its status and, if complete, download/read its artifact before citing it.
+
+The next unfinished eligible plan row is `darkweb_search`; `transport_movement` remains deferred under Gate 6 and is not excluded. Preliminary source review found:
+
+- Piano / `darknet-crawler` 0.1.2 is published on PyPI and documents a search CLI with engine allowlisting and Tor mode. Its official package page says it queries existing indexes and that broad arbitrary onion spidering is opt-in. The PyPI sdist was downloaded to the Windows temp directory and its SHA-256 matched the PyPI value `3e766ccddd2007303ed49f2efefc6eb00716993e71ae2c9acd0d3fc7446c7eed`. The published package source contains an `ahmia_onion` engine at `http://juhanurmihxlp77nkq76byazcldy2hlmovfu2epvl5ankdibsot4csyd.onion/search`; Ahmia's own About page confirms that onion address. The narrow candidate is one Piano query restricted to that engine, `--mode tor`, with no spider/fetch/enrichment.
+- Ahmia's current Terms of Service explicitly prohibit scraping or replicating the service without permission. The project’s Florida directive classifies public ToS-hostile scraping as allowed/Tier 2; this conflict must be recorded clearly if that source is implemented. No query was made.
+- OnionSearch's official README describes a scraper across 16 engines; its upstream source includes several entries marked offline and hard-coded service endpoints. The current review did not establish a reliable, current multi-engine scope.
+- TorBot's current official CLI takes a URL and crawls pages; it is not a keyword-search endpoint.
+- Intelligence X's official SDK/API docs require a registered API key in `X-Key`; it is not keyless.
+
+No final sub-source selection was made and no code was written. Next action: finish the above CI-run check, then continue the `darkweb_search` source review with only a documented, tightly selected, keyless index if usable; otherwise record the exact source drops and move to the next non-blocked plan row. Do not claim live-source verification from the CI health smoke.
+
 Last updated: 2026-10-17T06:05:00Z
 
 ## Read this first: the 38323854024 fabrication was isolated

@@ -1,0 +1,697 @@
+[
+  {
+    "name": "phase1-sherlock",
+    "image": "aletheia/sherlock:0.16.2",
+    "command": [
+      "docker",
+      "run",
+      "--rm",
+      "--network",
+      "none",
+      "aletheia/sherlock:0.16.2",
+      "--version"
+    ],
+    "returncode": 0
+  },
+  {
+    "name": "phase1-theharvester",
+    "image": "aletheia/theharvester:4.11.1",
+    "command": [
+      "docker",
+      "run",
+      "--rm",
+      "--network",
+      "none",
+      "aletheia/theharvester:4.11.1",
+      "-h"
+    ],
+    "returncode": 0
+  },
+  {
+    "name": "phase1-exiftool",
+    "image": "aletheia/exiftool:13.59",
+    "command": [
+      "docker",
+      "run",
+      "--rm",
+      "--network",
+      "none",
+      "-v",
+      "/tmp/tmpq3jua5wi/sample.txt:/work/sample.txt:ro",
+      "aletheia/exiftool:13.59",
+      "-j",
+      "/work/sample.txt"
+    ],
+    "returncode": 0
+  },
+  {
+    "name": "phase3-amass",
+    "image": "aletheia/amass:5.1.1",
+    "command": [
+      "docker",
+      "run",
+      "--rm",
+      "--network",
+      "none",
+      "aletheia/amass:5.1.1",
+      "-version"
+    ],
+    "returncode": 0
+  },
+  {
+    "name": "phase3-subfinder",
+    "image": "aletheia/subfinder:2.17.0",
+    "command": [
+      "docker",
+      "run",
+      "--rm",
+      "--network",
+      "none",
+      "aletheia/subfinder:2.17.0",
+      "-version"
+    ],
+    "returncode": 0
+  },
+  {
+    "name": "phase3-assetfinder",
+    "image": "aletheia/assetfinder:0.1.1",
+    "command": [
+      "docker",
+      "run",
+      "--rm",
+      "--network",
+      "none",
+      "aletheia/assetfinder:0.1.1",
+      "--help"
+    ],
+    "returncode": 0
+  },
+  {
+    "name": "phase3-dnsx",
+    "image": "aletheia/dnsx:1.3.1",
+    "command": [
+      "docker",
+      "run",
+      "--rm",
+      "--network",
+      "none",
+      "aletheia/dnsx:1.3.1",
+      "-version"
+    ],
+    "returncode": 0
+  },
+  {
+    "name": "phase3-massdns",
+    "image": "aletheia/massdns:1.1.0",
+    "command": [
+      "docker",
+      "run",
+      "--rm",
+      "--network",
+      "none",
+      "aletheia/massdns:1.1.0",
+      "--help"
+    ],
+    "returncode": 0
+  },
+  {
+    "name": "phase3-dnsrecon",
+    "image": "aletheia/dnsrecon:1.6.3",
+    "command": [
+      "docker",
+      "run",
+      "--rm",
+      "--network",
+      "none",
+      "aletheia/dnsrecon:1.6.3",
+      "--help"
+    ],
+    "returncode": 0
+  },
+  {
+    "name": "phase3-fierce",
+    "image": "aletheia/fierce:1.6.0",
+    "command": [
+      "docker",
+      "run",
+      "--rm",
+      "--network",
+      "none",
+      "aletheia/fierce:1.6.0",
+      "--help"
+    ],
+    "returncode": 0
+  },
+  {
+    "name": "phase3-shodan",
+    "image": "aletheia/shodan:1.31.0",
+    "command": [
+      "docker",
+      "run",
+      "--rm",
+      "--network",
+      "none",
+      "aletheia/shodan:1.31.0",
+      "--health"
+    ],
+    "returncode": 0
+  },
+  {
+    "name": "phase3-crtsh",
+    "image": "aletheia/crtsh:public-json",
+    "command": [
+      "docker",
+      "run",
+      "--rm",
+      "--network",
+      "none",
+      "aletheia/crtsh:public-json",
+      "--health"
+    ],
+    "returncode": 0
+  },
+  {
+    "name": "phase4-maigret",
+    "image": "aletheia/maigret:0.6.6",
+    "command": [
+      "docker",
+      "run",
+      "--rm",
+      "--network",
+      "none",
+      "aletheia/maigret:0.6.6",
+      "--version"
+    ],
+    "returncode": 0
+  },
+  {
+    "name": "phase4-holehe",
+    "image": "aletheia/holehe:1.61",
+    "command": [
+      "docker",
+      "run",
+      "--rm",
+      "--network",
+      "none",
+      "--entrypoint",
+      "python",
+      "aletheia/holehe:1.61",
+      "-c",
+      "from holehe.core import __version__; print(__version__)"
+    ],
+    "returncode": 0
+  },
+  {
+    "name": "phase4-h8mail",
+    "image": "aletheia/h8mail:2.5.6",
+    "command": [
+      "docker",
+      "run",
+      "--rm",
+      "--network",
+      "none",
+      "aletheia/h8mail:2.5.6",
+      "--help"
+    ],
+    "returncode": 0
+  },
+  {
+    "name": "phase4-hibp",
+    "image": "aletheia/hibp:api-v3",
+    "command": [
+      "docker",
+      "run",
+      "--rm",
+      "--network",
+      "none",
+      "aletheia/hibp:api-v3",
+      "--health"
+    ],
+    "returncode": 0
+  },
+  {
+    "name": "phase4-xposedornot",
+    "image": "aletheia/xposedornot:api-v1",
+    "command": [
+      "docker",
+      "run",
+      "--rm",
+      "--network",
+      "none",
+      "aletheia/xposedornot:api-v1",
+      "--health"
+    ],
+    "returncode": 0
+  },
+  {
+    "name": "phase4-phoneinfoga",
+    "image": "aletheia/phoneinfoga:2.11.0",
+    "command": [
+      "docker",
+      "run",
+      "--rm",
+      "--network",
+      "none",
+      "aletheia/phoneinfoga:2.11.0",
+      "version"
+    ],
+    "returncode": 0
+  },
+  {
+    "name": "phase4-libphonenumber",
+    "image": "aletheia/libphonenumber:9.0.40",
+    "command": [
+      "docker",
+      "run",
+      "--rm",
+      "--network",
+      "none",
+      "aletheia/libphonenumber:9.0.40",
+      "--health"
+    ],
+    "returncode": 0
+  },
+  {
+    "name": "phase5-instaloader",
+    "image": "aletheia/instaloader:4.15.3",
+    "command": [
+      "docker",
+      "run",
+      "--rm",
+      "--network",
+      "none",
+      "aletheia/instaloader:4.15.3",
+      "--health"
+    ],
+    "returncode": 0
+  },
+  {
+    "name": "phase5-reddit",
+    "image": "aletheia/reddit-api:v1",
+    "command": [
+      "docker",
+      "run",
+      "--rm",
+      "--network",
+      "none",
+      "aletheia/reddit-api:v1",
+      "--health"
+    ],
+    "returncode": 0
+  },
+  {
+    "name": "phase5-youtube",
+    "image": "aletheia/youtube-api:v3",
+    "command": [
+      "docker",
+      "run",
+      "--rm",
+      "--network",
+      "none",
+      "aletheia/youtube-api:v3",
+      "--health"
+    ],
+    "returncode": 0
+  },
+  {
+    "name": "phase5-overpass",
+    "image": "aletheia/overpass:public",
+    "command": [
+      "docker",
+      "run",
+      "--rm",
+      "--network",
+      "none",
+      "aletheia/overpass:public",
+      "--health"
+    ],
+    "returncode": 0
+  },
+  {
+    "name": "phase5-suncalc",
+    "image": "aletheia/suncalc:2.0.2",
+    "command": [
+      "docker",
+      "run",
+      "--rm",
+      "--network",
+      "none",
+      "aletheia/suncalc:2.0.2",
+      "--health"
+    ],
+    "returncode": 0
+  },
+  {
+    "name": "phase5-deepface",
+    "image": "aletheia/deepface:0.0.101",
+    "command": [
+      "docker",
+      "run",
+      "--rm",
+      "--network",
+      "none",
+      "aletheia/deepface:0.0.101",
+      "--health"
+    ],
+    "returncode": 0
+  },
+  {
+    "name": "phase5-insightface",
+    "image": "aletheia/insightface:2.1",
+    "command": [
+      "docker",
+      "run",
+      "--rm",
+      "--network",
+      "none",
+      "aletheia/insightface:2.1",
+      "--health"
+    ],
+    "returncode": 0
+  },
+  {
+    "name": "phase6-sec-edgar",
+    "image": "aletheia/sec-edgar:public-api",
+    "command": [
+      "docker",
+      "run",
+      "--rm",
+      "--network",
+      "none",
+      "aletheia/sec-edgar:public-api",
+      "--health"
+    ],
+    "returncode": 0
+  },
+  {
+    "name": "phase6-gleif",
+    "image": "aletheia/gleif:api-v1",
+    "command": [
+      "docker",
+      "run",
+      "--rm",
+      "--network",
+      "none",
+      "aletheia/gleif:api-v1",
+      "--health"
+    ],
+    "returncode": 0
+  },
+  {
+    "name": "phase6-opencorporates",
+    "image": "aletheia/opencorporates:api-v0.4.8",
+    "command": [
+      "docker",
+      "run",
+      "--rm",
+      "--network",
+      "none",
+      "aletheia/opencorporates:api-v0.4.8",
+      "--health"
+    ],
+    "returncode": 0
+  },
+  {
+    "name": "phase6-opensanctions",
+    "image": "aletheia/opensanctions:api",
+    "command": [
+      "docker",
+      "run",
+      "--rm",
+      "--network",
+      "none",
+      "aletheia/opensanctions:api",
+      "--health"
+    ],
+    "returncode": 0
+  },
+  {
+    "name": "phase6-courtlistener",
+    "image": "aletheia/courtlistener:api-v3",
+    "command": [
+      "docker",
+      "run",
+      "--rm",
+      "--network",
+      "none",
+      "aletheia/courtlistener:api-v3",
+      "--health"
+    ],
+    "returncode": 0
+  },
+  {
+    "name": "phase7-core-import",
+    "image": "aletheia/core:0.7.0",
+    "command": [
+      "docker",
+      "run",
+      "--rm",
+      "--network",
+      "none",
+      "--entrypoint",
+      "python",
+      "aletheia/core:0.7.0",
+      "-c",
+      "import aletheia; print('core import ok')"
+    ],
+    "returncode": 0
+  },
+  {
+    "name": "phase5c-gravatar",
+    "image": "aletheia/gravatar:api-v3",
+    "command": [
+      "docker",
+      "run",
+      "--rm",
+      "--network",
+      "none",
+      "aletheia/gravatar:api-v3",
+      "--health"
+    ],
+    "returncode": 0
+  },
+  {
+    "name": "phase5c-rdap",
+    "image": "aletheia/rdap:rfc9082",
+    "command": [
+      "docker",
+      "run",
+      "--rm",
+      "--network",
+      "none",
+      "aletheia/rdap:rfc9082",
+      "--health"
+    ],
+    "returncode": 0
+  },
+  {
+    "name": "phase9-ip-intelligence",
+    "image": "aletheia/ip-intelligence:v1",
+    "command": [
+      "docker",
+      "run",
+      "--rm",
+      "--network",
+      "none",
+      "aletheia/ip-intelligence:v1",
+      "--health"
+    ],
+    "returncode": 0
+  },
+  {
+    "name": "phase9-gov-records-us",
+    "image": "aletheia/gov-records-us:v1",
+    "command": [
+      "docker",
+      "run",
+      "--rm",
+      "--network",
+      "none",
+      "aletheia/gov-records-us:v1",
+      "--health"
+    ],
+    "returncode": 0
+  },
+  {
+    "name": "phase9-corp-registry",
+    "image": "aletheia/corp-registry:v1",
+    "command": [
+      "docker",
+      "run",
+      "--rm",
+      "--network",
+      "none",
+      "aletheia/corp-registry:v1",
+      "--health"
+    ],
+    "returncode": 0
+  },
+  {
+    "name": "phase9-sanctions-watchlists",
+    "image": "aletheia/sanctions-watchlists:v1",
+    "command": [
+      "docker",
+      "run",
+      "--rm",
+      "--network",
+      "none",
+      "aletheia/sanctions-watchlists:v1",
+      "--health"
+    ],
+    "returncode": 0
+  },
+  {
+    "name": "phase9-academic-search",
+    "image": "aletheia/academic-search:v1",
+    "command": [
+      "docker",
+      "run",
+      "--rm",
+      "--network",
+      "none",
+      "aletheia/academic-search:v1",
+      "--health"
+    ],
+    "returncode": 0
+  },
+  {
+    "name": "phase9-ssl-tls",
+    "image": "aletheia/ssl-tls:v1",
+    "command": [
+      "docker",
+      "run",
+      "--rm",
+      "--network",
+      "none",
+      "aletheia/ssl-tls:v1",
+      "--health"
+    ],
+    "returncode": 0
+  },
+  {
+    "name": "phase9-crypto-blockchain",
+    "image": "aletheia/crypto-blockchain:v1",
+    "command": [
+      "docker",
+      "run",
+      "--rm",
+      "--network",
+      "none",
+      "aletheia/crypto-blockchain:v1",
+      "--health"
+    ],
+    "returncode": 0
+  },
+  {
+    "name": "phase9-patents-trademarks",
+    "image": "aletheia/patents-trademarks:v1",
+    "command": [
+      "docker",
+      "run",
+      "--rm",
+      "--network",
+      "none",
+      "aletheia/patents-trademarks:v1",
+      "--health"
+    ],
+    "returncode": 0
+  },
+  {
+    "name": "phase9-email-auth",
+    "image": "aletheia/email-auth:v1",
+    "command": [
+      "docker",
+      "run",
+      "--rm",
+      "--network",
+      "none",
+      "aletheia/email-auth:v1",
+      "--health"
+    ],
+    "returncode": 0
+  },
+  {
+    "name": "phase9-code-search",
+    "image": "aletheia/code-search:v1",
+    "command": [
+      "docker",
+      "run",
+      "--rm",
+      "--network",
+      "none",
+      "aletheia/code-search:v1",
+      "--health"
+    ],
+    "returncode": 0
+  },
+  {
+    "name": "phase9-search-engines",
+    "image": "aletheia/search-engines:v1",
+    "command": [
+      "docker",
+      "run",
+      "--rm",
+      "--network",
+      "none",
+      "aletheia/search-engines:v1",
+      "--health"
+    ],
+    "returncode": 0
+  },
+  {
+    "name": "phase9-geolocation-image",
+    "image": "aletheia/geolocation-image:v1",
+    "command": [
+      "docker",
+      "run",
+      "--rm",
+      "--network",
+      "none",
+      "aletheia/geolocation-image:v1",
+      "--health"
+    ],
+    "returncode": 0
+  },
+  {
+    "name": "phase9-transport-asset-registry",
+    "image": "aletheia/transport-asset-registry:v1",
+    "command": [
+      "docker",
+      "run",
+      "--rm",
+      "--network",
+      "none",
+      "aletheia/transport-asset-registry:v1",
+      "--health"
+    ],
+    "returncode": 0
+  },
+  {
+    "name": "phase9-social-profile",
+    "image": "aletheia/social-profile:v1",
+    "command": [
+      "docker",
+      "run",
+      "--rm",
+      "--network",
+      "none",
+      "aletheia/social-profile:v1",
+      "--health"
+    ],
+    "returncode": 0
+  },
+  {
+    "name": "phase9-social-username",
+    "image": "aletheia/social-username:v1",
+    "command": [
+      "docker",
+      "run",
+      "--rm",
+      "--network",
+      "none",
+      "aletheia/social-username:v1",
+      "--health"
+    ],
+    "returncode": 0
+  }
+]

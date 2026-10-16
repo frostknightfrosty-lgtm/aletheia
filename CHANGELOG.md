@@ -162,3 +162,9 @@
 - Added secret-safe Docker environment propagation so API secrets do not enter Docker argv or audit command records.
 - Added Phase 4 parser, contract, authorization, secret-handling, and Docker smoke tests.
 - Rejected WhatsMyName as a checker integration because current upstream distribution is dataset-oriented and bundled checker scripts were removed; no replacement checker was implemented.
+# 2026-10-16 — Pause at darkweb_search source review
+
+- Recorded the user-requested pause and exact resume point in `HANDOFF.md` / `RESUME_STATE.json`.
+- No repository implementation files were changed. Preliminary review: Piano 0.1.2 PyPI sdist hash matched the published SHA-256; Ahmia current terms prohibit scraping; TorBot is a page crawler; Intelligence X requires a registered API key. No live requests were made.
+- Docker Verification run `38902790400` was still `in_progress` at last check; evidence must be downloaded and read before claiming its outcome.
+

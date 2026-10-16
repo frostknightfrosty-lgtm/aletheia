@@ -45,7 +45,7 @@ context before use.
 - Face search (PimEyes, FaceCheck.ID, Search4Faces, Lenso.ai) — allowed by project policy
 - People-search aggregators (TruePeopleSearch, Whitepages free, PeekYou) — allowed; paid-only products rejected
 - Stealer-log checkers (including Hudson Rock Cavalier and LeakRadar) — allowed by project policy
-- Dark-web search engines (Ahmia, Torch, OnionLand, DarkSearch) — allowed by project policy
+- Dark-web search engines (Ahmia, Torch, OnionLand, DarkSearch) — allowed by project policy; Ahmia and similar index services prohibit automated scraping, but under the project’s Florida posture this is treated as a civil/ToS-risk matter and the operator assumes that risk when using the source
 - Tools requiring the operator's own authenticated account — allowed when the account owner authorizes the use
 - Plaintext credential storage — allowed by project policy; credential parsing/storage must remain structurally separated from authenticated HTTP code
 - Bulk data processing — allowed by project policy, subject to applicable limits and source restrictions

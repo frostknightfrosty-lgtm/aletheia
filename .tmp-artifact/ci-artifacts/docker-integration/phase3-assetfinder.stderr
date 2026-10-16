@@ -1,0 +1,3 @@
+Usage of /go/bin/assetfinder:
+  -subs-only
+    	Only include subdomains of search domain

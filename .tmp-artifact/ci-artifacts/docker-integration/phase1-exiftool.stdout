@@ -1,0 +1,18 @@
+[{
+  "SourceFile": "/work/sample.txt",
+  "ExifToolVersion": 13.59,
+  "FileName": "sample.txt",
+  "Directory": "/work",
+  "FileSize": "8 bytes",
+  "FileModifyDate": "2026:10:16 12:58:29+00:00",
+  "FileAccessDate": "2026:10:16 12:58:29+00:00",
+  "FileInodeChangeDate": "2026:10:16 12:58:29+00:00",
+  "FilePermissions": "-rw-r--r--",
+  "FileType": "TXT",
+  "FileTypeExtension": "txt",
+  "MIMEType": "text/plain",
+  "MIMEEncoding": "us-ascii",
+  "Newlines": "(none)",
+  "LineCount": 1,
+  "WordCount": 1
+}]
