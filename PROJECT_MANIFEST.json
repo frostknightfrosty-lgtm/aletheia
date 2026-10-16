@@ -1390,7 +1390,7 @@
     },
     {
       "name": "transport_asset_registry",
-        "upstream": "https://github.com/frostknightfrosty-lgtm/aletheia/tree/main/docker/transport_asset_registry",
+      "upstream": "https://github.com/frostknightfrosty-lgtm/aletheia/tree/main/docker/transport_asset_registry",
       "license": "Composite adapter: FAA public aircraft registration data; OpenStreetMap / OpenRailwayMap facility data (ODbL); and Planespotters public aircraft-photo metadata.",
       "version_pin": "1.0",
       "invocation": "FAA CSV download and public HTTPS JSON APIs via dedicated Docker runner (aletheia/transport-asset-registry:v1)",
@@ -1401,7 +1401,7 @@
       "legal_notes": "Implements exact FAA N-number lookup from the public CSV archive, bounded OpenRailwayMap facility lookup, and Planespotters photo-reference metadata. FAA registrant names and addresses are discarded; Planespotters images are never downloaded. IMO GISIS, ERATV, and the ambiguous ERIS candidate are documented non-querying drops in docker/transport_asset_registry/RATE_LIMITS.md.",
       "network": "required",
       "last_audited": "2026-10-16T00:00:00Z",
-      "verification_status": "unverified-fixture",
+      "verification_status": "verified-fixture",
       "fixture_provenance": "synthetic",
       "legal_tier": 1,
       "enabled_by_default": true,
@@ -1440,7 +1440,7 @@
           "enabled_by_default": false
         }
       ],
-        "note": "Synthetic fixture only; fixture file: tests/fixtures/transport_asset_registry.json. No live container run has occurred. Three keyless sources are implemented. IMO GISIS, ERATV, and ERIS are recorded as non-querying skips with evidence in docker/transport_asset_registry/RATE_LIMITS.md."
+      "note": "Synthetic fixture parser tests and Docker health smoke passed in CI run 38888136680 on commit 274b1a6f0cda9f44cfdf1b25662dfc7d4895e570 (https://github.com/frostknightfrosty-lgtm/aletheia/actions/runs/38888136680). Raw evidence copied from the downloaded artifact: PARSER PREFLIGHT: PASS — 46/46 adapters have parser coverage; 534 passed, 1 warning in 21.43s; DOCKER CAPTURE: PASS — 47/47 cases captured. results.json has 47 entries with 0 nonzero return codes and 47 stdout/stderr pairs; SHA-256 e2d525d2dfbe5707fb83731fda68f40b2d5ed8ed19eb25a124b8570748d07cd6. Case phase9-transport-asset-registry returned 0 with stdout ok under --network none. Three keyless sources implemented: FAA Aircraft Registration, OpenRailwayMap facility API, and Planespotters photo-reference metadata. Three candidates are documented as non-querying drops: IMO GISIS (no verified public API contract), ERATV (migration is ongoing and its public UI may trigger CAPTCHA), and ERIS (no official source matching that name identified). fixture file: tests/fixtures/transport_asset_registry.json. No live source lookups occurred."
     }
   ],
   "phase_1_scope": {
