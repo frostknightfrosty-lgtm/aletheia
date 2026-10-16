@@ -178,6 +178,7 @@ class AdapterRunRequest(BaseModel):
     authorization_assertion: str | None = None
     timeout_seconds: int = Field(default=120, ge=1, le=3600)
     proxy_url: str | None = None
+    network_name: str | None = None
 
 
 class AdapterRunResult(BaseModel):

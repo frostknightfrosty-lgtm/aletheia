@@ -1,5 +1,7 @@
+import json
 import shutil
 import subprocess
+import sys
 from pathlib import Path
 
 import pytest
@@ -207,3 +209,51 @@ def test_phase11_egress_proxy_container_health():
     r = _run(["docker", "run", "--rm", "--network", "none", "aletheia/egress-proxy:v1", "--health"])
     assert r.returncode == 0, r.stderr or r.stdout
     assert r.stdout.strip() == "ok", r.stdout + r.stderr
+
+
+# -- Phase 12: proxied path, adapter egress, and fail-closed -------------------
+#
+# The whole wiring scenario runs once per test session through ci/egress_scenario.py
+# (real Docker, a custom --internal network, a local origin, and the adapter image);
+# the individual tests below assert their slice of the shared summary.
+
+_SCENARIO: dict = {}
+
+
+def _scenario_summary() -> dict:
+    if "summary" not in _SCENARIO:
+        if not docker:
+            pytest.skip("Docker CLI unavailable in this environment")
+        repo_root = Path(__file__).resolve().parents[1]
+        proc = subprocess.run(
+            [sys.executable, "ci/egress_scenario.py", "--json"],
+            cwd=repo_root, capture_output=True, text=True, timeout=900,
+        )
+        lines = [line for line in proc.stdout.splitlines() if line.strip().startswith("{")]
+        _SCENARIO["summary"] = json.loads(lines[-1]) if lines else {"checks": []}
+        _SCENARIO["stderr"] = proc.stderr
+    return _SCENARIO["summary"]
+
+
+def _scenario_check(name: str) -> dict:
+    summary = _scenario_summary()
+    checks = {check["name"]: check for check in summary.get("checks", [])}
+    assert name in checks, f"scenario did not report {name!r}: {summary} ({_SCENARIO.get('stderr', '')})"
+    return checks[name]
+
+
+def test_phase12_egress_proxied_path():
+    forward = _scenario_check("phase12-egress-forward")
+    assert forward["ok"], forward["detail"]
+    chain_check = _scenario_check("phase12-egress-chain")
+    assert chain_check["ok"], chain_check["detail"]
+
+
+def test_phase12_egress_adapter_proxied():
+    check = _scenario_check("phase12-egress-adapter-proxied")
+    assert check["ok"], check["detail"]
+
+
+def test_phase12_egress_fail_closed():
+    check = _scenario_check("phase12-egress-fail-closed")
+    assert check["ok"], check["detail"]

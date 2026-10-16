@@ -4,6 +4,7 @@ from pathlib import Path
 from uuid import UUID, uuid4
 
 from aletheia.adapters.registry import phase7_adapters
+from aletheia.core import egress
 from aletheia.core.audit import AuditLogger
 from aletheia.core.chain import AuditChainError, GENESIS_HASH, tip as audit_chain_tip
 from aletheia.core.checkpoint import CheckpointStore
@@ -44,7 +45,7 @@ class Orchestrator:
         return run_id
 
     def resume(self, run_id: UUID, *, authorization_assertion: str | None = None, timeout_seconds: int = 120,
-               proxy_url: str | None = None) -> dict:
+               proxy_url: str | None = None, wire_egress: bool = False) -> dict:
         manifest = self.checkpoints.load(run_id)
         if manifest is None:
             raise FileNotFoundError(f"unknown run {run_id}")
@@ -64,30 +65,51 @@ class Orchestrator:
         manifest.setdefault("retry_counters", {})
         for adapter_name in pending:
             adapter = self.adapters[adapter_name]
+            session = None
+            adapter_proxy_url = proxy_url
+            adapter_network = None
+            if wire_egress and egress.is_wired(adapter_name):
+                session = egress.ProxySession(
+                    adapter_name, self.checkpoints.run_dir(run_id) / adapter_name / "egress"
+                )
+                session.start()
+                adapter_proxy_url = session.proxy_url
+                adapter_network = session.network
             req = AdapterRunRequest(run_id=run_id, seed=seed, legal_only=manifest["legal_only"],
                                     authorization_assertion=authorization_assertion,
-                                    timeout_seconds=timeout_seconds, proxy_url=proxy_url)
+                                    timeout_seconds=timeout_seconds, proxy_url=adapter_proxy_url,
+                                    network_name=adapter_network)
             try:
-                result = adapter.run(req, self.checkpoints.run_dir(run_id) / adapter_name, audit)
-            except AuditChainError:
-                raise
-            except Exception as exc:
-                manifest["retry_counters"][adapter_name] = manifest["retry_counters"].get(adapter_name, 0) + 1
-                if adapter_name not in manifest["failed"]:
-                    manifest["failed"].append(adapter_name)
-                manifest["next_action"] = adapter_name
-                manifest["chain_tip"] = audit_chain_tip(run_id, data_root=self.data_root)
-                self.checkpoints.save(run_id, manifest)
-                self.checkpoints.write_handoff(
-                    run_id,
-                    manifest["goal"],
-                    manifest["completed"],
-                    [f"Retry adapter {adapter_name}"],
-                    [str(self.checkpoints.manifest_path(run_id)), str(audit.path)],
-                    [str(exc)],
-                    f"aletheia resume --run-id {run_id}",
-                )
-                raise
+                try:
+                    result = adapter.run(req, self.checkpoints.run_dir(run_id) / adapter_name, audit)
+                except AuditChainError:
+                    raise
+                except Exception as exc:
+                    manifest["retry_counters"][adapter_name] = manifest["retry_counters"].get(adapter_name, 0) + 1
+                    if adapter_name not in manifest["failed"]:
+                        manifest["failed"].append(adapter_name)
+                    manifest["next_action"] = adapter_name
+                    manifest["chain_tip"] = audit_chain_tip(run_id, data_root=self.data_root)
+                    self.checkpoints.save(run_id, manifest)
+                    self.checkpoints.write_handoff(
+                        run_id,
+                        manifest["goal"],
+                        manifest["completed"],
+                        [f"Retry adapter {adapter_name}"],
+                        [str(self.checkpoints.manifest_path(run_id)), str(audit.path)],
+                        [str(exc)],
+                        f"aletheia resume --run-id {run_id}",
+                    )
+                    raise
+                # The proxy log records the adapter's egress; append it to the chain
+                # while the manifest anchor is still valid.
+                if session is not None:
+                    entries = session.read_entries()
+                    if entries:
+                        egress.append_log_to_chain(run_id, entries, data_root=self.data_root)
+            finally:
+                if session is not None:
+                    session.stop()
             for finding in result.findings:
                 graph.ingest(finding)
             result_path = self.checkpoints.run_dir(run_id) / adapter_name / "result.json"

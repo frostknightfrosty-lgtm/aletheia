@@ -25,11 +25,12 @@ from __future__ import annotations
 
 import json
 import os
+import subprocess
 import tempfile
 import time
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, Mapping
+from typing import Any, Callable, Mapping
 from uuid import UUID
 
 from aletheia.core import chain
@@ -37,6 +38,12 @@ from aletheia.core import chain
 DEFAULT_IMAGE = "aletheia/egress-proxy:v1"
 DEFAULT_PORT = 8888
 LOG_FILENAME = "EGRESS.jsonl"
+
+
+def _dns_safe(name: str) -> str:
+    """Make an adapter name usable as a Docker container/network DNS label."""
+    safe = "".join(ch if (ch.isalnum() or ch == "-") else "-" for ch in name)
+    return safe.strip("-") or "adapter"
 
 # Environment variable names shared with docker/egress_proxy/proxy.py.
 ADAPTER_ENV = "ALETHEIA_ADAPTER"
@@ -338,7 +345,8 @@ class EgressProxy:
 
     @property
     def container_name(self) -> str:
-        return f"aletheia-egress-{self.adapter}"
+        # Container/DNS labels cannot carry underscores, so sanitize the name.
+        return f"aletheia-egress-{_dns_safe(self.adapter)}"
 
     @property
     def proxy_url(self) -> str:
@@ -354,8 +362,18 @@ class EgressProxy:
             "no_proxy": "localhost,127.0.0.1",
         }
 
-    def run_command(self, *, log_dir: str | Path, network: str | None = None) -> list[str]:
-        command = ["docker", "run", "--rm", "--name", self.container_name]
+    def run_command(
+        self,
+        *,
+        log_dir: str | Path,
+        network: str | None = None,
+        detached: bool = False,
+        publish_port: bool = True,
+    ) -> list[str]:
+        command = ["docker", "run", "--rm"]
+        if detached:
+            command += ["-d"]
+        command += ["--name", self.container_name]
         if network is not None:
             command += ["--network", network]
         command += [
@@ -369,7 +387,10 @@ class EgressProxy:
             command += ["-e", f"{KILL_SWITCH_ENV}=1"]
         command += [
             "-v", f"{log_dir}:/var/log/aletheia",
-            "-p", f"{self.port}:{self.port}",
+        ]
+        if publish_port:
+            command += ["-p", f"{self.port}:{self.port}"]
+        command += [
             self.image,
             "--serve",
         ]
@@ -396,3 +417,128 @@ def append_log_to_chain(
         chain.append(event, data_root=data_root)
         count += 1
     return count
+
+
+# -- wiring the proxy into adapters (Phase 12) ---------------------------------
+#
+# The wiring pattern (docs/EGRESS_PROXY_CONTRACT.md, "Wiring pattern"):
+#   1. create one ``--internal`` network per adapter run: containers on it have
+#      no default route out, so the proxy is the only way off the network;
+#   2. start the egress proxy detached on that network, named after the adapter;
+#   3. run the adapter on the same network with HTTP_PROXY/HTTPS_PROXY pointing
+#      at the proxy and NO_PROXY for loopback;
+#   4. append the proxy's request log to the run's audit chain;
+#   5. stop the proxy and delete the network.
+#
+# Only the adapters in ``EGRESS_WIRED_ADAPTERS`` are wired in this phase; wiring
+# the remaining 46 adapters is deliberately deferred.
+
+EGRESS_WIRED_ADAPTERS: tuple[str, ...] = ("search_engines", "ssl_tls", "ip_intelligence")
+
+NETWORK_PREFIX = "aletheia-egress"
+
+
+def is_wired(adapter: str) -> bool:
+    """True when this phase routes the adapter's egress through the proxy."""
+    return adapter in EGRESS_WIRED_ADAPTERS
+
+
+def network_name(adapter: str) -> str:
+    return f"{NETWORK_PREFIX}-net-{_dns_safe(adapter)}"
+
+
+def create_network_command(network: str) -> list[str]:
+    """Create an internal network (no default egress)."""
+    return ["docker", "network", "create", "--internal", network]
+
+
+def remove_network_command(network: str) -> list[str]:
+    return ["docker", "network", "rm", network]
+
+
+class DockerCommandError(RuntimeError):
+    """Raised when a wiring command (network/proxy lifecycle) exits non-zero."""
+
+
+def _default_runner(argv: list[str]) -> Any:
+    return subprocess.run(argv, capture_output=True, text=True, timeout=120)
+
+
+@dataclass
+class ProxySession:
+    """Bring up the internal network and the egress proxy for one adapter run.
+
+    ``runner`` is injectable so the exact command sequence can be unit-tested
+    without a Docker daemon. ``runner(argv)`` must return an object exposing
+    ``returncode``, ``stdout`` and ``stderr`` (like ``subprocess.CompletedProcess``).
+    """
+
+    adapter: str
+    log_dir: str | Path
+    image: str = DEFAULT_IMAGE
+    port: int = DEFAULT_PORT
+    kill_switch: bool = False
+    network: str | None = None
+    runner: Callable[[list[str]], Any] = _default_runner
+    _proxy: EgressProxy | None = field(default=None, init=False)
+
+    def __post_init__(self) -> None:
+        self.log_dir = Path(self.log_dir)
+        if self.network is None:
+            self.network = network_name(self.adapter)
+        self._proxy = EgressProxy(
+            self.adapter, image=self.image, port=self.port, kill_switch=self.kill_switch
+        )
+
+    def _run(self, argv: list[str]) -> Any:
+        completed = self.runner(argv)
+        code = getattr(completed, "returncode", 1)
+        if code != 0:
+            raise DockerCommandError(
+                "wiring command failed (exit " + str(code) + "): " + " ".join(argv)
+                + "\n" + (getattr(completed, "stderr", "") or "")
+            )
+        return completed
+
+    def start(self) -> "ProxySession":
+        """Create the internal network and start the detached proxy container."""
+        self._run(create_network_command(self.network))
+        self.log_dir.mkdir(parents=True, exist_ok=True)
+        argv = self._proxy.run_command(
+            log_dir=self.log_dir, network=self.network, detached=True, publish_port=False
+        )
+        self._run(argv)
+        return self
+
+    @property
+    def proxy_url(self) -> str:
+        return self._proxy.proxy_url
+
+    @property
+    def proxy_container(self) -> str:
+        return self._proxy.container_name
+
+    @property
+    def log_path(self) -> Path:
+        return self.log_dir / LOG_FILENAME
+
+    def read_entries(self) -> list[EgressLogEntry]:
+        return read_log(self.log_path)
+
+    def stop(self) -> None:
+        """Stop the proxy and remove the network; never raises."""
+        for argv in (
+            ["docker", "rm", "-f", self._proxy.container_name],
+            remove_network_command(self.network),
+        ):
+            try:
+                self.runner(argv)
+            except Exception:
+                pass
+
+    def __enter__(self) -> "ProxySession":
+        return self.start()
+
+    def __exit__(self, *exc: object) -> None:
+        self.stop()
+

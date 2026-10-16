@@ -1,9 +1,9 @@
 # Egress proxy contract
 
-Status: **implemented as a standalone component** (2026-10-16). Not yet wired
-into every adapter's Dockerfile — that is a separate session. This document is
-the design/contract record for the component; it was missing from the repository
-before this session and is created here.
+Status: **implemented and wired into a representative subset** (2026-10-17).
+`search_engines`, `ssl_tls`, and `ip_intelligence` route their egress through the
+proxy; the remaining 46 adapters are deferred (see "Wiring pattern"). This
+document is the design/contract record for the component.
 
 ## Purpose
 
@@ -27,8 +27,10 @@ adapter registry and does not carry `parser_test` coverage.
 | Image | `docker/egress_proxy/Dockerfile` | `aletheia/egress-proxy:v1` |
 | Fixture | `tests/fixtures/egress_proxy_log.jsonl` | synthetic request log |
 | Tests | `tests/test_egress.py` | schema, rate limiter, kill switch, helpers, chain writer |
+| Wiring + tests | `app/aletheia/core/egress.py` (`ProxySession`), `tests/test_egress_wiring.py` | network + proxy lifecycle, unit-tested with an injected runner |
+| End-to-end scenario | `ci/egress_scenario.py` | real-Docker `--internal` network, local origin, adapter image |
 | Docker smoke | `tests/test_docker_integration.py::test_phase11_egress_proxy_container_health` | container health |
-| Capture case | `ci/capture_docker_integration.py` — `phase11-egress-proxy` | raw stdout/stderr capture |
+| Capture cases | `ci/capture_docker_integration.py` — `phase11-egress-proxy`, `phase12-egress-*` | raw stdout/stderr capture |
 
 ## Trust boundary and fail-closed behaviour
 
@@ -39,9 +41,36 @@ container is down, the adapter simply has no route out. The fail-closed property
 is a property of the **network**, not of application code — this is why the
 Docker network wiring is part of the contract and not an optional detail.
 
-`EgressProxy.run_command()` only *describes* the proxy container argv; the
-repository does not yet start it for every adapter. This component prepares that
-wiring.
+`EgressProxy.run_command()` only *describes* the proxy container argv. The
+Phase 12 wiring (`egress.ProxySession`) actually creates the network and starts
+the proxy for the wired adapters; see "Wiring pattern" below.
+
+## Wiring pattern
+
+Wiring an adapter's egress through the proxy is one shape, applied once per
+adapter run:
+
+1. Create a fresh Docker network with `docker network create --internal
+   <network>` so containers on it have **no default egress** — the proxy is the
+   only route off the network.
+2. Start the egress proxy detached on that network
+   (`EgressProxy.run_command(..., detached=True, publish_port=False)`), so it is
+   addressed by container name and never exposed on the host.
+3. Run the adapter container on the *same* network with `HTTP_PROXY` and
+   `HTTPS_PROXY` set to `http://<proxy-container>:<port>` (and
+   `NO_PROXY=localhost,127.0.0.1` for loopback) instead of `--network bridge`.
+4. After the run, read the proxy's `EGRESS.jsonl` and append it to the run's
+   hash-chained audit log with `append_log_to_chain`.
+5. Stop the proxy and delete the network.
+
+`ProxySession` implements steps 1, 2, and 5; `AdapterRunRequest.proxy_url` /
+`network_name` and `run_docker(..., network_name=...)` carry step 3; and the
+orchestrator performs step 4. Only `EGRESS_WIRED_ADAPTERS` (`search_engines`,
+`ssl_tls`, `ip_intelligence`) are wired in Phase 12 — the remaining 46 adapters
+are deferred and keep their previous network behaviour. The end-to-end shape is
+exercised by `ci/egress_scenario.py` (real Docker, an `--internal` network, a
+local origin, and the adapter image) and by the `phase12-*` Docker integration
+tests.
 
 ## Request log schema
 
@@ -104,8 +133,9 @@ the append instead of recording on top of the tampered chain.
   TLS session.
 - The forwarding loop is exercised only in Docker/CI. Only the pure helpers and
   the request-log schema are unit-tested locally.
-- The proxy is not yet started for every adapter; adapter Dockerfiles and the
-  run-time network wiring are still to be changed in a later session.
+- Only three of the 49 adapters (`search_engines`, `ssl_tls`, `ip_intelligence`)
+  are wired through the proxy in Phase 12; the remaining 46 still run without a
+  proxied path.
 
 ## Verification
 
@@ -116,6 +146,9 @@ Docker-invoked adapters — the proxy entry deliberately does not contain the wo
 
 CI: `aletheia/egress-proxy:v1` is built by `docker/build.sh`, health-checked by
 the Docker integration smoke and captured by case `phase11-egress-proxy` under
-`--network none`. The status in `PROJECT_MANIFEST.json` moves from
-`unverified-fixture` to `verified-fixture` only from artifact-copied lines
-(Gate 5).
+`--network none`. `ci/egress_scenario.py` additionally wires the proxy, a local
+origin and the adapter image onto an `--internal` Docker network and asserts the
+forwarded request, the adapter's proxied egress, the audit-chain append, and the
+fail-closed behaviour; those become the `phase12-egress-*` capture cases. The
+status in `PROJECT_MANIFEST.json` moves from `unverified-fixture` to
+`verified-fixture` only from artifact-copied lines (Gate 5).

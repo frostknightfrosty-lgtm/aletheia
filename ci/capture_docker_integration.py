@@ -61,13 +61,48 @@ CASES = [
     ("phase11-egress-proxy", "aletheia/egress-proxy:v1", ["--health"]),
 ]
 
+def _scenario_results(out: Path) -> list:
+    """Run the Phase 12 wiring scenario and turn its checks into capture cases."""
+    proc = subprocess.run(
+        [sys.executable, "ci/egress_scenario.py", "--json", "--artifacts", str(out)],
+        capture_output=True, text=True, timeout=1200,
+    )
+    lines = [line for line in proc.stdout.splitlines() if line.strip().startswith("{")]
+    checks = []
+    if lines:
+        try:
+            checks = json.loads(lines[-1]).get("checks", [])
+        except json.JSONDecodeError:
+            checks = []
+    if not checks:
+        return [{
+            "name": "phase12-egress-scenario",
+            "image": "aletheia/egress-proxy:v1",
+            "command": ["scenario", "phase12"],
+            "returncode": proc.returncode or 1,
+            "scenario": True,
+            "detail": (proc.stderr or "")[-500:],
+        }]
+    return [
+        {
+            "name": check["name"],
+            "image": "aletheia/egress-proxy:v1",
+            "command": ["scenario", check["name"]],
+            "returncode": 0 if check["ok"] else 1,
+            "scenario": True,
+            "detail": check.get("detail", ""),
+        }
+        for check in checks
+    ]
+
+
 def main() -> int:
     out = Path("ci-artifacts/docker-integration")
     out.mkdir(parents=True, exist_ok=True)
+    results = []
     with TemporaryDirectory() as td:
         sample = Path(td) / "sample.txt"
         sample.write_text("Aletheia", encoding="utf-8")
-        results = []
         for name, image, args in CASES:
             cmd = ["docker", "run", "--rm", "--network", "none"]
             if name == "phase1-exiftool":
@@ -81,7 +116,8 @@ def main() -> int:
             (out / f"{name}.stdout").write_text(proc.stdout, encoding="utf-8")
             (out / f"{name}.stderr").write_text(proc.stderr, encoding="utf-8")
             results.append({"name": name, "image": image, "command": cmd, "returncode": proc.returncode})
-        (out / "results.json").write_text(json.dumps(results, indent=2) + "\n", encoding="utf-8")
+    results.extend(_scenario_results(out))
+    (out / "results.json").write_text(json.dumps(results, indent=2) + "\n", encoding="utf-8")
     failed = [r for r in results if r["returncode"] != 0]
     print(f"DOCKER CAPTURE: {'PASS' if not failed else 'FAIL'} — {len(results) - len(failed)}/{len(results)} cases captured")
     for r in failed:

@@ -19,7 +19,8 @@ class ExecutionResult:
 
 
 def run_docker(*, image: str, command: Sequence[str], workspace: Path, timeout_seconds: int,
-               proxy_url: str | None, network: bool, secret_env: Sequence[str] = ()) -> ExecutionResult:
+               proxy_url: str | None, network: bool, secret_env: Sequence[str] = (),
+               network_name: str | None = None) -> ExecutionResult:
     argv = [
         "docker", "run", "--rm",
         "--read-only",
@@ -27,7 +28,10 @@ def run_docker(*, image: str, command: Sequence[str], workspace: Path, timeout_s
         "-v", f"{workspace.resolve()}:/work:rw",
         "--workdir", "/work",
     ]
-    if network:
+    if network_name is not None:
+        # Join a caller-provided network (the egress proxy's internal network).
+        argv += ["--network", network_name]
+    elif network:
         argv += ["--network", "bridge"]
     else:
         argv += ["--network", "none"]

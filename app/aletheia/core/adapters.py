@@ -43,6 +43,7 @@ class Adapter(ABC):
                 proxy_url=request.proxy_url,
                 network=self.descriptor.network_required,
                 secret_env=self.descriptor.secret_env,
+                network_name=request.network_name,
             )
         except DockerExecutionError as exc:
             audit.log(AuditEvent(run_id=request.run_id, event_type="adapter_invocation", adapter=self.descriptor.name,
