@@ -1,0 +1,195 @@
+{
+  "input_type": "fixture",
+  "input_value": "SyntheticGeoImageFixture",
+  "timestamp": "2026-10-16T08:00:00+00:00",
+  "sources": [
+    {
+      "source": "mapillary",
+      "skipped": false,
+      "skip_reason": null,
+      "http_status": 200,
+      "error": null,
+      "raw_hash": null,
+      "data": {
+        "api_source": "Mapillary Graph API v4 Images",
+        "api_documentation": "https://mapillary.github.io/mapillary-python-sdk/docs/mapillary.models/mapillary.models.client/",
+        "endpoint": "https://graph.mapillary.com/images?fields=id&bbox=-0.1256%2C51.4997%2C-0.1236%2C51.5017&limit=5",
+        "invocation": "GET https://graph.mapillary.com/images?fields=<fields>&bbox=<west,south,east,north>&limit=<limit>",
+        "query": "51.5007,-0.1246",
+        "record_count": 1,
+        "truncated": false,
+        "records": [
+          {
+            "record_id": "synthetic-mapillary-image",
+            "detail": "Mapillary street-level image metadata",
+            "location": {"latitude": 51.5007, "longitude": -0.1246},
+            "observation_time": "2026-01-01T12:00:00Z",
+            "source_fields": {"compass_angle": 90.0}
+          }
+        ]
+      }
+    },
+    {
+      "source": "nominatim",
+      "skipped": false,
+      "skip_reason": null,
+      "http_status": 200,
+      "error": null,
+      "raw_hash": null,
+      "data": {
+        "api_source": "OpenStreetMap Nominatim",
+        "api_documentation": "https://nominatim.org/release-docs/latest/api/Search/",
+        "endpoint": "https://nominatim.openstreetmap.org/search?q=SyntheticGeoImageFixture&format=jsonv2&limit=5&addressdetails=1",
+        "invocation": "GET https://nominatim.openstreetmap.org/search?q=<query>&format=jsonv2&limit=<limit>&addressdetails=1",
+        "query": "SyntheticGeoImageFixture",
+        "record_count": 1,
+        "truncated": false,
+        "records": [
+          {
+            "record_id": "node:synthetic-nominatim-place",
+            "detail": "Synthetic Nominatim place",
+            "location": {"latitude": "51.5007", "longitude": "-0.1246"},
+            "source_fields": {"osm_type": "node", "osm_id": "synthetic-nominatim-place", "category": "place", "type": "city"}
+          }
+        ]
+      }
+    },
+    {
+      "source": "copernicus-stac",
+      "skipped": false,
+      "skip_reason": null,
+      "http_status": 200,
+      "error": null,
+      "raw_hash": null,
+      "data": {
+        "api_source": "Copernicus Data Space Ecosystem STAC catalogue",
+        "api_documentation": "https://documentation.dataspace.copernicus.eu/APIs/STAC.html",
+        "endpoint": "https://stac.dataspace.copernicus.eu/v1/collections/sentinel-2-l2a/items?bbox=-0.1256%2C51.4997%2C-0.1236%2C51.5017&datetime=2026-01-01%2F2026-01-31&limit=5",
+        "invocation": "GET https://stac.dataspace.copernicus.eu/v1/collections/sentinel-2-l2a/items?bbox=<bbox>&datetime=<datetime>&limit=<limit>",
+        "query": "51.5007,-0.1246,2026-01-01/2026-01-31",
+        "record_count": 1,
+        "truncated": false,
+        "records": [
+          {
+            "record_id": "synthetic-copernicus-item",
+            "detail": "Copernicus Sentinel-2 L2A catalogue item",
+            "location": {"bbox": [-0.1256, 51.4997, -0.1236, 51.5017]},
+            "observation_time": "2026-01-15T10:00:00Z",
+            "source_fields": {"collection": "sentinel-2-l2a", "eo:cloud_cover": 3.2}
+          }
+        ]
+      }
+    },
+    {
+      "source": "dfit",
+      "skipped": false,
+      "skip_reason": null,
+      "http_status": 0,
+      "error": null,
+      "raw_hash": null,
+      "data": {
+        "api_source": "DFIT Digital Image Forensics Toolkit",
+        "api_documentation": "https://pypi.org/project/dfit-toolkit/1.0.0/",
+        "module": "dfit-toolkit==1.0.0",
+        "invocation": "dfit metadata -i <image> -o <report.json>",
+        "query": "synthetic-image.jpg",
+        "record_count": 1,
+        "truncated": false,
+        "records": [
+          {
+            "record_id": "synthetic-image.jpg",
+            "detail": "DFIT metadata analysis completed",
+            "source_fields": {"report_sha256": "synthetic", "top_level_keys": ["metadata"]}
+          }
+        ]
+      }
+    },
+    {
+      "source": "steg-analyzer",
+      "skipped": false,
+      "skip_reason": null,
+      "http_status": 0,
+      "error": null,
+      "raw_hash": null,
+      "data": {
+        "api_source": "Steg Analyzer",
+        "api_documentation": "https://pypi.org/project/steg-analyzer/",
+        "module": "steg-analyzer==1.0.1",
+        "invocation": "steg-analyzer analyze <image> --metadata --ela --histogram --format json --output <directory>",
+        "query": "synthetic-image.jpg",
+        "record_count": 1,
+        "truncated": false,
+        "records": [
+          {
+            "record_id": "synthetic-image.jpg",
+            "detail": "Steg Analyzer metadata, ELA and histogram analysis completed",
+            "source_fields": {"report_sha256": "synthetic", "top_level_keys": ["ela", "metadata"]}
+          }
+        ]
+      }
+    },
+    {
+      "source": "pic-image-search",
+      "skipped": true,
+      "skip_reason": "PicImageSearch documents a wrapper over many third-party reverse-image engines, but no single downstream engine request contract is documented by that engine for this integration. The runner therefore does not select or scrape an undocumented engine endpoint.",
+      "http_status": 0,
+      "error": null,
+      "raw_hash": null,
+      "data": null
+    },
+    {
+      "source": "tracelines",
+      "skipped": true,
+      "skip_reason": "tracelines documents deployment of its own coverage proxy and fuses Mapillary, KartaView and street-view coverage. It is not a public hosted API, and its Mapillary path would overlap the direct Mapillary source implemented here.",
+      "http_status": 0,
+      "error": null,
+      "raw_hash": null,
+      "data": null
+    },
+    {
+      "source": "shadowfinder",
+      "skipped": true,
+      "skip_reason": "ShadowFinder requires object height plus shadow length (or sun altitude) and a date/time. The current single-seed CLI provides no safe structured representation for those independent measurements, so it cannot be invoked without inventing inputs.",
+      "http_status": 0,
+      "error": null,
+      "raw_hash": null,
+      "data": null
+    },
+    {
+      "source": "pybdshadow",
+      "skipped": true,
+      "skip_reason": "pybdshadow requires building geometry and a datetime. The current single-seed CLI supplies neither a building GeoDataFrame nor a documented building-source contract, so it cannot be invoked without inventing inputs or re-querying another adapter.",
+      "http_status": 0,
+      "error": null,
+      "raw_hash": null,
+      "data": null
+    },
+    {
+      "source": "youtube-geofind",
+      "skipped": true,
+      "skip_reason": "youtube-geofind calls the YouTube Data API geospatial search. Aletheia already has the youtube-api adapter for that live vendor API, and this batch must not re-query a sub-source already live in another adapter.",
+      "http_status": 0,
+      "error": null,
+      "raw_hash": null,
+      "data": null
+    },
+    {
+      "source": "geolocator",
+      "skipped": true,
+      "skip_reason": "The reviewed GeoLocator implementations require a prebuilt panorama index and automatic model weight/index acquisition or GPU setup. No pinned, bounded single-image library contract was verified for this Docker batch.",
+      "http_status": 0,
+      "error": null,
+      "raw_hash": null,
+      "data": null
+    },
+    {
+      "source": "betaface",
+      "skipped": true,
+      "skip_reason": "Betaface documents its public betafaceapi.com service as temporarily down. The available product page does not publish a current detection request contract that this adapter can call without guessing an endpoint or credentials.",
+      "http_status": 0,
+      "error": null,
+      "raw_hash": null,
+      "data": null
+    }
+  ]
+}

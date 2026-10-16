@@ -80,6 +80,9 @@ class EntityType(StrEnum):
     # search_engines batch adapter; no existing EntityType covered a web-search
     # result, so the plan's "WebSearchResult" output type maps to this member.
     WEB_SEARCH_RESULT = "web_search_result"
+    # Composite geolocation/image observation: a normalized place, street-level
+    # image, satellite catalogue item, or bounded local image-forensics result.
+    GEO_EVIDENCE = "geo_evidence"
 
 
 class RelationshipType(StrEnum):

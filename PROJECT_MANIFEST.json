@@ -1339,6 +1339,54 @@
         }
       ],
       "note": "Synthetic fixture parser tests and the Docker health smoke passed in CI run 38813318506 on commit 316172b (https://github.com/frostknightfrosty-lgtm/aletheia/actions/runs/38813318506). Raw evidence copied from the artifact: PARSER PREFLIGHT: PASS \u2014 44/44 adapters have parser coverage; 518 passed, 1 warning in 15.38s; DOCKER CAPTURE: PASS \u2014 45/45 cases captured. results.json has 45 entries with 0 nonzero return codes and 45 stdout/stderr pairs; SHA-256 536C538DE9EA54A2836B40BA79D120F89ADB7D033E05028A7BFCEBB875885049. Case phase9-search-engines returned 0 with stdout ok under --network none. Two sub-sources are implemented: marginalia and common-crawl-index. Two candidates are dropped and reported once per run as audited skips: searxng (a self-hosted metasearch engine, not a public API) and google-custom-search (Google states the Custom Search JSON API is closed to new customers). fixture file: tests/fixtures/search_engines.json. No live API lookups have occurred."
+    },
+    {
+      "name": "geolocation_image",
+      "upstream": "https://github.com/frostknightfrosty-lgtm/aletheia/tree/main/docker/geolocation_image",
+      "license": "Composite adapter: Mapillary Graph API, OpenStreetMap Nominatim, Copernicus Data Space Ecosystem STAC catalogue, MIT-licensed dfit-toolkit, and MIT-licensed steg-analyzer.",
+      "version_pin": "1.0",
+      "invocation": "HTTPS geocoding/catalogue APIs and local image-analysis CLIs via dedicated Docker runner (aletheia/geolocation-image:v1)",
+      "input_types": [
+        "geolocation",
+        "name",
+        "image",
+        "file_path"
+      ],
+      "output_schema": "GeoEvidenceFinding[]",
+      "legal_notes": "Implements one bounded request each to Mapillary, Nominatim, and Copernicus STAC catalogue metadata, plus local DFIT metadata and Steg Analyzer metadata/ELA/histogram only. Mapillary uses a free client token if configured; it is reported as skipped when absent. Copernicus is metadata-only and never downloads assets. The seven candidates PicImageSearch, tracelines, ShadowFinder, pybdshadow, youtube-geofind, GeoLocator, and Betaface are explicit non-querying skips with their reasons and official source citations recorded in docker/geolocation_image/RATE_LIMITS.md and this manifest note. No extraction, cracking, credential parsing, or authenticated access is performed.",
+      "network": "required",
+      "last_audited": "2026-10-16T00:00:00Z",
+      "verification_status": "unverified-fixture",
+      "fixture_provenance": "synthetic",
+      "legal_tier": 3,
+      "enabled_by_default": true,
+      "disabled_reason": null,
+      "batch_grouping": "geolocation_image",
+      "requires_key": false,
+      "sub_sources": [
+        {
+          "name": "mapillary",
+          "requires_key": true,
+          "key_cost": "free"
+        },
+        {
+          "name": "nominatim",
+          "requires_key": false
+        },
+        {
+          "name": "copernicus-stac",
+          "requires_key": false
+        },
+        {
+          "name": "dfit",
+          "requires_key": false
+        },
+        {
+          "name": "steg-analyzer",
+          "requires_key": false
+        }
+      ],
+      "note": "Initial CI verification pending. Dropped PicImageSearch because its GitHub project documents an aggregator over third-party engines without one bounded downstream request contract (https://github.com/kitUIN/PicImageSearch); dropped tracelines because its PyPI documentation describes an operator-deployed coverage proxy that overlaps direct Mapillary (https://pypi.org/project/tracelines/0.2.0/); dropped ShadowFinder because its Bellingcat documentation requires object height and shadow-length or sun-altitude inputs plus date/time (https://github.com/bellingcat/ShadowFinder); dropped pybdshadow because its official docs require building geometry and a datetime (https://pybdshadow.readthedocs.io/en/stable/); dropped youtube-geofind because its documented YouTube Data API search endpoint is already queried by the existing youtube-api adapter (https://developers.google.com/youtube/v3/docs/search/list); dropped GeoLocator because the reviewed upstream implementation requires a prebuilt panorama index/model setup rather than a bounded single-image API (https://github.com/Developer-Mike/geolocator); dropped Betaface because its product page states the public service is temporarily down and gives no current usable request contract (https://www.betaface.com/products.html). fixture file: tests/fixtures/geolocation_image.json. No live API lookups have occurred."
     }
   ],
   "phase_1_scope": {

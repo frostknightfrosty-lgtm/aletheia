@@ -47,3 +47,4 @@ docker build -f docker/patents_trademarks/Dockerfile -t aletheia/patents-tradema
 docker build -f docker/email_auth/Dockerfile -t aletheia/email-auth:v1 docker/email_auth
 docker build -f docker/code_search/Dockerfile -t aletheia/code-search:v1 docker/code_search
 docker build -f docker/search_engines/Dockerfile -t aletheia/search-engines:v1 docker/search_engines
+docker build -f docker/geolocation_image/Dockerfile -t aletheia/geolocation-image:v1 docker/geolocation_image
