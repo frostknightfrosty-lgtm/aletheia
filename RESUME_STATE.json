@@ -1,12 +1,12 @@
 {
   "session_id": "2ba610de-14d2-4fab-925f-52a87db7e537",
-  "last_updated": "2026-10-16T09:43:52Z",
-  "last_commit": "70729d2",
-  "last_ci_verified_commit": "316172b147eccd48e5fec4236c98f112e4cde5b3",
-  "last_ci_run": "38881046397",
-  "last_ci_status": "red",
+  "last_updated": "2026-10-16T09:59:22Z",
+  "last_commit": "3053678",
+  "last_ci_verified_commit": "bcbdee911c6527d4450ad88bae000cdae4aa8485",
+  "last_ci_run": "38882456490",
+  "last_ci_status": "green",
   "current_phase": "Phase 9 — batch adapter implementation",
-  "current_task": "geolocation_image build compatibility fix committed; CI retry pending",
+  "current_task": "geolocation_image complete; beginning transport_movement",
   "current_status": "in_progress",
   "completed_phases": [
     "Original Phases 1–7 baseline (subject to audit gaps documented in HANDOFF.md)",
@@ -36,7 +36,8 @@
     "Phase 9 email_auth adapter (scan-mx and checkdmarc, no drops) implemented and committed as 9b949c7; local 412 passed / 43 skipped; CI verification pending at the time of this state update.",
     "Tests: removed the count-drift burden. tests/test_ssl_tls_adapter.py and tests/test_email_auth_adapter.py now assert set(registry) == the manifest Docker-declared adapter set, and tests/test_phase3_manifest.py asserts the run pending set == the live registry DOMAIN-capable set. Both were proved to still fail when the source of truth is tampered with. Commits 4c2b38f and the email_auth follow-up in f59458f. The phase3/4/5 adapter tests were left alone: they assert frozen phase-specific registries, not the live one.",
     "Phase 9 code_search adapter (1 sub-source debian-code-search; dropped gitlab-search and publicwww) CI-verified: run 38811234205 on commit f59458fa0a9f34dde19690bdd8dacf7686f80223 (parser 43/43; 484 passed in 20.60s; capture 44/44; SHA-256 9E5B842F42F7545DA089B7F92154161C1A1D18F8042C08276D81477AE61F5601).",
-    "Phase 9 search_engines adapter (2 sub-sources marginalia and common-crawl-index; dropped searxng and google-custom-search) CI-verified: run 38813318506 on commit 316172b (parser 44/44; 518 passed in 15.38s; capture 45/45; SHA-256 536C538DE9EA54A2836B40BA79D120F89ADB7D033E05028A7BFCEBB875885049)."
+    "Phase 9 search_engines adapter (2 sub-sources marginalia and common-crawl-index; dropped searxng and google-custom-search) CI-verified: run 38813318506 on commit 316172b (parser 44/44; 518 passed in 15.38s; capture 45/45; SHA-256 536C538DE9EA54A2836B40BA79D120F89ADB7D033E05028A7BFCEBB875885049).",
+    "Phase 9 geolocation_image implemented and CI-verified as verified-fixture: run 38882456490 on bcbdee911c6527d4450ad88bae000cdae4aa8485; parser 45/45; 525 passed, 1 warning in 21.93s; capture 46/46; results.json 46 entries, 0 nonzero, 46 stdout/stderr pairs, SHA-256 308EDE70B65BA1D55D72281BABE7A2ECDA88459DCBD94861F4B870B15EA57E3B. Five sub-sources: Mapillary, Nominatim, Copernicus STAC, DFIT, Steg Analyzer; seven candidates dropped with reasons and official citations in RATE_LIMITS.md and manifest note."
   ],
   "pending_phases": [
     "Phase 8 - audit chain, storage backends, and egress proxy (await user direction)",
@@ -50,9 +51,7 @@
     "Gate 3 - verify required API keys and costs before a phase depends on them",
     "Gate 5 - no adapter may be marked verified-fixture from a typed or predicted evidence line; the line must be copied from the downloaded CI artifact. This gate was opened because run 38323854024 violated it."
   ],
-  "next_action": "Push the Python 3.12 Dockerfile fix and state update, wait for CI, download the artifact, and verify parser, pytest, build, capture and results.json evidence.",
-  "files_in_flight": [
-    "docker/geolocation_image/Dockerfile"
-  ],
-  "notes_for_next_session": "44 adapters registered, all verified-fixture, all citing an artifact-backed run; 45 Docker integration cases. New adapters start at unverified-fixture and move to verified-fixture only from copied artifact lines (Gate 5). The count-drift fix means a new adapter should require NO edits to any other test file; if it does, that is a regression worth reporting. Consistency check to apply every time: local (passed + skipped) must equal CI passed. It held three times this session: 412+43=455, 440+44=484, 473+45=518. Build pattern that worked: pre-verify the endpoints yourself, delegate one composite to a subagent forbidden from touching PROJECT_MANIFEST.json or tests/test_project_manifest.py, then independently verify, add the manifest entry, commit, push, wait for CI, copy evidence. Docker is unavailable locally. Latest geolocation_image attempt: run 38881046397 failed building pillow==10.3.0 because dfit-toolkit pins it and its source setup raised KeyError: '__version__' on Python 3.13; Dockerfile changed to Python 3.12 because PyPI publishes matching cp312 wheels. Capture logged 45/46 because the new image was unavailable."
+  "next_action": "Read the transport_movement plan row, verify each candidate against official vendor documentation and credentials, then implement only bounded, verifiable sub-sources.",
+  "files_in_flight": [],
+  "notes_for_next_session": "44 adapters registered, all verified-fixture, all citing an artifact-backed run; 45 Docker integration cases. New adapters start at unverified-fixture and move to verified-fixture only from copied artifact lines (Gate 5). The count-drift fix means a new adapter should require NO edits to any other test file; if it does, that is a regression worth reporting. Consistency check to apply every time: local (passed + skipped) must equal CI passed. It held three times this session: 412+43=455, 440+44=484, 473+45=518. Build pattern that worked: pre-verify the endpoints yourself, delegate one composite to a subagent forbidden from touching PROJECT_MANIFEST.json or tests/test_project_manifest.py, then independently verify, add the manifest entry, commit, push, wait for CI, copy evidence. Docker is unavailable locally. Latest geolocation_image attempt: run 38881046397 failed building pillow==10.3.0 because dfit-toolkit pins it and its source setup raised KeyError: '__version__' on Python 3.13; Dockerfile changed to Python 3.12 because PyPI publishes matching cp312 wheels. Capture logged 45/46 because the new image was unavailable. Geolocation image is now verified-fixture; five sources implemented, seven dropped with cited reasons; Mapillary skipped in CI health because no token was configured. Local consistency held: 479 passed + 46 Docker skips = 525 CI passed. Run 38881046397 failed on Python 3.13/Pillow 10.3.0 compatibility; Python 3.12 fix passed in run 38882456490. Next plan row is transport_movement."
 }
