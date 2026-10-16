@@ -1500,7 +1500,7 @@
       "legal_notes": "Masto is restricted to one unauthenticated mastodon.social /api/v2/search request for accounts (limit 5, no resolve/pagination); only exact username matches marked discoverable=true are emitted, and the upstream cross-instance list scan is not used. Octosuite is restricted to one public GET https://api.github.com/users/{username}, with redirects disabled and a timeout; only username, display name, platform, and profile URL are emitted. OWASP SocialOSINTLM and scrawler are disabled for this keyless build; source-specific reasons and official documentation are in docker/social_username/RATE_LIMITS.md.",
       "network": "required",
       "last_audited": "2026-10-16T00:00:00Z",
-      "verification_status": "unverified-fixture",
+      "verification_status": "verified-fixture",
       "fixture_provenance": "synthetic",
       "legal_tier": 1,
       "enabled_by_default": true,
@@ -1529,7 +1529,7 @@
           "enabled_by_default": false
         }
       ],
-      "note": "Synthetic fixture: fixture file: tests/fixtures/social_username.json. No live source lookups occurred. Masto is constrained to the documented single-instance public search and filters non-discoverable accounts; Octosuite is constrained to one public GitHub profile request. See docker/social_username/RATE_LIMITS.md for documented endpoint, quota, and sub-source drop evidence."
+      "note": "Synthetic fixture and Docker health smoke passed in CI run 38898128908 on commit 99d02667b86d1e6be9490d5e9227f0dd05957434 (https://github.com/frostknightfrosty-lgtm/aletheia/actions/runs/38898128908). Raw artifact evidence: PARSER PREFLIGHT: PASS — 48/48 adapters have parser coverage; 553 passed, 1 warning in 18.25s; DOCKER CAPTURE: PASS — 49/49 cases captured. results.json contains 49 entries with 0 nonzero return codes and 49 stdout/stderr pairs; SHA-256 4B2D483B9E1B4A61FEEE9E92211D19F1648372EF32B33BD8BD4334FB686C3883. Case phase9-social-username returned 0 with stdout ok under --network none, confirming container startup only. Fixture file: tests/fixtures/social_username.json. No live source lookups occurred. Masto is constrained to the documented single-instance public search and filters non-discoverable accounts; Octosuite is constrained to one public GitHub profile request. See docker/social_username/RATE_LIMITS.md for documented endpoint, quota, and sub-source drop evidence."
     }
   ],
   "phase_1_scope": {
