@@ -50,3 +50,4 @@ docker build -f docker/search_engines/Dockerfile -t aletheia/search-engines:v1 d
 docker build -f docker/geolocation_image/Dockerfile -t aletheia/geolocation-image:v1 docker/geolocation_image
 docker build -f docker/transport_asset_registry/Dockerfile -t aletheia/transport-asset-registry:v1 docker/transport_asset_registry
 docker build -f docker/social_profile/Dockerfile -t aletheia/social-profile:v1 docker/social_profile
+docker build -f docker/social_username/Dockerfile -t aletheia/social-username:v1 docker/social_username

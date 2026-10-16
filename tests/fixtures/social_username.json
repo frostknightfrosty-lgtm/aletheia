@@ -1,0 +1,45 @@
+{
+  "sources": [
+    {
+      "source": "masto",
+      "skipped": false,
+      "http_status": 200,
+      "error": null,
+      "data": {
+        "records": [
+          {
+            "username": "alice",
+            "display_name": "Alice Example",
+            "profile_url": "https://mastodon.social/@alice",
+            "discoverable": true
+          }
+        ]
+      }
+    },
+    {
+      "source": "octosuite",
+      "skipped": false,
+      "http_status": 200,
+      "error": null,
+      "data": {
+        "records": [
+          {
+            "username": "alice",
+            "display_name": "Alice E.",
+            "profile_url": "https://github.com/alice"
+          }
+        ]
+      }
+    },
+    {
+      "source": "owasp-socialosintlm",
+      "skipped": true,
+      "skip_reason": "Credential-gated source omitted from this keyless batch."
+    },
+    {
+      "source": "scrawler",
+      "skipped": true,
+      "skip_reason": "Interactive cookie-dependent source omitted from this batch."
+    }
+  ]
+}
