@@ -195,3 +195,9 @@ def test_phase9_social_username_container_health():
     r = _run(["docker", "run", "--rm", "--network", "none", "aletheia/social-username:v1", "--health"])
     assert r.returncode == 0, r.stderr or r.stdout
     assert r.stdout.strip() == "ok", r.stdout + r.stderr
+
+
+def test_phase9_leak_checkers_container_health():
+    r = _run(["docker", "run", "--rm", "--network", "none", "aletheia/leak-checkers:v1", "--health"])
+    assert r.returncode == 0, r.stderr or r.stdout
+    assert r.stdout.strip() == "ok", r.stdout + r.stderr

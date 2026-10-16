@@ -33,6 +33,7 @@ from aletheia.adapters.geolocation_image import GeolocationImageAdapter
 from aletheia.adapters.transport_asset_registry import TransportAssetRegistryAdapter
 from aletheia.adapters.social_profile import SocialProfileAdapter
 from aletheia.adapters.social_username import SocialUsernameAdapter
+from aletheia.adapters.leak_checkers import LeakCheckersAdapter
 
 
 def phase1_adapters() -> dict[str, Adapter]:
@@ -95,4 +96,5 @@ def phase7_adapters() -> dict[str, Adapter]:
     adapters[TransportAssetRegistryAdapter.descriptor.name] = TransportAssetRegistryAdapter()
     adapters[SocialProfileAdapter.descriptor.name] = SocialProfileAdapter()
     adapters[SocialUsernameAdapter.descriptor.name] = SocialUsernameAdapter()
+    adapters[LeakCheckersAdapter.descriptor.name] = LeakCheckersAdapter()
     return adapters

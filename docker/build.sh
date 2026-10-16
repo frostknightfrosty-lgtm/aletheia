@@ -51,3 +51,4 @@ docker build -f docker/geolocation_image/Dockerfile -t aletheia/geolocation-imag
 docker build -f docker/transport_asset_registry/Dockerfile -t aletheia/transport-asset-registry:v1 docker/transport_asset_registry
 docker build -f docker/social_profile/Dockerfile -t aletheia/social-profile:v1 docker/social_profile
 docker build -f docker/social_username/Dockerfile -t aletheia/social-username:v1 docker/social_username
+docker build -f docker/leak_checkers/Dockerfile -t aletheia/leak-checkers:v1 docker/leak_checkers
