@@ -29,5 +29,6 @@ def test_phase2_finalize_updates_manifest_and_writes_artifacts(tmp_path):
     manifest = checkpoints.load(run_id)
     assert manifest["phase"] == 2
     assert manifest["resolution"]["completed"] is True
+    assert manifest["chain_tip"]
     assert Path(artifacts["pdf"]).exists()
     assert (checkpoints.run_dir(run_id) / "HANDOFF.md").exists()

@@ -46,6 +46,10 @@ aletheia phase2 --run-id <RUN_ID>
 
 This writes `report.json`, `report.pdf`, `graph.graphml`, `report.stix2.json`, `resolution.json`, hashes, and an updated `HANDOFF.md` under the run directory.
 
+## Audit chain
+
+Each run's `AUDIT.jsonl` is a SHA-256 hash chain. Entries carry a sequence number, the previous entry's hash, and their own hash; the final `chain_tip` is stored in that run's `MANIFEST.json`. Verify a run with `aletheia verify-chain <RUN_ID>`. This makes changes detectable relative to the manifest anchor, but it is not a digital signature or a guarantee of legal admissibility; preserve and protect the manifest and audit files together.
+
 ## Phase 6
 
 Corporate/records/sanctions adapters: SEC EDGAR, GLEIF, OpenCorporates, OpenSanctions, and CourtListener. PACER, RECAP, Aleph, MuckRock, and country-specific registries remain deferred until their current access contracts are verified.

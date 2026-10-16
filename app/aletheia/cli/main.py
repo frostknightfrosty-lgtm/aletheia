@@ -3,7 +3,9 @@ from __future__ import annotations
 import argparse
 import os
 from pathlib import Path
+from uuid import UUID
 
+from aletheia.core import chain
 from aletheia.core.models import Seed, SeedType
 from aletheia.core.orchestrator import Orchestrator
 
@@ -45,6 +47,9 @@ def build_parser() -> argparse.ArgumentParser:
     resume.add_argument("--timeout", type=int, default=120)
     resume.add_argument("--proxy", default=os.getenv("ALETHEIA_HTTP_PROXY") or None)
     resume.add_argument("--authorization-assertion", default=None, help="Explicit authorization statement; stored with the run for exact resumability")
+    verify_chain = sub.add_parser("verify-chain", help="verify a run's hash-chained audit log")
+    verify_chain.add_argument("run_id", type=UUID)
+    verify_chain.add_argument("--data-dir", default=os.getenv("ALETHEIA_DATA_DIR", "./data"))
     return parser
 
 
@@ -58,8 +63,21 @@ def parse_seed(raw: str) -> Seed:
 
 def main() -> None:
     args = build_parser().parse_args()
-    orch = Orchestrator(Path(args.data_dir))
-    if args.cmd == "investigate":
+    if args.cmd == "verify-chain":
+        result = chain.verify(args.run_id, data_root=Path(args.data_dir))
+        if result["valid"]:
+            print(f"valid: {args.run_id}")
+            print(f"chain tip: {result['tip_hash']}")
+            print("manifest anchor: verified" if result["anchored"] else "manifest anchor: unavailable")
+        else:
+            print(f"invalid: {args.run_id}")
+            print(f"first broken seq: {result['first_broken_seq']}")
+            print(f"chain tip: {result['tip_hash']}")
+            if result.get("error"):
+                print(f"reason: {result['error']}")
+            raise SystemExit(1)
+    elif args.cmd == "investigate":
+        orch = Orchestrator(Path(args.data_dir))
         seed = parse_seed(args.seed)
         run_id = orch.create_run(seed, legal_only=True, authorization_assertion=args.authorization_assertion)
         print(run_id)
@@ -88,7 +106,7 @@ def main() -> None:
         from aletheia.mcp.server import serve
         serve(Path(args.data_dir))
     elif args.cmd == "resume":
-        from uuid import UUID
+        orch = Orchestrator(Path(args.data_dir))
         orch.resume(UUID(args.run_id), authorization_assertion=args.authorization_assertion, timeout_seconds=args.timeout, proxy_url=args.proxy)
         print(f"resumed: {args.run_id}")
 

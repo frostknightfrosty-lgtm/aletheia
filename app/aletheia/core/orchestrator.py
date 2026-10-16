@@ -5,6 +5,7 @@ from uuid import UUID, uuid4
 
 from aletheia.adapters.registry import phase7_adapters
 from aletheia.core.audit import AuditLogger
+from aletheia.core.chain import AuditChainError, GENESIS_HASH, tip as audit_chain_tip
 from aletheia.core.checkpoint import CheckpointStore
 from aletheia.core.graph import Graph
 from aletheia.core.models import AdapterRunRequest, Seed
@@ -37,6 +38,7 @@ class Orchestrator:
             "next_action": None,
             "token_budget_remaining": None,
             "tool_versions": {name: a.descriptor.version_pin for name, a in self.adapters.items()},
+            "chain_tip": GENESIS_HASH,
         }
         self.checkpoints.save(run_id, manifest)
         return run_id
@@ -67,11 +69,14 @@ class Orchestrator:
                                     timeout_seconds=timeout_seconds, proxy_url=proxy_url)
             try:
                 result = adapter.run(req, self.checkpoints.run_dir(run_id) / adapter_name, audit)
+            except AuditChainError:
+                raise
             except Exception as exc:
                 manifest["retry_counters"][adapter_name] = manifest["retry_counters"].get(adapter_name, 0) + 1
                 if adapter_name not in manifest["failed"]:
                     manifest["failed"].append(adapter_name)
                 manifest["next_action"] = adapter_name
+                manifest["chain_tip"] = audit_chain_tip(run_id, data_root=self.data_root)
                 self.checkpoints.save(run_id, manifest)
                 self.checkpoints.write_handoff(
                     run_id,
@@ -95,9 +100,12 @@ class Orchestrator:
             manifest["completed"].append(adapter_name)
             manifest["pending"].remove(adapter_name)
             manifest["next_action"] = manifest["pending"][0] if manifest["pending"] else None
+            manifest["chain_tip"] = audit_chain_tip(run_id, data_root=self.data_root)
             self.graph_store.save_graph(str(run_id), graph.export())
             self.checkpoints.save(run_id, manifest)
 
+        manifest["chain_tip"] = audit_chain_tip(run_id, data_root=self.data_root)
+        self.checkpoints.save(run_id, manifest)
         self.checkpoints.write_handoff(
             run_id,
             manifest["goal"],

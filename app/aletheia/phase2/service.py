@@ -8,6 +8,7 @@ from aletheia.core.checkpoint import CheckpointStore
 from aletheia.core.graph import Graph
 from aletheia.core.models import Seed
 from aletheia.core.audit import AuditLogger
+from aletheia.core.chain import AuditChainError, verify as verify_audit_chain
 from aletheia.core.models import AuditEvent
 from aletheia.phase2.reporting import generate_all_reports
 from aletheia.phase2.resolution import EntityResolver
@@ -22,6 +23,11 @@ class Phase2Service:
         self.resolver = EntityResolver()
 
     def finalize(self, run_id: UUID) -> dict[str, str]:
+        integrity = verify_audit_chain(run_id, data_root=self.data_root)
+        if not integrity["valid"]:
+            raise AuditChainError(
+                f"run audit chain is invalid at sequence {integrity['first_broken_seq']}"
+            )
         manifest = self.checkpoints.load(run_id)
         if manifest is None:
             raise FileNotFoundError(f"unknown run {run_id}")
