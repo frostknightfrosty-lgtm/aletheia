@@ -9,6 +9,7 @@ from uuid import UUID
 
 from rapidfuzz.distance import JaroWinkler, Levenshtein
 
+from aletheia.core.calibration import Calibrator
 from aletheia.core.graph import Graph
 from aletheia.core.models import Entity, EntityType, RelationshipType, Provenance
 
@@ -33,6 +34,10 @@ class ResolutionCandidate:
     score: float
     decision: str
     explanation: tuple[str, ...]
+    # Phase 13: the composite ``score`` is a similarity heuristic. ``calibrated``
+    # is True only when a trained calibrator produced ``calibrated_probability``.
+    calibrated: bool = False
+    calibrated_probability: float | None = None
 
     def to_dict(self) -> dict:
         raw = asdict(self)
@@ -170,9 +175,13 @@ class EntityResolver:
     they become explicit SAME_AS_CANDIDATE edges with a machine-readable explanation.
     """
 
-    def __init__(self, *, candidate_threshold: float = 0.88, auto_merge_threshold: float = 0.985) -> None:
+    def __init__(self, *, candidate_threshold: float = 0.88, auto_merge_threshold: float = 0.985,
+                 calibrator: Calibrator | None = None) -> None:
         self.candidate_threshold = candidate_threshold
         self.auto_merge_threshold = auto_merge_threshold
+        # A calibrator maps the raw similarity score to a probability. When it is
+        # absent or untrained, candidates are reported as ``calibrated: false``.
+        self.calibrator = calibrator
 
     def resolve(self, graph: Graph) -> list[ResolutionCandidate]:
         # First pass: canonicalize and exact-merge within an entity type.
@@ -239,6 +248,18 @@ class EntityResolver:
                             f"levenshtein={lev:.6f}",
                             "no automatic merge because fuzzy similarity is not source evidence",
                         ]
+                        calibrated = self.calibrator is not None and self.calibrator.trained
+                        probability = (
+                            round(self.calibrator.predict(score), 6)
+                            if calibrated and self.calibrator is not None
+                            else None
+                        )
+                        if calibrated:
+                            explanation.append("calibrated=true")
+                            explanation.append(f"calibrated_probability={probability:.6f}")
+                        else:
+                            explanation.append("calibrated=false")
+                            explanation.append("no_trained_calibrator_score_is_similarity_not_probability")
                         if score >= self.auto_merge_threshold:
                             # Still require exact canonical equality for merge; threshold alone cannot authorize it.
                             explanation.append("auto_merge_blocked_by_policy_exact_match_only")
@@ -246,6 +267,7 @@ class EntityResolver:
                             left.entity_id, right.entity_id, entity_type,
                             left.canonical_value, right.canonical_value,
                             jw, lev, score, decision, tuple(explanation),
+                            calibrated, probability,
                         ))
                         graph.link(left, right, RelationshipType.SAME_AS_CANDIDATE, score, provenance,
                                    attributes={"resolution": candidates[-1].to_dict()})

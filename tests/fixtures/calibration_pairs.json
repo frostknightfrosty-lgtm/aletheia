@@ -1,0 +1,407 @@
+{
+  "description": "Synthetic labelled similarity pairs for calibrating the entity resolver's composite score. Generated deterministically (seed 20261017) for CI; NOT collected from real investigations. See docs/ADAPTER_CONTRACT.md, 'Calibrated vs uncalibrated scores'.",
+  "generator": "seed=20261017; positives U[0.90,1.00], negatives U[0.55,0.95]",
+  "method": "platt",
+  "pairs": [
+    {
+      "score": 0.907044,
+      "label": 1,
+      "note": "synthetic true match: same identifier with a small presentation difference"
+    },
+    {
+      "score": 0.56906,
+      "label": 0,
+      "note": "synthetic non-match: different identifier sharing a blocking prefix"
+    },
+    {
+      "score": 0.579194,
+      "label": 0,
+      "note": "synthetic non-match: different identifier sharing a blocking prefix"
+    },
+    {
+      "score": 0.825561,
+      "label": 0,
+      "note": "synthetic non-match: different identifier sharing a blocking prefix"
+    },
+    {
+      "score": 0.600992,
+      "label": 0,
+      "note": "synthetic non-match: different identifier sharing a blocking prefix"
+    },
+    {
+      "score": 0.720816,
+      "label": 0,
+      "note": "synthetic non-match: different identifier sharing a blocking prefix"
+    },
+    {
+      "score": 0.916359,
+      "label": 1,
+      "note": "synthetic true match: same identifier with a small presentation difference"
+    },
+    {
+      "score": 0.900434,
+      "label": 1,
+      "note": "synthetic true match: same identifier with a small presentation difference"
+    },
+    {
+      "score": 0.917631,
+      "label": 1,
+      "note": "synthetic true match: same identifier with a small presentation difference"
+    },
+    {
+      "score": 0.912975,
+      "label": 0,
+      "note": "synthetic non-match: different identifier sharing a blocking prefix"
+    },
+    {
+      "score": 0.997703,
+      "label": 1,
+      "note": "synthetic true match: same identifier with a small presentation difference"
+    },
+    {
+      "score": 0.750605,
+      "label": 0,
+      "note": "synthetic non-match: different identifier sharing a blocking prefix"
+    },
+    {
+      "score": 0.95534,
+      "label": 1,
+      "note": "synthetic true match: same identifier with a small presentation difference"
+    },
+    {
+      "score": 0.993935,
+      "label": 1,
+      "note": "synthetic true match: same identifier with a small presentation difference"
+    },
+    {
+      "score": 0.668569,
+      "label": 0,
+      "note": "synthetic non-match: different identifier sharing a blocking prefix"
+    },
+    {
+      "score": 0.957222,
+      "label": 1,
+      "note": "synthetic true match: same identifier with a small presentation difference"
+    },
+    {
+      "score": 0.580085,
+      "label": 0,
+      "note": "synthetic non-match: different identifier sharing a blocking prefix"
+    },
+    {
+      "score": 0.952157,
+      "label": 1,
+      "note": "synthetic true match: same identifier with a small presentation difference"
+    },
+    {
+      "score": 0.932262,
+      "label": 1,
+      "note": "synthetic true match: same identifier with a small presentation difference"
+    },
+    {
+      "score": 0.665835,
+      "label": 0,
+      "note": "synthetic non-match: different identifier sharing a blocking prefix"
+    },
+    {
+      "score": 0.594738,
+      "label": 0,
+      "note": "synthetic non-match: different identifier sharing a blocking prefix"
+    },
+    {
+      "score": 0.992524,
+      "label": 1,
+      "note": "synthetic true match: same identifier with a small presentation difference"
+    },
+    {
+      "score": 0.931495,
+      "label": 1,
+      "note": "synthetic true match: same identifier with a small presentation difference"
+    },
+    {
+      "score": 0.970923,
+      "label": 1,
+      "note": "synthetic true match: same identifier with a small presentation difference"
+    },
+    {
+      "score": 0.703547,
+      "label": 0,
+      "note": "synthetic non-match: different identifier sharing a blocking prefix"
+    },
+    {
+      "score": 0.940089,
+      "label": 1,
+      "note": "synthetic true match: same identifier with a small presentation difference"
+    },
+    {
+      "score": 0.979314,
+      "label": 1,
+      "note": "synthetic true match: same identifier with a small presentation difference"
+    },
+    {
+      "score": 0.955507,
+      "label": 1,
+      "note": "synthetic true match: same identifier with a small presentation difference"
+    },
+    {
+      "score": 0.717299,
+      "label": 0,
+      "note": "synthetic non-match: different identifier sharing a blocking prefix"
+    },
+    {
+      "score": 0.978181,
+      "label": 1,
+      "note": "synthetic true match: same identifier with a small presentation difference"
+    },
+    {
+      "score": 0.701047,
+      "label": 0,
+      "note": "synthetic non-match: different identifier sharing a blocking prefix"
+    },
+    {
+      "score": 0.61129,
+      "label": 0,
+      "note": "synthetic non-match: different identifier sharing a blocking prefix"
+    },
+    {
+      "score": 0.838518,
+      "label": 0,
+      "note": "synthetic non-match: different identifier sharing a blocking prefix"
+    },
+    {
+      "score": 0.770286,
+      "label": 0,
+      "note": "synthetic non-match: different identifier sharing a blocking prefix"
+    },
+    {
+      "score": 0.856979,
+      "label": 0,
+      "note": "synthetic non-match: different identifier sharing a blocking prefix"
+    },
+    {
+      "score": 0.820894,
+      "label": 0,
+      "note": "synthetic non-match: different identifier sharing a blocking prefix"
+    },
+    {
+      "score": 0.966348,
+      "label": 1,
+      "note": "synthetic true match: same identifier with a small presentation difference"
+    },
+    {
+      "score": 0.948451,
+      "label": 1,
+      "note": "synthetic true match: same identifier with a small presentation difference"
+    },
+    {
+      "score": 0.667662,
+      "label": 0,
+      "note": "synthetic non-match: different identifier sharing a blocking prefix"
+    },
+    {
+      "score": 0.888157,
+      "label": 0,
+      "note": "synthetic non-match: different identifier sharing a blocking prefix"
+    },
+    {
+      "score": 0.944945,
+      "label": 1,
+      "note": "synthetic true match: same identifier with a small presentation difference"
+    },
+    {
+      "score": 0.922831,
+      "label": 0,
+      "note": "synthetic non-match: different identifier sharing a blocking prefix"
+    },
+    {
+      "score": 0.810237,
+      "label": 0,
+      "note": "synthetic non-match: different identifier sharing a blocking prefix"
+    },
+    {
+      "score": 0.897272,
+      "label": 0,
+      "note": "synthetic non-match: different identifier sharing a blocking prefix"
+    },
+    {
+      "score": 0.930235,
+      "label": 1,
+      "note": "synthetic true match: same identifier with a small presentation difference"
+    },
+    {
+      "score": 0.621101,
+      "label": 0,
+      "note": "synthetic non-match: different identifier sharing a blocking prefix"
+    },
+    {
+      "score": 0.922568,
+      "label": 0,
+      "note": "synthetic non-match: different identifier sharing a blocking prefix"
+    },
+    {
+      "score": 0.932981,
+      "label": 1,
+      "note": "synthetic true match: same identifier with a small presentation difference"
+    },
+    {
+      "score": 0.908639,
+      "label": 1,
+      "note": "synthetic true match: same identifier with a small presentation difference"
+    },
+    {
+      "score": 0.686597,
+      "label": 0,
+      "note": "synthetic non-match: different identifier sharing a blocking prefix"
+    },
+    {
+      "score": 0.924063,
+      "label": 1,
+      "note": "synthetic true match: same identifier with a small presentation difference"
+    },
+    {
+      "score": 0.932098,
+      "label": 1,
+      "note": "synthetic true match: same identifier with a small presentation difference"
+    },
+    {
+      "score": 0.907966,
+      "label": 0,
+      "note": "synthetic non-match: different identifier sharing a blocking prefix"
+    },
+    {
+      "score": 0.95551,
+      "label": 1,
+      "note": "synthetic true match: same identifier with a small presentation difference"
+    },
+    {
+      "score": 0.716653,
+      "label": 0,
+      "note": "synthetic non-match: different identifier sharing a blocking prefix"
+    },
+    {
+      "score": 0.956476,
+      "label": 1,
+      "note": "synthetic true match: same identifier with a small presentation difference"
+    },
+    {
+      "score": 0.977448,
+      "label": 1,
+      "note": "synthetic true match: same identifier with a small presentation difference"
+    },
+    {
+      "score": 0.932333,
+      "label": 1,
+      "note": "synthetic true match: same identifier with a small presentation difference"
+    },
+    {
+      "score": 0.979884,
+      "label": 1,
+      "note": "synthetic true match: same identifier with a small presentation difference"
+    },
+    {
+      "score": 0.97676,
+      "label": 1,
+      "note": "synthetic true match: same identifier with a small presentation difference"
+    },
+    {
+      "score": 0.938432,
+      "label": 0,
+      "note": "synthetic non-match: different identifier sharing a blocking prefix"
+    },
+    {
+      "score": 0.949507,
+      "label": 1,
+      "note": "synthetic true match: same identifier with a small presentation difference"
+    },
+    {
+      "score": 0.852151,
+      "label": 0,
+      "note": "synthetic non-match: different identifier sharing a blocking prefix"
+    },
+    {
+      "score": 0.735174,
+      "label": 0,
+      "note": "synthetic non-match: different identifier sharing a blocking prefix"
+    },
+    {
+      "score": 0.6134,
+      "label": 0,
+      "note": "synthetic non-match: different identifier sharing a blocking prefix"
+    },
+    {
+      "score": 0.573158,
+      "label": 0,
+      "note": "synthetic non-match: different identifier sharing a blocking prefix"
+    },
+    {
+      "score": 0.665459,
+      "label": 0,
+      "note": "synthetic non-match: different identifier sharing a blocking prefix"
+    },
+    {
+      "score": 0.91847,
+      "label": 0,
+      "note": "synthetic non-match: different identifier sharing a blocking prefix"
+    },
+    {
+      "score": 0.997026,
+      "label": 1,
+      "note": "synthetic true match: same identifier with a small presentation difference"
+    },
+    {
+      "score": 0.984122,
+      "label": 1,
+      "note": "synthetic true match: same identifier with a small presentation difference"
+    },
+    {
+      "score": 0.857151,
+      "label": 0,
+      "note": "synthetic non-match: different identifier sharing a blocking prefix"
+    },
+    {
+      "score": 0.942543,
+      "label": 0,
+      "note": "synthetic non-match: different identifier sharing a blocking prefix"
+    },
+    {
+      "score": 0.798016,
+      "label": 0,
+      "note": "synthetic non-match: different identifier sharing a blocking prefix"
+    },
+    {
+      "score": 0.970904,
+      "label": 1,
+      "note": "synthetic true match: same identifier with a small presentation difference"
+    },
+    {
+      "score": 0.753976,
+      "label": 0,
+      "note": "synthetic non-match: different identifier sharing a blocking prefix"
+    },
+    {
+      "score": 0.943785,
+      "label": 1,
+      "note": "synthetic true match: same identifier with a small presentation difference"
+    },
+    {
+      "score": 0.951299,
+      "label": 1,
+      "note": "synthetic true match: same identifier with a small presentation difference"
+    },
+    {
+      "score": 0.950872,
+      "label": 1,
+      "note": "synthetic true match: same identifier with a small presentation difference"
+    },
+    {
+      "score": 0.954995,
+      "label": 1,
+      "note": "synthetic true match: same identifier with a small presentation difference"
+    },
+    {
+      "score": 0.928049,
+      "label": 1,
+      "note": "synthetic true match: same identifier with a small presentation difference"
+    }
+  ]
+}
