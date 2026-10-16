@@ -1,6 +1,6 @@
-# Aletheia Handoff — Phase 11 complete (egress proxy, standalone component)
+# Aletheia Handoff — Phase 12 complete (egress proxy wired into a representative subset)
 
-Last updated: 2026-10-17T00:30:00Z
+Last updated: 2026-10-17T14:20:00Z
 
 ## Project boundaries
 
@@ -13,27 +13,54 @@ prerequisites are met. A tier classification is project policy, not a legal conc
 
 ## Repository and CI state
 
-- Latest CI-verified commit: `02ee8879330d5195d48f3a7d47b3c0aa28080422`
-  (`phase-11: implement egress proxy (standalone component)`).
-- Docker Verification run **38961709929** —
-  https://github.com/frostknightfrosty-lgtm/aletheia/actions/runs/38961709929 — **green**
-  (attempt 2; attempt 1 was cancelled after the image-build step stalled on a layer pull).
+- Latest CI-verified commit: `ccd5a4b1b9bde0532936911e06685f4f2518314d`
+  (`phase-12: wire egress proxy into representative adapters (3-5 of 49)`).
+- Docker Verification run **38970577087** —
+  https://github.com/frostknightfrosty-lgtm/aletheia/actions/runs/38970577087 — **green**.
 - Evidence lines copied from the downloaded artifact
-  (`ci-artifacts-38961709929`), not typed:
+  (`ci-artifacts-38970577087`), not typed:
   - `PARSER PREFLIGHT: PASS — 49/49 adapters have parser coverage`
-  - `602 passed, 1 warning in 20.79s`
-  - `DOCKER CAPTURE: PASS — 51/51 cases captured`
-- `results.json`: 51 entries, 0 nonzero return codes; the `phase11-egress-proxy` case
-  (`docker run --rm --network none aletheia/egress-proxy:v1 --health`) returned 0; SHA-256
-  `DEED8B3B1C8F62BD77D0B835666672AA5504076211525C161D4EBA9B2C3EA1CF`.
-- Egress-proxy image built in CI (`#9 naming to docker.io/aletheia/egress-proxy:v1 done`),
-  image id `sha256:f5af6b1f42d9e8cdb5a637bef81534496aa194fe422e18e1187f61ec4ddd12a0`;
-  `docker/egress_proxy/Dockerfile` SHA-256
-  `eb7ce40f08eee36733d045d726bee8b6532ee4d196c4dccb2e42bc2ac8e761d1` (matches the local file).
-- Local consistency: **551 passed + 51 skipped = 602**, which equals the CI passed count
-  exactly. CI runs the container smokes that skip without a local Docker CLI.
+  - `616 passed, 1 warning in 31.17s`
+  - `DOCKER CAPTURE: PASS — 55/55 cases captured`
+- `results.json`: 55 entries, 0 nonzero return codes (51 pre-existing cases plus 4 new
+  `phase12-egress-*` scenario checks).
+- Local consistency: **562 passed + 54 skipped = 616**, which equals the CI passed count
+  exactly. (The 18 Phase 13 calibration tests are in the working tree but not in this
+  commit, so they are not part of this figure.)
 - 49 registered adapters, all `verified-fixture`. No `verified-live` adapters. One
-  infrastructure component (`egress_proxy`), now `verified-fixture`.
+  infrastructure component (`egress_proxy`), `verified-fixture`.
+
+## Phase 12 — egress proxy wiring (complete)
+
+Implemented and CI-verified in commit `ccd5a4b`.
+
+- `app/aletheia/core/egress.py` — added `ProxySession` (creates an `--internal` Docker
+  network and starts the detached proxy on it, no published host port), `create_network_command`,
+  `remove_network_command`, `network_name`, `EGRESS_WIRED_ADAPTERS`, `is_wired`, and a
+  DNS-safe container name (underscores become hyphens, because DNS labels cannot carry them).
+  `EgressProxy.run_command` gained `detached` and `publish_port`.
+- `app/aletheia/core/execution.py` — `run_docker(..., network_name=...)` joins a named
+  network (the internal one), overriding the old `bridge`/`none` choice.
+- `app/aletheia/core/models.py` / `core/adapters.py` — `AdapterRunRequest.network_name`
+  is threaded through to `run_docker`.
+- `app/aletheia/core/orchestrator.py` — `resume(..., wire_egress=True)` starts a
+  `ProxySession` for each *wired* adapter, sets `proxy_url`/`network_name`, and appends the
+  proxy's request log to the run's Phase 10 chain as `egress_request` events.
+- Wired subset (3 of 49): `search_engines`, `ssl_tls`, `ip_intelligence`. The other 46 keep
+  their previous behaviour; full coverage is deferred.
+- `ci/egress_scenario.py` — new. Runs the whole shape on a real `--internal` network (a local
+  origin plus the adapter image as the client) and asserts: the forwarded request returns 200
+  and is logged; the real `search_engines` runner egresses through the proxy (`rc=0`); four
+  `egress_request` events append to a chain that verifies valid; and the fail-closed property
+  (no direct internet; no path once the proxy is stopped).
+- `tests/test_egress_wiring.py` — 11 unit tests (argv builders, `ProxySession` with an
+  injected runner, `run_docker` network selection, orchestrator wiring gating).
+- `tests/test_docker_integration.py` — 3 new integration tests sharing one scenario run.
+- `ci/capture_docker_integration.py` — records the 4 `phase12-egress-*` scenario checks.
+- `docs/EGRESS_PROXY_CONTRACT.md` — new "Wiring pattern" section; status updated.
+- Honest limitation: the proxy is wired into three adapters, not all 49. The scenario proves
+  the pattern with the adapter image as the client and the real `search_engines` runner; per
+  the standing rules it uses no live internet (the network is `--internal`).
 
 ## Phase 10 — hash-chained audit log (complete)
 

@@ -1,5 +1,35 @@
 # Changelog
 
+## 2026-10-17 — Phase 12: egress proxy wired into a representative subset, CI-verified
+- **Wiring.** `egress.ProxySession` creates a fresh `docker network create --internal`
+  network (no default egress — the proxy is the only route out) and starts the detached
+  egress proxy on it with no published host port, so it is addressed by container name.
+  `EgressProxy.run_command` gained `detached`/`publish_port`; container names are made
+  DNS-safe (underscores become hyphens). `execution.run_docker(..., network_name=...)` joins
+  the named network instead of `bridge`/`none`, and `AdapterRunRequest.network_name` carries
+  it from the orchestrator. `orchestrator.resume(..., wire_egress=True)` starts a session per
+  wired adapter and appends the proxy's request log to the run's Phase 10 chain as
+  `egress_request` events.
+- **Representative subset.** `EGRESS_WIRED_ADAPTERS = (search_engines, ssl_tls,
+  ip_intelligence)`. The other 46 adapters are deliberately **not** wired; full coverage is
+  deferred. "Wire the proxy into the adapter Dockerfiles" is therefore only partially met.
+- `ci/egress_scenario.py` — new end-to-end scenario under real Docker: a local origin plus the
+  adapter image as the client on an `--internal` network, proving the forwarded 200, the real
+  `search_engines` runner egressing through the proxy (`rc=0`), a valid hash-chain append of
+  four `egress_request` events, and the fail-closed property (no direct internet; no path once
+  the proxy is stopped). `ci/capture_docker_integration.py` records its four
+  `phase12-egress-*` checks.
+- `tests/test_egress_wiring.py` (11 unit tests) and three new `tests/test_docker_integration.py`
+  cases; `docs/EGRESS_PROXY_CONTRACT.md` gained a "Wiring pattern" section. The CI workflow
+  step name that hardcoded "45" Docker integration cases was corrected to carry no count.
+- Verified by Docker Verification run `38970577087` on commit
+  `ccd5a4b1b9bde0532936911e06685f4f2518314d`
+  (https://github.com/frostknightfrosty-lgtm/aletheia/actions/runs/38970577087). Lines copied
+  from the downloaded artifact: `PARSER PREFLIGHT: PASS — 49/49 adapters have parser coverage`;
+  `616 passed, 1 warning in 31.17s`; `DOCKER CAPTURE: PASS — 55/55 cases captured`. `results.json`:
+  55 entries, 0 nonzero return codes. Local consistency: 562 passed + 54 Docker skips = 616 CI
+  passed. No test was skipped, deleted, or weakened.
+
 ## 2026-10-17 — Phase 11: egress proxy (standalone component) implemented and CI-verified
 - **Egress proxy, standalone.** `app/aletheia/core/egress.py` is the control-plane side:
   JSONL schema parsing (`EgressLogEntry`, `parse_log_line`, `read_log`), a per-adapter
