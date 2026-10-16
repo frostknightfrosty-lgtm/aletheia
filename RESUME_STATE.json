@@ -1,12 +1,12 @@
 {
   "session_id": "2ba610de-14d2-4fab-925f-52a87db7e537",
-  "last_updated": "2026-10-16T11:05:43Z",
-  "last_commit": "d85969e4eef272040b6193d36431f18ad6a95354",
-  "last_ci_verified_commit": "d85969e4eef272040b6193d36431f18ad6a95354",
-  "last_ci_run": "38889830581",
+  "last_updated": "2026-10-16T11:50:57Z",
+  "last_commit": "be12b6261c410f0976d763ad6255c82cfe82fe5c",
+  "last_ci_verified_commit": "be12b6261c410f0976d763ad6255c82cfe82fe5c",
+  "last_ci_run": "38894761059",
   "last_ci_status": "green",
   "current_phase": "Phase 9 — batch adapter implementation",
-  "current_task": "social_profile source review and implementation",
+  "current_task": "social_username source review and implementation",
   "current_status": "in_progress",
   "completed_phases": [
     "Original Phases 1–7 baseline (subject to audit gaps documented in HANDOFF.md)",
@@ -39,7 +39,8 @@
     "Phase 9 search_engines adapter (2 sub-sources marginalia and common-crawl-index; dropped searxng and google-custom-search) CI-verified: run 38813318506 on commit 316172b (parser 44/44; 518 passed in 15.38s; capture 45/45; SHA-256 536C538DE9EA54A2836B40BA79D120F89ADB7D033E05028A7BFCEBB875885049).",
     "Phase 9 geolocation_image implemented and CI-verified as verified-fixture: run 38882456490 on bcbdee911c6527d4450ad88bae000cdae4aa8485; parser 45/45; 525 passed, 1 warning in 21.93s; capture 46/46; results.json 46 entries, 0 nonzero, 46 stdout/stderr pairs, SHA-256 308EDE70B65BA1D55D72281BABE7A2ECDA88459DCBD94861F4B870B15EA57E3B. Five sub-sources: Mapillary, Nominatim, Copernicus STAC, DFIT, Steg Analyzer; seven candidates dropped with reasons and official citations in RATE_LIMITS.md and manifest note.",
     "Phase 9 geolocation_image current-HEAD CI verification: run 38884205657 on d2544feafbe02edebd03ba52cf09b41b90059aef; parser 45/45, 525 passed, capture 46/46, results 46/46 return code 0.",
-    "Phase 9 transport_asset_registry verified-fixture: run 38889830581 on d85969e4eef272040b6193d36431f18ad6a95354; parser 46/46, 534 passed, capture 47/47. Artifact results.json had 47 entries, 0 nonzero return codes, and 47 stdout/stderr pairs."
+    "Phase 9 transport_asset_registry verified-fixture: run 38889830581 on d85969e4eef272040b6193d36431f18ad6a95354; parser 46/46, 534 passed, capture 47/47. Artifact results.json had 47 entries, 0 nonzero return codes, and 47 stdout/stderr pairs.",
+    "Phase 9 social_profile current-HEAD CI verification: run 38894761059 on be12b6261c410f0976d763ad6255c82cfe82fe5c (https://github.com/frostknightfrosty-lgtm/aletheia/actions/runs/38894761059); artifact lines: PARSER PREFLIGHT: PASS — 47/47 adapters have parser coverage; 543 passed, 1 warning in 23.01s; DOCKER CAPTURE: PASS — 48/48 cases captured. results.json had 48 entries, all return code 0, 48 stdout/stderr pairs; SHA-256 225AF0D9200D3A36016A958243580F8EE2CC873C6F36928E17129C9C0BE758D2."
   ],
   "pending_phases": [
     "Phase 8 - audit chain, storage backends, and egress proxy (await user direction)",
@@ -53,12 +54,21 @@
     "Gate 5 - no adapter may be marked verified-fixture from a typed or predicted evidence line; the line must be copied from the downloaded CI artifact. This gate was opened because run 38323854024 violated it.",
     "Gate 6 — transport_movement — deferred pending user action. Requires: (1) registration at BarentsWatch, Network Rail, National Rail, Deutsche Bahn; (2) written permission from OpenSky for REST integration. Resume when user chooses to pursue."
   ],
-  "next_action": "Implement the next eligible composite, social_profile, with CrossLinked and Slinky; record TikTok and Zehef source-review drops; then verify in CI.",
+  "next_action": "Complete the keyless social_username composite with only Masto and Octosuite; keep OWASP SocialOSINTLM and scrawler non-querying and document their reasons. Then run local validation, commit, push, wait for CI, download its artifact, and record only evidence copied from that artifact.",
   "files_in_flight": [
-    "app/aletheia/adapters/social_profile.py",
-    "docker/social_profile/",
-    "tests/test_social_profile_adapter.py",
-    "tests/fixtures/social_profile.json"
+    "app/aletheia/adapters/social_username.py",
+    "docker/social_username/Dockerfile",
+    "docker/social_username/runner.py",
+    "docker/social_username/RATE_LIMITS.md",
+    "tests/fixtures/social_username.json",
+    "tests/test_social_username_adapter.py",
+    "tests/test_docker_integration.py",
+    "ci/capture_docker_integration.py",
+    "docker/build.sh",
+    "app/aletheia/adapters/registry.py",
+    "PROJECT_MANIFEST.json",
+    "tests/test_project_manifest.py",
+    "docs/BATCHING_PLAN.md"
   ],
   "notes_for_next_session": "44 adapters registered, all verified-fixture, all citing an artifact-backed run; 45 Docker integration cases. New adapters start at unverified-fixture and move to verified-fixture only from copied artifact lines (Gate 5). The count-drift fix means a new adapter should require NO edits to any other test file; if it does, that is a regression worth reporting. Consistency check to apply every time: local (passed + skipped) must equal CI passed. It held three times this session: 412+43=455, 440+44=484, 473+45=518. Build pattern that worked: pre-verify the endpoints yourself, delegate one composite to a subagent forbidden from touching PROJECT_MANIFEST.json or tests/test_project_manifest.py, then independently verify, add the manifest entry, commit, push, wait for CI, copy evidence. Docker is unavailable locally. Latest geolocation_image attempt: run 38881046397 failed building pillow==10.3.0 because dfit-toolkit pins it and its source setup raised KeyError: '__version__' on Python 3.13; Dockerfile changed to Python 3.12 because PyPI publishes matching cp312 wheels. Capture logged 45/46 because the new image was unavailable. Geolocation image is now verified-fixture; five sources implemented, seven dropped with cited reasons; Mapillary skipped in CI health because no token was configured. Local consistency held: 479 passed + 46 Docker skips = 525 CI passed. Run 38881046397 failed on Python 3.13/Pillow 10.3.0 compatibility; Python 3.12 fix passed in run 38882456490. Next plan row is transport_movement. Current HEAD d2544fe was reverified by green CI run 38884205657: parser 45/45; 525 passed; capture 46/46. Artifact results.json had 46 entries with 0 nonzero return codes and 46 stdout/stderr pairs. Local consistency: 479 passed + 46 Docker skips = 525 CI passed. geolocation_image is complete with 5 implemented and 7 cited drops. transport_movement is not started: repository Actions secrets and variables are empty. Official documentation confirms credentials for OpenSky, BarentsWatch AIS, Network Rail, National Rail Darwin, and Deutsche Bahn; OpenSky terms also require written permission for operational API use. Batching plan records the blocker. Next action: configure approved credentials and resolve OpenSky permission, then continue transport_movement. Current `verified-fixture` count: 45. Current HEAD d85969e4eef272040b6193d36431f18ad6a95354 passed Docker Verification run 38889830581: parser 46/46, 534 passed, capture 47/47; results.json had 47 zero-returncode cases and 47 stdout/stderr pairs. transport_asset_registry is verified-fixture. Gate 6 explicitly defers transport_movement pending provider registrations and OpenSky written permission. Local Docker is unavailable. Next eligible plan row is social_profile; source review found CrossLinked (pinned PyPI 0.3.0, bounded to one HTTPS page each from Google/Bing) and Slinky (offline URL parser pinned to commit e74a138b6bf7264c788871b2e0825455046d09ef) can be scoped; TikTok package has an anti-bot/ headed retry path and Zehef is email/breach/account-existence oriented, so they are candidates for documented drops."
 }
