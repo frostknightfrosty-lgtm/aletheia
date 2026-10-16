@@ -60,7 +60,7 @@
       "network": "required",
       "last_audited": "2026-10-08T18:39:35+03:00",
       "verification_status": "verified-fixture",
-      "note": "Fixture parser coverage passes; fixture provenance: synthetic; fixture file: tests/fixtures/sherlock.txt. No live container run has occurred. Verified in Docker Verification run 38293763683 on commit d784850ed5d869393c63e180cfb05035c070513e (https://github.com/frostknightfrosty-lgtm/aletheia/actions/runs/38293763683): case phasesherlock returned 0 under --network none. Run lines copied from the downloaded artifact: PARSER PREFLIGHT: PASS \u2014 33/33 adapters have parser coverage; 128 passed, 1 warning in 11.85s; DOCKER CAPTURE: PASS \u2014 34/34 cases captured; results.json has 34 entries with 0 nonzero return codes.",
+      "note": "Fixture parser coverage passes; fixture provenance: synthetic; fixture file: tests/fixtures/sherlock.txt. No live container run has occurred. Verified in Docker Verification run 38293763683 on commit d784850ed5d869393c63e180cfb05035c070513e (https://github.com/frostknightfrosty-lgtm/aletheia/actions/runs/38293763683): case phasesherlock returned 0 under --network none. Run lines copied from the downloaded artifact: PARSER PREFLIGHT: PASS — 33/33 adapters have parser coverage; 128 passed, 1 warning in 11.85s; DOCKER CAPTURE: PASS — 34/34 cases captured; results.json has 34 entries with 0 nonzero return codes.",
       "fixture_provenance": "synthetic",
       "legal_tier": 2,
       "enabled_by_default": true,
@@ -81,7 +81,7 @@
       "network": "required",
       "last_audited": "2026-10-08T18:39:35+03:00",
       "verification_status": "verified-fixture",
-      "note": "Fixture parser coverage passes; fixture provenance: synthetic; fixture file: tests/fixtures/theharvester.jsonl. No live container run has occurred. Verified in Docker Verification run 38293763683 on commit d784850ed5d869393c63e180cfb05035c070513e (https://github.com/frostknightfrosty-lgtm/aletheia/actions/runs/38293763683): case phase1-theharvester returned 0 under --network none. Run lines copied from the downloaded artifact: PARSER PREFLIGHT: PASS \u2014 33/33 adapters have parser coverage; 128 passed, 1 warning in 11.85s; DOCKER CAPTURE: PASS \u2014 34/34 cases captured; results.json has 34 entries with 0 nonzero return codes.",
+      "note": "Fixture parser coverage passes; fixture provenance: synthetic; fixture file: tests/fixtures/theharvester.jsonl. No live container run has occurred. Verified in Docker Verification run 38293763683 on commit d784850ed5d869393c63e180cfb05035c070513e (https://github.com/frostknightfrosty-lgtm/aletheia/actions/runs/38293763683): case phase1-theharvester returned 0 under --network none. Run lines copied from the downloaded artifact: PARSER PREFLIGHT: PASS — 33/33 adapters have parser coverage; 128 passed, 1 warning in 11.85s; DOCKER CAPTURE: PASS — 34/34 cases captured; results.json has 34 entries with 0 nonzero return codes.",
       "fixture_provenance": "synthetic",
       "legal_tier": 1,
       "enabled_by_default": true,
@@ -103,7 +103,7 @@
       "network": "none",
       "last_audited": "2026-10-08T18:39:35+03:00",
       "verification_status": "verified-fixture",
-      "note": "Fixture parser coverage passes; fixture provenance: synthetic; fixture file: tests/fixtures/exiftool.json. No live container run has occurred. Verified in Docker Verification run 38293763683 on commit d784850ed5d869393c63e180cfb05035c070513e (https://github.com/frostknightfrosty-lgtm/aletheia/actions/runs/38293763683): case phaseexiftool returned 0 under --network none. Run lines copied from the downloaded artifact: PARSER PREFLIGHT: PASS \u2014 33/33 adapters have parser coverage; 128 passed, 1 warning in 11.85s; DOCKER CAPTURE: PASS \u2014 34/34 cases captured; results.json has 34 entries with 0 nonzero return codes.",
+      "note": "Fixture parser coverage passes; fixture provenance: synthetic; fixture file: tests/fixtures/exiftool.json. No live container run has occurred. Verified in Docker Verification run 38293763683 on commit d784850ed5d869393c63e180cfb05035c070513e (https://github.com/frostknightfrosty-lgtm/aletheia/actions/runs/38293763683): case phaseexiftool returned 0 under --network none. Run lines copied from the downloaded artifact: PARSER PREFLIGHT: PASS — 33/33 adapters have parser coverage; 128 passed, 1 warning in 11.85s; DOCKER CAPTURE: PASS — 34/34 cases captured; results.json has 34 entries with 0 nonzero return codes.",
       "fixture_provenance": "synthetic",
       "legal_tier": 1,
       "enabled_by_default": true,
@@ -156,7 +156,7 @@
       "network": "required",
       "last_audited": "2026-10-08T18:39:35+03:00",
       "verification_status": "verified-fixture",
-      "note": "Fixture parser coverage passes; fixture provenance: synthetic; fixture file: tests/fixtures/amass.txt. No live container run has occurred. Verified in Docker Verification run 38293763683 on commit d784850ed5d869393c63e180cfb05035c070513e (https://github.com/frostknightfrosty-lgtm/aletheia/actions/runs/38293763683): case phaseamass returned 0 under --network none. Run lines copied from the downloaded artifact: PARSER PREFLIGHT: PASS \u2014 33/33 adapters have parser coverage; 128 passed, 1 warning in 11.85s; DOCKER CAPTURE: PASS \u2014 34/34 cases captured; results.json has 34 entries with 0 nonzero return codes.",
+      "note": "Fixture parser coverage passes; fixture provenance: synthetic; fixture file: tests/fixtures/amass.txt. No live container run has occurred. Verified in Docker Verification run 38293763683 on commit d784850ed5d869393c63e180cfb05035c070513e (https://github.com/frostknightfrosty-lgtm/aletheia/actions/runs/38293763683): case phaseamass returned 0 under --network none. Run lines copied from the downloaded artifact: PARSER PREFLIGHT: PASS — 33/33 adapters have parser coverage; 128 passed, 1 warning in 11.85s; DOCKER CAPTURE: PASS — 34/34 cases captured; results.json has 34 entries with 0 nonzero return codes.",
       "fixture_provenance": "synthetic",
       "legal_tier": 1,
       "enabled_by_default": true,
@@ -177,7 +177,7 @@
       "network": "required",
       "last_audited": "2026-10-08T18:39:35+03:00",
       "verification_status": "verified-fixture",
-      "note": "Fixture parser coverage passes; fixture provenance: synthetic; fixture file: tests/fixtures/subfinder.txt. No live container run has occurred. Verified in Docker Verification run 38293763683 on commit d784850ed5d869393c63e180cfb05035c070513e (https://github.com/frostknightfrosty-lgtm/aletheia/actions/runs/38293763683): case phasesubfinder returned 0 under --network none. Run lines copied from the downloaded artifact: PARSER PREFLIGHT: PASS \u2014 33/33 adapters have parser coverage; 128 passed, 1 warning in 11.85s; DOCKER CAPTURE: PASS \u2014 34/34 cases captured; results.json has 34 entries with 0 nonzero return codes.",
+      "note": "Fixture parser coverage passes; fixture provenance: synthetic; fixture file: tests/fixtures/subfinder.txt. No live container run has occurred. Verified in Docker Verification run 38293763683 on commit d784850ed5d869393c63e180cfb05035c070513e (https://github.com/frostknightfrosty-lgtm/aletheia/actions/runs/38293763683): case phasesubfinder returned 0 under --network none. Run lines copied from the downloaded artifact: PARSER PREFLIGHT: PASS — 33/33 adapters have parser coverage; 128 passed, 1 warning in 11.85s; DOCKER CAPTURE: PASS — 34/34 cases captured; results.json has 34 entries with 0 nonzero return codes.",
       "fixture_provenance": "synthetic",
       "legal_tier": 1,
       "enabled_by_default": true,
@@ -198,7 +198,7 @@
       "network": "required",
       "last_audited": "2026-10-08T18:39:35+03:00",
       "verification_status": "verified-fixture",
-      "note": "Fixture parser coverage passes; fixture provenance: synthetic; fixture file: tests/fixtures/assetfinder.txt. No live container run has occurred. Verified in Docker Verification run 38293763683 on commit d784850ed5d869393c63e180cfb05035c070513e (https://github.com/frostknightfrosty-lgtm/aletheia/actions/runs/38293763683): case phaseassetfinder returned 0 under --network none. Run lines copied from the downloaded artifact: PARSER PREFLIGHT: PASS \u2014 33/33 adapters have parser coverage; 128 passed, 1 warning in 11.85s; DOCKER CAPTURE: PASS \u2014 34/34 cases captured; results.json has 34 entries with 0 nonzero return codes.",
+      "note": "Fixture parser coverage passes; fixture provenance: synthetic; fixture file: tests/fixtures/assetfinder.txt. No live container run has occurred. Verified in Docker Verification run 38293763683 on commit d784850ed5d869393c63e180cfb05035c070513e (https://github.com/frostknightfrosty-lgtm/aletheia/actions/runs/38293763683): case phaseassetfinder returned 0 under --network none. Run lines copied from the downloaded artifact: PARSER PREFLIGHT: PASS — 33/33 adapters have parser coverage; 128 passed, 1 warning in 11.85s; DOCKER CAPTURE: PASS — 34/34 cases captured; results.json has 34 entries with 0 nonzero return codes.",
       "fixture_provenance": "synthetic",
       "legal_tier": 1,
       "enabled_by_default": true,
@@ -219,7 +219,7 @@
       "network": "required",
       "last_audited": "2026-10-08T18:39:35+03:00",
       "verification_status": "verified-fixture",
-      "note": "Fixture parser coverage passes; fixture provenance: synthetic; fixture file: tests/fixtures/dnsx.jsonl. No live container run has occurred. Verified in Docker Verification run 38293763683 on commit d784850ed5d869393c63e180cfb05035c070513e (https://github.com/frostknightfrosty-lgtm/aletheia/actions/runs/38293763683): case phasednsx returned 0 under --network none. Run lines copied from the downloaded artifact: PARSER PREFLIGHT: PASS \u2014 33/33 adapters have parser coverage; 128 passed, 1 warning in 11.85s; DOCKER CAPTURE: PASS \u2014 34/34 cases captured; results.json has 34 entries with 0 nonzero return codes.",
+      "note": "Fixture parser coverage passes; fixture provenance: synthetic; fixture file: tests/fixtures/dnsx.jsonl. No live container run has occurred. Verified in Docker Verification run 38293763683 on commit d784850ed5d869393c63e180cfb05035c070513e (https://github.com/frostknightfrosty-lgtm/aletheia/actions/runs/38293763683): case phasednsx returned 0 under --network none. Run lines copied from the downloaded artifact: PARSER PREFLIGHT: PASS — 33/33 adapters have parser coverage; 128 passed, 1 warning in 11.85s; DOCKER CAPTURE: PASS — 34/34 cases captured; results.json has 34 entries with 0 nonzero return codes.",
       "fixture_provenance": "synthetic",
       "legal_tier": 2,
       "enabled_by_default": true,
@@ -240,7 +240,7 @@
       "network": "required",
       "last_audited": "2026-10-08T18:39:35+03:00",
       "verification_status": "verified-fixture",
-      "note": "Fixture parser coverage passes; fixture provenance: synthetic; fixture file: tests/fixtures/massdns.txt. No live container run has occurred. Verified in Docker Verification run 38293763683 on commit d784850ed5d869393c63e180cfb05035c070513e (https://github.com/frostknightfrosty-lgtm/aletheia/actions/runs/38293763683): case phasemassdns returned 0 under --network none. Run lines copied from the downloaded artifact: PARSER PREFLIGHT: PASS \u2014 33/33 adapters have parser coverage; 128 passed, 1 warning in 11.85s; DOCKER CAPTURE: PASS \u2014 34/34 cases captured; results.json has 34 entries with 0 nonzero return codes.",
+      "note": "Fixture parser coverage passes; fixture provenance: synthetic; fixture file: tests/fixtures/massdns.txt. No live container run has occurred. Verified in Docker Verification run 38293763683 on commit d784850ed5d869393c63e180cfb05035c070513e (https://github.com/frostknightfrosty-lgtm/aletheia/actions/runs/38293763683): case phasemassdns returned 0 under --network none. Run lines copied from the downloaded artifact: PARSER PREFLIGHT: PASS — 33/33 adapters have parser coverage; 128 passed, 1 warning in 11.85s; DOCKER CAPTURE: PASS — 34/34 cases captured; results.json has 34 entries with 0 nonzero return codes.",
       "fixture_provenance": "synthetic",
       "legal_tier": 2,
       "enabled_by_default": true,
@@ -261,7 +261,7 @@
       "network": "required",
       "last_audited": "2026-10-08T18:39:35+03:00",
       "verification_status": "verified-fixture",
-      "note": "Fixture parser coverage passes; fixture provenance: synthetic; fixture file: tests/fixtures/dnsrecon.json. No live container run has occurred. Verified in Docker Verification run 38293763683 on commit d784850ed5d869393c63e180cfb05035c070513e (https://github.com/frostknightfrosty-lgtm/aletheia/actions/runs/38293763683): case phasednsrecon returned 0 under --network none. Run lines copied from the downloaded artifact: PARSER PREFLIGHT: PASS \u2014 33/33 adapters have parser coverage; 128 passed, 1 warning in 11.85s; DOCKER CAPTURE: PASS \u2014 34/34 cases captured; results.json has 34 entries with 0 nonzero return codes.",
+      "note": "Fixture parser coverage passes; fixture provenance: synthetic; fixture file: tests/fixtures/dnsrecon.json. No live container run has occurred. Verified in Docker Verification run 38293763683 on commit d784850ed5d869393c63e180cfb05035c070513e (https://github.com/frostknightfrosty-lgtm/aletheia/actions/runs/38293763683): case phasednsrecon returned 0 under --network none. Run lines copied from the downloaded artifact: PARSER PREFLIGHT: PASS — 33/33 adapters have parser coverage; 128 passed, 1 warning in 11.85s; DOCKER CAPTURE: PASS — 34/34 cases captured; results.json has 34 entries with 0 nonzero return codes.",
       "fixture_provenance": "synthetic",
       "legal_tier": 2,
       "enabled_by_default": true,
@@ -282,7 +282,7 @@
       "network": "required",
       "last_audited": "2026-10-08T18:39:35+03:00",
       "verification_status": "verified-fixture",
-      "note": "Fixture parser coverage passes; fixture provenance: synthetic; fixture file: tests/fixtures/fierce.txt. No live container run has occurred. Verified in Docker Verification run 38293763683 on commit d784850ed5d869393c63e180cfb05035c070513e (https://github.com/frostknightfrosty-lgtm/aletheia/actions/runs/38293763683): case phasefierce returned 0 under --network none. Run lines copied from the downloaded artifact: PARSER PREFLIGHT: PASS \u2014 33/33 adapters have parser coverage; 128 passed, 1 warning in 11.85s; DOCKER CAPTURE: PASS \u2014 34/34 cases captured; results.json has 34 entries with 0 nonzero return codes.",
+      "note": "Fixture parser coverage passes; fixture provenance: synthetic; fixture file: tests/fixtures/fierce.txt. No live container run has occurred. Verified in Docker Verification run 38293763683 on commit d784850ed5d869393c63e180cfb05035c070513e (https://github.com/frostknightfrosty-lgtm/aletheia/actions/runs/38293763683): case phasefierce returned 0 under --network none. Run lines copied from the downloaded artifact: PARSER PREFLIGHT: PASS — 33/33 adapters have parser coverage; 128 passed, 1 warning in 11.85s; DOCKER CAPTURE: PASS — 34/34 cases captured; results.json has 34 entries with 0 nonzero return codes.",
       "fixture_provenance": "synthetic",
       "legal_tier": 2,
       "enabled_by_default": true,
@@ -304,7 +304,7 @@
       "network": "required",
       "last_audited": "2026-10-08T18:39:35+03:00",
       "verification_status": "verified-fixture",
-      "note": "Fixture parser coverage passes; fixture provenance: synthetic; fixture file: tests/fixtures/shodan.json. No live container run has occurred. Verified in Docker Verification run 38293763683 on commit d784850ed5d869393c63e180cfb05035c070513e (https://github.com/frostknightfrosty-lgtm/aletheia/actions/runs/38293763683): case phaseshodan returned 0 under --network none. Run lines copied from the downloaded artifact: PARSER PREFLIGHT: PASS \u2014 33/33 adapters have parser coverage; 128 passed, 1 warning in 11.85s; DOCKER CAPTURE: PASS \u2014 34/34 cases captured; results.json has 34 entries with 0 nonzero return codes.",
+      "note": "Fixture parser coverage passes; fixture provenance: synthetic; fixture file: tests/fixtures/shodan.json. No live container run has occurred. Verified in Docker Verification run 38293763683 on commit d784850ed5d869393c63e180cfb05035c070513e (https://github.com/frostknightfrosty-lgtm/aletheia/actions/runs/38293763683): case phaseshodan returned 0 under --network none. Run lines copied from the downloaded artifact: PARSER PREFLIGHT: PASS — 33/33 adapters have parser coverage; 128 passed, 1 warning in 11.85s; DOCKER CAPTURE: PASS — 34/34 cases captured; results.json has 34 entries with 0 nonzero return codes.",
       "fixture_provenance": "synthetic",
       "legal_tier": 3,
       "enabled_by_default": true,
@@ -326,7 +326,7 @@
       "network": "required",
       "last_audited": "2026-10-08T18:39:35+03:00",
       "verification_status": "verified-fixture",
-      "note": "Fixture parser coverage passes; fixture provenance: synthetic; fixture file: tests/fixtures/crtsh.json. No live container run has occurred. Verified in Docker Verification run 38293763683 on commit d784850ed5d869393c63e180cfb05035c070513e (https://github.com/frostknightfrosty-lgtm/aletheia/actions/runs/38293763683): case phase3-crtsh returned 0 under --network none. Run lines copied from the downloaded artifact: PARSER PREFLIGHT: PASS \u2014 33/33 adapters have parser coverage; 128 passed, 1 warning in 11.85s; DOCKER CAPTURE: PASS \u2014 34/34 cases captured; results.json has 34 entries with 0 nonzero return codes.",
+      "note": "Fixture parser coverage passes; fixture provenance: synthetic; fixture file: tests/fixtures/crtsh.json. No live container run has occurred. Verified in Docker Verification run 38293763683 on commit d784850ed5d869393c63e180cfb05035c070513e (https://github.com/frostknightfrosty-lgtm/aletheia/actions/runs/38293763683): case phase3-crtsh returned 0 under --network none. Run lines copied from the downloaded artifact: PARSER PREFLIGHT: PASS — 33/33 adapters have parser coverage; 128 passed, 1 warning in 11.85s; DOCKER CAPTURE: PASS — 34/34 cases captured; results.json has 34 entries with 0 nonzero return codes.",
       "fixture_provenance": "synthetic",
       "legal_tier": 1,
       "enabled_by_default": true,
@@ -347,7 +347,7 @@
       "network": "required",
       "last_audited": "2026-10-08T18:39:35+03:00",
       "verification_status": "verified-fixture",
-      "note": "Fixture parser coverage passes; fixture provenance: synthetic; fixture file: tests/fixtures/maigret.ndjson. No live container run has occurred. Verified in Docker Verification run 38293763683 on commit d784850ed5d869393c63e180cfb05035c070513e (https://github.com/frostknightfrosty-lgtm/aletheia/actions/runs/38293763683): case phasemaigret returned 0 under --network none. Run lines copied from the downloaded artifact: PARSER PREFLIGHT: PASS \u2014 33/33 adapters have parser coverage; 128 passed, 1 warning in 11.85s; DOCKER CAPTURE: PASS \u2014 34/34 cases captured; results.json has 34 entries with 0 nonzero return codes.",
+      "note": "Fixture parser coverage passes; fixture provenance: synthetic; fixture file: tests/fixtures/maigret.ndjson. No live container run has occurred. Verified in Docker Verification run 38293763683 on commit d784850ed5d869393c63e180cfb05035c070513e (https://github.com/frostknightfrosty-lgtm/aletheia/actions/runs/38293763683): case phasemaigret returned 0 under --network none. Run lines copied from the downloaded artifact: PARSER PREFLIGHT: PASS — 33/33 adapters have parser coverage; 128 passed, 1 warning in 11.85s; DOCKER CAPTURE: PASS — 34/34 cases captured; results.json has 34 entries with 0 nonzero return codes.",
       "fixture_provenance": "synthetic",
       "legal_tier": 2,
       "enabled_by_default": true,
@@ -368,7 +368,7 @@
       "network": "required",
       "last_audited": "2026-10-08T18:39:35+03:00",
       "verification_status": "verified-fixture",
-      "note": "Fixture parser coverage passes; fixture provenance: synthetic; fixture file: tests/fixtures/holehe.txt. No live container run has occurred. Verified in Docker Verification run 38293763683 on commit d784850ed5d869393c63e180cfb05035c070513e (https://github.com/frostknightfrosty-lgtm/aletheia/actions/runs/38293763683): case phaseholehe returned 0 under --network none. Run lines copied from the downloaded artifact: PARSER PREFLIGHT: PASS \u2014 33/33 adapters have parser coverage; 128 passed, 1 warning in 11.85s; DOCKER CAPTURE: PASS \u2014 34/34 cases captured; results.json has 34 entries with 0 nonzero return codes.",
+      "note": "Fixture parser coverage passes; fixture provenance: synthetic; fixture file: tests/fixtures/holehe.txt. No live container run has occurred. Verified in Docker Verification run 38293763683 on commit d784850ed5d869393c63e180cfb05035c070513e (https://github.com/frostknightfrosty-lgtm/aletheia/actions/runs/38293763683): case phaseholehe returned 0 under --network none. Run lines copied from the downloaded artifact: PARSER PREFLIGHT: PASS — 33/33 adapters have parser coverage; 128 passed, 1 warning in 11.85s; DOCKER CAPTURE: PASS — 34/34 cases captured; results.json has 34 entries with 0 nonzero return codes.",
       "fixture_provenance": "synthetic",
       "legal_tier": 2,
       "enabled_by_default": true,
@@ -389,7 +389,7 @@
       "network": "required",
       "last_audited": "2026-10-08T18:39:35+03:00",
       "verification_status": "verified-fixture",
-      "note": "Fixture parser coverage passes; fixture provenance: synthetic; fixture file: tests/fixtures/h8mail.json. No live container run has occurred. Verified in Docker Verification run 38293763683 on commit d784850ed5d869393c63e180cfb05035c070513e (https://github.com/frostknightfrosty-lgtm/aletheia/actions/runs/38293763683): case phaseh8mail returned 0 under --network none. Run lines copied from the downloaded artifact: PARSER PREFLIGHT: PASS \u2014 33/33 adapters have parser coverage; 128 passed, 1 warning in 11.85s; DOCKER CAPTURE: PASS \u2014 34/34 cases captured; results.json has 34 entries with 0 nonzero return codes.",
+      "note": "Fixture parser coverage passes; fixture provenance: synthetic; fixture file: tests/fixtures/h8mail.json. No live container run has occurred. Verified in Docker Verification run 38293763683 on commit d784850ed5d869393c63e180cfb05035c070513e (https://github.com/frostknightfrosty-lgtm/aletheia/actions/runs/38293763683): case phaseh8mail returned 0 under --network none. Run lines copied from the downloaded artifact: PARSER PREFLIGHT: PASS — 33/33 adapters have parser coverage; 128 passed, 1 warning in 11.85s; DOCKER CAPTURE: PASS — 34/34 cases captured; results.json has 34 entries with 0 nonzero return codes.",
       "fixture_provenance": "synthetic",
       "legal_tier": 2,
       "enabled_by_default": true,
@@ -410,7 +410,7 @@
       "network": "required",
       "last_audited": "2026-10-08T18:39:35+03:00",
       "verification_status": "verified-fixture",
-      "note": "Fixture parser coverage passes; fixture provenance: synthetic; fixture file: tests/fixtures/hibp.json. No live container run has occurred. Verified in Docker Verification run 38293763683 on commit d784850ed5d869393c63e180cfb05035c070513e (https://github.com/frostknightfrosty-lgtm/aletheia/actions/runs/38293763683): case phasehibp returned 0 under --network none. Run lines copied from the downloaded artifact: PARSER PREFLIGHT: PASS \u2014 33/33 adapters have parser coverage; 128 passed, 1 warning in 11.85s; DOCKER CAPTURE: PASS \u2014 34/34 cases captured; results.json has 34 entries with 0 nonzero return codes.",
+      "note": "Fixture parser coverage passes; fixture provenance: synthetic; fixture file: tests/fixtures/hibp.json. No live container run has occurred. Verified in Docker Verification run 38293763683 on commit d784850ed5d869393c63e180cfb05035c070513e (https://github.com/frostknightfrosty-lgtm/aletheia/actions/runs/38293763683): case phasehibp returned 0 under --network none. Run lines copied from the downloaded artifact: PARSER PREFLIGHT: PASS — 33/33 adapters have parser coverage; 128 passed, 1 warning in 11.85s; DOCKER CAPTURE: PASS — 34/34 cases captured; results.json has 34 entries with 0 nonzero return codes.",
       "fixture_provenance": "synthetic",
       "legal_tier": 3,
       "enabled_by_default": true,
@@ -456,7 +456,7 @@
       "network": "required",
       "last_audited": "2026-10-11T22:48:37Z",
       "verification_status": "verified-fixture",
-      "note": "Synthetic fixture parser tests and Docker health smoke passed in CI run 38179832021 on commit 200ada277886ee961c90c668bfe4aa36fc5f2899 (https://github.com/frostknightfrosty-lgtm/aletheia/actions/runs/38179832021). Raw evidence: PARSER PREFLIGHT: PASS \u00e2\u20ac\u201d 32/32 adapters have parser coverage; 119 passed, 1 warning in 12.58s; DOCKER CAPTURE: PASS \u00e2\u20ac\u201d 33/33 cases captured. Gravatar case phase5c-gravatar returned 0 with stdout ok (--network none health check). fixture file: tests/fixtures/gravatar.json. No live API lookup has occurred.",
+      "note": "Synthetic fixture parser tests and Docker health smoke passed in CI run 38179832021 on commit 200ada277886ee961c90c668bfe4aa36fc5f2899 (https://github.com/frostknightfrosty-lgtm/aletheia/actions/runs/38179832021). Raw evidence: PARSER PREFLIGHT: PASS â€” 32/32 adapters have parser coverage; 119 passed, 1 warning in 12.58s; DOCKER CAPTURE: PASS â€” 33/33 cases captured. Gravatar case phase5c-gravatar returned 0 with stdout ok (--network none health check). fixture file: tests/fixtures/gravatar.json. No live API lookup has occurred.",
       "fixture_provenance": "synthetic",
       "legal_tier": 1,
       "enabled_by_default": true,
@@ -480,7 +480,7 @@
       "network": "required",
       "last_audited": "2026-10-12T15:34:00Z",
       "verification_status": "verified-fixture",
-      "note": "Docker Verification run 38270478612 on commit 33185c7fbbe253562f6b644955bf2ff5ede79c0e: PARSER PREFLIGHT: PASS \u00e2\u20ac\u201d 33/33 adapters have parser coverage; 128 passed, 1 warning in 13.87s; DOCKER CAPTURE: PASS \u00e2\u20ac\u201d 34/34 cases captured. results.json has 34 cases, 0 nonzero return codes; phase5c-rdap Docker health smoke returned 0. Fixture provenance: synthetic; fixture file: tests/fixtures/rdap.json. No live RDAP lookup has occurred.",
+      "note": "Docker Verification run 38270478612 on commit 33185c7fbbe253562f6b644955bf2ff5ede79c0e: PARSER PREFLIGHT: PASS â€” 33/33 adapters have parser coverage; 128 passed, 1 warning in 13.87s; DOCKER CAPTURE: PASS â€” 34/34 cases captured. results.json has 34 cases, 0 nonzero return codes; phase5c-rdap Docker health smoke returned 0. Fixture provenance: synthetic; fixture file: tests/fixtures/rdap.json. No live RDAP lookup has occurred.",
       "fixture_provenance": "synthetic",
       "legal_tier": 1,
       "enabled_by_default": true,
@@ -523,7 +523,7 @@
       "network": "none",
       "last_audited": "2026-10-08T18:39:35+03:00",
       "verification_status": "verified-fixture",
-      "note": "Fixture parser coverage passes; fixture provenance: synthetic; fixture file: tests/fixtures/libphonenumber.json. No live container run has occurred. Verified in Docker Verification run 38293763683 on commit d784850ed5d869393c63e180cfb05035c070513e (https://github.com/frostknightfrosty-lgtm/aletheia/actions/runs/38293763683): case phaselibphonenumber returned 0 under --network none. Run lines copied from the downloaded artifact: PARSER PREFLIGHT: PASS \u2014 33/33 adapters have parser coverage; 128 passed, 1 warning in 11.85s; DOCKER CAPTURE: PASS \u2014 34/34 cases captured; results.json has 34 entries with 0 nonzero return codes.",
+      "note": "Fixture parser coverage passes; fixture provenance: synthetic; fixture file: tests/fixtures/libphonenumber.json. No live container run has occurred. Verified in Docker Verification run 38293763683 on commit d784850ed5d869393c63e180cfb05035c070513e (https://github.com/frostknightfrosty-lgtm/aletheia/actions/runs/38293763683): case phaselibphonenumber returned 0 under --network none. Run lines copied from the downloaded artifact: PARSER PREFLIGHT: PASS — 33/33 adapters have parser coverage; 128 passed, 1 warning in 11.85s; DOCKER CAPTURE: PASS — 34/34 cases captured; results.json has 34 entries with 0 nonzero return codes.",
       "fixture_provenance": "synthetic",
       "legal_tier": 1,
       "enabled_by_default": true,
@@ -544,7 +544,7 @@
       "network": "required",
       "last_audited": "2026-10-08T18:39:35+03:00",
       "verification_status": "verified-fixture",
-      "note": "Fixture parser coverage passes; fixture provenance: synthetic; fixture file: tests/fixtures/instaloader.json. No live container run has occurred. Verified in Docker Verification run 38293763683 on commit d784850ed5d869393c63e180cfb05035c070513e (https://github.com/frostknightfrosty-lgtm/aletheia/actions/runs/38293763683): case phaseinstaloader returned 0 under --network none. Run lines copied from the downloaded artifact: PARSER PREFLIGHT: PASS \u2014 33/33 adapters have parser coverage; 128 passed, 1 warning in 11.85s; DOCKER CAPTURE: PASS \u2014 34/34 cases captured; results.json has 34 entries with 0 nonzero return codes.",
+      "note": "Fixture parser coverage passes; fixture provenance: synthetic; fixture file: tests/fixtures/instaloader.json. No live container run has occurred. Verified in Docker Verification run 38293763683 on commit d784850ed5d869393c63e180cfb05035c070513e (https://github.com/frostknightfrosty-lgtm/aletheia/actions/runs/38293763683): case phaseinstaloader returned 0 under --network none. Run lines copied from the downloaded artifact: PARSER PREFLIGHT: PASS — 33/33 adapters have parser coverage; 128 passed, 1 warning in 11.85s; DOCKER CAPTURE: PASS — 34/34 cases captured; results.json has 34 entries with 0 nonzero return codes.",
       "fixture_provenance": "synthetic",
       "legal_tier": 2,
       "enabled_by_default": true,
@@ -565,7 +565,7 @@
       "network": "required",
       "last_audited": "2026-10-08T18:39:35+03:00",
       "verification_status": "verified-fixture",
-      "note": "Fixture parser coverage passes; fixture provenance: synthetic; fixture file: tests/fixtures/reddit.json. No live container run has occurred. Verified in Docker Verification run 38293763683 on commit d784850ed5d869393c63e180cfb05035c070513e (https://github.com/frostknightfrosty-lgtm/aletheia/actions/runs/38293763683): case phase5-reddit returned 0 under --network none. Run lines copied from the downloaded artifact: PARSER PREFLIGHT: PASS \u2014 33/33 adapters have parser coverage; 128 passed, 1 warning in 11.85s; DOCKER CAPTURE: PASS \u2014 34/34 cases captured; results.json has 34 entries with 0 nonzero return codes.",
+      "note": "Fixture parser coverage passes; fixture provenance: synthetic; fixture file: tests/fixtures/reddit.json. No live container run has occurred. Verified in Docker Verification run 38293763683 on commit d784850ed5d869393c63e180cfb05035c070513e (https://github.com/frostknightfrosty-lgtm/aletheia/actions/runs/38293763683): case phase5-reddit returned 0 under --network none. Run lines copied from the downloaded artifact: PARSER PREFLIGHT: PASS — 33/33 adapters have parser coverage; 128 passed, 1 warning in 11.85s; DOCKER CAPTURE: PASS — 34/34 cases captured; results.json has 34 entries with 0 nonzero return codes.",
       "fixture_provenance": "synthetic",
       "legal_tier": 3,
       "enabled_by_default": true,
@@ -587,7 +587,7 @@
       "network": "required",
       "last_audited": "2026-10-08T18:39:35+03:00",
       "verification_status": "verified-fixture",
-      "note": "Fixture parser coverage passes; fixture provenance: synthetic; fixture file: tests/fixtures/youtube.json. No live container run has occurred. Verified in Docker Verification run 38293763683 on commit d784850ed5d869393c63e180cfb05035c070513e (https://github.com/frostknightfrosty-lgtm/aletheia/actions/runs/38293763683): case phase5-youtube returned 0 under --network none. Run lines copied from the downloaded artifact: PARSER PREFLIGHT: PASS \u2014 33/33 adapters have parser coverage; 128 passed, 1 warning in 11.85s; DOCKER CAPTURE: PASS \u2014 34/34 cases captured; results.json has 34 entries with 0 nonzero return codes.",
+      "note": "Fixture parser coverage passes; fixture provenance: synthetic; fixture file: tests/fixtures/youtube.json. No live container run has occurred. Verified in Docker Verification run 38293763683 on commit d784850ed5d869393c63e180cfb05035c070513e (https://github.com/frostknightfrosty-lgtm/aletheia/actions/runs/38293763683): case phase5-youtube returned 0 under --network none. Run lines copied from the downloaded artifact: PARSER PREFLIGHT: PASS — 33/33 adapters have parser coverage; 128 passed, 1 warning in 11.85s; DOCKER CAPTURE: PASS — 34/34 cases captured; results.json has 34 entries with 0 nonzero return codes.",
       "fixture_provenance": "synthetic",
       "legal_tier": 3,
       "enabled_by_default": true,
@@ -609,7 +609,7 @@
       "network": "required",
       "last_audited": "2026-10-08T18:39:35+03:00",
       "verification_status": "verified-fixture",
-      "note": "Fixture parser coverage passes; fixture provenance: synthetic; fixture file: tests/fixtures/overpass.json. No live container run has occurred. Verified in Docker Verification run 38293763683 on commit d784850ed5d869393c63e180cfb05035c070513e (https://github.com/frostknightfrosty-lgtm/aletheia/actions/runs/38293763683): case phaseoverpass returned 0 under --network none. Run lines copied from the downloaded artifact: PARSER PREFLIGHT: PASS \u2014 33/33 adapters have parser coverage; 128 passed, 1 warning in 11.85s; DOCKER CAPTURE: PASS \u2014 34/34 cases captured; results.json has 34 entries with 0 nonzero return codes.",
+      "note": "Fixture parser coverage passes; fixture provenance: synthetic; fixture file: tests/fixtures/overpass.json. No live container run has occurred. Verified in Docker Verification run 38293763683 on commit d784850ed5d869393c63e180cfb05035c070513e (https://github.com/frostknightfrosty-lgtm/aletheia/actions/runs/38293763683): case phaseoverpass returned 0 under --network none. Run lines copied from the downloaded artifact: PARSER PREFLIGHT: PASS — 33/33 adapters have parser coverage; 128 passed, 1 warning in 11.85s; DOCKER CAPTURE: PASS — 34/34 cases captured; results.json has 34 entries with 0 nonzero return codes.",
       "fixture_provenance": "synthetic",
       "legal_tier": 1,
       "enabled_by_default": true,
@@ -630,7 +630,7 @@
       "network": "none",
       "last_audited": "2026-10-08T18:39:35+03:00",
       "verification_status": "verified-fixture",
-      "note": "Fixture parser coverage passes; fixture provenance: synthetic; fixture file: tests/fixtures/suncalc.json. No live container run has occurred. Verified in Docker Verification run 38293763683 on commit d784850ed5d869393c63e180cfb05035c070513e (https://github.com/frostknightfrosty-lgtm/aletheia/actions/runs/38293763683): case phasesuncalc returned 0 under --network none. Run lines copied from the downloaded artifact: PARSER PREFLIGHT: PASS \u2014 33/33 adapters have parser coverage; 128 passed, 1 warning in 11.85s; DOCKER CAPTURE: PASS \u2014 34/34 cases captured; results.json has 34 entries with 0 nonzero return codes.",
+      "note": "Fixture parser coverage passes; fixture provenance: synthetic; fixture file: tests/fixtures/suncalc.json. No live container run has occurred. Verified in Docker Verification run 38293763683 on commit d784850ed5d869393c63e180cfb05035c070513e (https://github.com/frostknightfrosty-lgtm/aletheia/actions/runs/38293763683): case phasesuncalc returned 0 under --network none. Run lines copied from the downloaded artifact: PARSER PREFLIGHT: PASS — 33/33 adapters have parser coverage; 128 passed, 1 warning in 11.85s; DOCKER CAPTURE: PASS — 34/34 cases captured; results.json has 34 entries with 0 nonzero return codes.",
       "fixture_provenance": "synthetic",
       "legal_tier": 1,
       "enabled_by_default": true,
@@ -652,7 +652,7 @@
       "network": "none",
       "last_audited": "2026-10-08T18:39:35+03:00",
       "verification_status": "verified-fixture",
-      "note": "Fixture parser coverage passes; fixture provenance: synthetic; fixture file: tests/fixtures/deepface.json. No live container run has occurred. Verified in Docker Verification run 38293763683 on commit d784850ed5d869393c63e180cfb05035c070513e (https://github.com/frostknightfrosty-lgtm/aletheia/actions/runs/38293763683): case phasedeepface returned 0 under --network none. Run lines copied from the downloaded artifact: PARSER PREFLIGHT: PASS \u2014 33/33 adapters have parser coverage; 128 passed, 1 warning in 11.85s; DOCKER CAPTURE: PASS \u2014 34/34 cases captured; results.json has 34 entries with 0 nonzero return codes.",
+      "note": "Fixture parser coverage passes; fixture provenance: synthetic; fixture file: tests/fixtures/deepface.json. No live container run has occurred. Verified in Docker Verification run 38293763683 on commit d784850ed5d869393c63e180cfb05035c070513e (https://github.com/frostknightfrosty-lgtm/aletheia/actions/runs/38293763683): case phasedeepface returned 0 under --network none. Run lines copied from the downloaded artifact: PARSER PREFLIGHT: PASS — 33/33 adapters have parser coverage; 128 passed, 1 warning in 11.85s; DOCKER CAPTURE: PASS — 34/34 cases captured; results.json has 34 entries with 0 nonzero return codes.",
       "fixture_provenance": "synthetic",
       "legal_tier": 1,
       "enabled_by_default": true,
@@ -674,7 +674,7 @@
       "network": "none",
       "last_audited": "2026-10-08T18:39:35+03:00",
       "verification_status": "verified-fixture",
-      "note": "Fixture parser coverage passes; fixture provenance: synthetic; fixture file: tests/fixtures/insightface.json. No live container run has occurred. Verified in Docker Verification run 38293763683 on commit d784850ed5d869393c63e180cfb05035c070513e (https://github.com/frostknightfrosty-lgtm/aletheia/actions/runs/38293763683): case phaseinsightface returned 0 under --network none. Run lines copied from the downloaded artifact: PARSER PREFLIGHT: PASS \u2014 33/33 adapters have parser coverage; 128 passed, 1 warning in 11.85s; DOCKER CAPTURE: PASS \u2014 34/34 cases captured; results.json has 34 entries with 0 nonzero return codes.",
+      "note": "Fixture parser coverage passes; fixture provenance: synthetic; fixture file: tests/fixtures/insightface.json. No live container run has occurred. Verified in Docker Verification run 38293763683 on commit d784850ed5d869393c63e180cfb05035c070513e (https://github.com/frostknightfrosty-lgtm/aletheia/actions/runs/38293763683): case phaseinsightface returned 0 under --network none. Run lines copied from the downloaded artifact: PARSER PREFLIGHT: PASS — 33/33 adapters have parser coverage; 128 passed, 1 warning in 11.85s; DOCKER CAPTURE: PASS — 34/34 cases captured; results.json has 34 entries with 0 nonzero return codes.",
       "fixture_provenance": "synthetic",
       "legal_tier": 1,
       "enabled_by_default": true,
@@ -695,7 +695,7 @@
       "network": "required",
       "last_audited": "2026-10-08T18:39:35+03:00",
       "verification_status": "verified-fixture",
-      "note": "Fixture parser coverage passes; fixture provenance: synthetic; fixture file: tests/fixtures/sec-edgar.json. No live container run has occurred. Verified in Docker Verification run 38293763683 on commit d784850ed5d869393c63e180cfb05035c070513e (https://github.com/frostknightfrosty-lgtm/aletheia/actions/runs/38293763683): case phase6-sec-edgar returned 0 under --network none. Run lines copied from the downloaded artifact: PARSER PREFLIGHT: PASS \u2014 33/33 adapters have parser coverage; 128 passed, 1 warning in 11.85s; DOCKER CAPTURE: PASS \u2014 34/34 cases captured; results.json has 34 entries with 0 nonzero return codes.",
+      "note": "Fixture parser coverage passes; fixture provenance: synthetic; fixture file: tests/fixtures/sec-edgar.json. No live container run has occurred. Verified in Docker Verification run 38293763683 on commit d784850ed5d869393c63e180cfb05035c070513e (https://github.com/frostknightfrosty-lgtm/aletheia/actions/runs/38293763683): case phase6-sec-edgar returned 0 under --network none. Run lines copied from the downloaded artifact: PARSER PREFLIGHT: PASS — 33/33 adapters have parser coverage; 128 passed, 1 warning in 11.85s; DOCKER CAPTURE: PASS — 34/34 cases captured; results.json has 34 entries with 0 nonzero return codes.",
       "fixture_provenance": "synthetic",
       "legal_tier": 1,
       "enabled_by_default": true,
@@ -716,7 +716,7 @@
       "network": "required",
       "last_audited": "2026-10-08T18:39:35+03:00",
       "verification_status": "verified-fixture",
-      "note": "Fixture parser coverage passes; fixture provenance: synthetic; fixture file: tests/fixtures/gleif.json. No live container run has occurred. Verified in Docker Verification run 38293763683 on commit d784850ed5d869393c63e180cfb05035c070513e (https://github.com/frostknightfrosty-lgtm/aletheia/actions/runs/38293763683): case phasegleif returned 0 under --network none. Run lines copied from the downloaded artifact: PARSER PREFLIGHT: PASS \u2014 33/33 adapters have parser coverage; 128 passed, 1 warning in 11.85s; DOCKER CAPTURE: PASS \u2014 34/34 cases captured; results.json has 34 entries with 0 nonzero return codes.",
+      "note": "Fixture parser coverage passes; fixture provenance: synthetic; fixture file: tests/fixtures/gleif.json. No live container run has occurred. Verified in Docker Verification run 38293763683 on commit d784850ed5d869393c63e180cfb05035c070513e (https://github.com/frostknightfrosty-lgtm/aletheia/actions/runs/38293763683): case phasegleif returned 0 under --network none. Run lines copied from the downloaded artifact: PARSER PREFLIGHT: PASS — 33/33 adapters have parser coverage; 128 passed, 1 warning in 11.85s; DOCKER CAPTURE: PASS — 34/34 cases captured; results.json has 34 entries with 0 nonzero return codes.",
       "fixture_provenance": "synthetic",
       "legal_tier": 1,
       "enabled_by_default": true,
@@ -737,7 +737,7 @@
       "network": "required",
       "last_audited": "2026-10-08T18:39:35+03:00",
       "verification_status": "verified-fixture",
-      "note": "Fixture parser coverage passes; fixture provenance: synthetic; fixture file: tests/fixtures/opencorporates.json. No live container run has occurred. Verified in Docker Verification run 38293763683 on commit d784850ed5d869393c63e180cfb05035c070513e (https://github.com/frostknightfrosty-lgtm/aletheia/actions/runs/38293763683): case phaseopencorporates returned 0 under --network none. Run lines copied from the downloaded artifact: PARSER PREFLIGHT: PASS \u2014 33/33 adapters have parser coverage; 128 passed, 1 warning in 11.85s; DOCKER CAPTURE: PASS \u2014 34/34 cases captured; results.json has 34 entries with 0 nonzero return codes.",
+      "note": "Fixture parser coverage passes; fixture provenance: synthetic; fixture file: tests/fixtures/opencorporates.json. No live container run has occurred. Verified in Docker Verification run 38293763683 on commit d784850ed5d869393c63e180cfb05035c070513e (https://github.com/frostknightfrosty-lgtm/aletheia/actions/runs/38293763683): case phaseopencorporates returned 0 under --network none. Run lines copied from the downloaded artifact: PARSER PREFLIGHT: PASS — 33/33 adapters have parser coverage; 128 passed, 1 warning in 11.85s; DOCKER CAPTURE: PASS — 34/34 cases captured; results.json has 34 entries with 0 nonzero return codes.",
       "fixture_provenance": "synthetic",
       "legal_tier": 3,
       "enabled_by_default": true,
@@ -761,7 +761,7 @@
       "network": "required",
       "last_audited": "2026-10-08T18:39:35+03:00",
       "verification_status": "verified-fixture",
-      "note": "Fixture parser coverage passes; fixture provenance: synthetic; fixture file: tests/fixtures/opensanctions.json. No live container run has occurred. Verified in Docker Verification run 38293763683 on commit d784850ed5d869393c63e180cfb05035c070513e (https://github.com/frostknightfrosty-lgtm/aletheia/actions/runs/38293763683): case phaseopensanctions returned 0 under --network none. Run lines copied from the downloaded artifact: PARSER PREFLIGHT: PASS \u2014 33/33 adapters have parser coverage; 128 passed, 1 warning in 11.85s; DOCKER CAPTURE: PASS \u2014 34/34 cases captured; results.json has 34 entries with 0 nonzero return codes.",
+      "note": "Fixture parser coverage passes; fixture provenance: synthetic; fixture file: tests/fixtures/opensanctions.json. No live container run has occurred. Verified in Docker Verification run 38293763683 on commit d784850ed5d869393c63e180cfb05035c070513e (https://github.com/frostknightfrosty-lgtm/aletheia/actions/runs/38293763683): case phaseopensanctions returned 0 under --network none. Run lines copied from the downloaded artifact: PARSER PREFLIGHT: PASS — 33/33 adapters have parser coverage; 128 passed, 1 warning in 11.85s; DOCKER CAPTURE: PASS — 34/34 cases captured; results.json has 34 entries with 0 nonzero return codes.",
       "fixture_provenance": "synthetic",
       "legal_tier": 3,
       "enabled_by_default": true,
@@ -783,7 +783,7 @@
       "network": "required",
       "last_audited": "2026-10-08T18:39:35+03:00",
       "verification_status": "verified-fixture",
-      "note": "Fixture parser coverage passes; fixture provenance: synthetic; fixture file: tests/fixtures/courtlistener.json. No live container run has occurred. Verified in Docker Verification run 38293763683 on commit d784850ed5d869393c63e180cfb05035c070513e (https://github.com/frostknightfrosty-lgtm/aletheia/actions/runs/38293763683): case phasecourtlistener returned 0 under --network none. Run lines copied from the downloaded artifact: PARSER PREFLIGHT: PASS \u2014 33/33 adapters have parser coverage; 128 passed, 1 warning in 11.85s; DOCKER CAPTURE: PASS \u2014 34/34 cases captured; results.json has 34 entries with 0 nonzero return codes.",
+      "note": "Fixture parser coverage passes; fixture provenance: synthetic; fixture file: tests/fixtures/courtlistener.json. No live container run has occurred. Verified in Docker Verification run 38293763683 on commit d784850ed5d869393c63e180cfb05035c070513e (https://github.com/frostknightfrosty-lgtm/aletheia/actions/runs/38293763683): case phasecourtlistener returned 0 under --network none. Run lines copied from the downloaded artifact: PARSER PREFLIGHT: PASS — 33/33 adapters have parser coverage; 128 passed, 1 warning in 11.85s; DOCKER CAPTURE: PASS — 34/34 cases captured; results.json has 34 entries with 0 nonzero return codes.",
       "fixture_provenance": "synthetic",
       "legal_tier": 1,
       "enabled_by_default": true,
@@ -805,7 +805,7 @@
       "network": "required",
       "last_audited": "2026-10-12T12:00:00Z",
       "verification_status": "verified-fixture",
-      "note": "Synthetic fixture parser and Docker health smoke passed in CI run 38303951248 on commit 7f06d100930fc7457774aca7112762a889e95b86 (https://github.com/frostknightfrosty-lgtm/aletheia/actions/runs/38303951248). Raw evidence: PARSER PREFLIGHT: PASS \u2014 34/34 adapters have parser coverage; 152 passed, 1 warning in 12.87s; DOCKER CAPTURE: PASS \u2014 35/35 cases captured. fixture file: tests/fixtures/ip_intelligence.json. No live API lookups have occurred.",
+      "note": "Synthetic fixture parser and Docker health smoke passed in CI run 38303951248 on commit 7f06d100930fc7457774aca7112762a889e95b86 (https://github.com/frostknightfrosty-lgtm/aletheia/actions/runs/38303951248). Raw evidence: PARSER PREFLIGHT: PASS — 34/34 adapters have parser coverage; 152 passed, 1 warning in 12.87s; DOCKER CAPTURE: PASS — 35/35 cases captured. fixture file: tests/fixtures/ip_intelligence.json. No live API lookups have occurred.",
       "fixture_provenance": "synthetic",
       "legal_tier": 1,
       "enabled_by_default": true,
@@ -958,7 +958,7 @@
           "requires_key": false
         }
       ],
-      "note": "Synthetic fixture parser tests and the Docker health smoke passed in CI run 38644757019 on commit e87777bf0ae873070c1aa9c49973a2aab0547a75 (https://github.com/frostknightfrosty-lgtm/aletheia/actions/runs/38644757019). Raw evidence copied from the artifact: PARSER PREFLIGHT: PASS \u2014 35/35 adapters have parser coverage; 180 passed, 1 warning in 17.00s; DOCKER CAPTURE: PASS \u2014 36/36 cases captured. results.json has 36 entries with 0 nonzero return codes and 36 stdout/stderr pairs; SHA-256 AF6DEC8F9F8E005F296A2254FB28C254F29F2AC5100C9E73CA1E2591687F970C. Case phase9-gov-records-us returned 0 with stdout ok under --network none. fixture file: tests/fixtures/government_records_us.json. No live API lookups have occurred."
+      "note": "Synthetic fixture parser tests and the Docker health smoke passed in CI run 38644757019 on commit e87777bf0ae873070c1aa9c49973a2aab0547a75 (https://github.com/frostknightfrosty-lgtm/aletheia/actions/runs/38644757019). Raw evidence copied from the artifact: PARSER PREFLIGHT: PASS — 35/35 adapters have parser coverage; 180 passed, 1 warning in 17.00s; DOCKER CAPTURE: PASS — 36/36 cases captured. results.json has 36 entries with 0 nonzero return codes and 36 stdout/stderr pairs; SHA-256 AF6DEC8F9F8E005F296A2254FB28C254F29F2AC5100C9E73CA1E2591687F970C. Case phase9-gov-records-us returned 0 with stdout ok under --network none. fixture file: tests/fixtures/government_records_us.json. No live API lookups have occurred."
     },
     {
       "name": "corporate_registry",
@@ -1018,7 +1018,7 @@
           "requires_key": false
         }
       ],
-      "note": "Synthetic fixture parser tests and the Docker health smoke passed in CI run 38647832837 on commit e74e8b4b1b15ef71475a36caeeda9244842ac936 (https://github.com/frostknightfrosty-lgtm/aletheia/actions/runs/38647832837). Raw evidence copied from the artifact: PARSER PREFLIGHT: PASS \u2014 36/36 adapters have parser coverage; 210 passed, 1 warning in 23.25s; DOCKER CAPTURE: PASS \u2014 37/37 cases captured. results.json has 37 entries with 0 nonzero return codes and 37 stdout/stderr pairs; SHA-256 4AF2E893CBFEB196180CC2380A88E51AF318FAAEE96EC4D095C5A7A7B9A0BDFD. Case phase9-corp-registry returned 0 with stdout ok under --network none. KVK Zoeken is a paid subscription excluding private use and is skipped unless KVK_API_KEY is set; INPI RNE, ASIC and CIPC are unsupported and always reported as skipped with their documented reason. fixture file: tests/fixtures/corporate_registry.json. No live API lookups have occurred."
+      "note": "Synthetic fixture parser tests and the Docker health smoke passed in CI run 38647832837 on commit e74e8b4b1b15ef71475a36caeeda9244842ac936 (https://github.com/frostknightfrosty-lgtm/aletheia/actions/runs/38647832837). Raw evidence copied from the artifact: PARSER PREFLIGHT: PASS — 36/36 adapters have parser coverage; 210 passed, 1 warning in 23.25s; DOCKER CAPTURE: PASS — 37/37 cases captured. results.json has 37 entries with 0 nonzero return codes and 37 stdout/stderr pairs; SHA-256 4AF2E893CBFEB196180CC2380A88E51AF318FAAEE96EC4D095C5A7A7B9A0BDFD. Case phase9-corp-registry returned 0 with stdout ok under --network none. KVK Zoeken is a paid subscription excluding private use and is skipped unless KVK_API_KEY is set; INPI RNE, ASIC and CIPC are unsupported and always reported as skipped with their documented reason. fixture file: tests/fixtures/corporate_registry.json. No live API lookups have occurred."
     },
     {
       "name": "sanctions_enforcement_watchlists",
@@ -1056,7 +1056,7 @@
           "requires_key": false
         }
       ],
-      "note": "Synthetic fixture parser tests and the Docker health smoke passed in CI run 38652416329 on commit 43bb9449d8667841a54bc5a5f6cf9b6f8cf362d8 (https://github.com/frostknightfrosty-lgtm/aletheia/actions/runs/38652416329). Raw evidence copied from the artifact: PARSER PREFLIGHT: PASS \u2014 37/37 adapters have parser coverage; 245 passed, 1 warning in 14.26s; DOCKER CAPTURE: PASS \u2014 38/38 cases captured. results.json has 38 entries with 0 nonzero return codes and 38 stdout/stderr pairs; SHA-256 53253F65451032E061425E66F3FA37A83977B6C0450F161E80CB41D1D6FAFA02. Case phase9-sanctions-watchlists returned 0 with stdout ok under --network none. This adapter covers only uk-sanctions-list, swiss-seco and eu-consolidated-sanctions; finra-brokercheck, fed-enforcement and occ-enforcement already live in government_records_us. fixture file: tests/fixtures/sanctions_enforcement_watchlists.json. No live API lookups have occurred. The three published bulk artefacts were fetched during development to confirm their documented XML shapes (HTTP 200, text/xml); no investigative query was made against any subject."
+      "note": "Synthetic fixture parser tests and the Docker health smoke passed in CI run 38652416329 on commit 43bb9449d8667841a54bc5a5f6cf9b6f8cf362d8 (https://github.com/frostknightfrosty-lgtm/aletheia/actions/runs/38652416329). Raw evidence copied from the artifact: PARSER PREFLIGHT: PASS — 37/37 adapters have parser coverage; 245 passed, 1 warning in 14.26s; DOCKER CAPTURE: PASS — 38/38 cases captured. results.json has 38 entries with 0 nonzero return codes and 38 stdout/stderr pairs; SHA-256 53253F65451032E061425E66F3FA37A83977B6C0450F161E80CB41D1D6FAFA02. Case phase9-sanctions-watchlists returned 0 with stdout ok under --network none. This adapter covers only uk-sanctions-list, swiss-seco and eu-consolidated-sanctions; finra-brokercheck, fed-enforcement and occ-enforcement already live in government_records_us. fixture file: tests/fixtures/sanctions_enforcement_watchlists.json. No live API lookups have occurred. The three published bulk artefacts were fetched during development to confirm their documented XML shapes (HTTP 200, text/xml); no investigative query was made against any subject."
     },
     {
       "name": "academic_search",
@@ -1106,7 +1106,7 @@
           "requires_key": false
         }
       ],
-      "note": "Synthetic fixture parser tests and the Docker health smoke passed in CI run 38658742093 on commit 9a24be885d88e740f078b6bdf5c62944f5002024 (https://github.com/frostknightfrosty-lgtm/aletheia/actions/runs/38658742093). Raw evidence copied from the artifact: PARSER PREFLIGHT: PASS \u2014 38/38 adapters have parser coverage; 292 passed, 1 warning in 15.83s; DOCKER CAPTURE: PASS \u2014 39/39 cases captured. results.json has 39 entries with 0 nonzero return codes and 39 stdout/stderr pairs; SHA-256 1C91399BD3271A49AA69437E683921449EA625BCC290D29A416FC8EEF4946B60. Case phase9-academic-search returned 0 with stdout ok under --network none. Six sub-sources are implemented: openalex, crossref, semantic-scholar, arxiv, core and openaire. unpaywall was dropped because its documented search endpoint is retired and returns 410 Gone and its only live endpoint is DOI-keyed; the runner reports it once per run as skipped with that reason. fixture file: tests/fixtures/academic_search.json. No live API lookups have occurred."
+      "note": "Synthetic fixture parser tests and the Docker health smoke passed in CI run 38658742093 on commit 9a24be885d88e740f078b6bdf5c62944f5002024 (https://github.com/frostknightfrosty-lgtm/aletheia/actions/runs/38658742093). Raw evidence copied from the artifact: PARSER PREFLIGHT: PASS — 38/38 adapters have parser coverage; 292 passed, 1 warning in 15.83s; DOCKER CAPTURE: PASS — 39/39 cases captured. results.json has 39 entries with 0 nonzero return codes and 39 stdout/stderr pairs; SHA-256 1C91399BD3271A49AA69437E683921449EA625BCC290D29A416FC8EEF4946B60. Case phase9-academic-search returned 0 with stdout ok under --network none. Six sub-sources are implemented: openalex, crossref, semantic-scholar, arxiv, core and openaire. unpaywall was dropped because its documented search endpoint is retired and returns 410 Gone and its only live endpoint is DOI-keyed; the runner reports it once per run as skipped with that reason. fixture file: tests/fixtures/academic_search.json. No live API lookups have occurred."
     },
     {
       "name": "ssl_tls",
@@ -1151,7 +1151,7 @@
           "requires_key": false
         }
       ],
-      "note": "Synthetic fixture parser tests and the Docker health smoke passed in CI run 38791430700 on commit a7c394d (https://github.com/frostknightfrosty-lgtm/aletheia/actions/runs/38791430700). Raw evidence copied from the artifact: PARSER PREFLIGHT: PASS \u2014 39/39 adapters have parser coverage; 343 passed, 1 warning in 24.95s; DOCKER CAPTURE: PASS \u2014 40/40 cases captured. results.json has 40 entries with 0 nonzero return codes and 40 stdout/stderr pairs; SHA-256 5134BD59E5E6AAC2727088582414721A4308C01EF44E82A63221C1FD6B2964F6. Case phase9-ssl-tls returned 0 with stdout ok under --network none, and its --health inventory confirms the image contains /usr/bin/testssl, /go/bin/certgraph, /usr/bin/sslscan and /go/bin/tlsx with no subprocess started and no network used. Two earlier runs of this adapter failed honestly and were fixed rather than retried blindly: run 38669069783 failed the image build with E: Version '2.0.7-1' for 'sslscan' was not found, so the exact apt pins were replaced with unpinned installs plus a dpkg-query version echo (commit 7b0ccbc); run 38789002369 failed one test because query_testssl and query_sslscan returned the artefact parse error instead of the tool exit code, so both now check code != 0 first (commit a7c394d). cipherscan is a documented skip: it publishes no releases or tags, so no pinned verifiable artefact exists. fixture file: tests/fixtures/ssl_tls.json. No live API lookups have occurred."
+      "note": "Synthetic fixture parser tests and the Docker health smoke passed in CI run 38791430700 on commit a7c394d (https://github.com/frostknightfrosty-lgtm/aletheia/actions/runs/38791430700). Raw evidence copied from the artifact: PARSER PREFLIGHT: PASS — 39/39 adapters have parser coverage; 343 passed, 1 warning in 24.95s; DOCKER CAPTURE: PASS — 40/40 cases captured. results.json has 40 entries with 0 nonzero return codes and 40 stdout/stderr pairs; SHA-256 5134BD59E5E6AAC2727088582414721A4308C01EF44E82A63221C1FD6B2964F6. Case phase9-ssl-tls returned 0 with stdout ok under --network none, and its --health inventory confirms the image contains /usr/bin/testssl, /go/bin/certgraph, /usr/bin/sslscan and /go/bin/tlsx with no subprocess started and no network used. Two earlier runs of this adapter failed honestly and were fixed rather than retried blindly: run 38669069783 failed the image build with E: Version '2.0.7-1' for 'sslscan' was not found, so the exact apt pins were replaced with unpinned installs plus a dpkg-query version echo (commit 7b0ccbc); run 38789002369 failed one test because query_testssl and query_sslscan returned the artefact parse error instead of the tool exit code, so both now check code != 0 first (commit a7c394d). cipherscan is a documented skip: it publishes no releases or tags, so no pinned verifiable artefact exists. fixture file: tests/fixtures/ssl_tls.json. No live API lookups have occurred."
     },
     {
       "name": "crypto_blockchain",
@@ -1201,7 +1201,7 @@
           "key_cost": "free"
         }
       ],
-      "note": "Synthetic fixture parser tests and the Docker health smoke passed in CI run 38797483163 on commit 9f53012d866c82c71ebd1a278e72f260181be099 (https://github.com/frostknightfrosty-lgtm/aletheia/actions/runs/38797483163). Raw evidence copied from the artifact: PARSER PREFLIGHT: PASS \u2014 40/40 adapters have parser coverage; 383 passed, 1 warning in 16.35s; DOCKER CAPTURE: PASS \u2014 41/41 cases captured. results.json has 41 entries with 0 nonzero return codes and 41 stdout/stderr pairs; SHA-256 627BB124FA5203605A4558C43D6C48B6831355EDF8B128D8EBEF2AED7F1686CF. Case phase9-crypto-blockchain returned 0 with stdout ok under --network none. Six sub-sources are implemented: mempool-space, blockstream-esplora, blockchair, etherscan-v2, blockcypher and chainabuse. crypttrace is dropped because its own PyPI page and README document only a terminal CLI and a local web app, with no documented importable Python API; the runner reports it once per run as skipped with that reason. fixture file: tests/fixtures/crypto_blockchain.json. No live API lookups have occurred."
+      "note": "Synthetic fixture parser tests and the Docker health smoke passed in CI run 38797483163 on commit 9f53012d866c82c71ebd1a278e72f260181be099 (https://github.com/frostknightfrosty-lgtm/aletheia/actions/runs/38797483163). Raw evidence copied from the artifact: PARSER PREFLIGHT: PASS — 40/40 adapters have parser coverage; 383 passed, 1 warning in 16.35s; DOCKER CAPTURE: PASS — 41/41 cases captured. results.json has 41 entries with 0 nonzero return codes and 41 stdout/stderr pairs; SHA-256 627BB124FA5203605A4558C43D6C48B6831355EDF8B128D8EBEF2AED7F1686CF. Case phase9-crypto-blockchain returned 0 with stdout ok under --network none. Six sub-sources are implemented: mempool-space, blockstream-esplora, blockchair, etherscan-v2, blockcypher and chainabuse. crypttrace is dropped because its own PyPI page and README document only a terminal CLI and a local web app, with no documented importable Python API; the runner reports it once per run as skipped with that reason. fixture file: tests/fixtures/crypto_blockchain.json. No live API lookups have occurred."
     },
     {
       "name": "patents_trademarks",
@@ -1245,7 +1245,7 @@
           "key_cost": "free"
         }
       ],
-      "note": "Synthetic fixture parser tests and the Docker health smoke passed in CI run 38801355462 on commit 0ae35e49e7cc146fa432fe867432664861079441 (https://github.com/frostknightfrosty-lgtm/aletheia/actions/runs/38801355462). Raw evidence copied from the artifact: PARSER PREFLIGHT: PASS \u2014 41/41 adapters have parser coverage; 422 passed, 1 warning in 19.09s; DOCKER CAPTURE: PASS \u2014 42/42 cases captured. results.json has 42 entries with 0 nonzero return codes and 42 stdout/stderr pairs; SHA-256 3911D3AB11896E516A06B7650BA3E4F65880E2FD9B4E14CD72A6871ADF6E7F80. Case phase9-patents-trademarks returned 0 with stdout ok under --network none. Four sub-sources are implemented: uspto-open-data, uspto-patent-assignment, uspto-tsdr and epo-ops. Three candidates are dropped and reported once per run as audited skips: patentsview (its documented API host no longer resolves), google-patents-bigquery (needs a GCP project, service-account credentials and a third-party client library) and euipo-esearch-plus (account plus sandbox and production approval rather than a free key). fixture file: tests/fixtures/patents_trademarks.json. No live API lookups have occurred."
+      "note": "Synthetic fixture parser tests and the Docker health smoke passed in CI run 38801355462 on commit 0ae35e49e7cc146fa432fe867432664861079441 (https://github.com/frostknightfrosty-lgtm/aletheia/actions/runs/38801355462). Raw evidence copied from the artifact: PARSER PREFLIGHT: PASS — 41/41 adapters have parser coverage; 422 passed, 1 warning in 19.09s; DOCKER CAPTURE: PASS — 42/42 cases captured. results.json has 42 entries with 0 nonzero return codes and 42 stdout/stderr pairs; SHA-256 3911D3AB11896E516A06B7650BA3E4F65880E2FD9B4E14CD72A6871ADF6E7F80. Case phase9-patents-trademarks returned 0 with stdout ok under --network none. Four sub-sources are implemented: uspto-open-data, uspto-patent-assignment, uspto-tsdr and epo-ops. Three candidates are dropped and reported once per run as audited skips: patentsview (its documented API host no longer resolves), google-patents-bigquery (needs a GCP project, service-account credentials and a third-party client library) and euipo-esearch-plus (account plus sandbox and production approval rather than a free key). fixture file: tests/fixtures/patents_trademarks.json. No live API lookups have occurred."
     },
     {
       "name": "email_auth",
@@ -1277,7 +1277,7 @@
           "requires_key": false
         }
       ],
-      "note": "Synthetic fixture parser tests and the Docker health smoke passed in CI run 38803797734 on commit 9b949c727cad61425fe2cd940e5837b87dae9762 (https://github.com/frostknightfrosty-lgtm/aletheia/actions/runs/38803797734). Raw evidence copied from the artifact: PARSER PREFLIGHT: PASS \u2014 42/42 adapters have parser coverage; 455 passed, 1 warning in 20.21s; DOCKER CAPTURE: PASS \u2014 43/43 cases captured. results.json has 43 entries with 0 nonzero return codes and 43 stdout/stderr pairs; SHA-256 02890FB948734A81E51AA5B0B5BBF2B93D2D4A7F7C3A58A36659749142946C4C. Case phase9-email-auth returned 0 with stdout ok under --network none, and its --health inventory confirms scan-mx is usable as an http_api source and that the checkdmarc library imported with package_version 6.0.4, proving the image pin installed. No candidate was dropped. fixture file: tests/fixtures/email_auth.json. No live API lookups have occurred."
+      "note": "Synthetic fixture parser tests and the Docker health smoke passed in CI run 38803797734 on commit 9b949c727cad61425fe2cd940e5837b87dae9762 (https://github.com/frostknightfrosty-lgtm/aletheia/actions/runs/38803797734). Raw evidence copied from the artifact: PARSER PREFLIGHT: PASS — 42/42 adapters have parser coverage; 455 passed, 1 warning in 20.21s; DOCKER CAPTURE: PASS — 43/43 cases captured. results.json has 43 entries with 0 nonzero return codes and 43 stdout/stderr pairs; SHA-256 02890FB948734A81E51AA5B0B5BBF2B93D2D4A7F7C3A58A36659749142946C4C. Case phase9-email-auth returned 0 with stdout ok under --network none, and its --health inventory confirms scan-mx is usable as an http_api source and that the checkdmarc library imported with package_version 6.0.4, proving the image pin installed. No candidate was dropped. fixture file: tests/fixtures/email_auth.json. No live API lookups have occurred."
     },
     {
       "name": "code_search",
@@ -1306,7 +1306,7 @@
           "key_cost": "free"
         }
       ],
-      "note": "Synthetic fixture parser tests and the Docker health smoke passed in CI run 38811234205 on commit f59458fa0a9f34dde19690bdd8dacf7686f80223 (https://github.com/frostknightfrosty-lgtm/aletheia/actions/runs/38811234205). Raw evidence copied from the artifact: PARSER PREFLIGHT: PASS \u2014 43/43 adapters have parser coverage; 484 passed, 1 warning in 20.60s; DOCKER CAPTURE: PASS \u2014 44/44 cases captured. results.json has 44 entries with 0 nonzero return codes and 44 stdout/stderr pairs; SHA-256 9E5B842F42F7545DA089B7F92154161C1A1D18F8042C08276D81477AE61F5601. Case phase9-code-search returned 0 with stdout ok under --network none. One sub-source is implemented, debian-code-search; two candidates are dropped and reported once per run as audited skips: gitlab-search (every GitLab Search API call requires authentication) and publicwww (paid plan required). fixture file: tests/fixtures/code_search.json. No live API lookups have occurred."
+      "note": "Synthetic fixture parser tests and the Docker health smoke passed in CI run 38811234205 on commit f59458fa0a9f34dde19690bdd8dacf7686f80223 (https://github.com/frostknightfrosty-lgtm/aletheia/actions/runs/38811234205). Raw evidence copied from the artifact: PARSER PREFLIGHT: PASS — 43/43 adapters have parser coverage; 484 passed, 1 warning in 20.60s; DOCKER CAPTURE: PASS — 44/44 cases captured. results.json has 44 entries with 0 nonzero return codes and 44 stdout/stderr pairs; SHA-256 9E5B842F42F7545DA089B7F92154161C1A1D18F8042C08276D81477AE61F5601. Case phase9-code-search returned 0 with stdout ok under --network none. One sub-source is implemented, debian-code-search; two candidates are dropped and reported once per run as audited skips: gitlab-search (every GitLab Search API call requires authentication) and publicwww (paid plan required). fixture file: tests/fixtures/code_search.json. No live API lookups have occurred."
     },
     {
       "name": "search_engines",
@@ -1338,7 +1338,7 @@
           "requires_key": false
         }
       ],
-      "note": "Synthetic fixture parser tests and the Docker health smoke passed in CI run 38813318506 on commit 316172b (https://github.com/frostknightfrosty-lgtm/aletheia/actions/runs/38813318506). Raw evidence copied from the artifact: PARSER PREFLIGHT: PASS \u2014 44/44 adapters have parser coverage; 518 passed, 1 warning in 15.38s; DOCKER CAPTURE: PASS \u2014 45/45 cases captured. results.json has 45 entries with 0 nonzero return codes and 45 stdout/stderr pairs; SHA-256 536C538DE9EA54A2836B40BA79D120F89ADB7D033E05028A7BFCEBB875885049. Case phase9-search-engines returned 0 with stdout ok under --network none. Two sub-sources are implemented: marginalia and common-crawl-index. Two candidates are dropped and reported once per run as audited skips: searxng (a self-hosted metasearch engine, not a public API) and google-custom-search (Google states the Custom Search JSON API is closed to new customers). fixture file: tests/fixtures/search_engines.json. No live API lookups have occurred."
+      "note": "Synthetic fixture parser tests and the Docker health smoke passed in CI run 38813318506 on commit 316172b (https://github.com/frostknightfrosty-lgtm/aletheia/actions/runs/38813318506). Raw evidence copied from the artifact: PARSER PREFLIGHT: PASS — 44/44 adapters have parser coverage; 518 passed, 1 warning in 15.38s; DOCKER CAPTURE: PASS — 45/45 cases captured. results.json has 45 entries with 0 nonzero return codes and 45 stdout/stderr pairs; SHA-256 536C538DE9EA54A2836B40BA79D120F89ADB7D033E05028A7BFCEBB875885049. Case phase9-search-engines returned 0 with stdout ok under --network none. Two sub-sources are implemented: marginalia and common-crawl-index. Two candidates are dropped and reported once per run as audited skips: searxng (a self-hosted metasearch engine, not a public API) and google-custom-search (Google states the Custom Search JSON API is closed to new customers). fixture file: tests/fixtures/search_engines.json. No live API lookups have occurred."
     },
     {
       "name": "geolocation_image",
@@ -1356,7 +1356,7 @@
       "legal_notes": "Implements one bounded request each to Mapillary, Nominatim, and Copernicus STAC catalogue metadata, plus local DFIT metadata and Steg Analyzer metadata/ELA/histogram only. Mapillary uses a free client token if configured; it is reported as skipped when absent. Copernicus is metadata-only and never downloads assets. The seven candidates PicImageSearch, tracelines, ShadowFinder, pybdshadow, youtube-geofind, GeoLocator, and Betaface are explicit non-querying skips with their reasons and official source citations recorded in docker/geolocation_image/RATE_LIMITS.md and this manifest note. No extraction, cracking, credential parsing, or authenticated access is performed.",
       "network": "required",
       "last_audited": "2026-10-16T00:00:00Z",
-      "verification_status": "unverified-fixture",
+      "verification_status": "verified-fixture",
       "fixture_provenance": "synthetic",
       "legal_tier": 3,
       "enabled_by_default": true,
@@ -1386,7 +1386,7 @@
           "requires_key": false
         }
       ],
-      "note": "Initial CI verification pending. Dropped PicImageSearch because its GitHub project documents an aggregator over third-party engines without one bounded downstream request contract (https://github.com/kitUIN/PicImageSearch); dropped tracelines because its PyPI documentation describes an operator-deployed coverage proxy that overlaps direct Mapillary (https://pypi.org/project/tracelines/0.2.0/); dropped ShadowFinder because its Bellingcat documentation requires object height and shadow-length or sun-altitude inputs plus date/time (https://github.com/bellingcat/ShadowFinder); dropped pybdshadow because its official docs require building geometry and a datetime (https://pybdshadow.readthedocs.io/en/stable/); dropped youtube-geofind because its documented YouTube Data API search endpoint is already queried by the existing youtube-api adapter (https://developers.google.com/youtube/v3/docs/search/list); dropped GeoLocator because the reviewed upstream implementation requires a prebuilt panorama index/model setup rather than a bounded single-image API (https://github.com/Developer-Mike/geolocator); dropped Betaface because its product page states the public service is temporarily down and gives no current usable request contract (https://www.betaface.com/products.html). fixture file: tests/fixtures/geolocation_image.json. No live API lookups have occurred."
+      "note": "Synthetic fixture parser tests and Docker health smoke passed in CI run 38882456490 on commit bcbdee911c6527d4450ad88bae000cdae4aa8485 (https://github.com/frostknightfrosty-lgtm/aletheia/actions/runs/38882456490). Raw evidence copied from the downloaded artifact: PARSER PREFLIGHT: PASS — 45/45 adapters have parser coverage; 525 passed, 1 warning in 21.93s; DOCKER CAPTURE: PASS — 46/46 cases captured. results.json has 46 entries with 0 nonzero return codes and 46 stdout/stderr pairs; SHA-256 308EDE70B65BA1D55D72281BABE7A2ECDA88459DCBD94861F4B870B15EA57E3B. Case phase9-geolocation-image returned 0 with stdout ok under --network none. Five sub-sources implemented: mapillary, nominatim, copernicus-stac, dfit and steg-analyzer. Seven candidates were dropped and documented with citations: Dropped PicImageSearch because its GitHub project documents an aggregator over third-party engines without one bounded downstream request contract (https://github.com/kitUIN/PicImageSearch); dropped tracelines because its PyPI documentation describes an operator-deployed coverage proxy that overlaps direct Mapillary (https://pypi.org/project/tracelines/0.2.0/); dropped ShadowFinder because its Bellingcat documentation requires object height and shadow-length or sun-altitude inputs plus date/time (https://github.com/bellingcat/ShadowFinder); dropped pybdshadow because its official docs require building geometry and a datetime (https://pybdshadow.readthedocs.io/en/stable/); dropped youtube-geofind because its documented YouTube Data API search endpoint is already queried by the existing youtube-api adapter (https://developers.google.com/youtube/v3/docs/search/list); dropped GeoLocator because the reviewed upstream implementation requires a prebuilt panorama index/model setup rather than a bounded single-image API (https://github.com/Developer-Mike/geolocator); dropped Betaface because its product page states the public service is temporarily down and gives no current usable request contract (https://www.betaface.com/products.html). fixture file: tests/fixtures/geolocation_image.json. No live API lookups have occurred."
     }
   ],
   "phase_1_scope": {
