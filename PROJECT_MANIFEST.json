@@ -1589,6 +1589,25 @@
         }
       ],
       "note": "Synthetic fixture and Docker health smoke verified in Docker Verification run 38952489236 on commit 2fc9933d375917c133fc4af44db26dc07c2949d4 (https://github.com/frostknightfrosty-lgtm/aletheia/actions/runs/38952489236). Raw artifact evidence: PARSER PREFLIGHT: PASS — 49/49 adapters have parser coverage; 560 passed, 1 warning in 16.17s; DOCKER CAPTURE: PASS — 50/50 cases captured. results.json contains 50 entries with 0 nonzero return codes; phase9-leak-checkers returned 0 with stdout ok under --network none. fixture file: tests/fixtures/leak_checkers.json. No live source lookups occurred. Two implemented sources: leakix and grayhatwarfare; three candidates are documented skips in docker/leak_checkers/RATE_LIMITS.md."
+    },
+    {
+      "name": "egress_proxy",
+      "upstream": "https://github.com/frostknightfrosty-lgtm/aletheia/tree/main/docker/egress_proxy",
+      "license": "Project-internal infrastructure component (Aletheia repository); no third-party code bundled.",
+      "version_pin": "v1",
+      "invocation": "Infrastructure container: forward HTTP/HTTPS proxy (aletheia/egress-proxy:v1); not an adapter",
+      "input_types": [],
+      "output_schema": "JSONL request log with fields adapter, method, host, path, status, bytes, purpose_id, request_id, timestamp",
+      "legal_notes": "Infrastructure component, not a source adapter. It records adapter egress metadata only (adapter name, method, host, path, status, byte count, purpose id, request id, timestamp) into a JSONL file that is appended to the run's hash-chained audit log. It stores no request or response bodies and no credentials. It provides the single kill switch and the per-adapter token-bucket rate limit for outbound adapter traffic; adapters are expected to run without a direct route to the internet so that a proxy outage is fail-closed at the network layer. The chain it feeds is tamper-evident relative to a preserved run manifest, not a digital signature, and is not a legal-admissibility guarantee.",
+      "network": "required",
+      "last_audited": "2026-10-16T00:00:00Z",
+      "verification_status": "unverified-fixture",
+      "legal_tier": 1,
+      "enabled_by_default": true,
+      "disabled_reason": null,
+      "batch_grouping": null,
+      "component_type": "infrastructure",
+      "note": "Standalone egress-proxy component (not an adapter; not yet wired into every adapter Dockerfile). Local unit tests cover the request-log schema parser, the token-bucket rate limiter and its persistence, the kill switch, the proxy lifecycle/env helpers, and the audit-chain writer. Container health is verified only in GitHub Actions; this status stays unverified-fixture until a CI artifact is copied."
     }
   ],
   "phase_1_scope": {

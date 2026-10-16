@@ -52,3 +52,4 @@ docker build -f docker/transport_asset_registry/Dockerfile -t aletheia/transport
 docker build -f docker/social_profile/Dockerfile -t aletheia/social-profile:v1 docker/social_profile
 docker build -f docker/social_username/Dockerfile -t aletheia/social-username:v1 docker/social_username
 docker build -f docker/leak_checkers/Dockerfile -t aletheia/leak-checkers:v1 docker/leak_checkers
+docker build -f docker/egress_proxy/Dockerfile -t aletheia/egress-proxy:v1 docker/egress_proxy

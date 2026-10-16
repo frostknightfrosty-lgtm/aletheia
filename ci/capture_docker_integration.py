@@ -58,6 +58,7 @@ CASES = [
     ("phase9-social-profile", "aletheia/social-profile:v1", ["--health"]),
     ("phase9-social-username", "aletheia/social-username:v1", ["--health"]),
     ("phase9-leak-checkers", "aletheia/leak-checkers:v1", ["--health"]),
+    ("phase11-egress-proxy", "aletheia/egress-proxy:v1", ["--health"]),
 ]
 
 def main() -> int:
