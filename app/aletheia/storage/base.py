@@ -30,15 +30,24 @@ def utc_now_iso() -> str:
 
 @dataclass(frozen=True)
 class Migration:
-    """One ordered, checksum-verified schema migration for a backend."""
+    """One ordered, checksum-verified schema migration for a backend.
+
+    ``statement`` is a single statement or a sequence of statements to apply in
+    order (Postgres DDL, Cypher constraints, ...).
+    """
 
     version: int
     name: str
-    statement: str
+    statement: str | tuple[str, ...]
+
+    @property
+    def statements(self) -> tuple[str, ...]:
+        return (self.statement,) if isinstance(self.statement, str) else tuple(self.statement)
 
     @property
     def checksum(self) -> str:
-        payload = f"{self.version}\x00{self.name}\x00{self.statement}".encode("utf-8")
+        joined = "\x00".join(self.statements)
+        payload = f"{self.version}\x00{self.name}\x00{joined}".encode("utf-8")
         return hashlib.sha256(payload).hexdigest()
 
 

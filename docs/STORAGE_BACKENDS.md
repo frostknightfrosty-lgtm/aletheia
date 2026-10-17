@@ -113,10 +113,12 @@ shared by two callers so they cannot drift:
   suite instead of skipping.
 * `ci/storage_conformance.py` runs the contract against the file store plus
   every configured service and writes `ci-artifacts/storage-conformance.json`.
+  CI invokes it with `--require-all`, so a backend whose service never started
+  makes the step fail instead of being quietly reported as unconfigured.
 
-`.github/workflows/docker-verification.yml` starts PostgreSQL, Redis, Neo4j,
-Elasticsearch, and an S3-protocol server, exports the DSNs, and runs both the
-suite and the evidence script.
+`.github/workflows/docker-verification.yml` frees space for the service images,
+starts PostgreSQL, Redis, Neo4j, Elasticsearch, and an S3-protocol server,
+exports the DSNs, and runs both the suite and the evidence script.
 
 ## Honest limits
 

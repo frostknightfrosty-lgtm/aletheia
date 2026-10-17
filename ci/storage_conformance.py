@@ -16,19 +16,19 @@ from __future__ import annotations
 
 import argparse
 import json
-import os
 import sys
 import tempfile
 from pathlib import Path
+from typing import Callable
 
 # Make ``aletheia`` importable when run from the repo root without installation.
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "app"))
 
 from aletheia.storage import (  # noqa: E402
     BACKENDS,
-    ENV_VARS,
     FILE_BACKEND,
     NETWORKED_BACKENDS,
+    configured_backends,
     open_backend,
 )
 from aletheia.storage.conformance import conform  # noqa: E402
@@ -55,29 +55,51 @@ def _run_backend(name: str, target: str) -> dict:
     return result
 
 
-def build_report() -> dict:
+def build_report(
+    *,
+    require_all: bool = False,
+    configured: dict[str, str] | None = None,
+    runner: Callable[[str, str], dict] | None = None,
+) -> dict:
+    """Run the contract against the file store and every configured backend.
+
+    ``require_all`` turns an unconfigured backend into a failure. CI passes it,
+    so a service that never started can never be reported as a pass; a developer
+    machine without the services keeps the lenient default.
+    """
+    configured = configured_backends() if configured is None else configured
+    runner = runner or _run_backend
     results: list[dict] = []
     unconfigured: list[str] = []
+    problems: list[str] = []
 
     with tempfile.TemporaryDirectory(prefix="aletheia-storage-") as tmp:
-        file_result = _run_backend(FILE_BACKEND, str(Path(tmp) / "graphs"))
+        file_result = runner(FILE_BACKEND, str(Path(tmp) / "graphs"))
         file_result["configured"] = True
         results.append(file_result)
 
     for name in NETWORKED_BACKENDS:
-        value = os.environ.get(ENV_VARS[name])
+        value = configured.get(name)
         if not value:
             unconfigured.append(name)
             continue
-        result = _run_backend(name, value)
+        result = runner(name, value)
         result["configured"] = True
         results.append(result)
 
-    configured = [row["backend"] for row in results]
+    if require_all and unconfigured:
+        problems.append("required backends were not configured: " + ", ".join(unconfigured))
+    failed = [row["backend"] for row in results if not row.get("ok")]
+    if failed:
+        problems.append("backends failed conformance: " + ", ".join(failed))
+
+    configured_names = [row["backend"] for row in results]
     passing = [row["backend"] for row in results if row.get("ok")]
     return {
-        "ok": all(row.get("ok") for row in results),
-        "configured": configured,
+        "ok": not problems,
+        "problems": problems,
+        "required_all": require_all,
+        "configured": configured_names,
         "unconfigured": unconfigured,
         "passing": passing,
         "backends": results,
@@ -89,9 +111,14 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--json", action="store_true", help="print the full JSON report on stdout")
     parser.add_argument("--output", default=DEFAULT_OUTPUT, help="path for the JSON report")
+    parser.add_argument(
+        "--require-all",
+        action="store_true",
+        help="fail when any networked backend is unconfigured (use this in CI)",
+    )
     args = parser.parse_args()
 
-    report = build_report()
+    report = build_report(require_all=args.require_all)
 
     output = Path(args.output)
     output.parent.mkdir(parents=True, exist_ok=True)
@@ -102,6 +129,8 @@ def main() -> int:
     print(f"STORAGE CONFORMANCE: {verdict} \u2014 {passed}/{total} backends conform", file=sys.stderr)
     if report["unconfigured"]:
         print(f"unconfigured (skipped): {', '.join(report['unconfigured'])}", file=sys.stderr)
+    for problem in report["problems"]:
+        print(f"  - {problem}", file=sys.stderr)
     print(f"report: {output}", file=sys.stderr)
 
     if args.json:

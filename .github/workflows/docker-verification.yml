@@ -40,6 +40,30 @@ jobs:
           docker --version | tee docker-runtime.txt
           docker info | tee -a docker-runtime.txt
 
+      - name: Free disk space for the storage service images
+        run: |
+          set -euo pipefail
+          mkdir -p ci-artifacts
+          {
+            echo "--- disk before ---"
+            df -h /
+          } | tee ci-artifacts/disk-space.txt
+          # The job builds every Aletheia adapter image, several of which are
+          # large (PyTorch-backed). The storage service images add roughly 3 GB,
+          # so reclaim the preinstalled SDKs the job never uses.
+          sudo rm -rf \
+            /usr/share/dotnet \
+            /usr/local/lib/android \
+            /opt/ghc \
+            /usr/local/share/boost \
+            /usr/share/swift \
+            /opt/hostedtoolcache/CodeQL
+          docker image prune -f
+          {
+            echo "--- disk after ---"
+            df -h /
+          } | tee -a ci-artifacts/disk-space.txt
+
       - name: Build every pinned Aletheia image
         run: |
           set -euo pipefail
@@ -63,22 +87,25 @@ jobs:
         run: |
           set -euo pipefail
           sudo sysctl -w vm.max_map_count=262144
+          # Published on loopback with non-default host ports: GitHub-hosted
+          # runners ship services that may already own 5432/6379/9200.
           docker run -d --name aletheia-postgres \
             -e POSTGRES_PASSWORD=aletheia -e POSTGRES_USER=aletheia -e POSTGRES_DB=aletheia \
-            -p 5432:5432 postgres:17-alpine
-          docker run -d --name aletheia-redis -p 6379:6379 redis:7-alpine
+            -p 127.0.0.1:15432:5432 postgres:17-alpine
+          docker run -d --name aletheia-redis -p 127.0.0.1:16379:6379 redis:7-alpine
           docker run -d --name aletheia-neo4j \
-            -e NEO4J_AUTH=neo4j/aletheia1234 -p 7687:7687 -p 7474:7474 neo4j:5-community
+            -e NEO4J_AUTH=neo4j/aletheia1234 -p 127.0.0.1:17687:7687 -p 127.0.0.1:17474:7474 neo4j:5-community
           docker run -d --name aletheia-elasticsearch \
             -e discovery.type=single-node -e xpack.security.enabled=false \
-            -e ES_JAVA_OPTS="-Xms512m -Xmx512m" -p 9200:9200 elasticsearch:8.19.23
-          docker run -d --name aletheia-s3 -p 9090:9090 adobe/s3mock:5.2.3
+            -e ES_JAVA_OPTS="-Xms512m -Xmx512m" -p 127.0.0.1:19200:9200 elasticsearch:8.19.23
+          docker run -d --name aletheia-s3 -p 127.0.0.1:19090:9090 adobe/s3mock:5.2.3
+          docker ps -a
           {
-            echo "ALETHEIA_STORAGE_POSTGRES=postgresql://aletheia:aletheia@localhost:5432/aletheia"
-            echo "ALETHEIA_STORAGE_REDIS=redis://localhost:6379/0"
-            echo "ALETHEIA_STORAGE_NEO4J=neo4j://neo4j:aletheia1234@localhost:7687"
-            echo "ALETHEIA_STORAGE_ELASTICSEARCH=http://localhost:9200"
-            echo "ALETHEIA_STORAGE_MINIO=minio://aletheia:aletheia123@localhost:9090"
+            echo "ALETHEIA_STORAGE_POSTGRES=postgresql://aletheia:aletheia@127.0.0.1:15432/aletheia"
+            echo "ALETHEIA_STORAGE_REDIS=redis://127.0.0.1:16379/0"
+            echo "ALETHEIA_STORAGE_NEO4J=neo4j://neo4j:aletheia1234@127.0.0.1:17687"
+            echo "ALETHEIA_STORAGE_ELASTICSEARCH=http://127.0.0.1:19200"
+            echo "ALETHEIA_STORAGE_MINIO=minio://aletheia:aletheia123@127.0.0.1:19090"
           } >> "$GITHUB_ENV"
 
       - name: Wait for storage services to accept connections
@@ -99,14 +126,24 @@ jobs:
           }
           wait_for postgres 60 docker exec aletheia-postgres pg_isready -U aletheia
           wait_for redis 30 docker exec aletheia-redis redis-cli ping
-          wait_for s3 30 curl -fsS http://localhost:9090/
-          wait_for elasticsearch 90 curl -fsS http://localhost:9200/_cluster/health
+          wait_for s3 30 curl -fsS http://127.0.0.1:19090/
+          wait_for elasticsearch 90 curl -fsS http://127.0.0.1:19200/_cluster/health
           wait_for neo4j 90 docker exec aletheia-neo4j cypher-shell -u neo4j -p aletheia1234 'RETURN 1'
 
       - name: Run full test suite (includes all Docker integration tests)
         run: |
           set -o pipefail
-          python -m pytest -q 2>&1 | tee ci-artifacts/pytest-full.log
+          mkdir -p ci-artifacts
+          python -m pytest -q -rs --junitxml=ci-artifacts/pytest-junit.xml 2>&1 | tee ci-artifacts/pytest-full.log
+
+      - name: Assert every test executed in CI (no silent skips)
+        if: always()
+        run: |
+          set -euo pipefail
+          python ci/pytest_summary.py \
+            --junit ci-artifacts/pytest-junit.xml \
+            --console ci-artifacts/pytest-full.log \
+            --output ci-artifacts/pytest-summary.json
 
       - name: Capture raw output for every Docker integration case
         if: always()
@@ -118,7 +155,10 @@ jobs:
         if: always()
         run: |
           set -euo pipefail
-          python ci/storage_conformance.py 2>&1 | tee ci-artifacts/storage-conformance.log
+          # --require-all: in CI an unconfigured backend is a failure, not a
+          # silent skip. Run 39078543221 reported PASS here while no storage
+          # service had actually started.
+          python ci/storage_conformance.py --require-all 2>&1 | tee ci-artifacts/storage-conformance.log
 
       - name: Upload verification evidence
         if: always()

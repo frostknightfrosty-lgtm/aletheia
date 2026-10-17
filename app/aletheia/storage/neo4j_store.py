@@ -176,7 +176,7 @@ class Neo4jBackend(StorageBackend):
         return list(_MIGRATIONS)
 
     def apply_migration(self, migration: Migration) -> None:
-        for statement in migration.statement:
+        for statement in migration.statements:
             self._run(statement)
 
     def applied_migrations(self) -> list[dict[str, Any]]:
