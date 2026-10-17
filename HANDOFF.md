@@ -1,6 +1,6 @@
-# Aletheia Handoff — Phase 12 complete (egress proxy wired into a representative subset)
+# Aletheia Handoff — Phase 13 complete (score calibration)
 
-Last updated: 2026-10-17T14:20:00Z
+Last updated: 2026-10-17T15:10:00Z
 
 ## Project boundaries
 
@@ -13,22 +13,44 @@ prerequisites are met. A tier classification is project policy, not a legal conc
 
 ## Repository and CI state
 
-- Latest CI-verified commit: `ccd5a4b1b9bde0532936911e06685f4f2518314d`
-  (`phase-12: wire egress proxy into representative adapters (3-5 of 49)`).
-- Docker Verification run **38970577087** —
-  https://github.com/frostknightfrosty-lgtm/aletheia/actions/runs/38970577087 — **green**.
+- Latest CI-verified commit: `f1a9a840c3dc9e0e16caefb640b2c934b2b6edeb`
+  (`phase-13: implement score calibration (Platt + isotonic)`).
+- Docker Verification run **38972618582** —
+  https://github.com/frostknightfrosty-lgtm/aletheia/actions/runs/38972618582 — **green**.
 - Evidence lines copied from the downloaded artifact
-  (`ci-artifacts-38970577087`), not typed:
+  (`ci-artifacts-38972618582`), not typed:
   - `PARSER PREFLIGHT: PASS — 49/49 adapters have parser coverage`
-  - `616 passed, 1 warning in 31.17s`
+  - `634 passed, 1 warning in 30.13s`
   - `DOCKER CAPTURE: PASS — 55/55 cases captured`
-- `results.json`: 55 entries, 0 nonzero return codes (51 pre-existing cases plus 4 new
-  `phase12-egress-*` scenario checks).
-- Local consistency: **562 passed + 54 skipped = 616**, which equals the CI passed count
-  exactly. (The 18 Phase 13 calibration tests are in the working tree but not in this
-  commit, so they are not part of this figure.)
+- `results.json`: 55 entries, 0 nonzero return codes.
+- Local consistency: **580 passed + 54 skipped = 634**, which equals the CI passed count
+  exactly. The state-only commit `9bdf8cf` (`state: record Phase 12 proxy wiring, next is
+  score calibration`) also passed run `38972568001` (`616 passed`; capture 55/55).
 - 49 registered adapters, all `verified-fixture`. No `verified-live` adapters. One
   infrastructure component (`egress_proxy`), `verified-fixture`.
+
+## Phase 13 — score calibration (complete)
+
+Implemented and CI-verified in commit `f1a9a84`.
+
+- `app/aletheia/core/calibration.py` — new. `PlattScaling` fits `sigmoid(slope * score +
+  intercept)` by Newton-Raphson on Platt-smoothed targets; `IsotonicRegression` fits a
+  monotone step function by pool-adjacent-violators. Both are pure standard library (the
+  project installs no numeric package). `Calibrator` wraps them and keeps `trained` `False`
+  below `MIN_LABELED_PAIRS = 8` pairs or when a class is missing, so an untrained model is
+  never presented as a probability. Dict round-trip via `to_dict`/`from_dict`.
+- `app/aletheia/phase2/resolution.py` — `EntityResolver` takes an optional `Calibrator` and
+  reports `calibrated` / `calibrated_probability` per `SAME_AS_CANDIDATE` edge
+  (`attributes.resolution`). Without a trained calibrator these are `false` / `null` and the
+  raw Jaro-Winkler/Levenshtein composite is retained as a similarity score.
+- `tests/test_calibration.py` — 18 tests (monotonicity, boundedness, degenerate input,
+  serialization round-trip, untrained-honesty, resolver integration).
+- `tests/fixtures/calibration_pairs.json` — 80 **synthetic** labelled pairs, deterministically
+  generated (seed 20261017). This is not real investigation data.
+- `docs/ADAPTER_CONTRACT.md` — new "Calibrated vs uncalibrated scores" section.
+- Honest limitation: the fixture is synthetic, so the fitted probabilities demonstrate the
+  mechanism only; real calibration is deferred until labelled pairs from authorised
+  investigations exist. The `calibrated` flag and the component contract are the stable part.
 
 ## Phase 12 — egress proxy wiring (complete)
 

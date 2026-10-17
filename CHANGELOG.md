@@ -1,5 +1,30 @@
 # Changelog
 
+## 2026-10-17 — Phase 13: score calibration (Platt scaling + isotonic regression), CI-verified
+- **Calibration.** `app/aletheia/core/calibration.py` — new. `PlattScaling` fits
+  `sigmoid(slope * score + intercept)` by Newton-Raphson on Platt-smoothed targets;
+  `IsotonicRegression` fits a monotone step function by pool-adjacent-violators. Both are pure
+  standard library. `Calibrator.trained` stays `False` below `MIN_LABELED_PAIRS = 8` pairs or
+  when a class is missing, so an untrained model is never presented as a probability.
+- **Resolver integration.** `app/aletheia/phase2/resolution.py` — `EntityResolver` takes an
+  optional `Calibrator` and reports `calibrated` / `calibrated_probability` per
+  `SAME_AS_CANDIDATE` edge; without a trained calibrator they are `false` / `null` and the raw
+  similarity composite is preserved.
+- `tests/test_calibration.py` — 18 tests; `tests/fixtures/calibration_pairs.json` — 80
+  **synthetic** labelled pairs (deterministically generated, seed 20261017), explicitly not
+  real investigation data. `docs/ADAPTER_CONTRACT.md` gained a "Calibrated vs uncalibrated
+  scores" section.
+- Honest limitation: the synthetic fixture demonstrates the mechanism, not a
+  production-calibrated model; real calibration is deferred until labelled pairs from
+  authorised investigations exist.
+- Verified by Docker Verification run `38972618582` on commit
+  `f1a9a840c3dc9e0e16caefb640b2c934b2b6edeb`
+  (https://github.com/frostknightfrosty-lgtm/aletheia/actions/runs/38972618582). Lines copied
+  from the downloaded artifact: `PARSER PREFLIGHT: PASS — 49/49 adapters have parser coverage`;
+  `634 passed, 1 warning in 30.13s`; `DOCKER CAPTURE: PASS — 55/55 cases captured`. `results.json`:
+  55 entries, 0 nonzero return codes. Local consistency: 580 passed + 54 Docker skips = 634 CI
+  passed. No test was skipped, deleted, or weakened; no `parser_test_exempt`.
+
 ## 2026-10-17 — Phase 12: egress proxy wired into a representative subset, CI-verified
 - **Wiring.** `egress.ProxySession` creates a fresh `docker network create --internal`
   network (no default egress — the proxy is the only route out) and starts the detached
