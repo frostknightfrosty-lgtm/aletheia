@@ -15,23 +15,84 @@ services:
     read_only: true
     tmpfs:
       - /tmp
+
+  # Phase 14 storage backends. Start with:
+  #   docker compose --profile storage up -d
+  # then point the CLI at them, e.g.:
+  #   ALETHEIA_STORAGE_POSTGRES=postgresql://aletheia:aletheia@localhost:5432/aletheia \
+  #     aletheia storage migrate --backend postgres
   postgres:
     image: postgres:17-alpine
-    profiles: ["future-storage"]
+    profiles: ["storage"]
     environment:
       POSTGRES_DB: aletheia
       POSTGRES_USER: aletheia
-      POSTGRES_PASSWORD: change-me
+      POSTGRES_PASSWORD: aletheia
+    ports:
+      - "127.0.0.1:5432:5432"
     volumes:
       - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U aletheia"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
   neo4j:
     image: neo4j:5-community
-    profiles: ["future-storage"]
+    profiles: ["storage"]
     environment:
-      NEO4J_AUTH: neo4j/change-me
+      NEO4J_AUTH: neo4j/aletheia1234
+    ports:
+      - "127.0.0.1:7687:7687"
+      - "127.0.0.1:7474:7474"
     volumes:
       - neo4j-data:/data
+    healthcheck:
+      test: ["CMD-SHELL", "cypher-shell -u neo4j -p aletheia1234 'RETURN 1' || exit 1"]
+      interval: 10s
+      timeout: 10s
+      retries: 30
+
+  elasticsearch:
+    image: elasticsearch:8.19.23
+    profiles: ["storage"]
+    environment:
+      discovery.type: single-node
+      xpack.security.enabled: "false"
+      ES_JAVA_OPTS: "-Xms512m -Xmx512m"
+    ports:
+      - "127.0.0.1:9200:9200"
+    volumes:
+      - elasticsearch-data:/usr/share/elasticsearch/data
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://localhost:9200/_cluster/health || exit 1"]
+      interval: 10s
+      timeout: 10s
+      retries: 30
+
+  # S3-compatible object storage. MinIO's own image was removed from Docker Hub
+  # in September 2026 and quay.io/minio/minio no longer allows anonymous pulls,
+  # so local/CI verification uses the S3-protocol server `adobe/s3mock`. A real
+  # MinIO deployment is used unchanged by setting ALETHEIA_STORAGE_MINIO.
+  s3:
+    image: adobe/s3mock:5.2.3
+    profiles: ["storage"]
+    ports:
+      - "127.0.0.1:9090:9090"
+
+  redis:
+    image: redis:7-alpine
+    profiles: ["storage"]
+    ports:
+      - "127.0.0.1:6379:6379"
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
 
 volumes:
   postgres-data:
   neo4j-data:
+  elasticsearch-data:

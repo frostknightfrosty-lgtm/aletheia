@@ -17,7 +17,17 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-dev = ["pytest>=9,<10", "httpx>=0.28,<1"]
+dev = ["pytest>=9,<10", "httpx>=0.28,<1", "pytest-asyncio", "pytest-mock", "fakeredis>=2.30,<3"]
+# Phase 14 networked storage backends. The file backend is always available;
+# these drivers are only needed to talk to PostgreSQL, Neo4j, Elasticsearch,
+# MinIO/S3, and Redis.
+storage = [
+  "pg8000>=1.31,<2",
+  "neo4j>=5,<6",
+  "elasticsearch>=8,<9",
+  "minio>=7.2,<8",
+  "redis>=5,<7",
+]
 
 [project.scripts]
 

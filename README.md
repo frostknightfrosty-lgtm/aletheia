@@ -50,6 +50,18 @@ This writes `report.json`, `report.pdf`, `graph.graphml`, `report.stix2.json`, `
 
 Each run's `AUDIT.jsonl` is a SHA-256 hash chain. Entries carry a sequence number, the previous entry's hash, and their own hash; the final `chain_tip` is stored in that run's `MANIFEST.json`. Verify a run with `aletheia verify-chain <RUN_ID>`. This makes changes detectable relative to the manifest anchor, but it is not a digital signature or a guarantee of legal admissibility; preserve and protect the manifest and audit files together.
 
+## Storage backends (Phase 14)
+
+Graph snapshots and run manifests persist through one backend contract. The default is the local file store; five networked backends implement the same contract: PostgreSQL, Neo4j, Elasticsearch, an S3-compatible object store (`minio`), and Redis (fast-path cache). Drivers live in the `storage` extra (`pip install -e '.[storage]'`).
+
+```bash
+aletheia storage health
+aletheia storage migrate --backend postgres
+aletheia storage sync --run-id <RUN_ID> --backend minio
+```
+
+A shared conformance contract runs against every backend, and a migration runner applies each schema migration once and records a checksum so drift is detected. The file store stays authoritative and the hash-chained audit log deliberately remains on local disk. See [`docs/STORAGE_BACKENDS.md`](docs/STORAGE_BACKENDS.md) for configuration, the CI verification path, and the honest limits (including why S3 verification uses an S3-protocol server rather than MinIO's own image).
+
 ## Phase 6
 
 Corporate/records/sanctions adapters: SEC EDGAR, GLEIF, OpenCorporates, OpenSanctions, and CourtListener. PACER, RECAP, Aleph, MuckRock, and country-specific registries remain deferred until their current access contracts are verified.

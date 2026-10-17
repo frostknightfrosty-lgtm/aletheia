@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import json
 import os
 from pathlib import Path
 from uuid import UUID
@@ -50,6 +51,25 @@ def build_parser() -> argparse.ArgumentParser:
     verify_chain = sub.add_parser("verify-chain", help="verify a run's hash-chained audit log")
     verify_chain.add_argument("run_id", type=UUID)
     verify_chain.add_argument("--data-dir", default=os.getenv("ALETHEIA_DATA_DIR", "./data"))
+
+    storage = sub.add_parser("storage", help="inspect and populate Phase-14 storage backends")
+    storage_sub = storage.add_subparsers(dest="storage_cmd", required=True)
+    from aletheia.storage import BACKENDS as _BACKENDS
+
+    storage_health = storage_sub.add_parser("health", help="probe each configured backend")
+    storage_health.add_argument("--backend", default=None, choices=sorted(_BACKENDS))
+    storage_health.add_argument("--data-dir", default=os.getenv("ALETHEIA_DATA_DIR", "./data"))
+
+    storage_migrate = storage_sub.add_parser("migrate", help="apply pending schema migrations")
+    storage_migrate.add_argument("--backend", required=True, choices=sorted(_BACKENDS))
+    storage_migrate.add_argument("--target", default=None, help="override the backend DSN/path")
+    storage_migrate.add_argument("--data-dir", default=os.getenv("ALETHEIA_DATA_DIR", "./data"))
+
+    storage_sync = storage_sub.add_parser("sync", help="copy a run's graph and manifest into a backend")
+    storage_sync.add_argument("--run-id", required=True, type=UUID)
+    storage_sync.add_argument("--backend", required=True, choices=sorted(_BACKENDS))
+    storage_sync.add_argument("--target", default=None, help="override the backend DSN/path")
+    storage_sync.add_argument("--data-dir", default=os.getenv("ALETHEIA_DATA_DIR", "./data"))
     return parser
 
 
@@ -84,7 +104,6 @@ def main() -> None:
         orch.resume(run_id, authorization_assertion=args.authorization_assertion, timeout_seconds=args.timeout, proxy_url=args.proxy)
         print(f"completed: {run_id}")
     elif args.cmd == "phase2":
-        from uuid import UUID
         from aletheia.phase2.service import Phase2Service
         artifacts = Phase2Service(Path(args.data_dir)).finalize(UUID(args.run_id))
         for key, value in artifacts.items():
@@ -100,7 +119,6 @@ def main() -> None:
                                duration_ms=args.duration_ms, negative_count=args.negative_count, cost=args.cost)
             print(cid)
         else:
-            import json
             print(json.dumps(BenchmarkStore(Path(args.data_dir) / "benchmarks.sqlite3").leaderboard(), indent=2))
     elif args.cmd == "mcp-server":
         from aletheia.mcp.server import serve
@@ -109,6 +127,22 @@ def main() -> None:
         orch = Orchestrator(Path(args.data_dir))
         orch.resume(UUID(args.run_id), authorization_assertion=args.authorization_assertion, timeout_seconds=args.timeout, proxy_url=args.proxy)
         print(f"resumed: {args.run_id}")
+    elif args.cmd == "storage":
+        from aletheia import storage as storage_mod
+        from aletheia.storage.base import MigrationRunner
+
+        if args.storage_cmd == "health":
+            names = [args.backend] if args.backend else None
+            print(json.dumps(storage_mod.health_report(names, data_dir=Path(args.data_dir)), indent=2))
+        else:
+            backend = storage_mod.resolve_backend(args.backend, Path(args.data_dir), args.target)
+            try:
+                if args.storage_cmd == "migrate":
+                    print(json.dumps(MigrationRunner(backend).run(), indent=2))
+                else:
+                    print(json.dumps(storage_mod.sync_run(backend, args.run_id, Path(args.data_dir)), indent=2))
+            finally:
+                backend.close()
 
 if __name__ == "__main__":
     main()

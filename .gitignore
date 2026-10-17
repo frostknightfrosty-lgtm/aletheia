@@ -12,3 +12,4 @@ data/evidence/*
 !data/**/.gitkeep
 *.egg-info/
 ci-artifacts-*/
+ci-artifacts/
