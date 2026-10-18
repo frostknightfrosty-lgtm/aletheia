@@ -1,14 +1,17 @@
 """Fixture/parser and bounded-request tests for the social-username batch."""
 
+import http.server
 import importlib.util
 import io
 import json
 import sys
+import threading
 from pathlib import Path
 from types import SimpleNamespace
 from uuid import uuid4
 from urllib.error import HTTPError
 from urllib.parse import parse_qs, urlsplit
+from urllib.request import ProxyHandler
 
 from parser_test_marker import parser_test
 
@@ -126,6 +129,8 @@ def test_partial_source_error_preserves_other_source_findings():
 def test_masto_is_one_bounded_search_and_ignores_non_discoverable_results(monkeypatch):
     runner = _load_runner()
     captured = {}
+    monkeypatch.setenv("HTTP_PROXY", "http://egress-proxy.example:8888")
+    monkeypatch.setenv("http_proxy", "http://egress-proxy.example:8888")
     response = _response(
         {
             "accounts": [
@@ -142,7 +147,13 @@ def test_masto_is_one_bounded_search_and_ignores_non_discoverable_results(monkey
     assert urlsplit(captured["url"])._replace(query="").geturl() == runner.MASTO_SEARCH_URL
     assert parse_qs(urlsplit(captured["url"]).query) == {"q": ["alice"], "type": ["accounts"], "limit": ["5"]}
     assert captured["timeout"] == 5
-    assert any(isinstance(handler, runner.ProxyHandler) and handler.proxies == {} for handler in captured["handlers"])
+    # The opener must read the environment proxies: the container has no route
+    # out except the egress proxy (live run 39125383530 bypassed it).
+    assert any(
+        isinstance(handler, ProxyHandler)
+        and handler.proxies.get("http") == "http://egress-proxy.example:8888"
+        for handler in captured["handlers"]
+    )
     assert any(isinstance(handler, runner._NoRedirectHandler) for handler in captured["handlers"])
     assert result.data["records"] == [
         {
@@ -171,6 +182,8 @@ def test_masto_does_not_contact_unapproved_instances(monkeypatch):
 def test_octosuite_uses_one_exact_public_github_user_endpoint(monkeypatch):
     runner = _load_runner()
     captured = {}
+    monkeypatch.setenv("HTTP_PROXY", "http://egress-proxy.example:8888")
+    monkeypatch.setenv("http_proxy", "http://egress-proxy.example:8888")
     response = _response(
         {
             "login": "alice",
@@ -185,7 +198,13 @@ def test_octosuite_uses_one_exact_public_github_user_endpoint(monkeypatch):
     assert result.error is None
     assert captured["url"] == "https://api.github.com/users/alice"
     assert captured["timeout"] == 5
-    assert any(isinstance(handler, runner.ProxyHandler) and handler.proxies == {} for handler in captured["handlers"])
+    # The opener must read the environment proxies: the container has no route
+    # out except the egress proxy (live run 39125383530 bypassed it).
+    assert any(
+        isinstance(handler, ProxyHandler)
+        and handler.proxies.get("http") == "http://egress-proxy.example:8888"
+        for handler in captured["handlers"]
+    )
     assert any(isinstance(handler, runner._NoRedirectHandler) for handler in captured["handlers"])
     assert result.data["records"] == [
         {"username": "alice", "profile_url": "https://github.com/alice", "display_name": "Alice Example"}
@@ -231,6 +250,49 @@ def test_health_does_not_make_network_requests(monkeypatch, capsys):
     assert {item["source"] for item in health["sub_sources"]} == (
         set(SUPPORTED_SUB_SOURCES) | set(UNSUPPORTED_SUB_SOURCES)
     )
+
+
+def test_requests_go_through_the_environment_proxy(monkeypatch):
+    """The container's only route out is the egress proxy. The old opener had
+    an empty proxy map, resolved target hosts itself, and died with EAI_AGAIN
+    on the internal network (live run 39125383530: zero proxy log entries)."""
+    runner = _load_runner()
+    seen = {}
+
+    class StubProxy(http.server.BaseHTTPRequestHandler):
+        def do_GET(self):
+            seen["path"] = self.path
+            body = b'{"records": []}'
+            self.send_response(200)
+            self.send_header("Content-Type", "application/json")
+            self.send_header("Content-Length", str(len(body)))
+            self.end_headers()
+            self.wfile.write(body)
+
+        def log_message(self, *args):
+            pass
+
+    server = http.server.ThreadingHTTPServer(("127.0.0.1", 0), StubProxy)
+    thread = threading.Thread(target=server.serve_forever, daemon=True)
+    thread.start()
+    proxy_url = "http://127.0.0.1:" + str(server.server_address[1])
+    try:
+        monkeypatch.setenv("HTTP_PROXY", proxy_url)
+        monkeypatch.setenv("http_proxy", proxy_url)
+        monkeypatch.delenv("NO_PROXY", raising=False)
+        monkeypatch.delenv("no_proxy", raising=False)
+        payload, status, error = runner._request_json(
+            "http://mastodon.example/api/v2/search", params={"q": "alice"}
+        )
+    finally:
+        server.shutdown()
+        server.server_close()
+
+    assert error is None
+    assert status == 200
+    assert payload == {"records": []}
+    # An absolute-form request line proves the request went to the proxy.
+    assert seen["path"] == "http://mastodon.example/api/v2/search?q=alice"
 
 
 def _response(payload):

@@ -69,6 +69,28 @@ def test_maigret_parser_only_accepts_claimed_results(tmp_path):
     assert {f.value for f in result.findings if f.entity_type == EntityType.URL} == {"https://github.com/alice"}
 
 
+def test_maigret_command_survives_a_read_only_root_and_takes_the_injected_proxy():
+    adapter = MaigretAdapter()
+    plain = adapter.build_command(req(SeedType.USERNAME, "alice"), Path("."))
+    # The autoupdate check creates ~/.maigret, which a --read-only container
+    # cannot do (live run 39125383530 crashed there before any site was checked).
+    assert "--no-autoupdate" in plain
+    assert "--proxy" not in plain
+
+    request = AdapterRunRequest(
+        run_id=uuid4(),
+        seed=Seed(type=SeedType.USERNAME, value="alice"),
+        legal_only=True,
+        authorization_assertion="authorized personal-identifier investigation",
+        proxy_url="http://aletheia-egress-maigret:8888",
+    )
+    proxied = adapter.build_command(request, Path("."))
+    # maigret's aiohttp stack ignores HTTP(S)_PROXY: the EgressProxy transport
+    # must arrive as an argument (live run 39125383530 made direct DNS instead).
+    assert proxied[proxied.index("--proxy") + 1] == "http://aletheia-egress-maigret:8888"
+    assert "--dns-resolver" in proxied
+
+
 @parser_test('holehe')
 def test_holehe_parser_retains_positive_signals():
     stdout = "[+] twitter : account exists\n[-] instagram : not found\n[+] github : registered\n"

@@ -21,7 +21,11 @@ network (no default egress):
                        once the proxy is stopped;
   * ``uplink``         the proxy is dual-homed: an origin on the uplink network
                        is reachable through the proxy and unreachable directly
-                       from the internal network (repair after run 39120709419).
+                       from the internal network (repair after run 39120709419);
+  * ``uplink-https``   a TLS origin on the uplink network is fetched through the
+                       CONNECT tunnel: TLS only completes when both tunnel
+                       directions are pumped, and the logged byte count proves
+                       data flowed (repair after run 39125383530).
 
 Only the standard library plus the Aletheia package is used. The images are
 already built by ``docker/build.sh``; no internet access is required.
@@ -51,10 +55,13 @@ from aletheia.core.checkpoint import CheckpointStore  # noqa: E402
 PY_IMAGE = "aletheia/search-engines:v1"       # python:3.13-based adapter image
 PROXY_IMAGE = egress.DEFAULT_IMAGE            # aletheia/egress-proxy:v1
 ORIGIN_PORT = 8080
+ORIGIN_TLS_PORT = 8443
 ORIGIN_BODY = "aletheia-egress-origin-ok"
 
 ORIGIN_SCRIPT = f'''\
 import http.server
+import ssl
+import threading
 
 BODY = b"{ORIGIN_BODY}"
 
@@ -71,17 +78,30 @@ class Handler(http.server.BaseHTTPRequestHandler):
         pass
 
 
-http.server.HTTPServer(("0.0.0.0", {ORIGIN_PORT}), Handler).serve_forever()
+def serve(port, tls_context=None):
+    server = http.server.ThreadingHTTPServer(("0.0.0.0", port), Handler)
+    if tls_context is not None:
+        server.socket = tls_context.wrap_socket(server.socket, server_side=True)
+    server.serve_forever()
+
+
+tls_context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
+tls_context.load_cert_chain("/origin/cert.pem", "/origin/key.pem")
+threading.Thread(target=serve, args=({ORIGIN_TLS_PORT}, tls_context), daemon=True).start()
+serve({ORIGIN_PORT})
 '''
 
 CLIENT_SCRIPT = '''\
+import ssl
 import sys
 import urllib.request
 
 url = sys.argv[1]
 timeout = float(sys.argv[2]) if len(sys.argv) > 2 else 10.0
+# The scenario's TLS origin uses a throwaway self-signed certificate.
+context = ssl._create_unverified_context() if "--insecure" in sys.argv else None
 try:
-    with urllib.request.urlopen(url, timeout=timeout) as response:
+    with urllib.request.urlopen(url, timeout=timeout, context=context) as response:
         sys.stdout.write(response.read().decode("utf-8", "replace"))
 except Exception as exc:  # noqa: BLE001 - the scenario only needs the failure
     print("UNREACHABLE " + type(exc).__name__)
@@ -100,7 +120,8 @@ def _docker_or_raise(argv: list[str], timeout: int = 120) -> subprocess.Complete
     return proc
 
 
-def _client(script_dir: Path, network: str, url: str, *, proxy_url: str | None, timeout: float = 10.0) -> str:
+def _client(script_dir: Path, network: str, url: str, *, proxy_url: str | None, timeout: float = 10.0,
+            insecure: bool = False) -> str:
     """Run the generic client container and return its stdout."""
     argv = [
         "docker", "run", "--rm",
@@ -114,6 +135,8 @@ def _client(script_dir: Path, network: str, url: str, *, proxy_url: str | None, 
             "-e", f"NO_PROXY=localhost,127.0.0.1",
         ]
     argv += ["--entrypoint", "python", PY_IMAGE, "/scripts/client.py", url, str(timeout)]
+    if insecure:
+        argv.append("--insecure")
     proc = _docker(argv, timeout=120)
     return (proc.stdout or "") + (proc.stderr or "")
 
@@ -184,6 +207,32 @@ def _run_checks(script_dir: Path, network: str, uplink_host: str, proxy_name: st
         "name": "phase12-egress-uplink-isolated",
         "ok": "UNREACHABLE" in direct_uplink,
         "detail": f"direct-to-uplink={direct_uplink.strip()[:60]!r}",
+    })
+
+    # -- uplink-https: the CONNECT tunnel must relay both directions -----------
+    # TLS deadlocks whenever one direction is dropped: the client's ClientHello
+    # must reach the server while the server's reply is on its way back (live
+    # run 39125383530: every CONNECT entry logged "bytes": 0 and every
+    # adapter's HTTPS request failed with SSL errors). The local TLS origin and
+    # the logged tunnel byte count pin this deterministically, without needing
+    # the internet.
+    https_body = (
+        _client(script_dir, network, f"https://{uplink_host}:{ORIGIN_TLS_PORT}/",
+                proxy_url=proxy_url, insecure=True)
+        if ready else ""
+    )
+    https_entries = [
+        entry
+        for entry in egress.read_log(log_path)
+        if entry.host == uplink_host and entry.method == "CONNECT"
+    ]
+    https_bytes = https_entries[-1].bytes if https_entries else 0
+    tls_ok = ORIGIN_BODY in https_body and https_bytes > 0
+    checks.append({
+        "name": "phase12-egress-uplink-https",
+        "ok": tls_ok,
+        "detail": "tls through the CONNECT tunnel ok; bytes=" + str(https_bytes) if tls_ok
+                  else "tls failed: " + https_body[-200:] + " bytes=" + str(https_bytes),
     })
 
     # -- adapter-proxied: the real search_engines runner egresses via the proxy -
@@ -305,6 +354,23 @@ def main(argv: list[str] | None = None) -> int:
     log_dir.mkdir(parents=True)
     (script_dir / "client.py").write_text(CLIENT_SCRIPT, encoding="utf-8")
     (script_dir / "origin.py").write_text(ORIGIN_SCRIPT, encoding="utf-8")
+    # TLS material for the tunnel check: the handshake through the CONNECT
+    # tunnel only completes when the proxy relays both directions (repair
+    # after run 39125383530, where every CONNECT entry logged bytes=0).
+    if shutil.which("openssl") is None:
+        print("egress scenario requires the openssl CLI for the TLS tunnel check", file=sys.stderr)
+        shutil.rmtree(work, ignore_errors=True)
+        return 2
+    openssl = subprocess.run(
+        ["openssl", "req", "-x509", "-newkey", "rsa:2048", "-nodes",
+         "-keyout", str(script_dir / "key.pem"), "-out", str(script_dir / "cert.pem"),
+         "-days", "1", "-subj", "/CN=uplink-origin"],
+        capture_output=True, text=True,
+    )
+    if openssl.returncode != 0:
+        print("openssl failed to create the scenario certificate:\n" + openssl.stderr, file=sys.stderr)
+        shutil.rmtree(work, ignore_errors=True)
+        return 2
     # The proxy lifecycle goes through the same ProxySession the orchestrator
     # uses — network creation, the world-writable log dir and the uplink attach
     # included — so a regression there fails here instead of in a live run.

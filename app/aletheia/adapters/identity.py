@@ -63,7 +63,27 @@ class MaigretAdapter(IdentityAdapter):
     )
 
     def build_command(self, request: AdapterRunRequest, workspace: Path) -> list[str]:
-        return [request.seed.value, "--json", "ndjson", "--folderoutput", "/work/results"]
+        command = [
+            request.seed.value,
+            # The runtime mounts the container root read-only (core.execution);
+            # the database autoupdate check would create ~/.maigret and crash
+            # with "Read-only file system" (live run 39125383530). With the
+            # check disabled maigret uses the database bundled in the image.
+            "--no-autoupdate",
+            "--no-progressbar",
+            "--no-color",
+            # Docker's embedded DNS is reached through the OS resolver more
+            # reliably than through c-ares inside the internal network; upstream
+            # recommends 'threaded' for "Could not contact DNS servers".
+            "--dns-resolver", "threaded",
+            "--json", "ndjson",
+            "--folderoutput", "/work/results",
+        ]
+        if request.proxy_url:
+            # The container has no route out except the egress proxy, and
+            # maigret's aiohttp stack ignores HTTP(S)_PROXY: pass it explicitly.
+            command += ["--proxy", request.proxy_url]
+        return command
 
     def parse(self, request: AdapterRunRequest, workspace: Path, stdout: str, stderr: str, exit_code: int) -> AdapterRunResult:
         started = datetime.now(timezone.utc)

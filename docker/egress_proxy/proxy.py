@@ -11,7 +11,10 @@ What it does
 - Plain HTTP: accepts an absolute-form request target (``GET http://host/path``),
   forwards it, and logs method/host/path/status/bytes.
 - HTTPS: accepts ``CONNECT host:port``, replies ``200 Connection Established``,
-  and tunnels bytes; the tunnel is logged once when it closes.
+  and relays bytes in both directions until both sides close; the tunnel is
+  logged once when it closes with the total bytes relayed. Pumping a single
+  direction relays nothing and deadlocks every TLS handshake (live run
+  39125383530 logged ``"bytes": 0`` on every CONNECT).
 - Applies a per-adapter token bucket and a kill switch before any connection is
   opened. A refused request is logged with status 403 (kill switch) or 429
   (rate limited).
@@ -33,9 +36,10 @@ socket, so the Docker integration smoke can run it under ``--network none``.
 Scope note
 ----------
 This component is not an adapter and is not wired into every adapter's
-Dockerfile yet. The forwarding loop is exercised only inside Docker/CI; the pure
-helpers below (``parse_request_line``, ``host_port_from_target``,
-``make_log_record``, ``TokenBucket``) are unit-tested locally.
+Dockerfile yet. The full forwarding loop is exercised only inside Docker/CI;
+the pure helpers below (``parse_request_line``, ``host_port_from_target``,
+``make_log_record``, ``TokenBucket``) and the bidirectional tunnel pump are
+unit-tested locally.
 """
 
 from __future__ import annotations
@@ -308,7 +312,7 @@ class ForwardProxy:
                                        request_id=request_id))
 
     async def _tunnel(self, reader, writer, remote_reader, remote_writer) -> int:
-        return await _pump(remote_reader, writer)
+        return await _pump_bidirectional(reader, writer, remote_reader, remote_writer)
 
     async def _forward_http(self, reader, writer, remote_reader, remote_writer,
                             method, path, header_lines, headers) -> tuple[int, int]:
@@ -356,6 +360,50 @@ async def _pump(source: asyncio.StreamReader, sink: asyncio.StreamWriter) -> int
         sink.write_eof()
     except (OSError, RuntimeError):
         pass
+    return total
+
+
+async def _pump_bidirectional(
+    client_reader: asyncio.StreamReader,
+    client_writer: asyncio.StreamWriter,
+    remote_reader: asyncio.StreamReader,
+    remote_writer: asyncio.StreamWriter,
+) -> int:
+    """Relay both directions of a CONNECT tunnel until both reach EOF.
+
+    TLS only completes when both directions flow at once: the client's
+    ClientHello must reach the server while the server's reply is on its way
+    back. A one-directional pump relays zero bytes and deadlocks every
+    handshake (live run 39125383530: every CONNECT entry logged ``"bytes": 0``
+    and every adapter's HTTPS request failed with SSL errors). Returns the
+    total bytes relayed in both directions.
+    """
+    total = 0
+
+    async def _one(source: asyncio.StreamReader, sink: asyncio.StreamWriter) -> None:
+        nonlocal total
+        while True:
+            data = await source.read(BUFFER)
+            if not data:
+                break
+            total += len(data)
+            sink.write(data)
+            await sink.drain()
+        try:
+            sink.write_eof()
+        except (OSError, RuntimeError, NotImplementedError):
+            pass
+
+    toward_remote = asyncio.create_task(_one(client_reader, remote_writer))
+    toward_client = asyncio.create_task(_one(remote_reader, client_writer))
+    try:
+        await asyncio.gather(toward_remote, toward_client)
+    except (ConnectionError, OSError):
+        # One direction died: abort the other instead of waiting forever for
+        # an EOF that will never arrive.
+        for task in (toward_remote, toward_client):
+            task.cancel()
+        await asyncio.gather(toward_remote, toward_client, return_exceptions=True)
     return total
 
 

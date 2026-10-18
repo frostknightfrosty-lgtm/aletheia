@@ -2,14 +2,17 @@
 
 Covers the request-log schema parser, the token-bucket rate limiter and its
 persistence, the kill switch, the proxy lifecycle/env helpers, the audit-chain
-writer, and the pure helpers inside docker/egress_proxy/proxy.py. No Docker or
+writer, the pure helpers inside docker/egress_proxy/proxy.py, and the
+bidirectional tunnel pump (live run 39125383530 repair). No Docker or external
 network access is required.
 """
 
 from __future__ import annotations
 
+import asyncio
 import importlib.util
 import json
+import socket
 from pathlib import Path
 from uuid import uuid4
 
@@ -336,3 +339,92 @@ def test_proxy_config_reads_environment():
     assert overridden["port"] == 9000
     assert overridden["kill_switch"] is True
     assert overridden["log_path"] == "/tmp/egress.jsonl"
+
+
+# -- CONNECT tunnel: both directions must flow (live run 39125383530) ----------
+
+
+def test_pump_bidirectional_relays_client_and_server_bytes():
+    module = _load_proxy_module()
+
+    async def scenario():
+        client_side, proxy_client_side = socket.socketpair()
+        server_side, proxy_server_side = socket.socketpair()
+        client_reader, client_writer = await asyncio.open_connection(sock=proxy_client_side)
+        remote_reader, remote_writer = await asyncio.open_connection(sock=proxy_server_side)
+        pump = asyncio.create_task(
+            module._pump_bidirectional(client_reader, client_writer, remote_reader, remote_writer)
+        )
+        loop = asyncio.get_running_loop()
+        # Client-first traffic is exactly what a one-way pump silently drops
+        # (the old _tunnel never forwarded the TLS ClientHello).
+        client_side.sendall(b"CLIENT-HELLO")
+        assert await asyncio.wait_for(loop.sock_recv(server_side, 64), timeout=5) == b"CLIENT-HELLO"
+        server_side.sendall(b"SERVER-HELLO")
+        assert await asyncio.wait_for(loop.sock_recv(client_side, 64), timeout=5) == b"SERVER-HELLO"
+        client_side.close()
+        server_side.close()
+        total = await asyncio.wait_for(pump, timeout=5)
+        assert total == len(b"CLIENT-HELLO") + len(b"SERVER-HELLO")
+
+    asyncio.run(scenario())
+
+
+def test_connect_tunnel_relays_data_and_logs_the_bytes(tmp_path):
+    """A TLS ClientHello analog through the real CONNECT handler: the byte must
+    reach the upstream, its reply must come back, and the log entry must count
+    both directions (run 39125383530: every CONNECT entry logged "bytes": 0)."""
+    module = _load_proxy_module()
+    log_path = tmp_path / "EGRESS.jsonl"
+
+    async def scenario():
+        async def upstream(reader, writer):
+            line = await reader.readline()
+            writer.write(b"PONG:" + line)
+            await writer.drain()
+            writer.close()
+
+        upstream_server = await asyncio.start_server(upstream, "127.0.0.1", 0)
+        upstream_port = upstream_server.sockets[0].getsockname()[1]
+        proxy = module.ForwardProxy({
+            "adapter": "rdap",
+            "log_path": str(log_path),
+            "kill_switch": False,
+            "rate": 1000.0,
+            "capacity": 1000.0,
+        })
+        proxy_server = await asyncio.start_server(proxy.handle, "127.0.0.1", 0)
+        proxy_port = proxy_server.sockets[0].getsockname()[1]
+        try:
+            reader, writer = await asyncio.open_connection("127.0.0.1", proxy_port)
+            writer.write(
+                f"CONNECT 127.0.0.1:{upstream_port} HTTP/1.1\r\n"
+                f"Host: 127.0.0.1:{upstream_port}\r\n\r\n".encode("latin-1")
+            )
+            await writer.drain()
+            status_line = await asyncio.wait_for(reader.readline(), timeout=5)
+            assert b"200" in status_line
+            # Consume the blank line that terminates the response head, so the
+            # next readline() returns tunnel data and not the separator.
+            assert await asyncio.wait_for(reader.readline(), timeout=5) == b"\r\n"
+            writer.write(b"hello-upstream\n")
+            await writer.drain()
+            assert await asyncio.wait_for(reader.readline(), timeout=5) == b"PONG:hello-upstream\n"
+            writer.close()
+            for _ in range(100):
+                if log_path.exists() and log_path.read_text(encoding="utf-8").strip():
+                    break
+                await asyncio.sleep(0.05)
+        finally:
+            proxy_server.close()
+            await proxy_server.wait_closed()
+            upstream_server.close()
+            await upstream_server.wait_closed()
+
+    asyncio.run(scenario())
+    entries = [json.loads(line) for line in log_path.read_text(encoding="utf-8").splitlines()]
+    assert len(entries) == 1
+    entry = entries[0]
+    assert entry["method"] == "CONNECT"
+    assert entry["status"] == 200
+    assert entry["bytes"] >= len(b"hello-upstream\n") + len(b"PONG:hello-upstream\n")

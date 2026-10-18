@@ -69,6 +69,23 @@ def test_phase4_docker_health(image, args):
     assert r.returncode == 0, r.stderr or r.stdout
 
 
+def test_phase4_maigret_starts_with_a_read_only_root():
+    """Every adapter container runs with --read-only; maigret's startup used to
+    create ~/.maigret and crash with "Read-only file system" before checking a
+    single site (live run 39125383530). --no-autoupdate keeps the pinned bundled
+    database and never touches the home directory."""
+    r = _run([
+        "docker", "run", "--rm", "--network", "none",
+        "--read-only",
+        "--tmpfs", "/tmp:rw,noexec,nosuid,size=64m",
+        "-w", "/tmp",
+        "aletheia/maigret:0.6.6",
+        "--no-autoupdate",
+    ])
+    assert r.returncode == 0, r.stderr or r.stdout
+    assert "Read-only file system" not in (r.stdout + r.stderr)
+
+
 @pytest.mark.parametrize("image,args", [
     ("aletheia/instaloader:4.15.3", ["--health"]),
     ("aletheia/reddit-api:v1", ["--health"]),
@@ -269,6 +286,15 @@ def test_phase12_egress_uplink_forward():
 def test_phase12_egress_uplink_is_isolated():
     """Adapters on the internal network must not reach the uplink directly."""
     check = _scenario_check("phase12-egress-uplink-isolated")
+    assert check["ok"], check["detail"]
+
+
+def test_phase12_egress_uplink_https():
+    """The CONNECT tunnel must relay both directions: TLS only completes when
+    the client's handshake bytes reach the upstream while its reply comes back
+    (repair after run 39125383530: every CONNECT entry logged bytes=0 and every
+    adapter's HTTPS request failed with SSL errors)."""
+    check = _scenario_check("phase12-egress-uplink-https")
     assert check["ok"], check["detail"]
 
 

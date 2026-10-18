@@ -90,7 +90,12 @@ def _request_json(
         (parsed.scheme, parsed.netloc, parsed.path, urlencode(params) if params else parsed.query, "")
     )
     request = Request(full_url, headers=headers or {})
-    opener = build_opener(ProxyHandler({}), _NoRedirectHandler())
+    # ProxyHandler() reads HTTP_PROXY/HTTPS_PROXY/ALL_PROXY from the environment:
+    # the container has no route out except the egress proxy, and the previous
+    # empty proxy map made every request resolve hosts on the internal network
+    # instead of using the proxy (live run 39125383530: EAI_AGAIN, zero proxy
+    # log entries).
+    opener = build_opener(ProxyHandler(), _NoRedirectHandler())
     try:
         with opener.open(request, timeout=HTTP_TIMEOUT_SECONDS) as response:
             status = int(response.status)
