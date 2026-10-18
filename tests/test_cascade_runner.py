@@ -250,3 +250,133 @@ def test_cli_cascade_run_fixture_dry_run(tmp_path: Path, monkeypatch, capsys) ->
     assert "coverage_ok=True" in out
     assert "trail_digest=" in out
     assert "expansions=" in out
+
+
+# -- live observer without Docker (stubbed egress sessions) --------------------
+
+
+class _FakeSession:
+    """Records session lifecycle; entries are fed in by the test."""
+
+    def __init__(self, adapter: str, log_dir: Path, rate: float = 1.0, capacity: float = 1.0) -> None:
+        self.adapter = adapter
+        self.log_dir = Path(log_dir)
+        self.proxy_url = f"http://proxy.invalid:8899/{adapter}"
+        self.network = f"aletheia-egress-net-{adapter}"
+        self.entries: list[SimpleNamespace] = []
+        self.started = 0
+        self.stopped = 0
+
+    def start(self) -> None:
+        self.started += 1
+
+    def read_entries(self) -> list[SimpleNamespace]:
+        return list(self.entries)
+
+    def stop(self) -> None:
+        self.stopped += 1
+
+
+def _patch_egress(monkeypatch, factory):
+    from aletheia.core import egress as egress_module
+
+    chained: list[list[SimpleNamespace]] = []
+    monkeypatch.setattr(egress_module, "ProxySession", factory)
+    monkeypatch.setattr(egress_module, "is_wired", lambda name, network_required=False: True)
+    monkeypatch.setattr(
+        egress_module,
+        "append_log_to_chain",
+        lambda run_id, entries, data_root=None: chained.append(list(entries)),
+    )
+    return chained
+
+
+def test_adapter_observer_reuses_one_egress_session_per_adapter(tmp_path, monkeypatch) -> None:
+    sessions: list[_FakeSession] = []
+
+    def factory(adapter, log_dir, rate=1.0, capacity=1.0):
+        session = _FakeSession(adapter, log_dir, rate, capacity)
+        sessions.append(session)
+        return session
+
+    chained = _patch_egress(monkeypatch, factory)
+
+    good = _StubAdapter(
+        {SeedType.DOMAIN}, findings=[_finding(EntityType.HOST, "example.com", "stub")]
+    )
+    good.descriptor = SimpleNamespace(network_required=True)
+    observer = AdapterObserver(
+        adapters={"good": good},
+        run_id=uuid4(),
+        audit=AuditLogger(tmp_path / "AUDIT.jsonl"),
+        workspace_root=tmp_path / "ws",
+        data_root=tmp_path,
+        authorization_assertion=None,
+        wire_egress=True,
+    )
+
+    observer(Seed(type=SeedType.DOMAIN, value="example.com"))
+    assert len(sessions) == 1
+    session = sessions[0]
+    session.entries.append(SimpleNamespace(status=200))
+
+    observer(Seed(type=SeedType.DOMAIN, value="example.org"))
+    session.entries.append(SimpleNamespace(status=429))
+    observer.close()
+
+    # One session for the whole run: a second per-invocation session would
+    # collide on the adapter-derived Docker network name.
+    assert len(sessions) == 1
+    assert session.started == 1
+    assert session.stopped == 1
+    assert good.calls == 2
+    assert [entry.status for entry in chained[0]] == [200]
+    assert [entry.status for entry in chained[1]] == [429]
+    assert observer.egress_totals == {"total": 2, "allowed": 1, "refused": 1}
+
+
+def test_adapter_observer_records_wiring_failures_without_crashing(tmp_path, monkeypatch) -> None:
+    started: list[str] = []
+
+    class _FailingSession:
+        proxy_url = "http://proxy.invalid:8899"
+        network = "aletheia-egress-net-bad"
+
+        def __init__(self, adapter, log_dir, rate=1.0, capacity=1.0):
+            self.adapter = adapter
+            started.append(adapter)
+
+        def start(self):
+            raise RuntimeError("network aletheia-egress-net-bad already exists")
+
+        def read_entries(self):
+            return []
+
+        def stop(self):
+            pass
+
+    _patch_egress(monkeypatch, _FailingSession)
+
+    bad = _StubAdapter({SeedType.DOMAIN})
+    bad.descriptor = SimpleNamespace(network_required=True)
+    observer = AdapterObserver(
+        adapters={"bad": bad},
+        run_id=uuid4(),
+        audit=AuditLogger(tmp_path / "AUDIT.jsonl"),
+        workspace_root=tmp_path / "ws",
+        data_root=tmp_path,
+        authorization_assertion=None,
+        wire_egress=True,
+    )
+
+    first = observer(Seed(type=SeedType.DOMAIN, value="example.com"))
+    assert first.findings == ()
+    assert "already exists" in first.blocked_reason
+    assert bad.calls == 0
+
+    second = observer(Seed(type=SeedType.DOMAIN, value="example.org"))
+    assert len(started) == 1  # never retried
+    assert bad.calls == 0  # never runs unwired
+    assert "egress wiring failed earlier" in second.blocked_reason
+    audit_text = (tmp_path / "AUDIT.jsonl").read_text(encoding="utf-8")
+    assert audit_text.count("cascade_adapter_error") == 1

@@ -193,6 +193,14 @@ class AdapterObserver:
         self.skips: dict[str, str] = {}
         self.blocked: dict[str, str] = {}
         self.egress_totals: dict[str, int] = {"total": 0, "allowed": 0, "refused": 0}
+        # One egress session per adapter for the whole run: the Docker network
+        # name is derived from the adapter name, so a second session for the
+        # same adapter would collide, and a re-run of an adapter must never
+        # quietly run unwired. Proxy entries are chained incrementally per
+        # drain so nothing is duplicated across invocations.
+        self._sessions: dict[str, egress.ProxySession] = {}
+        self._appended: dict[str, int] = {}
+        self._session_failed: dict[str, str] = {}
 
     def __call__(self, seed: Seed) -> Observation:
         supporting = sorted(
@@ -211,10 +219,44 @@ class AdapterObserver:
             if self._wire_egress and egress.is_wired(
                 name, network_required=adapter.descriptor.network_required
             ):
-                session = egress.ProxySession(
-                    name, workspace / "egress", rate=self._egress_rate, capacity=self._egress_burst
-                )
-                session.start()
+                session = self._sessions.get(name)
+                if session is None and name in self._session_failed:
+                    # A failed wiring attempt never becomes an unwired run: the
+                    # adapter stays blocked for the rest of this run.
+                    reason = f"egress wiring failed earlier in this run: {self._session_failed[name]}"
+                    errors.append(f"{name}: {reason}")
+                    self.blocked.setdefault(name, self._session_failed[name])
+                    continue
+                if session is None:
+                    candidate = egress.ProxySession(
+                        name,
+                        self._workspace_root / "egress" / name,
+                        rate=self._egress_rate,
+                        capacity=self._egress_burst,
+                    )
+                    try:
+                        candidate.start()
+                    except Exception as exc:  # noqa: BLE001 - recorded, never silent
+                        self._session_failed[name] = str(exc)[:300]
+                        self.blocked[name] = str(exc)[:300]
+                        errors.append(f"{name}: egress wiring failed: {exc}")
+                        self._audit.log(
+                            AuditEvent(
+                                run_id=self._run_id,
+                                event_type="cascade_adapter_error",
+                                adapter=name,
+                                request_meta={
+                                    "seed_type": seed.type.value,
+                                    "seed_value": seed.value,
+                                    "error": f"egress session start failed: {exc}"[:500],
+                                },
+                                outcome="error",
+                            )
+                        )
+                        candidate.stop()
+                        continue
+                    self._sessions[name] = candidate
+                    session = candidate
                 proxy_url = session.proxy_url
                 network = session.network
             try:
@@ -248,16 +290,9 @@ class AdapterObserver:
                 continue
             finally:
                 if session is not None:
-                    entries = session.read_entries()
-                    if entries:
-                        egress.append_log_to_chain(self._run_id, entries, data_root=self._data_root)
-                        for entry in entries:
-                            self.egress_totals["total"] += 1
-                            if entry.status == 429:
-                                self.egress_totals["refused"] += 1
-                            else:
-                                self.egress_totals["allowed"] += 1
-                    session.stop()
+                    # Sessions persist across invocations of the same adapter;
+                    # only the not-yet-chained proxy entries are appended.
+                    self._drain_egress(name, session)
             findings.extend(result.findings)
             self.ran.add(name)
             for skip in extract_skipped_sources(result.findings):
@@ -272,6 +307,31 @@ class AdapterObserver:
         if errors:
             return Observation(blocked_reason="; ".join(errors)[:500])
         return Observation()
+
+    def _drain_egress(self, name: str, session: egress.ProxySession) -> None:
+        """Chain the proxy entries produced since the last drain for ``name``."""
+        entries = session.read_entries()
+        already = self._appended.get(name, 0)
+        self._appended[name] = len(entries)
+        fresh = entries[already:]
+        if not fresh:
+            return
+        egress.append_log_to_chain(self._run_id, fresh, data_root=self._data_root)
+        for entry in fresh:
+            self.egress_totals["total"] += 1
+            if entry.status == 429:
+                self.egress_totals["refused"] += 1
+            else:
+                self.egress_totals["allowed"] += 1
+
+    def close(self) -> None:
+        """Drain every reused session and tear its wiring down (never raises)."""
+        for name, session in list(self._sessions.items()):
+            try:
+                self._drain_egress(name, session)
+            finally:
+                session.stop()
+        self._sessions.clear()
 
 
 def _write_json(path: Path, payload: Mapping[str, Any]) -> str:
@@ -422,7 +482,11 @@ def run_cascade(config: CascadeRunConfig, *, observer: Observer | None = None) -
         policy=SchedulerPolicy(owner_mode=config.owner_mode, max_expansions=config.max_expansions),
         ledger=ledger,
     )
-    result = engine.run(root_claims, subject_label=config.subject_label)
+    try:
+        result = engine.run(root_claims, subject_label=config.subject_label)
+    finally:
+        if live is not None:
+            live.close()
 
     ledger_path = cascade_dir / "ledger.jsonl"
     ledger_path.write_text(
