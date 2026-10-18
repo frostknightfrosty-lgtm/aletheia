@@ -1,6 +1,6 @@
-# Aletheia Handoff — Phase 15 complete (egress coverage)
+# Aletheia Handoff — Phase 16 complete (multi-seed investigations and context features)
 
-Last updated: 2026-10-18T01:57:10Z
+Last updated: 2026-10-18T10:03:14Z
 
 ## Project boundaries
 
@@ -13,24 +13,25 @@ prerequisites are met. A tier classification is project policy, not a legal conc
 
 ## Repository and CI state
 
-- Latest CI-verified commit: `d7f73e172342300e1b074248e86d8734fb73b680`
-  (`phase-15: prove the crtsh proxy entry is new, not inherited`).
-- Docker Verification run **39087297928** —
-  https://github.com/frostknightfrosty-lgtm/aletheia/actions/runs/39087297928 — **green**.
+- Latest CI-verified commit: `f0352a4f752934d8d5ae3bd320c659e4a8a475e3`
+  (`Multi-seed investigations, context filters, jurisdiction warnings, Tier 5 construction rejection`).
+- Docker Verification run **39116485331** —
+  https://github.com/frostknightfrosty-lgtm/aletheia/actions/runs/39116485331 — **green**.
 - Evidence lines copied from the downloaded artifact
-  (`ci-artifacts-39087297928`), not typed:
+  (`ci-artifacts-39116485331`), not typed:
   - `PARSER PREFLIGHT: PASS — 49/49 adapters have parser coverage`
-  - `678 passed, 1 warning in 38.12s`
+  - `714 passed, 1 warning in 29.49s`
   - `DOCKER CAPTURE: PASS — 57/57 cases captured`
   - `STORAGE CONFORMANCE: PASS — 6/6 backends conform`
-- `pytest-summary.json`: `junit_total` 678, `skipped_in_ci` `[]`, `ok` `true`.
-  `storage-conformance.json`: `passing` = `file`, `postgres`, `neo4j`, `elasticsearch`,
-  `minio`, `redis`; `unconfigured` `[]`. `results.json`: 57 entries, 0 nonzero return codes,
-  with both `phase15-*` scenario checks present. `egress-scenario.json`:
+- `pytest-summary.json`: `junit_total` 714, `skipped_in_ci` `[]`, `ok` `true`.
+  `storage-conformance.json`: `configured` = `file`, `postgres`, `neo4j`, `elasticsearch`,
+  `minio`, `redis`; `unconfigured` `[]`; `required_all` `true`. `results.json`: 57 entries,
+  0 nonzero return codes, with the `phase15-*` scenario checks present.
+  `egress-scenario.json`: all 6 checks ok —
   `phase15-egress-policy-covers-registry` = `adapters=49 network_required=44 wired=44`;
-  `phase15-egress-previously-unwired-adapter` = `crtsh rc=1 new CONNECT crt.sh entries=1 status=502`; all four
-  `phase12-*` checks still pass.
-- Local consistency: **617 passed + 61 skipped = 678**, which equals the CI passed count
+  `phase15-egress-previously-unwired-adapter` = `crtsh rc=1 new CONNECT crt.sh entries=1 status=502`;
+  the four `phase12-*` checks pass.
+- Local consistency: **653 passed + 61 skipped = 714**, which equals the CI passed count
   exactly. The 61 skips are 56 `tests/test_docker_integration.py` (no Docker on this machine)
   and 5 `tests/test_storage_services.py` (no `ALETHEIA_STORAGE_*` service configured); both
   groups execute in CI, and CI now *fails* if either group skips — see
@@ -39,6 +40,69 @@ prerequisites are met. A tier classification is project policy, not a legal conc
   infrastructure component (`egress_proxy`), `verified-fixture`. Six storage backends, all
   conformance-verified against real services in CI. 44 of the 49 adapters declare
   `network_required=True`, and the egress policy wires all 44.
+
+## Phase 16 — multi-seed investigations and context features (complete)
+
+Implemented and CI-verified in commit `f0352a4` (single code commit). The
+non-gated deliverables from `docs/PROJECT_DIRECTION.md` are now implemented; the
+gated ones remain gated.
+
+- **Multi-seed runs.** `Orchestrator.create_run` accepts a `Seed` (unchanged) or
+  a sequence; `manifest["pending_seeds"]` schedules every matching adapter once
+  per supported seed, each seed expands into its own workspace
+  (`adapter@seedN`, 1-based) and `result.json`, and every finding is tagged with
+  `Provenance.seed_index` before ingestion. Single-seed runs keep the previous
+  artifact shape (untagged provenance, unchanged workspace names and
+  `tools_invoked` labels); legacy manifests without `pending_seeds` remain
+  resumable.
+- **Intersection pass.** `EntityResolver.resolve` reads per-entity seed
+  attribution from edge provenance and applies a bounded boost
+  (`score * (1 + 0.05 * (trees - 1))`, capped at 1.0) when an entity is
+  corroborated by two or more trees. The boost never creates a candidate (the raw
+  threshold is applied first) and never feeds the Phase 13 calibrator; the
+  candidate explanation records `cross_seed_trees` and
+  `cross_seed_boost=<raw>-><boosted>` and states it is a heuristic prior. See
+  `docs/MULTI_SEED.md`.
+- **Context filters** (country, age min/max, language, timezone) live in the
+  manifest as `context_filters`, ride on every `AdapterRunRequest`, and are
+  enforced at resolution: only positive mismatches flip a candidate to
+  `filtered_out` with a `context_filter_mismatch=...` explanation; an entity
+  with no comparable attribute is never excluded. No ISO-3166 dataset is bundled
+  and no adapter consumes the filters as query hints yet.
+- **Jurisdiction warnings** (`app/aletheia/core/warnings.py`,
+  `docs/JURISDICTION_WARNINGS.md`): strong-privacy jurisdiction, minor,
+  health-data, and protected-class heuristics over seeds and entity attributes,
+  deduplicated, recorded as `jurisdiction_warning` audit events (before
+  `phase2_finalize`, same hash chain), in `report.json`, and in the PDF. They
+  never gate a run and are not a legal determination.
+- **Adapter-run reporting.** `resume` persists adapter-recorded sub-source skips
+  (missing keys, retired endpoints, paid-only APIs) to `manifest["skipped"]`;
+  `report.json`/`report.pdf` list every matching adapter with its outcome and
+  each skip reason, and mark failed and still-pending adapters.
+- **Lawful basis.** Every `resume` records a `lawful_basis_declaration` audit
+  event (declared true/false plus the assertion text when present); an empty
+  declaration does not stop a run.
+- **Tier enforcement.** `PROJECT_MANIFEST.json` validation requires
+  `legal_tier` (integer 1..5), `enabled_by_default`, and `batch_grouping` for
+  every adapter entry, with a non-empty `disabled_reason` when
+  `enabled_by_default` is false (all 49 adapter entries pass); the registry
+  refuses to construct an adapter whose entry declares `legal_tier=5`.
+- **CLI/API/MCP.** Repeatable `--seed`, plus
+  `--filter-country|--filter-age-min|--filter-age-max|--filter-language|--filter-timezone`;
+  the HTTP API and the MCP `investigate` tool take `seeds` + `context_filters`.
+- 36 new tests (`tests/test_multi_seed.py`, `tests/test_jurisdiction_warnings.py`,
+  `tests/test_tier_metadata.py`); no test skipped, deleted, or weakened.
+
+### Honest limitations (recorded, not softened)
+
+- The trees share one graph, one audit chain, and one run directory; "independent
+  tree" is provenance tagging, not separate storage.
+- The 5%-per-tree boost is a documented heuristic prior, not a calibrated
+  probability and not source evidence.
+- Context filters exclude only on positive attribute mismatches; the matching
+  rules are documented and have no ISO dataset behind them.
+- Jurisdiction warnings are keyword/attribute heuristics with expected false
+  positives and false negatives; they are informational only.
 
 ## Phase 15 — egress proxy coverage (complete)
 
@@ -273,10 +337,13 @@ manifest**, not a digital signature and not a legal-admissibility guarantee.
 
 ## Next action
 
-**Blocked on the user.** The verified-fixture work is complete: 678 tests execute in CI with 0
+**Blocked on the user.** The verified-fixture work is complete: 714 tests execute in CI with 0
 skipped, all 49 adapters are `verified-fixture`, 6/6 storage backends conform against real
-services, and adapter egress is proxied by policy (44 of 49 adapters declare network access; all
-44 are wired). The next substantive step is the authorized live investigation, which needs:
+services, adapter egress is proxied by policy (44 of 49 adapters declare network access; all
+44 are wired), and the non-gated `docs/PROJECT_DIRECTION.md` deliverables (multi-seed
+investigations, context filters, jurisdiction warnings, adapter-run reporting, Tier 5
+construction rejection) are implemented. The next substantive step is the authorized live
+investigation, which needs:
 
 - **Gate 2** — an explicit, user-owned live target and an authorization assertion for the first
   `verified-live` run. No live lookup has been made, and none should be made without this.
@@ -296,8 +363,15 @@ honestly without those decisions.
   egressing unproxied; that failure mode is not demonstrated per adapter.
 - No `verified-live` adapters; every fixture is synthetic unless separately documented.
 - Score/confidence separation is incomplete; `--purpose` is not a required adapter field.
-- `AUTONOMOUS_DIRECTIVE.md` and `AGENT_SETUP.md` live at the repo root, but both reference
-  `docs/AUTONOMOUS_DIRECTIVE.md`. Worth fixing or documenting.
+- `AUTONOMOUS_DIRECTIVE.md` and `AGENT_SETUP.md` live at the repo root and now reference
+  `AUTONOMOUS_DIRECTIVE.md` correctly; the four stale `docs/AUTONOMOUS_DIRECTIVE.md` paths
+  were fixed in the directive commit following `f0352a4`.
+- Multi-seed trees share one graph/audit chain/run directory, and the cross-seed boost is a
+  documented heuristic prior, not calibrated output (`docs/MULTI_SEED.md`).
+- Context filters are enforced only where a comparable attribute exists, and no adapter
+  consumes them beyond receiving them on the request.
+- Jurisdiction warnings are heuristic and informational; expected false positives and false
+  negatives (`docs/JURISDICTION_WARNINGS.md`).
 - **Point-in-time documents deliberately left unedited.** `audit/CLAIMS_VS_VERIFIED_AUDIT.md`
   keeps its Step 3 rows (with a superseded-in-part banner) rather than being rewritten, and
   `aletheia_step3_CI_READY.md` still calls the egress proxy non-existent (superseded by Phase
