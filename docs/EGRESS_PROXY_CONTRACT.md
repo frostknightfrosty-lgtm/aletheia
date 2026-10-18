@@ -66,11 +66,25 @@ adapter run:
 3. Run the adapter container on the *same* network with `HTTP_PROXY` and
    `HTTPS_PROXY` set to `http://<proxy-container>:<port>` (and
    `NO_PROXY=localhost,127.0.0.1` for loopback) instead of `--network bridge`.
+   The environment is the single transport injection: do not also pass the
+   proxy as a client flag, because a client that builds its own tunnel from
+   the flag while also honouring the environment tunnels to the proxy
+   *through* the proxy (run `39135219248`: maigret 0.6.6's aiohttp transport;
+   the flag was removed).
 4. After the run, read the proxy's `EGRESS.jsonl` and append it to the run's
    hash-chained audit log with `append_log_to_chain`.
 5. Stop the proxy and delete the network.
 
-`ProxySession` implements steps 1, 2, and 5 (including the uplink attach and
+**Readiness.** `docker run -d` returns before the proxy process inside has
+bound its port, so `ProxySession.start()` waits with a bounded `docker exec`
+loopback-connect probe (`probe_command`) and fails the session loudly when the
+proxy never accepts. Run `39135219248` lost `social_username` to exactly that
+race (`Connection refused`, zero egress entries). The probe connection leaves
+no log entry (the proxy discards an empty connection in `_read_head`), so the
+scenario's exact-entry-count assertions remain exact.
+
+`ProxySession` implements steps 1, 2 (the readiness probe included), and 5
+(including the uplink attach and
 making the bind-mounted log directory writable for the proxy's unprivileged
 uid); `AdapterRunRequest.proxy_url` /
 `network_name` and `run_docker(..., network_name=...)` carry step 3; and the

@@ -1,5 +1,51 @@
 # Changelog
 
+## 2026-10-18 — Live-path repair round 3 after run `39135219248`: single-hop proxying, proxy readiness, sherlock results file, CI-verified
+
+- **`maigret` tunnelled to the proxy through the proxy.** 455 of the 757 entries
+  in its `EGRESS.jsonl` address the proxy's own container, e.g.
+  `{"adapter":"maigret","bytes":272,"host":"aletheia-egress-maigret","method":"CONNECT","path":"","purpose_id":"unspecified","request_id":"97862c6f3d4341aa85d8c9d2394e8a98","status":200,"timestamp":"2026-10-18T14:30:03.385124+00:00"}`
+  — 235 are the rate limiter refusing the outer connect (`status 429`,
+  `bytes 0`), 164 relayed only 248–395 bytes each (a single TLS ClientHello's
+  shape), and 56 relayed larger payloads (max 996 557 bytes). Its stdout
+  records `Too many errors of type "Proxy" (46.17%)`. Root cause: maigret
+  0.6.6's `SimpleAiohttpChecker` builds an `aiohttp_socks.ProxyConnector` from
+  `--proxy` and opens the session with `trust_env=True`; with
+  `HTTP_PROXY`/`HTTPS_PROXY` also set, aiohttp asks that connector to tunnel to
+  the environment proxy address, so the proxy dials itself.
+  `MaigretAdapter.build_command` no longer passes `--proxy`: the environment is
+  the single transport channel, honoured by both of maigret's transports
+  (reproduced locally against `docker/egress_proxy/proxy.py`: with the flag the
+  connector logs `CONNECT 127.0.0.1` even with the rate limit wide open,
+  env-only logs `CONNECT example.com`, and `curl_cffi` env-only also logs
+  `CONNECT example.com`). This supersedes the `--proxy` wiring of the previous
+  entry.
+- **`ProxySession.start()` did not wait for the proxy to accept connections.**
+  The `social_username` result records `masto: URLError: <urlopen error
+  [Errno 111] Connection refused>` and the same for `octosuite`: the adapter
+  ran in the window between `docker run -d` returning and the proxy process
+  binding port 8888, so both sources failed instantly and the egress log was
+  left empty. `start()` now runs a bounded `docker exec` loopback-connect probe
+  (`ProxySession.probe_command`) and fails the session loudly if the proxy
+  never accepts. The probe was executed locally: rc=0 in 0.09 s against a live
+  proxy, rc=1 after 15.06 s with a clear stderr against a dead port. An empty
+  probe connection leaves no log entry (the proxy discards it via
+  `_read_head`'s `IncompleteReadError`), so the scenario's exact-count
+  assertions (`entries=1`, `log_entries=7`) stay exact.
+- **`sherlock` never wrote the file its parser reads.** Its stdout lists nine
+  claimed results and `[*] Search completed with 9 results`, while
+  `result.json` contains only the seed finding: sherlock 0.16.2 computes the
+  file named by `--output` and gates the actual write behind `--txt`
+  (`if args.output_txt:` in `sherlock_project/sherlock.py`), so nine live
+  findings were silently dropped from the graph and report — the parser
+  fixture writes `sherlock.txt` itself, so CI could not see the missing export
+  flag. `build_command` now passes `--txt` next to `--output`.
+- Local consistency: 721 passed + 65 skipped = 786 CI passed (run `39139781693`;
+  scenario 9/9 with the readiness probe exercised under real Docker, capture
+  60/60, storage 6/6, parser 49/49). Three new tests; the `--proxy` command
+  assertion of the previous entry now asserts the opposite, because the flag
+  was the defect; no test was skipped, deleted, or weakened.
+
 ## 2026-10-18 — Live-path repair after run `39125383530`: CONNECT tunnel, env proxies, maigret startup, CI-verified
 - **The CONNECT tunnel pumped one direction only.** Every tunneled request in
   run `39125383530` failed while the proxy logged `200`. The artifact shows
