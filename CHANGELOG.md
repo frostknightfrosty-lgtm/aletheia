@@ -1,5 +1,35 @@
 # Changelog
 
+## 2026-10-18 — P17.4: matchers, stdlib perceptual hashing, LR scoring, base-rate priors, calibration hook
+
+The comparison and scoring engine the cascade evaluates with. Every number
+below is copied from the downloaded artifact `ci-artifacts-39155284979` (run
+`39155284979`, commit `db5f03e`).
+
+- `PARSER PREFLIGHT: PASS — 49/49 adapters have parser coverage` (registry
+  unchanged).
+- `"console_summary": "896 passed, 1 warning"` with `"junit_total": 896`,
+  `"skipped_in_ci": []`, `"ok": true` — 56 new tests over the previous 840,
+  none skipped in CI.
+- `DOCKER CAPTURE: PASS — 60/60 cases captured`.
+- storage-conformance.json: `"passing": ["file", "postgres", "neo4j",
+  "elasticsearch", "minio", "redis"]`, `"unconfigured": []`,
+  `"required_all": true`, `"ok": true`.
+- What landed: `matching.py` (diacritic folding, token-set and Jaro-Winkler
+  comparison on `rapidfuzz`, Soundex against the NARA reference vectors,
+  nickname expansion, temporal and graph overlap) — no new dependencies;
+  `phash.py` (pure-stdlib PNG/BMP/PPM/PGM decoding plus aHash, dHash, and a
+  DCT pHash, with Pillow only as an optional runtime fallback; JPEG stays
+  unsupported in the core environment and is documented, not worked around);
+  `scoring.py` (reviewable likelihood-ratio constants — HARD 50, STRONG 10,
+  MEDIUM 3, WEAK 1.5 — vetoes never summed, tier rules with the review-gated
+  "cannot clear a gate alone" cap, and a calibration hook that reports no
+  probability until `core/calibration.py`'s `Calibrator` is actually
+  trained); `priors.py` (entropy/rarity base-rate terms, explicitly
+  `calibrated=False`); `evidence.py` (the claim-pair decision table,
+  with shared-infrastructure guards: public mail domains and shared platform
+  hosts never yield evidence).
+
 ## 2026-10-18 — P17.3: claim normalization, strong-key blocking, pivot extractors
 
 The claim layer the evidence engine compares: normalized claims, blocking that

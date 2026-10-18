@@ -454,8 +454,9 @@ the facts, or recorded with evidence if the facts block implementation.
 ## 15. Build plan (each step CI-verified; docs commits separate from code)
 
 Implementation status is tracked in `docs/CAMPAIGN_LOG.md` (the campaign's
-working memory): P17.2 landed first (commit `7900ce4`), everything else below
-is pending.
+working memory): P17.2–P17.6 landed (commits `7900ce4` → `d7f035a` →
+`db5f03e` → `d561c9c` → `341f055`), everything else below is pending or in
+flight.
 
 1. **P17.1** — this design document (v3) + PROJECT_DIRECTION pointer.
 2. **P17.2** — cascade models + descriptor-derived routing graph + coverage

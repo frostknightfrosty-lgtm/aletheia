@@ -14,18 +14,18 @@
 ## NOW (edited in place — this is the current position)
 
 - Campaign: **ACTIVE** — owner mandate received and executing.
-- Position: **P17.5 pushed as `d561c9c`** (falsification pass, ACH, union-find
-  conflict propagation, low-grade gate cap; 26 new tests; local 857 passed +
-  65 environment-only skips → expected CI 922). Verification run starting.
-  **P17.3 verified green** (run `39154364738`); P17.4's run `39155284979`
-  still watching.
-- Next action: start **P17.6** (VOI scheduler + adaptive budgets + stop policy
-  + resume + decision ledger) locally while CI runs; copy evidence when the
-  watches notify.
-- In-flight CI: `39155284979` (P17.4 code `db5f03e`, watch running);
-  `d561c9c`'s run starting.
-- Last verified commit: `d7f035a` (run `39154364738`, docker-verification
-  green; lines copied: parser 49/49; **840 passed**; capture 60/60; storage
+- Position: **P17.6 pushed as `341f055`** (VOI scheduler + adaptive budgets +
+  stop policy + resume checkpoints + hash-chained decision ledger; 22 new
+  tests; local 879 passed + 65 environment-only skips → expected CI 944).
+  Verification run starting. **P17.3 verified green**; **P17.4 verified
+  green** (run `39155284979` on `db5f03e`, 896 passed); P17.5
+  (`39156241115`) still watching.
+- Next action: start **P17.7** (case memory + cache/TTL + re-audit diffs)
+  locally while CI runs; copy evidence when the watches notify.
+- In-flight CI: `39156241115` (P17.5 code `d561c9c` + docs `051625c`),
+  `341f055`'s run starting.
+- Last verified commit: `db5f03e` (run `39155284979`, docker-verification
+  green; lines copied: parser 49/49; **896 passed**; capture 60/60; storage
   6/6).
 - Owner-blocked (parked, never wait on): everything in `docs/USER_ACTIONS.md`.
 - Decision defaults in force: see "Adopted defaults" below.
@@ -107,11 +107,13 @@
       → Implemented locally-green (25 tests); pushed `d7f035a`; run
       `39154364738` **green** — evidence lines copied to the Log (parser
       49/49; 840 passed; capture 60/60; storage 6/6).
-- [ ] **P17.4** — matchers, perceptual hashing, LR scoring, base-rate priors,
+- [x] **P17.4** — matchers, perceptual hashing, LR scoring, base-rate priors,
       calibration hook (Platt/isotonic in `core/calibration.py` stays the only
       probability path; an untrained model is never presented as a probability).
       → Implemented locally-green (56 tests; local 831 passed + 65 skips →
-      expected CI 896); pushed `db5f03e`; run `39155284979` verifying.
+      expected CI 896); pushed `db5f03e`; run `39155284979` **green** —
+      evidence lines copied to the Log (parser 49/49; 896 passed; capture
+      60/60; storage 6/6).
 - [ ] **P17.5** — falsification pass + ACH + union-find conflict propagation.
       → Implemented locally-green (26 tests; local 857 passed + 65 skips →
       expected CI 922); pushed `d561c9c`; run verifying.
@@ -121,6 +123,8 @@
       "not yet graded"; §17 resolution item 7).
 - [ ] **P17.6** — VOI scheduler + adaptive budgets + stop policy + resume +
       decision ledger.
+      → Implemented locally-green (22 tests; local 879 passed + 65 skips →
+      expected CI 944); pushed `341f055`; run verifying.
 - [ ] **P17.7** — case memory + cache/TTL + re-audit diffs.
 - [ ] **P17.8** — CLI + trail/dossier/coverage outputs + next-actions checklist +
       redaction/purge (no new adapters in this step).
@@ -233,5 +237,31 @@ activate when the key exists.
   65 environment-only skips → expected CI 896) and pushed as `db5f03e`
   (docs commit `91e36cb` copies the P17.2 verification evidence). Verification
   run `39155284979` watching in the background.
-- Next: finish P17.5 (falsify + ACH + merge graph) → commit/push; on
-  `39155284979` green copy evidence, flip the P17.4 checkbox.
+- 2026-10-18 — P17.4 verification — commit `db5f03e` — run `39155284979` —
+  docker-verification **green**. Copied from the downloaded artifact
+  `ci-artifacts-39155284979`:
+  - `PARSER PREFLIGHT: PASS — 49/49 adapters have parser coverage`
+  - pytest-summary.json: `"console_summary": "896 passed, 1 warning"`,
+    `"junit_total": 896`, `"skipped_in_ci": []`, `"ok": true`
+    (840 → 896: the 56 new matcher/pHash/scoring/evidence tests, none skipped)
+  - docker-integration/capture.log: `DOCKER CAPTURE: PASS — 60/60 cases
+    captured`
+  - storage-conformance.json: `"passing": ["file", "postgres", "neo4j",
+    "elasticsearch", "minio", "redis"]`, `"unconfigured": []`,
+    `"required_all": true`, `"ok": true`
+- 2026-10-18 — P17.5 implemented (falsification pass, ACH hypothesis scoring
+  with the conservative tie order, union-find merge graph with conflict
+  propagation, low-grade E/F gate cap; 26 tests; local 857 passed + 65
+  environment-only skips → expected CI 922) and pushed as `d561c9c` (docs
+  commit `051625c` copies the P17.3 verification evidence and records the
+  source-grade resolution). Verification run `39156241115` watching in the
+  background.
+- 2026-10-18 — P17.6 implemented (VOI scheduler with the section-8 formula and
+  clamped cost, per-type caps, depth escalation only in owner mode with HARD
+  evidence, time-pressure de-escalation, stop-policy derivation, JSON-safe
+  resume checkpoints, hash-chained decision ledger; 22 tests; local 879 passed
+  + 65 environment-only skips → expected CI 944) and pushed as `341f055`.
+  Verification run starting.
+- Next: start P17.7 (case memory + cache/TTL + re-audit diffs) locally; on
+  `39156241115` green copy P17.5 evidence; on `341f055`'s run green copy P17.6
+  evidence.
