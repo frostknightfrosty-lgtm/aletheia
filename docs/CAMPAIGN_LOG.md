@@ -14,21 +14,22 @@
 ## NOW (edited in place — this is the current position)
 
 - Campaign: **ACTIVE** — owner mandate received and executing.
-- Position: **P17.11 in progress (Wave A)** — the re-check-with-evidence
-  rows are recorded in `docs/PHASE17_RECHECKS.md` (§A 27 → 28 → 29 → 32 →
-  35; see the queue line), and §A 33 (Unpaywall DOI route) is built (runner
-  DOI path + adapter parse + 4 tests; local 944 passed + 65
-  environment-only skips → expected CI 1009); pushed. P17.10
-  (`39159820872`) and the live cascade (`39159843080`) are still in flight.
-  **P17.3–P17.9 verified green.**
-- Next action: when this push's run is green, copy its evidence and flip
-  §A 33; when P17.10 and the live cascade finish, copy their evidence;
-  continue Wave A (next: SearXNG self-hosted container, CipherScan pinned
-  commit, Bron Vault offline parser).
-- In-flight CI: `39159820872` (P17.10), live cascade `39159843080`, plus
-  this push's run.
-- Last verified commit: `5a0a201` (run `39159218589`, docker-verification
-  green; lines copied: parser 49/49; **998 passed**; capture 60/60; storage
+- Position: **P17.10 CI green** (run `39159820872`; parser 49/49; 1005
+  passed; capture 60/60; storage 6/6 — lines copied to the Log). First live
+  cascade dispatch (run `39159843080`) failed on an egress-session Docker
+  network collision and is **repaired** (one session per adapter per run +
+  recorded start failures; local 946 passed + 65 environment-only skips →
+  expected CI 1011); re-dispatch on the repair's green. **P17.11 Wave A in
+  progress** — re-checks recorded; §A 33 (Unpaywall DOI route) run
+  `39160798771` watching (expected 1009). **P17.3–P17.9 verified green.**
+- Next action: on the repair's run green re-dispatch the live cascade for
+  `username:frost2233`; on Unpaywall's run green flip §A 33; continue
+  Wave A (next: SearXNG self-hosted container, CipherScan pinned commit,
+  Bron Vault offline parser).
+- In-flight CI: Unpaywall run `39160798771` (expected 1009), plus this
+  repair's run (expected 1011).
+- Last verified commit: `39680b0` (run `39159820872`, docker-verification
+  green; lines copied: parser 49/49; **1005 passed**; capture 60/60; storage
   6/6).
 - Owner-blocked (parked, never wait on): everything in `docs/USER_ACTIONS.md`.
 - Decision defaults in force: see "Adopted defaults" below.
@@ -158,16 +159,18 @@
 - [ ] **P17.10** — fixture dry-run → local suite → CI → live cascade on
       `username:frost2233` (authorization on file). Owner confirmations and the
       first real calibration labels are owner-gated — park them.
-      → Implemented locally-green (`cascade/runner.py`: one audited run per
-      cascade — fixture observer (no I/O) + live `AdapterObserver` reusing the
-      egress proxy/audit-chain patterns; the manifest `cascade` section
-      carries the verbatim authorization assertion and the scheduler
-      checkpoint; artifacts ledger/trail/dossier/coverage/next-actions under
-      `runs/<id>/cascade/`; the coverage audit is asserted at the end of the
-      run; optional case recording via `--case-id`; `aletheia cascade run`
-      CLI; `live-cascade.yml` dispatch workflow; 7 runner tests; local 940
-      passed + 65 skips → expected CI 1005); pushed `dc44fc5`; run verifying.
-      Live dispatch on `username:frost2233` pending this run green.
+      → CI green: pushed `dc44fc5` + docs `39680b0`; run `39159820872`
+      **green** — parser 49/49; 1005 passed; capture 60/60; storage 6/6 (lines
+      copied to the Log). First live dispatch (run `39159843080`) **failed in
+      the wiring**: instaloader timed out (recorded) and the next instaloader
+      invocation collided with the leftover per-invocation Docker network
+      (`docker network create --internal aletheia-egress-net-instaloader` →
+      "already exists"), crashing outside the per-adapter error handling.
+      Repair: one egress session per adapter per run (network names are
+      adapter-derived), incremental proxy-entry chaining, start failures
+      recorded as blocked and never retried or run unwired, `close()` drains
+      and tears down in `run_cascade` (local 946 passed + 65 skips → expected
+      CI 1011); re-dispatch on this repair's green.
 
 ### Track 2 — Source completeness (`docs/SOURCE_COMPLETENESS.md`; P17.11–P17.12)
 
@@ -428,6 +431,34 @@ activate when the key exists.
   `secret_env` and both live workflows, RATE_LIMITS.md re-annotated; 4 new
   tests; local 944 passed + 65 environment-only skips → expected CI 1009;
   pushed; run verifying.
-- Next: on this push's run green flip §A 33 + CHANGELOG (Unpaywall); on
-  P17.10's run (`39159820872`) green copy its evidence; copy the live
-  cascade evidence (`39159843080`) when it finishes; continue Wave A.
+- 2026-10-18 — P17.10 CI verification — commit `dc44fc5` (docs `39680b0`) —
+  run `39159820872` — docker-verification **green**. Copied from the
+  downloaded artifact `ci-artifacts-39159820872`:
+  - `PARSER PREFLIGHT: PASS — 49/49 adapters have parser coverage`
+  - pytest-summary.json: `"console_summary": "1005 passed, 1 warning"`,
+    `"junit_total": 1005`, `"skipped_in_ci": []`, `"ok": true`
+  - docker-integration/capture.log: `DOCKER CAPTURE: PASS — 60/60 cases
+    captured`
+  - storage-conformance.json: `"passing": ["file", "postgres", "neo4j",
+    "elasticsearch", "minio", "redis"]`, `"unconfigured": []`,
+    `"required_all": true`, `"ok": true`
+- 2026-10-18 — live cascade incident (first dispatch, run `39159843080`) —
+  the run failed outside the per-adapter error handling. Copied from the
+  artifact `ci-live-cascade-39159843080` (`cascade.log` tail):
+  - `aletheia.core.egress.DockerCommandError: wiring command failed (exit 1):
+    docker network create --internal aletheia-egress-net-instaloader`
+  - `Error response from daemon: network with name
+    aletheia-egress-net-instaloader already exists`
+  AUDIT.jsonl: `adapter_invocation x8`, `adapter_complete x6`,
+  `cascade_adapter_error x1` — instaloader `container timed out after 120s`
+  (recorded); leak_checkers/maigret/reddit-api/sherlock/social_username/
+  youtube-api completed; a later instaloader pivot then collided with the
+  timed-out invocation's leftover network. Root cause: per-invocation
+  `egress.ProxySession` with an adapter-derived network name, and
+  `session.start()` outside the recorded-error try. Repair: one session per
+  adapter per run + incremental chaining + recorded start failures +
+  `close()` teardown; 2 regression tests; local `946 passed + 65 skips →
+  expected CI 1011`.
+- Next: on this repair's run green (expected 1011) re-dispatch the live
+  cascade for `username:frost2233`; on Unpaywall's run (`39160798771`) green
+  flip §A 33 + CHANGELOG; continue Wave A.

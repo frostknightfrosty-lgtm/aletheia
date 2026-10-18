@@ -1,5 +1,40 @@
 # Changelog
 
+## 2026-10-18 — P17.10: live cascade runner + first live dispatch (repair)
+
+The runner that executes one audited cascade run against the live adapters,
+and the campaign's first live dispatch on the authorized target
+`username:frost2233`. Every number below is copied from downloaded artifacts;
+the live dispatch's failure is recorded verbatim.
+
+- CI (run `39159820872`, commit `dc44fc5` + docs `39680b0`): `PARSER
+  PREFLIGHT: PASS — 49/49 adapters have parser coverage`; `"console_summary":
+  "1005 passed, 1 warning"` with `"junit_total": 1005`, `"skipped_in_ci": []`,
+  `"ok": true`; `DOCKER CAPTURE: PASS — 60/60 cases captured`;
+  storage-conformance.json `"passing": ["file", "postgres", "neo4j",
+  "elasticsearch", "minio", "redis"]`, `"unconfigured": []`,
+  `"required_all": true`, `"ok": true`.
+- What landed: one audited run per cascade (`cascade/runner.py`) — fixture
+  observer for I/O-free dry-runs, live `AdapterObserver` reusing the egress
+  proxy/audit-chain patterns; the manifest `cascade` section carries the
+  verbatim authorization assertion and the scheduler checkpoint; ledger,
+  trail, dossier, coverage and next-actions artifacts under
+  `runs/<id>/cascade/`; `aletheia cascade run` CLI; a `live-cascade.yml`
+  dispatch workflow; 7 runner tests.
+- First live dispatch (run `39159843080`): leak_checkers, maigret,
+  reddit-api, sherlock, social_username and youtube-api completed; instaloader
+  timed out (`container timed out after 120s`, recorded); a later instaloader
+  pivot then crashed the run on its per-invocation egress network —
+  `DockerCommandError: wiring command failed (exit 1): docker network create
+  --internal aletheia-egress-net-instaloader` / `Error response from daemon:
+  network with name aletheia-egress-net-instaloader already exists`.
+- Repair: one egress session per adapter for the whole run (network names are
+  adapter-derived), incremental proxy-entry chaining, wiring-start failures
+  recorded as blocked and never retried or run unwired, `close()` teardown in
+  `run_cascade`; 2 regression tests. Local `946 passed` + 65
+  environment-only skips → expected CI 1011; re-dispatch follows this
+  repair's green.
+
 ## 2026-10-18 — P17.9: deterministic cascade engine + synthetic-world suites
 
 The pivot cascade's execution core: a deterministic engine over an injectable

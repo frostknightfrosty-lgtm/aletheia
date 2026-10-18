@@ -96,7 +96,17 @@ unverified, and re-opens only on a vendor change.
   `UNPAYWALL_EMAIL` contact secret; every other input keeps the documented
   skip. The contact email is an owner-provided secret (no registration).
 
-## #36 CipherScan — next re-check in this wave
+## #36 CipherScan — pinnable commit confirmed (2026-10-18)
 
-- Path per the inventory: pin a specific commit SHA as the verifiable
-  artifact. Not yet probed; recorded here when its build unit runs.
+- GitHub API (2026-10-18): the repository has **0 releases** and no tags, so a
+  commit SHA is the only verifiable artifact — matching the inventory path.
+- Repository facts: `mozilla/cipherscan`, license **MPL-2.0**, default branch
+  `master`, not archived.
+- Pinned commit: **`30bd23938853d68b51c2ebe4bcc922cc3113c5e2`** (2025-06-09,
+  the current `master` tip). Its only change over its parent
+  (`5866911b6207fb29491b6a625f62cea441961e5d`) is a one-line portability fix
+  in `cscan.sh`: `python` → `python3`. The exact diff was reviewed here
+  before pinning; nothing else is taken from that merge.
+- **Outcome:** the build unit (a Dockerfile cloning the repository at that
+  SHA, a capture case, and the wiring into `ssl_tls`) is queued behind the
+  SearXNG unit; the SHA above is the artifact to verify against on rebuild.
