@@ -1,6 +1,6 @@
 # Aletheia Handoff — Phase 15 complete (egress coverage)
 
-Last updated: 2026-10-18T01:18:27Z
+Last updated: 2026-10-18T01:57:10Z
 
 ## Project boundaries
 
@@ -13,14 +13,14 @@ prerequisites are met. A tier classification is project policy, not a legal conc
 
 ## Repository and CI state
 
-- Latest CI-verified commit: `9f1c09288961d5175ff6c2d68b8b6f7f307074d7`
-  (`phase-15: keep the policy check in the scenario summary`).
-- Docker Verification run **39084899431** —
-  https://github.com/frostknightfrosty-lgtm/aletheia/actions/runs/39084899431 — **green**.
+- Latest CI-verified commit: `d7f73e172342300e1b074248e86d8734fb73b680`
+  (`phase-15: prove the crtsh proxy entry is new, not inherited`).
+- Docker Verification run **39087297928** —
+  https://github.com/frostknightfrosty-lgtm/aletheia/actions/runs/39087297928 — **green**.
 - Evidence lines copied from the downloaded artifact
-  (`ci-artifacts-39084899431`), not typed:
+  (`ci-artifacts-39087297928`), not typed:
   - `PARSER PREFLIGHT: PASS — 49/49 adapters have parser coverage`
-  - `678 passed, 1 warning in 36.14s`
+  - `678 passed, 1 warning in 38.12s`
   - `DOCKER CAPTURE: PASS — 57/57 cases captured`
   - `STORAGE CONFORMANCE: PASS — 6/6 backends conform`
 - `pytest-summary.json`: `junit_total` 678, `skipped_in_ci` `[]`, `ok` `true`.
@@ -28,7 +28,7 @@ prerequisites are met. A tier classification is project policy, not a legal conc
   `minio`, `redis`; `unconfigured` `[]`. `results.json`: 57 entries, 0 nonzero return codes,
   with both `phase15-*` scenario checks present. `egress-scenario.json`:
   `phase15-egress-policy-covers-registry` = `adapters=49 network_required=44 wired=44`;
-  `phase15-egress-previously-unwired-adapter` = `crtsh rc=1 crt.sh log entries=1`; all four
+  `phase15-egress-previously-unwired-adapter` = `crtsh rc=1 new CONNECT crt.sh entries=1 status=502`; all four
   `phase12-*` checks still pass.
 - Local consistency: **617 passed + 61 skipped = 678**, which equals the CI passed count
   exactly. The 61 skips are 56 `tests/test_docker_integration.py` (no Docker on this machine)
@@ -43,7 +43,7 @@ prerequisites are met. A tier classification is project policy, not a legal conc
 ## Phase 15 — egress proxy coverage (complete)
 
 Implemented and CI-verified in commits `5add1b5` (policy, default wiring, CLI flag), `4ed8772`
-(docs), `9f1c092` (report the policy check).
+(docs), `9f1c092` (report the policy check), `d7f73e1` (harden the crtsh check).
 
 - The Phase 12 allowlist `EGRESS_WIRED_ADAPTERS = (search_engines, ssl_tls, ip_intelligence)`
   is gone. `egress.is_wired(name, network_required=descriptor.network_required)` is true for
@@ -58,7 +58,7 @@ Implemented and CI-verified in commits `5add1b5` (policy, default wiring, CLI fl
 - Coverage is checked rather than asserted: a unit test walks the registry, and CI reports
   `phase15-egress-policy-covers-registry` (`adapters=49 network_required=44 wired=44`) plus a
   real-container check that runs `crtsh` — never in the Phase 12 allowlist — on an `--internal`
-  network and finds its HTTPS attempt in the proxy log (`crtsh rc=1 crt.sh log entries=1`,
+  network and finds its HTTPS attempt in the proxy log (`crtsh rc=1 new CONNECT crt.sh entries=1 status=502`,
   fail-closed).
 - The wiring pattern itself is unchanged from Phase 12: one `--internal` network per adapter
   run, the proxy as the only route out, `HTTP_PROXY`/`HTTPS_PROXY`/`NO_PROXY` in the container,

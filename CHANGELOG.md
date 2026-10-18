@@ -38,6 +38,18 @@
   returned by `_run_checks`. The list is now assembled in one place, and a unit test pins the
   check's name and result.
 
+- **Evidence hardened (run 39087297928).** The crtsh scenario check counts CONNECT crt.sh
+  entries before and after the container run and requires exactly one new one, instead
+  of counting entries after the run alone: the scenario's single proxy tags every
+  container `search_engines`, so an after-only count could have matched a
+  `search_engines` entry and passed without the crtsh container's request having gone
+  through the proxy. Artifact detail: `phase15-egress-previously-unwired-adapter` =
+  `crtsh rc=1 new CONNECT crt.sh entries=1 status=502`. Same run: `678 passed, 1 warning in 38.12s`; `DOCKER CAPTURE: PASS — 57/57 cases captured`;
+  `STORAGE CONFORMANCE: PASS — 6/6 backends conform`; `pytest-summary.json` `junit_total` 678,
+  `skipped_in_ci` `[]`, `ok` `true`;
+  `results.json` 57 entries, 0 nonzero. Local consistency:
+  617 passed + 61 skipped = 678 CI passed.
+
 ## 2026-10-18 — Phase 14: storage backends behind one conformance contract, CI-verified against real services
 - **One contract, six backends.** `app/aletheia/storage/base.py` defines `StorageBackend`
   (graph snapshots + run manifests), implemented by `file`, `postgres`, `neo4j`,
