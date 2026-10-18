@@ -110,3 +110,28 @@ unverified, and re-opens only on a vendor change.
 - **Outcome:** the build unit (a Dockerfile cloning the repository at that
   SHA, a capture case, and the wiring into `ssl_tls`) is queued behind the
   SearXNG unit; the SHA above is the artifact to verify against on rebuild.
+
+## #3 scrawler — Windows-only GUI; upstream states no CLI (re-checked 2026-10-18)
+
+- `FAQ.md` verbatim (<https://github.com/AAndyProgram/SCrawler/blob/main/FAQ.md>,
+  section "Does this program have a GUI or CLI, and will a CLI be added in the
+  future"):
+  > This is a GUI program and **NO**, CLI will not be added
+- `README.md` verbatim
+  (<https://github.com/AAndyProgram/SCrawler/blob/main/README.md>):
+  > I highly doubt you can run SCrawler on Linux or Mac. SCrawler is a program
+  > that is heavily dependent on Windows.
+- README requirements: "**Windows 10, 11** with NET Framework 4.6.1 or
+  higher"; the FAQ's "What file executes the program" names **`SCrawler.exe`**
+  — a .NET/vb.net desktop application, not a container-friendly binary.
+- The FAQ's per-site retrieval paths are credential-bound, verbatim:
+  > Reddit: add cookies and/or configure [OAuth]… **Reddit profiles can be
+  > downloaded without credentials using cookies.**
+
+  > **META** (**Instagram**, Threads, Facebook): you need **cookies** and fill
+  > in **all fields**
+- **Outcome:** no headless read-only subset exists to wrap. The upstream is an
+  interactive Windows GUI with no CLI and no plan for one ("CLI will not be
+  added"), and its site retrieval requires user cookies/OAuth. The row-3
+  interface blocker is recorded; re-open only if upstream ships a non-GUI
+  interface.

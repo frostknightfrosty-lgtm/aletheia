@@ -45,7 +45,7 @@ below may be upgraded except from copied artifact lines.
 |---|------|----:|-------------|-------------------|---------------------|
 | 1 | OWASP SocialOSINTLM | 1 | Disabled sub-source (`social_username`): external platform + LLM credentials | Re-review: free platform keys; free-tier or local LLM path; document what the LLM adds | Owner: platform dev keys |
 | 2 | Zehef | 1 | Documented drop (`social_profile`) | Re-review: email→registered-accounts CLI; wrap in container if scoped | — |
-| 3 | scrawler | 1 | Disabled: GUI/cookie/OAuth, no CLI | Re-review for a headless read-only subset; if none exists, record the interface blocker with evidence | — |
+| 3 | scrawler | 1 | Dropped: Windows-only .NET GUI; re-checked 2026-10-18 — upstream FAQ: no CLI will be added; site retrieval needs user cookies/OAuth. See [`PHASE17_RECHECKS.md`](PHASE17_RECHECKS.md) | Recorded as interface blocker 2026-10-18; re-open only on a vendor interface change | — |
 | 4 | tiktok-hashtag-analysis | 1 | Documented drop (`social_profile`) | Bellingcat PyPI library; re-review and implement (hashtag input) | — |
 | 5 | OnionSearch | 2 | Not built; `darkweb_search` deferred (Gate 6) | Build in `darkweb_search` behind container-level Tor; per-engine notes (Ahmia/Torch/Candle; ToS risk recorded) | Tor setup |
 | 6 | TorBot | 2 | Not built; Gate 6 | Build; crawler semantics (titles, links, emails) documented | Tor setup |
@@ -145,7 +145,7 @@ queries over the public patents datasets).
   contract; OpenSecrets API discontinued 2025-04-15; commercial only). Re-open
   only if the vendor publishes a contract or a free route.
 - **Re-check items that may resolve to blockers:** PatentsView, Google Custom
-  Search, PublicWWW, scrawler, crypttrace, Google Patents BigQuery. If the free
+  Search, PublicWWW, crypttrace, Google Patents BigQuery. If the free
   path no longer exists, record the evidence and the resulting exclusion — do
   not fabricate a path.
 - **The 7 deferred candidates** (Judyrecords, PACER Case Locator, MuckRock,
