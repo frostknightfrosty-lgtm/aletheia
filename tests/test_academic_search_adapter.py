@@ -50,17 +50,17 @@ SUPPORTED_SOURCES = (
     "openaire",
 )
 
-# unpaywall is dropped, not implemented: the Unpaywall REST API documents no
-# title, keyword or author search (its only live endpoint is a DOI lookup and
-# its documented title search was retired on 18 September 2026 and now returns
-# 410 Gone). It therefore appears in the fixture as a skip carrying this exact
-# reason and is never queried.
+# unpaywall is queried only when the input itself is a DOI (its documented
+# title search was retired on 18 September 2026 and now returns 410 Gone; the
+# DOI lookup requires a contact email). Name-based inputs therefore appear in
+# the fixture as a skip carrying this exact reason and are never queried.
 SKIP_REASONS = {
     "unpaywall": (
-        "Unpaywall documents no title, keyword or author search: its only live endpoint is a DOI lookup "
-        "(GET /v2/:doi) and the documented title search (GET /v2/search?query=...) was retired on "
-        "18 September 2026 and now returns 410 Gone, so no documented search contract exists for this adapter's "
-        "name-based input types."
+        "Unpaywall documents no title, keyword or author search: the documented title search "
+        "(GET /v2/search?query=...) was retired on 18 September 2026 and now returns 410 Gone, and a "
+        "name-based input is not a DOI. Its only live endpoint is the DOI lookup (GET /v2/:doi, which "
+        "requires a contact-email parameter), so no documented contract exists for this input. See "
+        "docker/academic_search/RATE_LIMITS.md."
     ),
 }
 
@@ -165,7 +165,7 @@ def test_extract_record_type():
         ("arxiv", "arxiv_preprint"),
         ("core", "core_work"),
         ("openaire", "openaire_research_product"),
-        ("unpaywall", None),
+        ("unpaywall", "unpaywall_doi_record"),
         ("unknown-source", None),
     ]
     for source, expected in cases:
@@ -717,19 +717,21 @@ def test_adapter_is_registered_and_not_parser_test_exempt():
         "SEMANTIC_SCHOLAR_API_KEY",
         "CORE_API_KEY",
         "CROSSREF_MAILTO",
+        "UNPAYWALL_EMAIL",
     ]
     assert descriptor.parser_test_exempt is False
     assert not getattr(descriptor, "parser_test_exempt", False)
     assert descriptor.upstream.endswith("docker/academic_search")
 
 
-def test_adapter_documents_the_dropped_unpaywall_sub_source():
-    """The dropped candidate sub-source stays an auditable, reasoned skip."""
+def test_adapter_documents_the_unpaywall_doi_only_route():
+    """Non-DOI inputs stay an auditable, reasoned skip on a DOI-only route."""
     assert set(UNSUPPORTED_SUB_SOURCES) == {"unpaywall"}
     assert not set(UNSUPPORTED_SUB_SOURCES) & set(SUPPORTED_SUB_SOURCES)
     reason = UNSUPPORTED_SUB_SOURCES["unpaywall"]
     assert "410 Gone" in reason
     assert "retired" in reason
+    assert "not a DOI" in reason
 
     runner_source = (ROOT / "docker" / "academic_search" / "runner.py").read_text(encoding="utf-8")
     assert 'UNSUPPORTED_SUB_SOURCES: dict[str, str] = {' in runner_source
@@ -790,7 +792,7 @@ def test_runner_reports_every_sub_source():
 
 
 def test_runner_defines_no_endpoint_for_unsupported_sources():
-    """Unsupported sub-sources are auditable skips with no URL, never a guessed call."""
+    """Non-matching inputs are auditable skips with no URL, never a guessed call."""
     runner = _load_runner()
     assert runner.UNSUPPORTED_SUB_SOURCES == UNSUPPORTED_SUB_SOURCES
     for source, reason in UNSUPPORTED_SUB_SOURCES.items():
@@ -803,6 +805,102 @@ def test_runner_defines_no_endpoint_for_unsupported_sources():
         assert result.skip_reason == reason
         assert result.data is None
         assert result.raw_hash is None
+
+
+def test_runner_extracts_dois_from_inputs():
+    """Only DOI-shaped inputs reach the Unpaywall DOI endpoint."""
+    runner = _load_runner()
+    assert runner._doi_from_query("10.1038/nature12373") == "10.1038/nature12373"
+    assert runner._doi_from_query("https://doi.org/10.1038/nature12373") == "10.1038/nature12373"
+    assert runner._doi_from_query("doi:10.1038/nature12373") == "10.1038/nature12373"
+    assert runner._doi_from_query("Acme Holdings") is None
+    assert runner._doi_from_query("10.1038") is None
+
+
+def test_runner_unpaywall_queries_the_doi_endpoint(monkeypatch):
+    runner = _load_runner()
+    captured: dict = {}
+
+    def fake_fetch_json(url, params=None, headers=None):
+        captured["url"] = url
+        captured["params"] = params
+        return (
+            {
+                "doi": "10.1038/nature12373",
+                "title": "Synthetic Open-Access Paper",
+                "year": 2013,
+                "journal_name": "Nature",
+                "is_oa": True,
+                "oa_status": "gold",
+                "z_authors": [{"given": "Jane", "family": "Acme"}],
+                "best_oa_location": {"url": "https://example.org/oa.pdf"},
+            },
+            200,
+            None,
+        )
+
+    monkeypatch.setattr(runner, "_fetch_json", fake_fetch_json)
+    monkeypatch.setenv("UNPAYWALL_EMAIL", "osint@example.org")
+    result = runner.query_unpaywall("10.1038/nature12373")
+
+    assert result.skipped is False
+    assert result.error is None
+    assert result.http_status == 200
+    assert captured["url"] == "https://api.unpaywall.org/v2/10.1038/nature12373"
+    assert captured["params"] == {"email": "osint@example.org"}
+    record = result.data["records"][0]
+    assert record["record_id"] == "10.1038/nature12373"
+    assert record["title"] == "Synthetic Open-Access Paper"
+    assert record["venue"] == "Nature"
+    assert record["authors"] == ["Jane Acme"]
+    assert record["url"] == "https://example.org/oa.pdf"
+    assert result.data["raw"]["doi"] == "10.1038/nature12373"
+
+
+def test_runner_unpaywall_skips_without_the_contact_email(monkeypatch):
+    runner = _load_runner()
+    monkeypatch.delenv("UNPAYWALL_EMAIL", raising=False)
+    result = runner.query_unpaywall("10.1038/nature12373")
+    assert result.skipped is True
+    assert result.skip_reason == runner.UNPAYWALL_EMAIL_MISSING_REASON
+
+
+def test_parse_live_unpaywall_doi_record():
+    """The DOI-path payload parses to a normal academic finding."""
+    data = {
+        "api_source": "Unpaywall REST API v2 (DOI lookup)",
+        "api_documentation": "https://unpaywall.org/products/api",
+        "endpoint": "https://api.unpaywall.org/v2/:doi",
+        "query": "10.1038/nature12373",
+        "record_count": 1,
+        "truncated": False,
+        "records": [
+            {
+                "record_id": "10.1038/nature12373",
+                "doi": "10.1038/nature12373",
+                "title": "Synthetic Open-Access Paper",
+                "year": 2013,
+                "venue": "Nature",
+                "authors": ["Jane Acme"],
+                "url": "https://example.org/oa.pdf",
+            }
+        ],
+    }
+    payload = _payload([_source("unpaywall", http_status=200, data=data)])
+
+    adapter = AcademicSearchAdapter()
+    result = adapter.parse(_request("10.1038/nature12373"), Path("."), payload, "", 0)
+
+    assert result.status == "succeeded"
+    assert len(result.findings) == 1
+    finding = result.findings[0]
+    assert finding.attributes["source"] == "unpaywall"
+    assert finding.record_type == "unpaywall_doi_record"
+    assert finding.doi == "10.1038/nature12373"
+    assert finding.value == "UNPAYWALL:10.1038/nature12373:Synthetic Open-Access Paper"
+    assert finding.attributes["details"]["record_count"] == 1
+    assert finding.attributes["details"]["venue"] == "Nature"
+    _assert_provenance_hash_invariant(result.findings)
 
 
 def test_runner_supported_sources_cite_a_documented_endpoint():

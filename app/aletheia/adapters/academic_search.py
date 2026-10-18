@@ -30,15 +30,19 @@ SUPPORTED_SUB_SOURCES = (
     "openaire",
 )
 
-# Sub-sources that publish no documented title/keyword/author search and are
-# therefore never queried. The runner reports each one once per run as a skipped
-# source carrying this exact reason; no URL is invented for it.
+# Sub-source with a single-input-type route. The Unpaywall REST API publishes no
+# title/keyword/author search (the documented title-search endpoint was retired
+# on 18 September 2026 and now returns 410 Gone); its only live endpoint is the
+# DOI lookup (GET /v2/:doi) with a required contact-email parameter. The runner
+# reports this exact reason for name-based inputs and queries the DOI path only
+# when the input itself is a DOI and UNPAYWALL_EMAIL is set.
 UNSUPPORTED_SUB_SOURCES: dict[str, str] = {
     "unpaywall": (
-        "Unpaywall documents no title, keyword or author search: its only live endpoint is a DOI lookup "
-        "(GET /v2/:doi) and the documented title search (GET /v2/search?query=...) was retired on "
-        "18 September 2026 and now returns 410 Gone, so no documented search contract exists for this adapter's "
-        "name-based input types."
+        "Unpaywall documents no title, keyword or author search: the documented title search "
+        "(GET /v2/search?query=...) was retired on 18 September 2026 and now returns 410 Gone, and a "
+        "name-based input is not a DOI. Its only live endpoint is the DOI lookup (GET /v2/:doi, which "
+        "requires a contact-email parameter), so no documented contract exists for this input. See "
+        "docker/academic_search/RATE_LIMITS.md."
     ),
 }
 
@@ -151,6 +155,7 @@ _SUBJECT_PREFIXES = {
     "arxiv": "ARXIV",
     "core": "CORE",
     "openaire": "OPENAIRE",
+    "unpaywall": "UNPAYWALL",
 }
 
 
@@ -178,6 +183,8 @@ def _extract_record_type(data: dict, source: str) -> str | None:
         return "core_work"
     if source == "openaire":
         return "openaire_research_product"
+    if source == "unpaywall":
+        return "unpaywall_doi_record"
     return None
 
 
@@ -298,18 +305,18 @@ def _extract_details(data: dict, source: str) -> dict[str, Any] | None:
 class AcademicSearchAdapter(Adapter):
     descriptor = AdapterDescriptor(
         name="academic_search",
-        license="Composite adapter; sub-sources are OpenAlex, Crossref, Semantic Scholar Academic Graph, arXiv, CORE API v3 and the OpenAIRE Graph API",
+        license="Composite adapter; sub-sources are OpenAlex, Crossref, Semantic Scholar Academic Graph, arXiv, CORE API v3 and the OpenAIRE Graph API; the Unpaywall DOI lookup runs only for DOI-shaped inputs",
         input_types=[SeedType.NAME, SeedType.COMPANY_NAME, SeedType.PERSON_NAME],
         output_types=[EntityType.ACADEMIC_RECORD],
         legal_notes=[
             "Composite adapter covering the six academic-search sub-sources of the academic_search batch: openalex (OpenAlex works search), crossref (Crossref REST API works query), semantic-scholar (Semantic Scholar Academic Graph paper relevance search), arxiv (arXiv API query), core (CORE API v3 search) and openaire (OpenAIRE Graph API V3 research products search).",
             "Every query parameter was read from the provider's own official documentation; none was inferred from a response example. The verbatim parameter name, auth method, documented rate limit, response format and documentation URL of each sub-source are recorded in docker/academic_search/RATE_LIMITS.md.",
-            "unpaywall is deliberately not queried. The Unpaywall REST API documents no title, keyword or author search: its only live endpoint is a DOI lookup and its documented title-search endpoint was retired on 18 September 2026 and now returns 410 Gone. The runner reports it once per run as a skipped source with that exact reason.",
+            "unpaywall is queried only when the input itself is a DOI. The Unpaywall REST API documents no title, keyword or author search (its documented title-search endpoint was retired on 18 September 2026 and now returns 410 Gone); its only live endpoint is the DOI lookup (GET /v2/:doi), which requires a contact-email parameter — sent as UNPAYWALL_EMAIL when set, otherwise the run records an auditable skip. Name-based inputs always get the documented skip reason and no URL is built for them.",
             "A hit is a scholarly-record match on free-text search, not a confirmed identity match between a person or organisation and a publication. Author names are reported exactly as the source published them and must be reviewed by a human before any attribution is relied on.",
             "Only the free-text search parameters documented by each provider are sent. No API key is required for any sub-source and no credential is stored in this repository; the optional keys documented by OpenAlex, Semantic Scholar and CORE are only sent when the matching environment variable is set, and the optional Crossref polite-pool mailto is only sent when CROSSREF_MAILTO is set.",
             "Documented rate limits differ per sub-source and are recorded verbatim in docker/academic_search/RATE_LIMITS.md. The runner issues at most one request per sub-source per run (six requests total) and never paginates.",
         ],
-        rate_limit="At most one request per sub-source per run (6 requests per run); no pagination. Documented limits: OpenAlex 10 requests/second without a key and 30/second with a free key; Crossref not published; Semantic Scholar 1000 requests/second shared by all unauthenticated users and 1 request/second introductory for a free key; arXiv a 3 second delay between successive calls; CORE 100 tokens/day and at most 10/minute unauthenticated; OpenAIRE 60 requests/hour unauthenticated and 7200/hour authenticated. See docker/academic_search/RATE_LIMITS.md",
+        rate_limit="At most one request per sub-source per run (up to 7 requests per run, the seventh only when the input is a DOI); no pagination. Documented limits: OpenAlex 10 requests/second without a key and 30/second with a free key; Crossref not published; Semantic Scholar 1000 requests/second shared by all unauthenticated users and 1 request/second introductory for a free key; arXiv a 3 second delay between successive calls; CORE 100 tokens/day and at most 10/minute unauthenticated; OpenAIRE 60 requests/hour unauthenticated and 7200/hour authenticated; Unpaywall \"Please limit use to 100,000 calls per day.\". See docker/academic_search/RATE_LIMITS.md",
         invocation="HTTPS JSON and Atom XML search APIs via dedicated Docker runner (aletheia/academic-search:v1)",
         version_pin="1.0",
         upstream="https://github.com/frostknightfrosty-lgtm/aletheia/tree/main/docker/academic_search",
@@ -323,6 +330,7 @@ class AcademicSearchAdapter(Adapter):
             "SEMANTIC_SCHOLAR_API_KEY",
             "CORE_API_KEY",
             "CROSSREF_MAILTO",
+            "UNPAYWALL_EMAIL",
         ],
     )
 

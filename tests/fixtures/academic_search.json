@@ -216,7 +216,7 @@
     {
       "source": "unpaywall",
       "skipped": true,
-      "skip_reason": "Unpaywall documents no title, keyword or author search: its only live endpoint is a DOI lookup (GET /v2/:doi) and the documented title search (GET /v2/search?query=...) was retired on 18 September 2026 and now returns 410 Gone, so no documented search contract exists for this adapter's name-based input types.",
+      "skip_reason": "Unpaywall documents no title, keyword or author search: the documented title search (GET /v2/search?query=...) was retired on 18 September 2026 and now returns 410 Gone, and a name-based input is not a DOI. Its only live endpoint is the DOI lookup (GET /v2/:doi, which requires a contact-email parameter), so no documented contract exists for this input. See docker/academic_search/RATE_LIMITS.md.",
       "timestamp": "2026-10-15T09:00:07+00:00",
       "http_status": 0,
       "error": null,

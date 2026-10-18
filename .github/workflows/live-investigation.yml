@@ -68,6 +68,7 @@ jobs:
           ALETHEIA_TIMEOUT_SECONDS: ${{ inputs.timeout_seconds }}
           ALETHEIA_EGRESS_RATE: ${{ inputs.egress_rate }}
           ALETHEIA_EGRESS_BURST: ${{ inputs.egress_burst }}
+          UNPAYWALL_EMAIL: ${{ secrets.UNPAYWALL_EMAIL }}
           REDDIT_CLIENT_ID: ${{ secrets.REDDIT_CLIENT_ID }}
           REDDIT_CLIENT_SECRET: ${{ secrets.REDDIT_CLIENT_SECRET }}
           YOUTUBE_API_KEY: ${{ secrets.YOUTUBE_API_KEY }}

@@ -16,6 +16,7 @@ from __future__ import annotations
 import hashlib
 import json
 import os
+import re
 import sys
 import urllib.error
 import urllib.parse
@@ -42,19 +43,29 @@ SUPPORTED_SUB_SOURCES = (
     "openaire",
 )
 
-# Dropped sub-source. Unpaywall documents no title/keyword/author search: the
-# only live endpoint is a DOI lookup (GET /v2/:doi) and the documented title
-# search (GET /v2/search?query=...) was retired on 18 September 2026 and now
-# returns 410 Gone. It is therefore reported once per run as an auditable skip
-# with this reason and no URL is ever built for it.
+# Unpaywall has a single-input-type route. Its documented title search
+# (GET /v2/search?query=...) was retired on 18 September 2026 and now returns
+# 410 Gone; its only documented live endpoint is the DOI lookup
+# (GET /v2/:doi), which requires a contact-email parameter. Name-based inputs
+# therefore get the auditable skip below with no URL ever built for them, and
+# DOI-shaped inputs are queried live when UNPAYWALL_EMAIL is configured.
 UNSUPPORTED_SUB_SOURCES: dict[str, str] = {
     "unpaywall": (
-        "Unpaywall documents no title, keyword or author search: its only live endpoint is a DOI lookup "
-        "(GET /v2/:doi) and the documented title search (GET /v2/search?query=...) was retired on "
-        "18 September 2026 and now returns 410 Gone, so no documented search contract exists for this adapter's "
-        "name-based input types."
+        "Unpaywall documents no title, keyword or author search: the documented title search "
+        "(GET /v2/search?query=...) was retired on 18 September 2026 and now returns 410 Gone, and a "
+        "name-based input is not a DOI. Its only live endpoint is the DOI lookup (GET /v2/:doi, which "
+        "requires a contact-email parameter), so no documented contract exists for this input. See "
+        "docker/academic_search/RATE_LIMITS.md."
     ),
 }
+
+# Recorded on the DOI path when the required contact email is not configured;
+# the DOI endpoint is never queried without it.
+UNPAYWALL_EMAIL_MISSING_REASON = (
+    "The input is a DOI and Unpaywall's only live endpoint is the DOI lookup (GET /v2/:doi), but that "
+    "endpoint requires a contact-email parameter and UNPAYWALL_EMAIL is not set. Set the UNPAYWALL_EMAIL "
+    "environment variable to enable the DOI path. See docker/academic_search/RATE_LIMITS.md."
+)
 
 # Official documentation and the exact published endpoint of every implemented
 # sub-source.
@@ -70,6 +81,8 @@ CORE_DOCS = "https://api.core.ac.uk/docs/v3"
 CORE_ENDPOINT = "https://api.core.ac.uk/v3/search/works/"
 OPENAIR_E_DOCS = "https://graph.openaire.eu/docs/apis/graph-api/"
 OPENAIR_E_ENDPOINT = "https://api.openaire.eu/graph/v3/research-products"
+UNPAYWALL_DOCS = "https://unpaywall.org/products/api"
+UNPAYWALL_ENDPOINT = "https://api.unpaywall.org/v2"
 
 # Fields requested from the Semantic Scholar paper search. Every name is a
 # property of the published Paper/FullPaper schema in the official API
@@ -650,18 +663,81 @@ def query_openaire(query: str) -> SourceResult:
     return SourceResult("openaire", data=data, http_status=status)
 
 
-# -- Unpaywall (dropped) -------------------------------------------------------
+# -- Unpaywall (DOI-keyed live path) -------------------------------------------
+#
+# Endpoint GET /v2/:doi, documented example
+# https://api.unpaywall.org/v2/10.1038/nature12373?email=YOUR_EMAIL, with the
+# documentation stating "Requests must include your email as a parameter at the
+# end of the URL". Documented limit: "Please limit use to 100,000 calls per
+# day." The exact strings live in RATE_LIMITS.md next to this file.
+
+# A DOI is "10.<registrant>/<suffix>": only that shape (optionally behind a
+# doi.org URL or a "doi:" prefix) is sent to the DOI endpoint, so a name input
+# can never be queried by accident.
+_DOI_PATTERN = re.compile(r"^10\.\d{4,9}/\S+$")
+_DOI_PREFIXES = ("https://doi.org/", "http://doi.org/", "https://dx.doi.org/", "http://dx.doi.org/", "doi:")
+
+
+def _doi_from_query(query: str) -> str | None:
+    value = query.strip()
+    lowered = value.lower()
+    for prefix in _DOI_PREFIXES:
+        if lowered.startswith(prefix):
+            value = value[len(prefix):]
+            break
+    return value if _DOI_PATTERN.match(value) else None
 
 
 def query_unpaywall(query: str) -> SourceResult:
-    """Never queried: Unpaywall documents no title/keyword/author search.
+    """GET /v2/:doi with the documented required email parameter.
 
-    Its documented title search (GET /v2/search?query=...) was retired on
-    18 September 2026 and now returns 410 Gone, and its only live endpoint is a
-    DOI lookup that also requires an email parameter. The documented reason is
-    reported so the source is an auditable skip rather than a silent omission.
+    One normalized record (the DOI plus the response fields this adapter maps)
+    is stored, with the complete vendor response kept under "raw" so the
+    finding carries the untruncated evidence. Without UNPAYWALL_EMAIL the DOI
+    path is an auditable skip, never a guessed call; name-based inputs keep the
+    documented skip reason.
     """
-    return _skip("unpaywall", UNSUPPORTED_SUB_SOURCES["unpaywall"])
+    doi = _doi_from_query(query)
+    if doi is None:
+        return _skip("unpaywall", UNSUPPORTED_SUB_SOURCES["unpaywall"])
+    email = os.environ.get("UNPAYWALL_EMAIL", "").strip()
+    if not email:
+        return _skip("unpaywall", UNPAYWALL_EMAIL_MISSING_REASON)
+    payload, status, error = _fetch_json(UNPAYWALL_ENDPOINT + "/" + urllib.parse.quote(doi), {"email": email})
+    if error:
+        return SourceResult("unpaywall", http_status=status, error=error)
+    if not isinstance(payload, dict):
+        return SourceResult("unpaywall", http_status=status, error="Unexpected response shape")
+    record: dict[str, Any] = {"record_id": doi, "doi": payload.get("doi") or doi}
+    for key in ("title", "year", "genre", "is_oa", "oa_status", "published_date"):
+        if key in payload:
+            record[key] = payload[key]
+    journal = payload.get("journal_name")
+    if isinstance(journal, str) and journal:
+        record["venue"] = journal
+    best = payload.get("best_oa_location")
+    if isinstance(best, dict) and isinstance(best.get("url"), str):
+        record["url"] = best["url"]
+    z_authors = payload.get("z_authors")
+    if isinstance(z_authors, list):
+        names = [
+            " ".join(part for part in (author.get("given"), author.get("family")) if part)
+            for author in z_authors
+            if isinstance(author, dict)
+        ]
+        names = [name for name in names if name]
+        if names:
+            record["authors"] = names
+    data = _records_payload(
+        "Unpaywall REST API v2 (DOI lookup)",
+        UNPAYWALL_DOCS,
+        UNPAYWALL_ENDPOINT + "/:doi",
+        doi,
+        [record],
+        1,
+    )
+    data["raw"] = payload
+    return SourceResult("unpaywall", data=data, http_status=status)
 
 
 def main() -> int:
