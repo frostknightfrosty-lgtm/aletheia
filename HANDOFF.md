@@ -1,6 +1,6 @@
 # Aletheia Handoff — Phase 17 staged (pivot cascade + source completeness; autonomous campaign)
 
-Last updated: 2026-10-18T21:37:31Z
+Last updated: 2026-10-18T21:57:00Z
 
 ## Project boundaries
 
@@ -13,23 +13,23 @@ prerequisites are met. A tier classification is project policy, not a legal conc
 
 ## Repository and CI state
 
-- Latest CI-verified commit: `f785aa7` (CipherScan, the sixth `ssl_tls`
-  sub-source; docker verification run **39167510546** green — parser 49/49;
-  **1030 passed**; capture 62/62; storage 6/6). Earlier this evening: `1c18b80`
-  (SearXNG sub-source; run **39166656036**, parser 49/49; 1021 passed; capture
-  61/61; storage 6/6); `fe5fc7f` (run **39162358358**, 1011 passed) and
-  `ac68b89` (run **39165890328**, 1011 passed, capture 60/60). The Bron Vault
-  unit (`d3e7d16`) run was in flight at this update.
+- Latest CI-verified commit: `d3e7d16` (Broń Vault loopback sub-source of
+  `leak_checkers`; docker verification run **39168364470** green — parser
+  49/49; **1034 passed**; capture 63/63; storage 6/6). Earlier this evening:
+  `f785aa7` (CipherScan; run **39167510546**, 1030 passed, capture 62/62);
+  `1c18b80` (SearXNG; run **39166656036**, 1021 passed, capture 61/61);
+  `fe5fc7f` (run **39162358358**, 1011 passed) and `ac68b89` (run
+  **39165890328**, 1011 passed, capture 60/60).
 - The authorized live run **39141366670** ran on tree `8939517` and is green (37m19s) —
   see the live-audit section below.
-- Newest artifact check (run **39167510546**, commit `f785aa7`): lines copied from the
-  downloaded artifact (`ci-artifacts-39167510546`), not typed —
-  `PARSER PREFLIGHT: PASS — 49/49 adapters have parser coverage`; `1030 passed,
-  1 warning`; `DOCKER CAPTURE: PASS — 62/62 cases captured` (including the new
-  `phase17-ssl-tls-cipherscan` offline selftest case);
+- Newest artifact check (run **39168364470**, commit `d3e7d16`): lines copied from the
+  downloaded artifact (`ci-artifacts-39168364470`), not typed —
+  `PARSER PREFLIGHT: PASS — 49/49 adapters have parser coverage`; `1034 passed,
+  1 warning`; `DOCKER CAPTURE: PASS — 63/63 cases captured` (including the new
+  `phase17-leak-checkers-bron-vault` loopback selftest case);
   `storage-conformance.json`: `passing` = file, postgres, neo4j, elasticsearch, minio,
   redis, `unconfigured` = [], `required_all` = `true`; `pytest-summary.json`:
-  `junit_total` 1030, `skipped_in_ci` [], `ok` `true`.
+  `junit_total` 1034, `skipped_in_ci` [], `ok` `true`.
 - Evidence lines copied from the downloaded artifact of run `39141365915`
   (`ci-artifacts-39141365915`), not typed:
   - `PARSER PREFLIGHT: PASS — 49/49 adapters have parser coverage`
@@ -41,9 +41,8 @@ prerequisites are met. A tier classification is project policy, not a legal conc
   7 = `egress_events` 7; `phase15-egress-policy-covers-registry` = `adapters=49
   network_required=44 wired=44`; the crtsh check returned `new CONNECT crt.sh entries=1
   status=200` this run; the four `phase12-*` checks pass.
-- Local consistency at the CipherScan-verified tree: **965 passed + 65 skipped = 1030**,
-  which equals the CI passed count exactly (the current working tree is at 969 passed +
-  65 skipped = 1034, pending its own run). The 65 skips are 60
+- Local consistency at the Bron-Vault-verified tree: **969 passed + 65 skipped = 1034**,
+  which equals the CI passed count exactly. The 65 skips are 60
   `tests/test_docker_integration.py` (no Docker on this machine) and 5
   `tests/test_storage_services.py` (no `ALETHEIA_STORAGE_*` service configured); both groups
   execute in CI, and CI now *fails* if either group skips — see `docs/SKIPPED_IN_CI.md`.
