@@ -135,3 +135,30 @@ unverified, and re-opens only on a vendor change.
   added"), and its site retrieval requires user cookies/OAuth. The row-3
   interface blocker is recorded; re-open only if upstream ships a non-GUI
   interface.
+
+## #4 tiktok-hashtag-analysis — scoped review outcome (2026-10-18)
+
+- License: MIT (upstream `LICENSE`, bellingcat/tiktok-hashtag-analysis). The
+  checkout pins commit `2a4af674efc4af7c7d592053ec3f475555f37694` (main,
+  2024-03-11; confirmed with `git ls-remote` on 2026-10-18).
+- The recorded `social_profile` drop reason was two-fold: the upstream wrapper
+  retries headed after any error, and the dependency (TikTokApi) hardcodes
+  browser stealth patching to avoid bot detection. Both are resolved:
+  - The headed retry is structural: the driver calls
+    `tiktok_hashtag_analysis.base._fetch_hashtag_data` directly with
+    `headed=False`; the wrapper that retries headed is never reachable and the
+    driver contains no headed path at all.
+  - The stealth patching is a policy line, not a workaround: TikTokApi 6.2.2
+    calls `stealth_async(page)` unconditionally inside `create_sessions` (no
+    off switch). `docs/LEGAL_MODEL.md` rejects evasion of platform controls,
+    so the driver replaces `TikTokApi.tiktok.stealth_async` with a no-op
+    before any session is created. The adapter makes plainly automated,
+    headless requests and records TikTok's bot-detection response honestly
+    (`EmptyResponseException` → recorded `blocked` status; no retry loop, no
+    challenge handling, no cookies, no ms_tokens).
+- No downloads (`yt_dlp` is never invoked), no plotting, no config files, no
+  media; one hashtag per invocation, a bounded post sample.
+- **Outcome:** build path cleared; the standalone hashtag-input adapter
+  (`SeedType.HASHTAG`) is the next Wave A unit. Live success is expected to be
+  limited by TikTok's bot detection; live coverage stays subject to the
+  standing live-run policy (Gate 2) and is not claimed.

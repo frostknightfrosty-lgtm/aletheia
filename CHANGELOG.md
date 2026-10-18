@@ -1,5 +1,33 @@
 # Changelog
 
+## 2026-10-18 — P17.11: Zehef email adapter (source #2)
+
+Every number below is copied from the downloaded artifact
+`ci-artifacts-39171286556` (run `39171286556`, commit `22d3ddc`).
+
+- `PARSER PREFLIGHT: PASS — 50/50 adapters have parser coverage` (49 → 50: the
+  first Phase 17 registry addition).
+- `"console_summary": "1046 passed, 1 warning"` with `"junit_total": 1046`,
+  `"skipped_in_ci": []`, `"ok": true` — 12 new tests (the 10 driver/parser
+  tests, the container health test, and one manifest-driven parametrization),
+  none skipped in CI (1034 → 1046).
+- `DOCKER CAPTURE: PASS — 65/65 cases captured`, including the two new cases
+  `phase17-zehef-health` and `phase17-zehef-selftest` (return code 0 under
+  `--network none`; the selftest ran 7/7 checks including the pinned-checkout
+  import); results.json: 65 entries, 0 nonzero return codes; storage-
+  conformance.json: `"required_all": true`, `"ok": true`, `"unconfigured": []`
+  (6/6 backends passing).
+- What landed: `docker/zehef/` gained a driver and image that run only the 17
+  account-registration modules of the pinned checkout (Zehef 2.2.1, commit
+  `5b0c120efe846eae944dfea9410f925ca3036103`). The paste-dump module (Google
+  search scraping), the HudsonRock stealer-log module and the random
+  email-combination generator are never invoked, with reasons in
+  `docker/zehef/RATE_LIMITS.md`. `ZehefAdapter` emits only positive
+  registration signals plus allowlisted public account URLs (https
+  github.com / flickr.com / gravatar.com); avatar and id detail fields are
+  deliberately dropped. The earlier `social_profile` drop stands as history
+  and now points to the standalone adapter entry.
+
 ## 2026-10-18 — P17.11: Broń Vault loopback sub-source (source #11)
 
 Every number below is copied from the downloaded artifact

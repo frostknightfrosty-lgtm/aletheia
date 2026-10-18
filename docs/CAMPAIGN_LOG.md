@@ -22,15 +22,18 @@
   failure class the repair targeted is closed). **P17.11 Wave A**: re-checks
   recorded; §A 33 (Unpaywall) CI-verified and flipped; §A 31 (SearXNG)
   CI-verified and flipped; §A 36 (CipherScan) CI-verified and flipped; §A 11
-  (Bron Vault) CI-verified and flipped.
+  (Bron Vault) CI-verified and flipped; §A 2 (Zehef) CI-verified and flipped;
+  §A 3 (scrawler) recorded as an interface blocker (Windows-only GUI; no CLI
+  per the upstream FAQ).
   **P17.3–P17.10 verified green.**
-- Next action: continue Wave A — Zehef (#2) design/implementation in
-  progress; then scrawler, tiktok-hashtag-analysis, VENOM, PicImageSearch,
+- Next action: continue Wave A — tiktok-hashtag-analysis (#4) scoped review
+  recorded + implementation in progress; then VENOM, PicImageSearch,
   tracelines, ShadowFinder, pybdshadow, GeoLocator, crypttrace CLI wrap,
   ERATV, BigQuery; then Waves B–E.
-- In-flight CI: `39169543833` (docs/state push, head `513ac7c`).
-- Last verified commit: `d3e7d16` (run `39168364470`; parser 49/49;
-  **1034 passed**; capture 63/63; storage 6/6).
+- In-flight CI: this docs/state push (Zehef flip + scrawler record + state);
+  its run id and evidence lines are appended in the Log when green.
+- Last verified commit: `22d3ddc` (run `39171286556`; parser 50/50;
+  **1046 passed**; capture 65/65; storage 6/6).
 - Owner-blocked (parked, never wait on): everything in `docs/USER_ACTIONS.md`.
 - Decision defaults in force: see "Adopted defaults" below.
 
@@ -212,7 +215,12 @@ activate when the key exists.
       the `ssl_tls` manifest entry updated. §A 11 (Bron Vault)
       **CI-verified**: run `39168364470` — parser 49/49; 1034 passed; capture
       63/63; storage 6/6; §A 11 flipped and the `leak_checkers` manifest entry
-      updated.
+      updated. §A 2 (Zehef) **CI-verified**: run `39171286556` — parser 50/50;
+      1046 passed; capture 65/65; storage 6/6; §A 2 flipped and the `zehef`
+      manifest entry cites the run. §A 3 (scrawler) re-check recorded
+      2026-10-18: Windows-only .NET GUI; the upstream FAQ states no CLI will
+      be added and site retrieval needs user cookies/OAuth → interface
+      blocker (see `docs/PHASE17_RECHECKS.md`).
 - [ ] **Wave B — free-registration/keyed builds (skip paths recorded):** §A 1
       (OWASP SocialOSINTLM), 8 (Intelligence X), 9 (BreachDirectory), 10
       (Leak-Lookup), 17 (youtube-geofind), 19 (Betaface), 30 (EUIPO), 34
@@ -583,3 +591,34 @@ activate when the key exists.
   scrawler, tiktok-hashtag-analysis, VENOM, PicImageSearch, tracelines,
   ShadowFinder, pybdshadow, GeoLocator, crypttrace CLI wrap, ERATV,
   BigQuery.
+- 2026-10-18 — P17.11 re-check: scrawler (§A 3) — commit `f19f3a4` (docs) —
+  recorded as an **interface blocker**, no code. Upstream facts (live
+  2026-10-18): the FAQ states verbatim "This is a GUI program and **NO**, CLI
+  will not be added"; the README targets Windows 10/11 with .NET 4.6.1 and a
+  `SCrawler.exe` binary, and site retrieval needs the operator's own cookies
+  or OAuth. `SOURCE_COMPLETENESS.md` row 3 and `docs/PHASE17_RECHECKS.md`
+  updated. Re-open only on a vendor interface change.
+- 2026-10-18 — P17.11 Zehef verification (§A 2) — commit `22d3ddc` — run
+  `39171286556` — docker-verification **green**. Copied from the downloaded
+  artifact `ci-artifacts-39171286556`:
+  - `PARSER PREFLIGHT: PASS — 50/50 adapters have parser coverage` (49 → 50)
+  - pytest-summary.json: `"console_summary": "1046 passed, 1 warning"`,
+    `"junit_total": 1046`, `"skipped_in_ci": []`, `"ok": true` (1034 → 1046:
+    the 10 Zehef driver/parser tests, the container health test, and one
+    manifest-driven parametrization; none skipped)
+  - `DOCKER CAPTURE: PASS — 65/65 cases captured` (new cases
+    `phase17-zehef-health` and `phase17-zehef-selftest`, return code 0 under
+    `--network none`; the selftest ran 7/7 checks including the pinned-checkout
+    import); results.json: 65 entries, 0 nonzero return codes;
+    storage-conformance.json: `"required_all": true`, `"ok": true`,
+    `"unconfigured": []` (6/6 backends passing)
+  §A 2 flipped in `SOURCE_COMPLETENESS.md`; the `zehef` manifest entry cites
+  the run; the `social_profile` drop note stands and points to the standalone
+  adapter.
+- Next: tiktok-hashtag-analysis (§A 4): scoped review + standalone
+  hashtag-input adapter — `SeedType.HASHTAG`, headless-only driver calling
+  `_fetch_hashtag_data` directly (the upstream headed retry is never
+  reachable), and the dependency's stealth patching neutralized per
+  `docs/LEGAL_MODEL.md` (decision recorded in `docs/PHASE17_RECHECKS.md`);
+  then VENOM, PicImageSearch, tracelines, ShadowFinder, pybdshadow,
+  GeoLocator, crypttrace, ERATV, BigQuery.
