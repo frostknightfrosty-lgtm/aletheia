@@ -1,5 +1,50 @@
 # Changelog
 
+## 2026-10-18 — Authorized live self-audit of `username:frost2233` (run `39141366670`): round-3 repairs confirmed on the live path
+
+The owner opened Gate 2 for one target with the assertion recorded verbatim in the run's
+`MANIFEST.json` — `Self-audit: I am the owner of the Discord account with username frost2233
+and I authorize an investigation of my own username across public, legal, open sources.` The
+audit ran end to end in 37m19s on the tree that passed run `39139781693`
+(https://github.com/frostknightfrosty-lgtm/aletheia/actions/runs/39141366670; run directory
+`983cc23b-f9f6-4ccd-8483-82f7e37738ba`). Every number below is copied from the downloaded
+artifact `ci-artifacts-39141366670`.
+
+- **`maigret` now proxies single-hop.** Its `EGRESS.jsonl` reads `total=585
+  self_addressed=0` (run `39135219248`: `total=757 self_addressed=455`), statuses
+  `{200: 575, 502: 6, 308: 1, 404: 1, 301: 2}`, `bytes>0 = 578`; the stdout error classes
+  are `Too many errors of type "Bot protection" (16.11%)` and `Too many errors of type
+  "Access denied" (3.14%)` — the `"Proxy" (46.17%)` and `"Unexpected" (31.43%)` classes of
+  the previous run are gone. The same sweep returns **19 accounts** (was 5) with **extended
+  info from 9 accounts** (was 2).
+- **`sherlock` writes the file its parser reads.** The artifact contains `sherlock.txt`
+  (`exists size=575 lines=17`); `result.json` holds 17 findings (16 claimed URLs plus the
+  seed); its egress log reads `total 439 statuses {200: 435, 502: 3, 308: 1}` with no
+  rate-limiter refusals. The report's claims grew from 13 to 32.
+- **`ProxySession.start()` readiness holds live.** `social_username`'s egress log — empty in
+  run `39135219248` — now reads `total=2 hosts={'mastodon.social': 1, 'api.github.com': 1}`
+  with `statuses = {200: 2}`. Both upstream sources still return nothing usable (octosuite:
+  `HTTP 403; stopped without redirect or retry` from inside the tunnel — GitHub's
+  unauthenticated limit; masto: no finding); that is an upstream result, not a wiring
+  failure.
+- **`AUDIT.jsonl` records the fixed invocations**: `sherlock ["--no-color", "--txt",
+  "--output", "/work/sherlock.txt", "--timeout", "60", "frost2233"]` and `maigret
+  ["frost2233", "--no-autoupdate", "--no-progressbar", "--no-color", "--dns-resolver",
+  "threaded", "--json", "ndjson", "--folderoutput", "/work/results"]` — no `--proxy`.
+- Coverage change, recorded honestly: the dispatch envelope was raised from
+  `egress_rate=20, egress_burst=100` to `100/500`, because under the old envelope our own
+  limiter refused roughly half of each one-shot sweep (176 refusals for sherlock alone in
+  run `39135219248`); with the envelope raised, neither sweep contains a single refusal and
+  the detection counts above were obtained without one.
+- Outcome: 16 sherlock sites plus 19 maigret accounts (24 distinct URL claims after
+  canonicalization, including one exact-canonical merge), `entity_count` 32, `edge_count`
+  43, `resolution_candidate_count` 3 — all candidates, nothing auto-merged on fuzzy
+  similarity alone — plus `report.pdf`, `report.stix2.json` and `graph.graphml`. Findings
+  are same-username **candidates**, not proof of ownership: several platforms present
+  different display names, which is exactly the caveat the report carries. `instaloader`
+  still ends on Instagram's side (`429 Too Many Requests`); `reddit-api`, `youtube-api` and
+  `leak_checkers` remain key-gated skips (Gate 3).
+
 ## 2026-10-18 — Live-path repair round 3 after run `39135219248`: single-hop proxying, proxy readiness, sherlock results file, CI-verified
 
 - **`maigret` tunnelled to the proxy through the proxy.** 455 of the 757 entries
