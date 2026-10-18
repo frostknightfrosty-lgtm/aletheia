@@ -1,6 +1,31 @@
 # Changelog
 
-## 2026-10-19 — P17.11: SearXNG self-hosted sub-source (source #31)
+## 2026-10-18 — P17.11: CipherScan sub-source (source #36)
+
+Every number below is copied from the downloaded artifact
+`ci-artifacts-39167510546` (run `39167510546`, commit `f785aa7`).
+
+- `PARSER PREFLIGHT: PASS — 49/49 adapters have parser coverage` (the
+  sub-source extends `ssl_tls`; no new adapter).
+- `"console_summary": "1030 passed, 1 warning"` with `"junit_total": 1030`,
+  `"skipped_in_ci": []`, `"ok": true` — 9 new tests (subject/details
+  extraction, the JSON contract, tolerance parsing, selftest reporting), none
+  skipped in CI (1021 → 1030).
+- `DOCKER CAPTURE: PASS — 62/62 cases captured`, including the new
+  `phase17-ssl-tls-cipherscan` case, which runs the pinned checkout's selftest
+  offline under `--network none`.
+- What landed: `docker/ssl_tls/runner.py` gained `cipherscan` as a sixth
+  sub-source. The project publishes no releases or tags, so the checkout is
+  pinned to commit `30bd23938853d68b51c2ebe4bcc922cc3113c5e2` (verified with
+  `git rev-parse` at build time); the tolerance-test dependencies are pinned to
+  tlslite-ng `c93df82603ab4a72c8d65645a3aeee73eeb24b3f` (v0.8.2) and
+  python-ecdsa `bd66899550d7185939bf27b75713a2ac9325a9d3` (0.19.2). The tool is
+  invoked at its real path (no symlink — `cscan.sh` resolves helper files from
+  `dirname $0`), JSON output (`-j`) is parsed into suite/config/tolerance
+  records, and the source is reported through the same documented-skip pattern
+  when the binary is absent.
+
+## 2026-10-18 — P17.11: SearXNG self-hosted sub-source (source #31)
 
 Every number below is copied from the downloaded artifact
 `ci-artifacts-39166656036` (run `39166656036`, commit `1c18b80`).

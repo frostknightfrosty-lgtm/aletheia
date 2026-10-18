@@ -78,7 +78,7 @@ below may be upgraded except from copied artifact lines.
 | 33 | Unpaywall | 11 | **Wired (CI-verified)**: DOI-keyed live path (`GET /v2/:doi` with `UNPAYWALL_EMAIL`; name inputs keep the documented skip) — run `39160798771`, 1009 passed. See [`PHASE17_RECHECKS.md`](PHASE17_RECHECKS.md) | Implement the live DOI-keyed endpoint (only live route) | Owner: `UNPAYWALL_EMAIL` config (no registration) |
 | 34 | GitLab Search API | 12 | Dropped: every call requires authentication (probe 401) | Implement with a free GitLab account token; skip without key | Owner: free token |
 | 35 | PublicWWW | 12 | Dropped: vendor docs require a paid plan; re-checked 2026-10-18 — no free tier surfaced. See [`PHASE17_RECHECKS.md`](PHASE17_RECHECKS.md) | Re-check free tier at review; if paid-only, stays out under nothing-paid with evidence | — |
-| 36 | CipherScan | 14 | Dropped: no releases/tags, no pinnable artifact | Re-review: pin a specific commit SHA as the verifiable artifact; build if pinnable | — |
+| 36 | CipherScan | 14 | **Wired (CI-verified)**: sixth `ssl_tls` sub-source — pinned by commit `30bd23938853d68b51c2ebe4bcc922cc3113c5e2` (project has no releases/tags; tolerance-test deps tlslite-ng v0.8.2 + python-ecdsa 0.19.2 pinned as well) — run `39167510546`, 1030 passed. See `docker/ssl_tls/RATE_LIMITS.md` | Re-review: pin a specific commit SHA as the verifiable artifact; build if pinnable | — |
 
 ## B. Policy-permitted, not-yet-integrated sources
 

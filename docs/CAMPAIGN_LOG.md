@@ -21,19 +21,18 @@
   `manifest anchor: verified`; instaloader blocked ×2 and recorded — the
   failure class the repair targeted is closed). **P17.11 Wave A**: re-checks
   recorded; §A 33 (Unpaywall) CI-verified and flipped; §A 31 (SearXNG)
-  CI-verified and flipped; §A 36 (CipherScan) and §A 11 (Bron Vault) units
-  pushed — runs in flight.
+  CI-verified and flipped; §A 36 (CipherScan) CI-verified and flipped; §A 11
+  (Bron Vault) pushed — run in flight.
   **P17.3–P17.10 verified green.**
-- Next action: on the CipherScan run (`39167510546`, head `f785aa7`) and the
-  Bron Vault run (`39168364470`, head `d3e7d16`) green: copy lines, flip §A 36
-  and §A 11, update the `ssl_tls` / `leak_checkers` manifest entries; then the
+- Next action: on the Bron Vault run (`39168364470`, head `d3e7d16`) green:
+  copy lines, flip §A 11, update the `leak_checkers` manifest entry; then the
   rest of the Wave A list (Zehef, scrawler, tiktok-hashtag-analysis, VENOM,
   PicImageSearch, tracelines, ShadowFinder, pybdshadow, GeoLocator, crypttrace
   CLI wrap, ERATV, BigQuery), then Waves B–E.
-- In-flight CI: `39167510546` (CipherScan, expected 1030 passed / capture
-  62/62); `39168364470` (Bron Vault, expected 1034 passed / capture 63/63).
-- Last verified commit: `1c18b80` (run `39166656036`; parser 49/49;
-  **1021 passed**; capture 61/61; storage 6/6).
+- In-flight CI: `39168364470` (Bron Vault, expected 1034 passed / capture
+  63/63).
+- Last verified commit: `f785aa7` (run `39167510546`; parser 49/49;
+  **1030 passed**; capture 62/62; storage 6/6).
 - Owner-blocked (parked, never wait on): everything in `docs/USER_ACTIONS.md`.
 - Decision defaults in force: see "Adopted defaults" below.
 
@@ -210,8 +209,10 @@ activate when the key exists.
       60/60; storage ok (lines in the Log); §A 33 flipped. §A 31 (SearXNG)
       **CI-verified**: run `39166656036` — parser 49/49; 1021 passed; capture
       61/61; storage 6/6; §A 31 flipped and the `search_engines` manifest
-      entry updated. §A 36 (CipherScan) and §A 11 (Bron Vault) built and
-      pushed (`f785aa7`, `d3e7d16`) — runs in flight.
+      entry updated. §A 36 (CipherScan) **CI-verified**: run `39167510546` —
+      parser 49/49; 1030 passed; capture 62/62; storage 6/6; §A 36 flipped and
+      the `ssl_tls` manifest entry updated. §A 11 (Bron Vault) built and
+      pushed (`d3e7d16`) — run in flight.
 - [ ] **Wave B — free-registration/keyed builds (skip paths recorded):** §A 1
       (OWASP SocialOSINTLM), 8 (Intelligence X), 9 (BreachDirectory), 10
       (Leak-Lookup), 17 (youtube-geofind), 19 (Betaface), 30 (EUIPO), 34
@@ -526,7 +527,7 @@ activate when the key exists.
 - Next: continue P17.11 Wave A builds (SearXNG self-hosted container,
   CipherScan pinned commit `30bd2393`, Bron Vault offline parser); on this
   push's run green copy its lines; then the rest of the queue.
-- 2026-10-19 — docs/state push verification — commits `d436593` (docs) +
+- 2026-10-18 — docs/state push verification — commits `d436593` (docs) +
   `ac68b89` (state) — run `39165890328` — docker-verification **green**.
   Copied from the downloaded artifact `ci-artifacts-39165890328`:
   - `PARSER PREFLIGHT: PASS — 49/49 adapters have parser coverage`
@@ -535,7 +536,7 @@ activate when the key exists.
   - `DOCKER CAPTURE: PASS — 60/60 cases captured`; storage-conformance.json:
     `"required_all": true`, `"ok": true`, `"unconfigured": []` (6/6 backends
     passing)
-- 2026-10-19 — P17.11 SearXNG verification — commit `1c18b80` — run
+- 2026-10-18 — P17.11 SearXNG verification — commit `1c18b80` — run
   `39166656036` — docker-verification **green**. Copied from the downloaded
   artifact `ci-artifacts-39166656036`:
   - `PARSER PREFLIGHT: PASS — 49/49 adapters have parser coverage`
@@ -551,4 +552,20 @@ activate when the key exists.
 - Next: on the CipherScan run (`39167510546`, head `f785aa7`) and the Bron
   Vault run (`39168364470`, head `d3e7d16`) green: copy lines, flip §A 36 and
   §A 11, update the `ssl_tls` / `leak_checkers` manifest entries; then the
+  rest of the Wave A list.
+- 2026-10-18 — P17.11 CipherScan verification — commit `f785aa7` — run
+  `39167510546` — docker-verification **green**. Copied from the downloaded
+  artifact `ci-artifacts-39167510546`:
+  - `PARSER PREFLIGHT: PASS — 49/49 adapters have parser coverage`
+  - pytest-summary.json: `"console_summary": "1030 passed, 1 warning"`,
+    `"junit_total": 1030`, `"skipped_in_ci": []`, `"ok": true` (1021 → 1030:
+    the 9 CipherScan tests, none skipped)
+  - `DOCKER CAPTURE: PASS — 62/62 cases captured` (new case
+    `phase17-ssl-tls-cipherscan` runs the pinned checkout's offline selftest
+    under `--network none`); storage-conformance.json: `"required_all": true`,
+    `"ok": true`, `"unconfigured": []` (6/6 backends passing)
+  §A 36 flipped in `SOURCE_COMPLETENESS.md`; `ssl_tls` manifest entry updated
+  (six sub-sources; cipherscan removed from the dropped list).
+- Next: on the Bron Vault run (`39168364470`, head `d3e7d16`) green: copy
+  lines, flip §A 11, update the `leak_checkers` manifest entry; then the
   rest of the Wave A list.
