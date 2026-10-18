@@ -28,6 +28,15 @@ with adaptive budgets, case memory with caching and re-audit diffs, the wide
 free-source playbook, human-loop tooling, the third-party firewall, and the
 synthetic-world test program.
 
+Directive addendum — **2026-10-18**: the owner directed that **everything
+accepted in the 111-candidate verification sweep and everything permitted by
+the Florida project policy but not yet integrated be fully integrated, wired,
+and working**, superseding the earlier narrower Wave-2 wording. Section 15
+carries this as P17.11–P17.12; the item-by-item status inventory lives in
+[`SOURCE_COMPLETENESS.md`](SOURCE_COMPLETENESS.md). All standing constraints
+are unchanged: nothing paid, the Tier 5 floor, a scoped review per source
+before code, and no fabricated evidence.
+
 ## 1. Objective
 
 Given any seed (or seed set, or raw text containing seeds), the engine must:
@@ -340,7 +349,9 @@ Each item below is allowed by project policy (`DIRECTIVE_AMENDMENT_FLORIDA.md`)
 and is part of the Wave-2 build plan (P17.11); each still needs its own
 source, license, scope, and implementation review before code. Permitted
 sources with open interface facts (Blackbird licensing, Lullar's missing
-machine interface) stay backlogged until their review resolves those facts.
+machine interface) are resolved at that review under the 2026-10-18
+completeness directive (`SOURCE_COMPLETENESS.md`): built once the review clears
+the facts, or recorded with evidence if the facts block implementation.
 
 | Expansion | Class | Conditions and safeguards |
 | --- | --- | --- |
@@ -458,11 +469,34 @@ machine interface) stay backlogged until their review resolves those facts.
    CI.
 10. **P17.10** — fixture dry-run -> local suite -> CI -> live cascade on the
     owner's own seed with owner confirmations; first real calibration labels.
-11. **P17.11** — Wave-2 expansions, each with its own scoped review before
-    code: email-existence checks, GHunt (own account), people-search free
-    tiers, face search (free paths), stealer-log checkers, paste indexes,
-    reverse-image search; the dark-web adapter slot activates only when
-    Gate 6 clears.
+11. **P17.11** — source completeness (owner directive, 2026-10-18; supersedes
+    the earlier Wave-2 scope): everything accepted in the 111-candidate
+    verification sweep and every policy-permitted but not-yet-integrated
+    source becomes fully integrated, wired, and working — darkweb_search
+    behind container-level Tor (OnionSearch, TorBot, Piano, Intelligence X);
+    transport_movement (OpenSky, BarentsWatch, Network Rail, National Rail,
+    Deutsche Bahn); the not-yet-built accepted candidates (VENOM;
+    PicImageSearch, tracelines, ShadowFinder, pybdshadow, youtube-geofind,
+    GeoLocator, Betaface); re-review-and-rebuild of documented drops that
+    have a free path (crypttrace CLI wrap, Unpaywall DOI endpoint, GitLab
+    with a free token, a self-hosted SearXNG instance, CipherScan pinned by
+    commit, Bron Vault offline, ERATV SPARQL, BreachDirectory and Leak-Lookup
+    key paths; PatentsView, Google Patents, EUIPO, PublicWWW and Google
+    Custom Search re-checked with evidence); the disabled sub-sources (OWASP
+    SocialOSINTLM, scrawler, Zehef, tiktok-hashtag-analysis); and the
+    policy-permitted set (LeakCheck, LeakRadar, OsintCat, OathNet, Blackbird,
+    Lullar, Hudson Rock, GHunt, people-search free tiers, face-search free
+    paths, paste indexes, reverse-image search). Email-existence checks
+    (holehe-class) are already integrated (holehe, h8mail) — verify only, do
+    not duplicate. Each source keeps its own scoped review before code;
+    free-key registrations and provider permissions are user actions
+    (Gate 3); externally blocked items are recorded with evidence and
+    re-checked, never fabricated. Item-by-item status:
+    `docs/SOURCE_COMPLETENESS.md`.
+12. **P17.12** — completeness verification: exercise every newly integrated
+    source in authorized runs where gates permit; copy per-source evidence
+    from the artifacts (Gate 5); update verification statuses and the
+    completeness tracker only from those lines.
 
 ## 16. Honest ceilings
 

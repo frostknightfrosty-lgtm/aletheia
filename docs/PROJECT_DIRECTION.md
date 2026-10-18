@@ -123,6 +123,24 @@ existing scheduling, resolver, calibration, checkpoint, egress, and audit
 machinery. Design: [`PIVOT_CASCADE.md`](PIVOT_CASCADE.md). **Not implemented**;
 the design is recorded for review before any code.
 
+## Source completeness directive (2026-10-18)
+
+The project owner directed that **every accepted candidate from the
+111-candidate verification sweep** ([`VERIFICATION_COMPLETE.md`](VERIFICATION_COMPLETE.md))
+**and every source permitted by the Florida policy but not yet integrated**
+([`DIRECTIVE_AMENDMENT_FLORIDA.md`](DIRECTIVE_AMENDMENT_FLORIDA.md)) become
+**fully integrated, wired, and working** — nothing accepted or permitted stays
+backlogged, disabled, or dropped while a free/open path exists.
+
+Unchanged constraints: nothing paid (Gate 3); the Tier 5 floor; each source
+keeps its own scoped source/license/scope/implementation review before code;
+free-key registrations and provider permissions are user actions; and evidence
+is never fabricated — a vendor-blocked item is recorded with evidence and
+re-checked.
+
+Status inventory and completion standard: [`SOURCE_COMPLETENESS.md`](SOURCE_COMPLETENESS.md).
+Build sequencing: Phase 17 items P17.11–P17.12 in [`PIVOT_CASCADE.md`](PIVOT_CASCADE.md).
+
 ## Implementation status (2026-10-18)
 
 The phase pipeline completed through Phase 15, and the user directive of
@@ -150,5 +168,7 @@ the deliverables:
   [`PIVOT_CASCADE.md`](PIVOT_CASCADE.md).
 - **Future / requires its own review:** the structural safeguard for Tier 4
   credential sources activates with the first such source; no credential-parsing
-  code exists yet, so there is nothing to separate. The Phase 5b/5c tools remain
-  out of scope. Live investigation remains behind its gates (`GATES.md`).
+  code exists yet, so there is nothing to separate. The previously out-of-scope
+  Phase 5b/5c tools are now covered by the 2026-10-18 source-completeness
+  directive above and Phase 17 items P17.11–P17.12. Live investigation remains
+  behind its gates (`GATES.md`).

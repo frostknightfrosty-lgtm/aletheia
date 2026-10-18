@@ -1,0 +1,162 @@
+# Source Completeness — Owner Directive Tracker (Phase 17)
+
+> **Owner directive (2026-10-18).** Everything accepted in the 111-candidate
+> verification sweep ([`VERIFICATION_COMPLETE.md`](VERIFICATION_COMPLETE.md)) and
+> every source permitted by the Florida project policy
+> ([`DIRECTIVE_AMENDMENT_FLORIDA.md`](DIRECTIVE_AMENDMENT_FLORIDA.md)) but not
+> yet integrated is to be **fully integrated, wired, and working**. Nothing
+> accepted or permitted stays backlogged, disabled, or dropped while a free,
+> open path exists.
+>
+> Unchanged constraints: nothing paid (Gate 3); the Tier 5 floor; each source
+> keeps its own scoped source / license / scope / implementation review before
+> code; free-key registrations and provider permissions are owner actions;
+> evidence is never fabricated (Gate 5) — an item blocked by vendor facts is
+> recorded with evidence and re-checked, never faked.
+
+Build sequencing: Phase 17 items **P17.11–P17.12** in
+[`PIVOT_CASCADE.md`](PIVOT_CASCADE.md). This file is the status inventory.
+
+## Completion standard — what "working" means here
+
+1. Scoped review recorded (license, terms, interface, permitted invocation,
+   rate limit, tier, response-field screening).
+2. Adapter implemented: Docker-isolated, pinned upstream, parser, fixture,
+   capture case, manifest entry (`legal_tier`, `enabled_by_default`,
+   `batch_grouping`, `requires_key`).
+3. CI-verified `verified-fixture` with evidence lines copied from the run
+   artifact (Gate 5); parser preflight and capture counts updated.
+4. Free-key / registration prerequisites obtained (owner action) or the source
+   runs keyless; a missing key is a recorded skip with reason — never a silent
+   absence.
+5. Executed in an authorized live sweep where gates permit (Gates 2/3/6);
+   per-source live evidence recorded.
+
+## A. The 111 accepted candidates — remaining gaps
+
+Already implemented and wired: **75 of 111** (the 49 registered adapters and
+their sub-sources; some are key-gated — their skip reasons are recorded).
+**36 of 111 remain.** Of these, one is externally blocked (FollowTheMoney),
+several have owner-action prerequisites, and a few carry factual re-checks that
+may resolve to a recorded blocker if the free path no longer exists. No status
+below may be upgraded except from copied artifact lines.
+
+| # | Item | Cat | State today | Path to "working" | Gate / owner action |
+|---|------|----:|-------------|-------------------|---------------------|
+| 1 | OWASP SocialOSINTLM | 1 | Disabled sub-source (`social_username`): external platform + LLM credentials | Re-review: free platform keys; free-tier or local LLM path; document what the LLM adds | Owner: platform dev keys |
+| 2 | Zehef | 1 | Documented drop (`social_profile`) | Re-review: email→registered-accounts CLI; wrap in container if scoped | — |
+| 3 | scrawler | 1 | Disabled: GUI/cookie/OAuth, no CLI | Re-review for a headless read-only subset; if none exists, record the interface blocker with evidence | — |
+| 4 | tiktok-hashtag-analysis | 1 | Documented drop (`social_profile`) | Bellingcat PyPI library; re-review and implement (hashtag input) | — |
+| 5 | OnionSearch | 2 | Not built; `darkweb_search` deferred (Gate 6) | Build in `darkweb_search` behind container-level Tor; per-engine notes (Ahmia/Torch/Candle; ToS risk recorded) | Tor setup |
+| 6 | TorBot | 2 | Not built; Gate 6 | Build; crawler semantics (titles, links, emails) documented | Tor setup |
+| 7 | Piano (darknet-crawler) | 2 | Not built; Gate 6 | Build; published single-engine search invocation; PyPI pin | Tor setup |
+| 8 | Intelligence X | 2 | Not built; Gate 6 | Build with registered `x-key` (free tier ~50 selector searches/day) | Owner: register free key |
+| 9 | BreachDirectory | 3 | Wired as documented skip (`leak_checkers`) | Implement live call path (RapidAPI); skip without key | Owner: free RapidAPI key |
+| 10 | Leak-Lookup | 3 | Wired as documented skip (`leak_checkers`) | Implement live call path (`/api/search`, breach names only) | Owner: free registration key |
+| 11 | Bron Vault | 3 | Wired as documented skip (local execution) | Build offline local-log parser adapter (no egress) | — |
+| 12 | VENOM | 3 | Not built (one-off) | Build one-off; review and constrain its 25+-service request set | — |
+| 13 | PicImageSearch | 4 | Not built (among `geolocation_image` drops) | Build reverse-image step, free engines only (SauceNAO/IqDB/Ascii2d; Google/Yandex/Bing per-engine terms review) | — |
+| 14 | tracelines | 4 | Not built (`geolocation_image` drop) | Build offline (street-view coverage lines) | — |
+| 15 | ShadowFinder Web | 4 | Not built (one-off) | Build offline shadow/solar geolocation analysis | — |
+| 16 | pybdshadow | 4 | Not built (one-off) | Build offline building-shadow geometry | — |
+| 17 | youtube-geofind | 4 | Not built (one-off) | Build with YouTube Data API free quota | Owner: YT key |
+| 18 | GeoLocator | 4 | Not built (one-off) | Build offline vision model; license + weights review | — |
+| 19 | Betaface | 4 | Not built (one-off) | Build with free evaluation tier (≤500 images/day); corroboration-only role; never sole basis | Owner: free key + secret |
+| 20 | crypttrace | 5 | Dropped (`crypto_blockchain`): no importable API | Re-review: wrap pinned CLI in container if output is parseable; else record blocker | — |
+| 21 | FollowTheMoney | 6 | Not built; **Gate 7 documented exclusion** | **Externally blocked**: no published request contract; parent OpenSecrets discontinued public API 2025-04-15; commercial route only. Re-open only on vendor change | — |
+| 22 | OpenSky Network API | 8 | Not built; `transport_movement` deferred (Gate 6) | Build; free key (~4,000 req/day); written integration permission | Owner: register + written permission |
+| 23 | BarentsWatch AIS | 8 | Not built; Gate 6 | Build; free OAuth 2.0 client credentials | Owner: register |
+| 24 | Network Rail Open Data | 8 | Not built; Gate 6 | Build; free self-service key (REST/STOMP) | Owner: register |
+| 25 | National Rail Data (Darwin) | 8 | Not built; Gate 6 | Build; free developer token | Owner: register |
+| 26 | Deutsche Bahn Timetables | 8 | Not built; Gate 6 | Build; free client-id + secret | Owner: register |
+| 27 | ERATV | 8 | Documented non-querying drop (`transport_asset_registry`) | Re-review public SPARQL/RDF endpoint; build query path or record live-probe evidence | — |
+| 28 | PatentsView | 9 | Dropped: API host no longer resolves | Re-check official host; build if live; else record evidence | — |
+| 29 | Google Patents Public Datasets | 9 | Dropped: GCP service account + client library | Re-review BigQuery free-tier path (no-billing route); build or record | — |
+| 30 | EUIPO eSearch plus | 9 | Dropped: account + sandbox/production approval | Build via free developer account once approved | Owner: register EUIPO dev account |
+| 31 | SearXNG | 10 | Dropped: self-hosted metasearch, not a public API | Build as a self-hosted container instance (JSON endpoint enabled) — free/open-source | — |
+| 32 | Google Custom Search JSON API | 10 | Dropped: closed to new customers; sunset 2027-01-01 | Re-check access at review; if unavailable, record evidence (Marginalia + Common Crawl carry the class) | — |
+| 33 | Unpaywall | 11 | Dropped: search endpoint retired (410 Gone) | Implement the live DOI-keyed endpoint (only live route) | — |
+| 34 | GitLab Search API | 12 | Dropped: every call requires authentication (probe 401) | Implement with a free GitLab account token; skip without key | Owner: free token |
+| 35 | PublicWWW | 12 | Dropped: vendor docs require a paid plan | Re-check free tier at review; if paid-only, stays out under nothing-paid with evidence | — |
+| 36 | CipherScan | 14 | Dropped: no releases/tags, no pinnable artifact | Re-review: pin a specific commit SHA as the verifiable artifact; build if pinnable | — |
+
+## B. Policy-permitted, not-yet-integrated sources
+
+Allowed by the Florida policy ([`DIRECTIVE_AMENDMENT_FLORIDA.md`](DIRECTIVE_AMENDMENT_FLORIDA.md))
+or listed as review-gated expansions (`PIVOT_CASCADE.md` §10.1). Each gets its
+scoped review first, then implementation.
+
+| # | Source | Path to "working" | Safeguard notes |
+|---|--------|-------------------|-----------------|
+| 1 | LeakCheck (free OSINT-Hub path) | Build; review current API terms and scope | Breach indicators only as scoped; found material never used |
+| 2 | LeakRadar | Build stealer-log checker | Structural safeguard; prefer signal/existence fields; credentials never used |
+| 3 | OsintCat | Build aggregator adapter | May return tokens/passwords — structural safeguard; no credential use |
+| 4 | OathNet | Build (breach + stealer + Discord data) | Structural safeguard; scope and response-field screening |
+| 5 | Blackbird | Resolve license fact at review, then build username enumeration | No declared upstream license today — resolve before bundling |
+| 6 | Lullar | Re-review for a bounded implementation; else record interface blocker with evidence | No documented machine-readable interface today |
+| 7 | Hudson Rock | Build username endpoint | Structural safeguard before any credential-field parsing; signal fields preferred; found credentials never used |
+| 8 | GHunt | Build; operator's own Google account only, explicit authorization | Read-only output; authenticated-workflow exception |
+| 9 | People-search free tiers (TruePeopleSearch, Whitepages free, PeekYou) | Build free paths; politeness limits; firewall | Paid-only products rejected; coverage limits recorded |
+| 10 | Face-search free paths | Build free-path services only (e.g. Betaface eval tier) | Corroboration only, never sole basis; paid products (PimEyes, FaceCheck.ID, Search4Faces, Lenso.ai programmatic) stay out under nothing-paid |
+| 11 | Paste indexes (psbdmp-class, LeakCheck OSINT-Hub) | Build | Flag-only storage: existence, date, source name; never dump contents beyond evidence hashes |
+| 12 | Reverse-image-search automation | Build free engines only (overlaps PicImageSearch #13 above) | Per-engine terms review; local pHash + archived captures remain the fallback |
+| 13 | Dark-web engines (Ahmia, Torch, OnionLand, DarkSearch) | Wire through the darkweb_search composite / OnionSearch-class tooling | Ahmia and similar prohibit scraping — recorded ToS risk under the Florida posture; OnionLand/DarkSearch interface review; Tor container setup |
+| 14 | Bulk/paste data processing | Policy capability; no separate adapter | Retention and flag rules apply |
+
+Note: email-existence checks (holehe-class) listed in `PIVOT_CASCADE.md` §10.1
+are **already integrated** (`holehe`, `h8mail`) — verify coverage, do not
+duplicate. LinkedIn-enumeration-class additions (InSpy-class) may only be
+integrated under the adapter safety rule (read-only fields: name, username,
+email, company, source_url).
+
+## C. Owner actions — free registrations and provider permissions
+
+The engine's next-actions checklist enumerates these per run; this is the
+grouped master list. All are free-tier registrations or permissions; no paid
+defaults.
+
+- **Breach / leak / exposure:** RapidAPI account (BreachDirectory free tier),
+  Leak-Lookup registration, LeakCheck, Hudson Rock, Intelligence X (`x-key`),
+  LeakIX, GrayhatWarfare, abuse.ch portal (URLhaus / ThreatFox / MalwareBazaar).
+- **IP intel:** IPinfo, IPGeolocation.io, AbuseIPDB, GreyNoise, VirusTotal,
+  Netlas, FullHunt, (optional) PhishTank `app_key`.
+- **Corporate / government:** Companies House, KVK, NZBN, ASIC, CIPC, EUIPO dev
+  account (approval gate), `api.data.gov` (FOIA, SAM.gov).
+- **Crypto:** Etherscan, Chainabuse.
+- **Code / search / academic:** GitLab token, Debian Salsa (DCS key),
+  Marginalia email key, Semantic Scholar, CORE, EPO OPS.
+- **Social / media:** Reddit, YouTube Data API, GitHub token, Mapillary,
+  Copernicus Data Space, Betaface.
+- **Transport (with Gate 6 items):** OpenSky (registration + written
+  integration permission), BarentsWatch, Network Rail, National Rail,
+  Deutsche Bahn.
+- Already-wired keyed adapters (Shodan, OpenCorporates, HIBP, etc.) keep their
+  recorded key states; HIBP direct email lookups remain out under nothing-paid.
+
+## D. Recorded blockers and unchanged exclusions
+
+- **FollowTheMoney** — Gate 7 documented exclusion (no published request
+  contract; OpenSecrets API discontinued 2025-04-15; commercial only). Re-open
+  only if the vendor publishes a contract or a free route.
+- **Re-check items that may resolve to blockers:** PatentsView, Google Custom
+  Search, PublicWWW, scrawler, crypttrace, Google Patents BigQuery. If the free
+  path no longer exists, record the evidence and the resulting exclusion — do
+  not fabricate a path.
+- **The 7 deferred candidates** (Judyrecords, PACER Case Locator, MuckRock,
+  JPO APIs, BASE OAI, CIRCL Passive DNS, CIRCL Passive SSL) are not part of the
+  111 accepted set; they remain deferred unless the owner extends the directive.
+- **Still excluded (unchanged):** ONYPHE (own-systems Free View mismatch);
+  Mr.Holmes; IVRE; urlscan; ThreatCluster; Social Analyzer; DarkNyx;
+  osint-darkweb-pkg; removed integrations (Twilio Lookup, Censys, Google Cloud
+  Vision); Tier-5-risk candidates (Discord History Tracker, ICE Detainee
+  Locator, NSOPW, IP India).
+- **Paid-only products stay out** under the nothing-paid rule (DeHashed,
+  Snusbase, HIBP stealer-log enterprise endpoints, PimEyes, FaceCheck.ID,
+  Search4Faces, Lenso.ai programmatic access, and similar).
+
+## E. Update rule
+
+- Statuses move only from copied artifact lines; this directive never upgrades
+  a source by itself.
+- Docs/state commits stay separate from code commits; each build step lands
+  with its CI verification (Gate 5 evidence).
