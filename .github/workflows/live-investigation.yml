@@ -72,6 +72,8 @@ jobs:
           REDDIT_CLIENT_ID: ${{ secrets.REDDIT_CLIENT_ID }}
           REDDIT_CLIENT_SECRET: ${{ secrets.REDDIT_CLIENT_SECRET }}
           YOUTUBE_API_KEY: ${{ secrets.YOUTUBE_API_KEY }}
+          BRON_VAULT_URL: ${{ secrets.BRON_VAULT_URL }}
+          BRON_VAULT_API_KEY: ${{ secrets.BRON_VAULT_API_KEY }}
           PYTHONUNBUFFERED: '1'
         run: |
           set -euo pipefail

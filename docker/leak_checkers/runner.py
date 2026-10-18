@@ -1,8 +1,10 @@
 """Leak-checker composite runner.
 
-This runner uses the documented LeakIX search API and GrayhatWarfare API v2.
-Other planned sources are emitted as explicit skips with the review evidence and
-integration limitations recorded in docker/leak_checkers/RATE_LIMITS.md.
+This runner uses the documented LeakIX search API, the GrayhatWarfare API v2,
+and the documented API v1 of a locally running Broń Vault instance (loopback
+only, never public networks; see docker/leak_checkers/RATE_LIMITS.md). The
+remaining candidates are emitted as explicit skips with the review evidence
+and integration limitations recorded in the same file.
 """
 
 from __future__ import annotations
@@ -17,7 +19,7 @@ import urllib.request
 from datetime import datetime, timezone
 from typing import Any
 
-SUPPORTED_SUB_SOURCES = ("leakix", "grayhatwarfare")
+SUPPORTED_SUB_SOURCES = ("leakix", "grayhatwarfare", "bron-vault")
 UNSUPPORTED_SUB_SOURCES: dict[str, str] = {
     "breachdirectory": (
         "The official BreachDirectory site (https://breachdirectory.org/) returned HTTP 403 during "
@@ -29,12 +31,6 @@ UNSUPPORTED_SUB_SOURCES: dict[str, str] = {
         "or people authorized in writing. This adapter request model cannot verify that written "
         "authorization, so the source is not queried. See https://leak-lookup.com/support/terms#use-of-service"
     ),
-    "bron-vault": (
-        "Broń Vault is a self-hosted application: its README describes deploying its Docker services, "
-        "uploading local log archives, and using API-key-authenticated local REST routes; it warns not "
-        "to expose the app to public networks. This adapter does not deploy or upload into a separate "
-        "operator-owned instance. See https://github.com/ITSEC-Research/bron-vault"
-    ),
 }
 
 LEAKIX_DOCS = "https://docs.leakix.net/docs/api/search/"
@@ -44,6 +40,19 @@ LEAKIX_API_KEY_ENV = "LEAKIX_API_KEY"
 GRAYHATWARFARE_DOCS = "https://buckets.grayhatwarfare.com/docs/api/v2"
 GRAYHATWARFARE_FILES_URL = "https://buckets.grayhatwarfare.com/api/v2/files"
 GRAYHATWARFARE_TOKEN_ENV = "GRAYHATWARFARE_TOKEN"
+
+BRON_VAULT_DOCS = "https://github.com/ITSEC-Research/bron-vault"
+# Pinned source of the API contract: release v1.4.0 of the project. The route
+# files under app/api/v1/search/ in that release define the method, request
+# body, auth header (X-API-Key) and response envelope this runner follows.
+BRON_VAULT_VERSION_PIN = "v1.4.0 (commit 6bfdcc0196ac90ed38a35a1099697497680c1666)"
+BRON_VAULT_URL_ENV = "BRON_VAULT_URL"
+BRON_VAULT_API_KEY_ENV = "BRON_VAULT_API_KEY"
+BRON_VAULT_SEARCH_PATH = "/api/v1/search/credentials"
+# This sub-source only ever talks to a local instance. Loopback names, any
+# 127.0.0.0/8 address, and Docker's documented alias for the local machine are
+# accepted; anything else is refused before a socket is opened.
+BRON_VAULT_ALLOWED_HOSTS = ("localhost", "127.0.0.1", "::1", "host.docker.internal")
 
 USER_AGENT = "Aletheia/0.9.0 (leak-checkers)"
 HTTP_TIMEOUT_SECONDS = 30
@@ -245,8 +254,305 @@ def query_grayhatwarfare(value: str) -> SourceResult:
     )
 
 
+# -- Broń Vault (operator-run local instance) ----------------------------------
+#
+# Broń Vault's only documented interface is the API v1 served by a locally
+# running instance (its README: "REST API with API-key auth for search, lookup,
+# and upload"; the README paragraph names "GET /api/v1/search/credentials", but
+# the route file shipped in the pinned release implements POST - this runner
+# follows the route file, and the discrepancy is recorded in
+# docker/leak_checkers/RATE_LIMITS.md). The instance is operated by the user:
+# this sub-source never deploys, uploads to, or configures it, and it only ever
+# sends a search request to a loopback address. When no local instance is
+# configured, the source reports the documented skip.
+
+
+class _NoOffHostRedirect(urllib.request.HTTPRedirectHandler):
+    """Refuse redirects that would leave the local instance."""
+
+    def redirect_request(self, req, fp, code, msg, headers, newurl):  # type: ignore[override]
+        if not _host_allowed(newurl):
+            return None
+        return super().redirect_request(req, fp, code, msg, headers, newurl)
+
+
+def _host_allowed(url: str) -> bool:
+    try:
+        parsed = urllib.parse.urlsplit(url)
+    except ValueError:
+        return False
+    host = (parsed.hostname or "").lower()
+    return host in BRON_VAULT_ALLOWED_HOSTS or host.startswith("127.") or host.endswith(".localhost")
+
+
+def _bron_vault_refusal(base_url: str) -> str | None:
+    """Return the reason a configured instance URL is refused, or None."""
+    try:
+        parsed = urllib.parse.urlsplit(base_url)
+    except ValueError:
+        return "the URL could not be parsed"
+    if parsed.scheme not in ("http", "https"):
+        return "the URL scheme must be http or https"
+    if not _host_allowed(base_url):
+        return (
+            "host '" + (parsed.hostname or "") + "' is not loopback; this sub-source only queries a "
+            "local instance and never sends traffic off the operator's machine"
+        )
+    return None
+
+
+def _post_json(url: str, body: dict[str, Any], headers: dict[str, str]) -> tuple[Any, int, str | None]:
+    """POST a JSON body with no proxy and no off-host redirects (loopback only)."""
+    data = json.dumps(body).encode("utf-8")
+    request = urllib.request.Request(
+        url,
+        data=data,
+        headers=_request_headers({"Content-Type": "application/json", **headers}),
+        method="POST",
+    )
+    # ProxyHandler({}) bypasses any proxy environment variables: a local
+    # instance is never reached through the egress proxy.
+    opener = urllib.request.build_opener(urllib.request.ProxyHandler({}), _NoOffHostRedirect())
+    try:
+        with opener.open(request, timeout=HTTP_TIMEOUT_SECONDS) as response:
+            if not _host_allowed(response.geturl()):
+                return None, response.status, "redirect left the local instance"
+            raw = response.read(MAX_RESPONSE_BYTES + 1)
+            if len(raw) > MAX_RESPONSE_BYTES:
+                return None, response.status, "Response exceeded safety limit"
+            try:
+                return json.loads(raw.decode("utf-8", errors="replace")), response.status, None
+            except json.JSONDecodeError as exc:
+                return None, response.status, "JSON decode error: " + str(exc)
+    except urllib.error.HTTPError as exc:
+        return None, exc.code, "HTTP status " + str(exc.code)
+    except (urllib.error.URLError, TimeoutError, OSError) as exc:
+        return None, 0, type(exc).__name__
+
+
+def query_bron_vault(value: str, input_type: str = "keyword") -> SourceResult:
+    base_url = os.environ.get(BRON_VAULT_URL_ENV, "").strip().rstrip("/")
+    api_key = os.environ.get(BRON_VAULT_API_KEY_ENV, "").strip()
+    if not base_url or not api_key:
+        return _skip(
+            "bron-vault",
+            "Broń Vault is a self-hosted application; this runner only queries an instance the operator "
+            "already runs and never deploys, uploads to, or exposes one. Set BRON_VAULT_URL (a loopback "
+            "address, e.g. http://127.0.0.1:3000) and BRON_VAULT_API_KEY (created on that instance's API "
+            "Keys page) to activate this source. See https://github.com/ITSEC-Research/bron-vault",
+        )
+    refusal = _bron_vault_refusal(base_url)
+    if refusal:
+        return SourceResult("bron-vault", error="BRON_VAULT_URL refused: " + refusal)
+
+    search_type = {"email": "email", "username": "username"}.get(input_type, "any")
+    endpoint = base_url + BRON_VAULT_SEARCH_PATH
+    # includePasswords stays False: the runner never requests full passwords.
+    body = {"query": value, "type": search_type, "page": 1, "limit": 25, "includePasswords": False}
+    payload, status, error = _post_json(endpoint, body, {"X-API-Key": api_key})
+    if error:
+        return SourceResult("bron-vault", http_status=status, error=error)
+    if not isinstance(payload, dict):
+        return SourceResult("bron-vault", http_status=status, error="Unexpected JSON root type")
+
+    data = payload.get("data") if isinstance(payload.get("data"), dict) else {}
+    credentials = data.get("credentials") if isinstance(data.get("credentials"), list) else []
+    pagination = data.get("pagination") if isinstance(data.get("pagination"), dict) else {}
+    meta = payload.get("meta") if isinstance(payload.get("meta"), dict) else {}
+
+    records: list[dict[str, Any]] = []
+    for item in credentials[:25]:
+        if not isinstance(item, dict):
+            continue
+        host_info = item.get("hostInfo") if isinstance(item.get("hostInfo"), dict) else {}
+        device_id = item.get("deviceId")
+        domain = item.get("domain") or item.get("url")
+        username = item.get("username")
+        records.append({
+            "record_id": f"{device_id}/{domain}",
+            "detail": (
+                f"{host_info.get('stealerType') or 'stealer'} log credential for "
+                f"{username or 'unknown'} on {domain or 'unknown'} (password masked; full passwords are "
+                "never requested)"
+            ),
+            "title": item.get("deviceName") or device_id,
+            "url": item.get("url"),
+            "device_id": device_id,
+            "device_name": item.get("deviceName"),
+            "domain": item.get("domain"),
+            "username": username,
+            "password_masked": item.get("passwordMasked"),
+            "browser": item.get("browser"),
+            "country": item.get("country"),
+            "upload_date": item.get("uploadDate"),
+            "stealer_type": host_info.get("stealerType"),
+            "log_date": host_info.get("logDate"),
+            "os": host_info.get("os"),
+            "machine_username": host_info.get("machineUsername"),
+            "hwid": host_info.get("hwid"),
+            "ip_address": host_info.get("ipAddress"),
+        })
+    total = pagination.get("total") if isinstance(pagination.get("total"), int) else len(records)
+    extra = {
+        "instance_url": base_url,
+        "key_source": "env:BRON_VAULT_API_KEY",
+        "api_version_pin": BRON_VAULT_VERSION_PIN,
+        "search_type": search_type,
+        "include_passwords": False,
+        "pagination": pagination,
+        "searched_at": meta.get("searchedAt"),
+    }
+    extra = {key: value for key, value in extra.items() if value not in (None, "", [], {})}
+    return SourceResult(
+        "bron-vault",
+        data=_payload(
+            "Broń Vault API v1 (search/credentials)",
+            BRON_VAULT_DOCS,
+            endpoint,
+            f"POST {endpoint}",
+            value,
+            records,
+            total,
+            extra=extra,
+        ),
+        http_status=status,
+    )
+
+
+def _bron_vault_selftest() -> dict[str, Any]:
+    """Exercise the Bron Vault client path against a loopback stub.
+
+    The stub implements exactly the documented v1.4.0 route contract
+    (POST /api/v1/search/credentials, X-API-Key auth, the success/data envelope
+    with data.credentials and data.pagination) and proves, without any off-host
+    traffic: the auth header is sent, a success envelope is parsed into a
+    record, a 401 is reported as an error, and a non-loopback instance URL is
+    refused before any socket opens. The report never claims the real
+    application ran: the real instance is operator-run and this image neither
+    deploys nor starts it.
+    """
+    from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+    import threading
+
+    report: dict[str, Any] = {
+        "bron_vault_selftest": "failed",
+        "api_version_pin": BRON_VAULT_VERSION_PIN,
+        "stub_contract": "POST " + BRON_VAULT_SEARCH_PATH,
+    }
+    seen: dict[str, Any] = {}
+
+    class Handler(BaseHTTPRequestHandler):
+        def do_POST(self) -> None:  # noqa: N802 - http.server API
+            if self.path != BRON_VAULT_SEARCH_PATH:
+                self.send_response(404)
+                self.end_headers()
+                return
+            if self.headers.get("X-API-Key") != "bv_selftest_key":
+                raw = json.dumps(
+                    {"success": False, "error": "Invalid API key", "code": "UNAUTHORIZED"}
+                ).encode()
+                self.send_response(401)
+                self.send_header("Content-Type", "application/json")
+                self.send_header("Content-Length", str(len(raw)))
+                self.end_headers()
+                self.wfile.write(raw)
+                return
+            length = int(self.headers.get("Content-Length") or 0)
+            body = json.loads(self.rfile.read(length) or b"{}")
+            seen["request_body"] = body
+            raw = json.dumps({
+                "success": True,
+                "data": {
+                    "credentials": [{
+                        "deviceId": "selftest-device",
+                        "deviceName": "selftest-host",
+                        "url": "https://example.invalid/login",
+                        "domain": "example.invalid",
+                        "username": body.get("query", ""),
+                        "passwordMasked": "se***st",
+                        "browser": "Chrome",
+                        "country": "US",
+                        "uploadDate": "2026-10-18T00:00:00Z",
+                        "hostInfo": {
+                            "os": "Synthetic OS",
+                            "stealerType": "RedLine",
+                            "logDate": "2026-10-01",
+                        },
+                    }],
+                    "pagination": {"page": 1, "limit": 25, "total": 1, "totalPages": 1, "hasMore": False},
+                },
+                "meta": {
+                    "query": body.get("query", ""),
+                    "type": body.get("type"),
+                    "searchedAt": "2026-10-18T00:00:00Z",
+                },
+            }).encode()
+            self.send_response(200)
+            self.send_header("Content-Type", "application/json")
+            self.send_header("Content-Length", str(len(raw)))
+            self.end_headers()
+            self.wfile.write(raw)
+
+        def log_message(self, *args: Any) -> None:
+            return
+
+    server = ThreadingHTTPServer(("127.0.0.1", 0), Handler)
+    thread = threading.Thread(target=server.serve_forever, daemon=True)
+    thread.start()
+    previous_url = os.environ.get(BRON_VAULT_URL_ENV)
+    previous_key = os.environ.get(BRON_VAULT_API_KEY_ENV)
+    try:
+        os.environ[BRON_VAULT_URL_ENV] = "http://127.0.0.1:" + str(server.server_address[1])
+        os.environ[BRON_VAULT_API_KEY_ENV] = "bv_selftest_key"
+        result = query_bron_vault("selftest@example.invalid", "email")
+
+        os.environ[BRON_VAULT_API_KEY_ENV] = "bv_wrong_key"
+        unauthorized = query_bron_vault("selftest@example.invalid", "email")
+
+        os.environ[BRON_VAULT_API_KEY_ENV] = "bv_selftest_key"
+        os.environ[BRON_VAULT_URL_ENV] = "https://example.com"
+        refused = query_bron_vault("selftest@example.invalid", "email")
+    finally:
+        server.shutdown()
+        server.server_close()
+        if previous_url is None:
+            os.environ.pop(BRON_VAULT_URL_ENV, None)
+        else:
+            os.environ[BRON_VAULT_URL_ENV] = previous_url
+        if previous_key is None:
+            os.environ.pop(BRON_VAULT_API_KEY_ENV, None)
+        else:
+            os.environ[BRON_VAULT_API_KEY_ENV] = previous_key
+
+    if result.error:
+        report["error"] = result.error
+        return report
+    if unauthorized.error != "HTTP status 401":
+        report["error"] = "unauthorized request was not refused: " + str(unauthorized.error)
+        return report
+    if not refused.error or "refused" not in refused.error:
+        report["error"] = "non-loopback instance URL was not refused"
+        return report
+    data = result.data or {}
+    records = data.get("records") or []
+    report["bron_vault_selftest"] = "ok"
+    report["auth_header_verified"] = True
+    report["unauthorized_refused"] = True
+    report["non_loopback_refused"] = True
+    report["search_type_sent"] = seen.get("request_body", {}).get("type")
+    report["include_passwords"] = seen.get("request_body", {}).get("includePasswords")
+    report["records_parsed"] = len(records)
+    report["record_id"] = records[0].get("record_id") if records else None
+    report["password_masked_only"] = bool(records) and "password" not in records[0]
+    return report
+
+
 def _run_for_input(input_type: str, value: str) -> list[dict[str, Any]]:
-    sources = [query_leakix(value), query_grayhatwarfare(value)]
+    sources = [
+        query_leakix(value),
+        query_grayhatwarfare(value),
+        query_bron_vault(value, input_type),
+    ]
     sources.extend(_skip(name, reason) for name, reason in UNSUPPORTED_SUB_SOURCES.items())
     return [source.to_dict() for source in sources]
 
@@ -260,6 +566,11 @@ def main(argv: list[str]) -> int:
         print("ok")
         print(json.dumps({"inventory": inventory}), file=sys.stderr)
         return 0
+
+    if len(argv) == 2 and argv[1] == "--selftest-bron-vault":
+        report = _bron_vault_selftest()
+        print(json.dumps(report, ensure_ascii=False, sort_keys=True))
+        return 0 if report.get("bron_vault_selftest") == "ok" else 1
 
     if len(argv) < 3:
         print("usage: runner.py <input_type> <value>", file=sys.stderr)

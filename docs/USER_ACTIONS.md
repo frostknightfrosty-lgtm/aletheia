@@ -50,6 +50,12 @@ Configuration values (no registration, still owner-provided):
 
 - [ ] **Unpaywall** — the documented DOI endpoint requires a contact email —
   secret `UNPAYWALL_EMAIL` (see `PHASE17_RECHECKS.md` #33).
+- [ ] **Broń Vault (optional)** — only if you ever run the Broń Vault stealer-log
+  dashboard locally (your own instance; the campaign never deploys or uploads to
+  one): set `BRON_VAULT_URL` (a loopback address, e.g. `http://127.0.0.1:3000`)
+  + `BRON_VAULT_API_KEY` (created on that instance's API Keys page) to turn the
+  documented `leak_checkers` skip into a live local path (see
+  `docker/leak_checkers/RATE_LIMITS.md`).
 - [ ] **Google Patents (BigQuery)** — sandbox queries need a Google-account
   access token and project — secrets `GOOGLE_BIGQUERY_ACCESS_TOKEN` +
   `GOOGLE_CLOUD_PROJECT` (the BigQuery sandbox requires no billing account).

@@ -46,13 +46,12 @@ def test_supported_sources_are_documented_and_drop_reasons_are_present():
     assert runner.UNSUPPORTED_SUB_SOURCES == UNSUPPORTED_SUB_SOURCES
     assert "leakix" in SUPPORTED_SUB_SOURCES
     assert "grayhatwarfare" in SUPPORTED_SUB_SOURCES
+    assert "bron-vault" in SUPPORTED_SUB_SOURCES
     assert "breachdirectory" in UNSUPPORTED_SUB_SOURCES
     assert "leak-lookup" in UNSUPPORTED_SUB_SOURCES
-    assert "bron-vault" in UNSUPPORTED_SUB_SOURCES
     assert all("https://" in reason for reason in UNSUPPORTED_SUB_SOURCES.values())
     assert "403" in UNSUPPORTED_SUB_SOURCES["breachdirectory"]
     assert "written" in UNSUPPORTED_SUB_SOURCES["leak-lookup"]
-    assert "self-hosted" in UNSUPPORTED_SUB_SOURCES["bron-vault"]
 
 
 @parser_test("leak_checkers")
@@ -71,6 +70,10 @@ def test_parse_creates_findings_for_supported_sources():
     assert set(by_source) == set(SUPPORTED_SUB_SOURCES) | set(UNSUPPORTED_SUB_SOURCES)
     assert by_source["leakix"].value == "LEAKIX:synthetic-event-fingerprint"
     assert by_source["grayhatwarfare"].value == "GRAYHAT:synthetic-file-id"
+    assert by_source["bron-vault"].value == "BRONVAULT:synthetic-bron-device/example.invalid"
+    assert by_source["bron-vault"].record_type == "bron_vault_credential"
+    assert by_source["bron-vault"].details["instance_url"] == "http://127.0.0.1:3000"
+    assert by_source["bron-vault"].details["api_version_pin"].startswith("v1.4.0")
     for source, reason in UNSUPPORTED_SUB_SOURCES.items():
         assert by_source[source].attributes["details"] == {"skipped": True, "reason": reason}
     for finding in result.findings:
@@ -152,10 +155,106 @@ def test_grayhatwarfare_request_matches_official_api_v2_contract(monkeypatch):
     assert "fixture-secret" not in json.dumps(result.to_dict())
 
 
+def test_bron_vault_request_matches_pinned_route_contract(monkeypatch):
+    runner = load_runner()
+    monkeypatch.setenv("BRON_VAULT_URL", "http://127.0.0.1:3000/")
+    monkeypatch.setenv("BRON_VAULT_API_KEY", "fixture-secret")
+    calls = []
+
+    def fake_post(url, body, headers):
+        calls.append((url, body, headers))
+        return ({
+            "success": True,
+            "data": {
+                "credentials": [{
+                    "deviceId": "synthetic-bron-device",
+                    "deviceName": "synthetic-bron-host",
+                    "url": "https://example.invalid/login",
+                    "domain": "example.invalid",
+                    "username": "synthetic-user",
+                    "passwordMasked": "se***st",
+                    "browser": "Chrome",
+                    "country": "US",
+                    "uploadDate": "2026-10-16T00:00:00Z",
+                    "hostInfo": {
+                        "os": "Synthetic OS",
+                        "stealerType": "RedLine",
+                        "logDate": "2026-10-01",
+                    },
+                }],
+                "pagination": {"page": 1, "limit": 25, "total": 1, "totalPages": 1, "hasMore": False},
+            },
+            "meta": {"query": "example.invalid", "type": "any", "searchedAt": "2026-10-16T00:00:00Z"},
+        }, 200, None)
+
+    monkeypatch.setattr(runner, "_post_json", fake_post)
+    result = runner.query_bron_vault("example.invalid", "domain")
+
+    assert len(calls) == 1
+    url, body, headers = calls[0]
+    assert url == "http://127.0.0.1:3000/api/v1/search/credentials"
+    assert body == {"query": "example.invalid", "type": "any", "page": 1, "limit": 25, "includePasswords": False}
+    assert headers == {"X-API-Key": "fixture-secret"}
+    assert result.data["records"][0]["record_id"] == "synthetic-bron-device/example.invalid"
+    assert result.data["records"][0]["password_masked"] == "se***st"
+    assert "password" not in result.data["records"][0]
+    assert "fixture-secret" not in json.dumps(result.to_dict())
+
+
+def test_bron_vault_maps_email_and_username_input_types(monkeypatch):
+    runner = load_runner()
+    monkeypatch.setenv("BRON_VAULT_URL", "http://127.0.0.1:3000")
+    monkeypatch.setenv("BRON_VAULT_API_KEY", "fixture-secret")
+    seen = []
+
+    def fake_post(url, body, headers):
+        seen.append(body["type"])
+        return ({"success": True, "data": {"credentials": [], "pagination": {"total": 0}}}, 200, None)
+
+    monkeypatch.setattr(runner, "_post_json", fake_post)
+    runner.query_bron_vault("someone@example.com", "email")
+    runner.query_bron_vault("someone", "username")
+    runner.query_bron_vault("192.0.2.7", "ip")
+
+    assert seen == ["email", "username", "any"]
+
+
+def test_bron_vault_skips_unconfigured_and_refuses_non_loopback_urls(monkeypatch):
+    runner = load_runner()
+    monkeypatch.delenv("BRON_VAULT_URL", raising=False)
+    monkeypatch.delenv("BRON_VAULT_API_KEY", raising=False)
+
+    skipped = runner.query_bron_vault("example.com", "domain")
+    assert skipped.skipped is True
+    assert "BRON_VAULT_URL" in skipped.skip_reason
+
+    monkeypatch.setenv("BRON_VAULT_URL", "https://example.com")
+    monkeypatch.setenv("BRON_VAULT_API_KEY", "fixture-secret")
+    refused = runner.query_bron_vault("example.com", "domain")
+    assert refused.error and "refused" in refused.error
+    assert "not loopback" in refused.error
+
+
+def test_bron_vault_selftest_exercises_loopback_stub():
+    runner = load_runner()
+    report = runner._bron_vault_selftest()
+
+    assert report["bron_vault_selftest"] == "ok"
+    assert report["auth_header_verified"] is True
+    assert report["unauthorized_refused"] is True
+    assert report["non_loopback_refused"] is True
+    assert report["records_parsed"] == 1
+    assert report["include_passwords"] is False
+    assert report["password_masked_only"] is True
+    assert report["record_id"] == "selftest-device/example.invalid"
+
+
 def test_runner_skips_missing_keys_and_reports_all_dropped_sources(monkeypatch):
     runner = load_runner()
     monkeypatch.delenv("LEAKIX_API_KEY", raising=False)
     monkeypatch.delenv("GRAYHATWARFARE_TOKEN", raising=False)
+    monkeypatch.delenv("BRON_VAULT_URL", raising=False)
+    monkeypatch.delenv("BRON_VAULT_API_KEY", raising=False)
 
     sources = runner._run_for_input("domain", "example.com")
     by_source = {source["source"]: source for source in sources}

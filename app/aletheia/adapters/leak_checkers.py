@@ -19,6 +19,7 @@ from aletheia.core.models import (
 SUPPORTED_SUB_SOURCES = (
     "leakix",
     "grayhatwarfare",
+    "bron-vault",
 )
 
 UNSUPPORTED_SUB_SOURCES: dict[str, str] = {
@@ -31,12 +32,6 @@ UNSUPPORTED_SUB_SOURCES: dict[str, str] = {
         "Leak-Lookup's Terms of Service limit use to personal security/research and searches for oneself "
         "or people authorized in writing. This adapter request model cannot verify that written "
         "authorization, so the source is not queried. See https://leak-lookup.com/support/terms#use-of-service"
-    ),
-    "bron-vault": (
-        "Broń Vault is a self-hosted application: its README describes deploying its Docker services, "
-        "uploading local log archives, and using API-key-authenticated local REST routes; it warns not "
-        "to expose the app to public networks. This adapter does not deploy or upload into a separate "
-        "operator-owned instance. See https://github.com/ITSEC-Research/bron-vault"
     ),
 }
 
@@ -130,11 +125,13 @@ def _first_record(data: dict[str, Any], source: str) -> dict[str, Any] | None:
 _SUBJECT_PREFIXES = {
     "leakix": "LEAKIX",
     "grayhatwarfare": "GRAYHAT",
+    "bron-vault": "BRONVAULT",
 }
 
 _RECORD_TYPES = {
     "leakix": "leakix_exposure",
     "grayhatwarfare": "grayhatwarfare_bucket",
+    "bron-vault": "bron_vault_credential",
 }
 
 
@@ -201,6 +198,28 @@ def _extract_details(data: dict[str, Any], source: str) -> dict[str, Any] | None
         "url": record.get("url"),
         "snippet": record.get("snippet"),
     }
+    if source == "bron-vault":
+        details.update(
+            {
+                "device_id": record.get("device_id"),
+                "device_name": record.get("device_name"),
+                "domain": record.get("domain"),
+                "username": record.get("username"),
+                "password_masked": record.get("password_masked"),
+                "browser": record.get("browser"),
+                "country": record.get("country"),
+                "upload_date": record.get("upload_date"),
+                "stealer_type": record.get("stealer_type"),
+                "log_date": record.get("log_date"),
+                "os": record.get("os"),
+                "machine_username": record.get("machine_username"),
+                "hwid": record.get("hwid"),
+                "ip_address": record.get("ip_address"),
+                "instance_url": data.get("instance_url"),
+                "api_version_pin": data.get("api_version_pin"),
+                "found_via": "operator-run local instance (loopback only; no egress)",
+            }
+        )
     return details
 
 
@@ -208,7 +227,8 @@ class LeakCheckersAdapter(Adapter):
     descriptor = AdapterDescriptor(
         name="leak_checkers",
         license=(
-            "Composite adapter covering LeakIX's leak search API and GrayhatWarfare's bucket-file API. "
+            "Composite adapter covering LeakIX's leak search API, GrayhatWarfare's bucket-file API, and "
+            "the API v1 of a locally running Broń Vault instance (operator-run; Apache-2.0). "
             "See each vendor's terms and service documentation before use."
         ),
         input_types=[
@@ -224,18 +244,23 @@ class LeakCheckersAdapter(Adapter):
             "LeakIX is queried only through its documented GET /search endpoint with scope=leak, q, page=0, "
             "and the api-key header; its docs specify approximately one request per second. GrayhatWarfare "
             "is queried only through GET /api/v2/files with keywords, limit=25, start=0, and the documented "
-            "Bearer token header. No returned file is fetched and no pagination is performed.",
+            "Bearer token header. No returned file is fetched and no pagination is performed. Broń Vault is "
+            "queried only through POST /api/v1/search/credentials on a loopback instance the operator runs "
+            "themselves (X-API-Key header; contract pinned to release v1.4.0); no upload, deployment, or "
+            "off-host traffic is involved, and full passwords are never requested.",
             "BreachDirectory is skipped because its official site returned HTTP 403 during this contract "
             "review, leaving no first-party API contract to verify. Leak-Lookup is skipped because its "
             "Terms of Service require self-search or written authorization, which the adapter cannot "
-            "validate. Broń Vault is skipped because its official README describes a self-hosted local-log "
-            "application, not a vendor-hosted source; this adapter does not deploy or upload to it.",
+            "validate. Broń Vault is only ever queried on a configured loopback instance; until "
+            "BRON_VAULT_URL and BRON_VAULT_API_KEY are set, the source reports a documented skip.",
         ],
         rate_limit=(
             "At most one HTTP request per supported sub-source per run, never paginates, and caps each "
             "response at 25 records. LeakIX documents approximately 1 request/second. GrayhatWarfare's "
             "registered free plan has account-specific result limits; its API docs cap each page at 1,000, "
-            "while this runner requests 25. See docker/leak_checkers/RATE_LIMITS.md."
+            "while this runner requests 25. The Broń Vault sub-source makes at most one loopback POST per "
+            "run to the operator's own local instance, never through the egress proxy. "
+            "See docker/leak_checkers/RATE_LIMITS.md."
         ),
         invocation="HTTPS JSON leak-index APIs via dedicated Docker runner (aletheia/leak-checkers:v1)",
         version_pin="1.0",
@@ -245,7 +270,7 @@ class LeakCheckersAdapter(Adapter):
         output_schema={"finding_type": "LeakCheckResult", "item_type": "object"},
         health_check="--health",
         requires_authorization_assertion=True,
-        secret_env=["LEAKIX_API_KEY", "GRAYHATWARFARE_TOKEN"],
+        secret_env=["LEAKIX_API_KEY", "GRAYHATWARFARE_TOKEN", "BRON_VAULT_URL", "BRON_VAULT_API_KEY"],
     )
 
     def supports(self, seed_type: SeedType) -> bool:

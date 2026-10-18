@@ -70,6 +70,56 @@
       }
     },
     {
+      "source": "bron-vault",
+      "skipped": false,
+      "timestamp": "2026-10-16T00:00:02Z",
+      "http_status": 200,
+      "data": {
+        "api_source": "Broń Vault API v1 (search/credentials)",
+        "api_documentation": "https://github.com/ITSEC-Research/bron-vault",
+        "endpoint": "http://127.0.0.1:3000/api/v1/search/credentials",
+        "invocation": "POST http://127.0.0.1:3000/api/v1/search/credentials",
+        "query": "example.com",
+        "record_count": 1,
+        "truncated": false,
+        "instance_url": "http://127.0.0.1:3000",
+        "key_source": "env:BRON_VAULT_API_KEY",
+        "api_version_pin": "v1.4.0 (commit 6bfdcc0196ac90ed38a35a1099697497680c1666)",
+        "search_type": "any",
+        "include_passwords": false,
+        "pagination": {
+          "page": 1,
+          "limit": 25,
+          "total": 1,
+          "totalPages": 1,
+          "hasMore": false
+        },
+        "searched_at": "2026-10-16T00:00:02Z",
+        "records": [
+          {
+            "record_id": "synthetic-bron-device/example.invalid",
+            "detail": "RedLine log credential for synthetic-user on example.invalid (password masked; full passwords are never requested)",
+            "title": "synthetic-bron-host",
+            "url": "https://example.invalid/login",
+            "device_id": "synthetic-bron-device",
+            "device_name": "synthetic-bron-host",
+            "domain": "example.invalid",
+            "username": "synthetic-user",
+            "password_masked": "se***st",
+            "browser": "Chrome",
+            "country": "US",
+            "upload_date": "2026-10-16T00:00:00Z",
+            "stealer_type": "RedLine",
+            "log_date": "2026-10-01",
+            "os": "Synthetic OS",
+            "machine_username": "synthetic-machine",
+            "hwid": "SYNTHETIC-HWID",
+            "ip_address": "192.0.2.9"
+          }
+        ]
+      }
+    },
+    {
       "source": "breachdirectory",
       "skipped": true,
       "skip_reason": "The official BreachDirectory site (https://breachdirectory.org/) returned HTTP 403 during contract review, and no first-party endpoint, parameter, or response contract could be verified. This source is not queried until its vendor contract can be reviewed; no route is inferred.",
@@ -81,13 +131,6 @@
       "skipped": true,
       "skip_reason": "Leak-Lookup's Terms of Service limit use to personal security/research and searches for oneself or people authorized in writing. This adapter request model cannot verify that written authorization, so the source is not queried. See https://leak-lookup.com/support/terms#use-of-service",
       "timestamp": "2026-10-16T00:00:03Z",
-      "http_status": 0
-    },
-    {
-      "source": "bron-vault",
-      "skipped": true,
-      "skip_reason": "Broń Vault is a self-hosted application: its README describes deploying its Docker services, uploading local log archives, and using API-key-authenticated local REST routes; it warns not to expose the app to public networks. This adapter does not deploy or upload into a separate operator-owned instance. See https://github.com/ITSEC-Research/bron-vault",
-      "timestamp": "2026-10-16T00:00:04Z",
       "http_status": 0
     }
   ]
