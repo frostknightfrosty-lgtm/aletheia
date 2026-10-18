@@ -19,16 +19,16 @@
   confirmation labels, `purge` deletes case artifacts; trail/dossier/coverage
   artifact builders; next-actions checklist; deterministic redaction; 21 new
   tests; local 924 passed + 65 environment-only skips → expected CI 989).
-  **P17.3–P17.5 verified green**; P17.6 (`39156855944`) and P17.7
-  (`39157495630`) runs still watching.
+  **P17.3–P17.6 verified green**; P17.7 (`39157495630`) and P17.8
+  (`39158143846`) runs still watching.
 - Next action: start **P17.9** (synthetic worlds + adversarial +
   failure-injection suites in CI) locally while CI runs; copy evidence when
   the watches notify.
-- In-flight CI: `39156855944` (P17.6 code `341f055` + docs `86c68b6`),
-  `39157495630` (P17.7 code `60bb0e6` + docs `c18d973`), `ced6f08`'s run
-  starting.
-- Last verified commit: `051625c` (run `39156241115`, docker-verification
-  green; lines copied: parser 49/49; **922 passed**; capture 60/60; storage
+- In-flight CI: `39157495630` (P17.7 code `60bb0e6` + docs `c18d973`),
+  `39157751920` (P17.5 evidence docs `70edb38`), `39158143846` (P17.8 code
+  `ced6f08` + docs `c8c02c3`).
+- Last verified commit: `86c68b6` (run `39156855944`, docker-verification
+  green; lines copied: parser 49/49; **944 passed**; capture 60/60; storage
   6/6).
 - Owner-blocked (parked, never wait on): everything in `docs/USER_ACTIONS.md`.
 - Decision defaults in force: see "Adopted defaults" below.
@@ -126,10 +126,12 @@
       landed in `scoring.py`; wiring `Claim.source_grade` into evidence items
       is deferred until a grading pass assigns real grades (F6-unrated stays
       "not yet graded"; §17 resolution item 7).
-- [ ] **P17.6** — VOI scheduler + adaptive budgets + stop policy + resume +
+- [x] **P17.6** — VOI scheduler + adaptive budgets + stop policy + resume +
       decision ledger.
       → Implemented locally-green (22 tests; local 879 passed + 65 skips →
-      expected CI 944); pushed `341f055`; run verifying.
+      expected CI 944); pushed `341f055`; run `39156855944` **green** —
+      evidence lines copied to the Log (parser 49/49; 944 passed; capture
+      60/60; storage 6/6).
 - [ ] **P17.7** — case memory + cache/TTL + re-audit diffs.
       → Implemented locally-green (case store with snapshots/timeline/diffs,
       source cache with TTL classes and scheduler-parity freshness, label
@@ -309,7 +311,18 @@ activate when the key exists.
   from USER_ACTIONS.md; `redact.py` deterministic person-identifier tokens;
   21 tests; local 924 passed + 65 environment-only skips → expected CI 989)
   and pushed as `ced6f08`.
+- 2026-10-18 — P17.6 verification — commit `341f055` — run `39156855944` —
+  docker-verification **green**. Copied from the downloaded artifact
+  `ci-artifacts-39156855944`:
+  - `PARSER PREFLIGHT: PASS — 49/49 adapters have parser coverage`
+  - pytest-summary.json: `"console_summary": "944 passed, 1 warning"`,
+    `"junit_total": 944`, `"skipped_in_ci": []`, `"ok": true`
+    (922 → 944: the 22 new scheduler/ledger tests, none skipped)
+  - docker-integration/capture.log: `DOCKER CAPTURE: PASS — 60/60 cases
+    captured`
+  - storage-conformance.json: `"passing": ["file", "postgres", "neo4j",
+    "elasticsearch", "minio", "redis"]`, `"unconfigured": []`,
+    `"required_all": true`, `"ok": true`
 - Next: start P17.9 (synthetic worlds + adversarial + failure-injection
-  suites in CI) locally; on `39156855944` green copy P17.6 evidence; on
-  `39157495630` green copy P17.7 evidence; on `ced6f08`'s run green copy
-  P17.8 evidence.
+  suites in CI) locally; on `39157495630` green copy P17.7 evidence; on
+  `39158143846` green copy P17.8 evidence.

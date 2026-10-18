@@ -1,5 +1,30 @@
 # Changelog
 
+## 2026-10-18 — P17.6: VOI scheduler, adaptive budgets, stop policy, decision ledger
+
+Budget-aware frontier management with a hash-chained audit trail. Every
+number below is copied from the downloaded artifact
+`ci-artifacts-39156855944` (run `39156855944`, commit `341f055`).
+
+- `PARSER PREFLIGHT: PASS — 49/49 adapters have parser coverage` (registry
+  unchanged).
+- `"console_summary": "944 passed, 1 warning"` with `"junit_total": 944`,
+  `"skipped_in_ci": []`, `"ok": true` — 22 new tests over the previous 922,
+  none skipped in CI.
+- `DOCKER CAPTURE: PASS — 60/60 cases captured`.
+- storage-conformance.json: `"passing": ["file", "postgres", "neo4j",
+  "elasticsearch", "minio", "redis"]`, `"unconfigured": []`,
+  `"required_all": true`, `"ok": true`.
+- What landed: `scheduler.py` (value-of-information ordering over the pivot
+  frontier with reviewable constants — `DEPTH_PENALTY=0.6`,
+  `DEFAULT_YIELD=1.0`, `DEFAULT_RARITY=0.5`, `DEFAULT_COST=1.0`,
+  `MIN_COST=0.1`, `TIME_PRESSURE_FRACTION=0.25`, `SchedulerPolicy.min_voi=0.02`;
+  per-type pivot caps; `(seed type, value)` dedup; fresh-TTL pivots refused
+  at push with the ledger recording the refusal; depth escalation only when
+  owner mode has seen a HARD gate; time pressure de-escalates depth by one);
+  `ledger.py` (hash-chained decision ledger recording pivot proposals,
+  grants, refusals, sweeps, and stops, verified by `verify()`).
+
 ## 2026-10-18 — P17.5: falsification pass, ACH hypothesis scoring, union-find merge graph
 
 Consistency checks and conflict propagation the cascade trusts before it
