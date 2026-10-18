@@ -13,33 +13,68 @@ prerequisites are met. A tier classification is project policy, not a legal conc
 
 ## Repository and CI state
 
-- Latest CI-verified commit: `f0352a4f752934d8d5ae3bd320c659e4a8a475e3`
-  (`Multi-seed investigations, context filters, jurisdiction warnings, Tier 5 construction rejection`).
-- Docker Verification run **39116485331** —
-  https://github.com/frostknightfrosty-lgtm/aletheia/actions/runs/39116485331 — **green**.
-- Evidence lines copied from the downloaded artifact
-  (`ci-artifacts-39116485331`), not typed:
+- Latest CI-verified commits: `b5ff9e2` (run **39139434131**, `785 passed` — single-hop
+  proxying, proxy readiness probe), `de6b218` (run **39139781693**, `786 passed` —
+  `sherlock --txt`), and `8939517` (round-3 docs; run **39141365915**, `786 passed`).
+- The authorized live run **39141366670** ran on tree `8939517` and is green (37m19s) —
+  see the live-audit section below.
+- Evidence lines copied from the downloaded artifact of run `39141365915`
+  (`ci-artifacts-39141365915`), not typed:
   - `PARSER PREFLIGHT: PASS — 49/49 adapters have parser coverage`
-  - `714 passed, 1 warning in 29.49s`
-  - `DOCKER CAPTURE: PASS — 57/57 cases captured`
+  - `786 passed, 1 warning`
+  - `DOCKER CAPTURE: PASS — 60/60 cases captured`
   - `STORAGE CONFORMANCE: PASS — 6/6 backends conform`
-- `pytest-summary.json`: `junit_total` 714, `skipped_in_ci` `[]`, `ok` `true`.
-  `storage-conformance.json`: `configured` = `file`, `postgres`, `neo4j`, `elasticsearch`,
-  `minio`, `redis`; `unconfigured` `[]`; `required_all` `true`. `results.json`: 57 entries,
-  0 nonzero return codes, with the `phase15-*` scenario checks present.
-  `egress-scenario.json`: all 6 checks ok —
-  `phase15-egress-policy-covers-registry` = `adapters=49 network_required=44 wired=44`;
-  `phase15-egress-previously-unwired-adapter` = `crtsh rc=1 new CONNECT crt.sh entries=1 status=502`;
-  the four `phase12-*` checks pass.
-- Local consistency: **653 passed + 61 skipped = 714**, which equals the CI passed count
-  exactly. The 61 skips are 56 `tests/test_docker_integration.py` (no Docker on this machine)
-  and 5 `tests/test_storage_services.py` (no `ALETHEIA_STORAGE_*` service configured); both
-  groups execute in CI, and CI now *fails* if either group skips — see
-  `docs/SKIPPED_IN_CI.md`.
-- 49 registered adapters, all `verified-fixture`. No `verified-live` adapters. One
-  infrastructure component (`egress_proxy`), `verified-fixture`. Six storage backends, all
-  conformance-verified against real services in CI. 44 of the 49 adapters declare
-  `network_required=True`, and the egress policy wires all 44.
+- `pytest-summary.json`: `junit_total` 786, `failed` `[]`, `skipped_in_ci` `[]`, `ok`
+  `true`. `egress-scenario.json`: all 9 checks ok, chain `valid: true` with `log_entries`
+  7 = `egress_events` 7; `phase15-egress-policy-covers-registry` = `adapters=49
+  network_required=44 wired=44`; the crtsh check returned `new CONNECT crt.sh entries=1
+  status=200` this run; the four `phase12-*` checks pass.
+- Local consistency: **721 passed + 65 skipped = 786** (re-run before this update), which
+  equals the CI passed count exactly. The 65 skips are 60
+  `tests/test_docker_integration.py` (no Docker on this machine) and 5
+  `tests/test_storage_services.py` (no `ALETHEIA_STORAGE_*` service configured); both groups
+  execute in CI, and CI now *fails* if either group skips — see `docs/SKIPPED_IN_CI.md`.
+- 49 registered adapters, all `verified-fixture` in `PROJECT_MANIFEST.json`; this round did
+  not change any `verification_status`. One infrastructure component (`egress_proxy`),
+  `verified-fixture`. Six storage backends, all conformance-verified against real services
+  in CI. 44 of the 49 adapters declare `network_required=True`, and the egress policy wires
+  all 44.
+
+## Authorized live self-audit of `username:frost2233` (2026-10-18, complete)
+
+The owner opened Gate 2 for one target with an assertion recorded verbatim in the live run's
+`MANIFEST.json`: *"Self-audit: I am the owner of the Discord account with username frost2233
+and I authorize an investigation of my own username across public, legal, open sources."*
+
+- **The live path took five repair commits to get there**: `4583d38` (after the first live
+  attempt `39120709419`), `1919266` (after `39125383530`), `692e418` (the CI-only defects
+  found by Docker Verification run `39128092472`), `b5ff9e2` and `de6b218` (after the
+  diagnostic run `39135219248`). Each was verified by its own CI run; the top CHANGELOG
+  entry carries every copied number.
+- **What the final run produced** (run `39141366670` on tree `8939517`, green, 37m19s; run
+  directory `983cc23b-f9f6-4ccd-8483-82f7e37738ba`): 16 sherlock sites; 19 maigret accounts
+  with extended info from 9; report `entity_count` 32, `edge_count` 43,
+  `resolution_candidate_count` 3 (all left as candidates — nothing is auto-merged on fuzzy
+  similarity); `report.json`, `report.pdf`, `report.stix2.json`, `graph.graphml`; a
+  hash-chained `AUDIT.jsonl` with `chain_tip`
+  `894354635d9da9789ea35d0a4798816d7338134c4ad2918569a0c02e4e5c9cbe`.
+- **Extended attributes returned**: Pinterest (`Helen Frost`, created 2014-05-25, latest
+  activity 2025-07-10, 67 posts), Twitter (`frost`, created 2016-01-03, protected), Twitch
+  (channel created 2013-01-31), Snapchat (`Frosti`), Picsart (`frost`), TikTok, Telegram
+  (`Frost2233`), Chess.com (`Leon Barnard`, ZA, created 2025-02-12), Xvideos (`Frost2233`,
+  BD, created 2018-06-17). Maigret tag summary: countries `ru`, `bd`; 24 interest tags.
+- **Candidate caveat (recorded, not softened):** every hit is a same-username *candidate*,
+  not proof of ownership. Display names differ across platforms (`Helen Frost`,
+  `Leon Barnard`, `Frosti`, `frost`), and the resolver's own candidate set includes obvious
+  site-name coincidences (`kick.com` vs `ko-fi.com`; `twitchtracker.com` vs `twitter.com`).
+  Discord's unauthenticated username-attempt endpoint reported the handle as taken, but
+  Discord exposes no public profile URL, so its recorded URL is the site root — a
+  username-exists signal, not a linkable profile.
+- **Honest limits:** `instaloader` still ends on Instagram's side (`429 Too Many Requests`);
+  `social_username` egresses correctly (2 entries, both HTTP 200) but both sources returned
+  nothing usable (octosuite: `HTTP 403` inside the tunnel — GitHub's unauthenticated limit;
+  masto: no finding); `reddit-api`, `youtube-api` and `leak_checkers` remain key-gated skips
+  (Gate 3). No `verification_status` in `PROJECT_MANIFEST.json` was changed.
 
 ## Phase 16 — multi-seed investigations and context features (complete)
 
@@ -337,22 +372,20 @@ manifest**, not a digital signature and not a legal-admissibility guarantee.
 
 ## Next action
 
-**Blocked on the user.** The verified-fixture work is complete: 714 tests execute in CI with 0
-skipped, all 49 adapters are `verified-fixture`, 6/6 storage backends conform against real
-services, adapter egress is proxied by policy (44 of 49 adapters declare network access; all
-44 are wired), and the non-gated `docs/PROJECT_DIRECTION.md` deliverables (multi-seed
-investigations, context filters, jurisdiction warnings, adapter-run reporting, Tier 5
-construction rejection) are implemented. The next substantive step is the authorized live
-investigation, which needs:
+**The authorized live self-audit has run** (run `39141366670`, target `username:frost2233`,
+owner-asserted; every live-path defect found along the way is repaired and re-verified — see
+the top CHANGELOG entry and the live-audit section above). What remains needs user decisions:
 
-- **Gate 2** — an explicit, user-owned live target and an authorization assertion for the first
-  `verified-live` run. No live lookup has been made, and none should be made without this.
-- **Gate 3** — free API keys, if an adapter is to be proven live, supplied as GitHub Secrets
-  (never in the repo) and cost-checked first.
-
-`transport_movement` and `darkweb_search` remain deferred on Gate 6 (registrations / written
-permission; no verifiable request contract). Nothing left in the backlog can be advanced
-honestly without those decisions.
+- **Gate 2 is satisfied for `frost2233` only.** Any other target — or a broader sweep — needs
+  a fresh, explicit ownership assertion before a live run.
+- **Gate 3** — free API keys as GitHub Secrets (`REDDIT_CLIENT_ID`/`SECRET`,
+  `YOUTUBE_API_KEY`, `LEAKIX_API_KEY`, `GRAYHATWARFARE_TOKEN`) would turn three key-gated
+  skips into live coverage. None are configured.
+- Optional bookkeeping: promote the adapters exercised by the authorized run to
+  `verified-live` using the run as copied evidence; and re-run the audit periodically as
+  platform data changes.
+- `transport_movement` and `darkweb_search` remain deferred on Gate 6 (registrations /
+  written permission; no verifiable request contract).
 
 ## Known deferred issues
 
@@ -361,7 +394,10 @@ honestly without those decisions.
   has only been exercised end to end for `search_engines`, `ssl_tls`, `ip_intelligence` and
   `crtsh`. An adapter whose client ignores the proxy variables fails closed rather than
   egressing unproxied; that failure mode is not demonstrated per adapter.
-- No `verified-live` adapters; every fixture is synthetic unless separately documented.
+- No `verified-live` adapters in `PROJECT_MANIFEST.json`; every fixture is synthetic
+  unless separately documented. The 2026-10-18 authorized run executed `sherlock`, `maigret`,
+  `instaloader`, `social_username` and `leak_checkers` live without changing any
+  `verification_status` — see the live-audit section.
 - Score/confidence separation is incomplete; `--purpose` is not a required adapter field.
 - `AUTONOMOUS_DIRECTIVE.md` and `AGENT_SETUP.md` live at the repo root and now reference
   `AUTONOMOUS_DIRECTIVE.md` correctly; the four stale `docs/AUTONOMOUS_DIRECTIVE.md` paths
@@ -381,8 +417,11 @@ honestly without those decisions.
 
 ## Open gates
 
-- **Gate 2** — user-owned target required before any live investigation.
-- **Gate 3** — verify API keys and cost before a phase depends on them.
+- **Gate 2** — user-owned target required before any live investigation. Satisfied on
+  2026-10-18 for `username:frost2233` (owner assertion recorded verbatim in the run
+  manifest); any other target re-opens the gate.
+- **Gate 3** — verify API keys and cost before a phase depends on them. Still open; no keys
+  are configured, so `reddit-api`, `youtube-api` and `leak_checkers` skip by design.
 - **Gate 5** — evidence lines must be copied from a downloaded artifact, never typed.
 - **Gate 6** — `transport_movement` and `darkweb_search` remain deferred pending user
   action / source verification.
