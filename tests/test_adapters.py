@@ -30,6 +30,21 @@ def test_sherlock_failed_run_never_claims_a_search(tmp_path):
     assert r.status == "partial"
 
 
+def test_sherlock_command_enables_the_txt_export():
+    """Run 39135219248: sherlock 0.16.2 computes the file named by --output but
+    gates the actual write behind `if args.output_txt:`
+    (sherlock_project/sherlock.py). Without --txt the results file never
+    appeared, the parse found no URLs, and 9 live findings were silently
+    dropped from the report."""
+    a = SherlockAdapter()
+    cmd = a.build_command(
+        AdapterRunRequest(run_id=uuid4(), seed=Seed(type=SeedType.USERNAME, value="alice")),
+        Path("."),
+    )
+    assert "--txt" in cmd
+    assert cmd[cmd.index("--output") + 1] == "/work/sherlock.txt"
+
+
 @parser_test('theHarvester')
 def test_theharvester_parser_mock(tmp_path):
     (tmp_path / "harvest.jsonl").write_text('{"host":"a.example.com","email":"a@example.com"}\n', encoding="utf-8")

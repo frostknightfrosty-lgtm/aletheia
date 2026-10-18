@@ -33,7 +33,12 @@ class SherlockAdapter(Adapter):
         return seed_type == SeedType.USERNAME
 
     def build_command(self, request: AdapterRunRequest, workspace: Path) -> list[str]:
-        return ["--no-color", "--output", "/work/sherlock.txt", "--timeout", str(min(request.timeout_seconds, 60)), request.seed.value]
+        # Run 39135219248: sherlock 0.16.2 only opens the file named by
+        # --output when an export flag is set (`if args.output_txt:` gates the
+        # write in sherlock_project/sherlock.py). Without --txt the results
+        # file never appeared, the parse found no URLs, and 9 live findings
+        # were silently dropped from the graph and report.
+        return ["--no-color", "--txt", "--output", "/work/sherlock.txt", "--timeout", str(min(request.timeout_seconds, 60)), request.seed.value]
 
     def parse(self, request: AdapterRunRequest, workspace: Path, stdout: str, stderr: str, exit_code: int) -> AdapterRunResult:
         started = datetime.now(timezone.utc)
