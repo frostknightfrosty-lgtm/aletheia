@@ -228,7 +228,7 @@ How to verify it worked: On restart, I'll run `ls app/aletheia/adapters/` and it
 
 Once §4 passes, read the project state files in this order:
 
-1. `docs/AUTONOMOUS_DIRECTIVE.md` — standing rules, execution order, handoff protocol
+1. `AUTONOMOUS_DIRECTIVE.md` — standing rules, execution order, handoff protocol
 2. `HANDOFF.md` — current state, last verified commit, next action
 3. `RESUME_STATE.json` — machine-readable resume point
 4. `GATES.md` — open and resolved gates

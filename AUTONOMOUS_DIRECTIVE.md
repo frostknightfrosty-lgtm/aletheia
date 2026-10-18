@@ -6,7 +6,7 @@
 
 **Reading order for a new session:**
 
-1. `docs/AUTONOMOUS_DIRECTIVE.md` (this file) and then AGENT_SETUP.md
+1. `AUTONOMOUS_DIRECTIVE.md` (this file, at the repo root) and then AGENT_SETUP.md
 2. `HANDOFF.md`
 3. `RESUME_STATE.json`
 4. `GATES.md`
@@ -246,7 +246,7 @@ Open gates:
 <list or "none">
 
 Paste the following into a fresh session:
-"Resume Aletheia. Read docs/AUTONOMOUS_DIRECTIVE.md, HANDOFF.md, RESUME_STATE.json, GATES.md, and CHANGELOG.md. Continue from next_action."
+"Resume Aletheia. Read AUTONOMOUS_DIRECTIVE.md, HANDOFF.md, RESUME_STATE.json, GATES.md, and CHANGELOG.md. Continue from next_action."
 ```
 
 ---
@@ -420,7 +420,7 @@ Nothing deferred. Nothing fabricated.
 
 This directive changes rarely. When it does, the change is a commit of its own with a clear message. Do not edit it opportunistically.
 
-- `docs/AUTONOMOUS_DIRECTIVE.md` — this file. Rarely changes.
+- `AUTONOMOUS_DIRECTIVE.md` — this file, at the repo root. Rarely changes.
 - `HANDOFF.md` — updated every session and at every pause.
 - `RESUME_STATE.json` — updated every commit.
 - `GATES.md` — updated when a gate status changes.
