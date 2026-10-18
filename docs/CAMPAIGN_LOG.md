@@ -14,21 +14,21 @@
 ## NOW (edited in place — this is the current position)
 
 - Campaign: **ACTIVE** — owner mandate received and executing.
-- Position: **P17.7 pushed as `60bb0e6`** (case memory: subject-centric case
-  store with snapshots/timeline and re-audit diffs, cross-run source cache
-  with per-source TTLs, confirmation label store feeding the calibrator,
-  blind-spot registry; 24 new tests; local 903 passed + 65 environment-only
-  skips → expected CI 968). **P17.3–P17.5 verified green** (P17.5 run
-  `39156241115` on `051625c`: 922 passed); P17.6 (`39156855944`) and P17.7
+- Position: **P17.8 pushed as `ced6f08`** (cascade CLI group — `review`
+  replays the decision ledger and verifies its hash chain, `confirm` records
+  confirmation labels, `purge` deletes case artifacts; trail/dossier/coverage
+  artifact builders; next-actions checklist; deterministic redaction; 21 new
+  tests; local 924 passed + 65 environment-only skips → expected CI 989).
+  **P17.3–P17.5 verified green**; P17.6 (`39156855944`) and P17.7
   (`39157495630`) runs still watching.
-- Next action: start **P17.8** (CLI + trail/dossier/coverage outputs +
-  next-actions checklist + redaction/purge; parser preflight stays 49/49)
-  locally while CI runs; copy evidence when the watches notify.
-- In-flight CI: `39156241115` (P17.5 code `d561c9c` + docs `051625c`),
-  `39156855944` (P17.6 code `341f055` + docs `86c68b6`), `60bb0e6`'s run
+- Next action: start **P17.9** (synthetic worlds + adversarial +
+  failure-injection suites in CI) locally while CI runs; copy evidence when
+  the watches notify.
+- In-flight CI: `39156855944` (P17.6 code `341f055` + docs `86c68b6`),
+  `39157495630` (P17.7 code `60bb0e6` + docs `c18d973`), `ced6f08`'s run
   starting.
-- Last verified commit: `db5f03e` (run `39155284979`, docker-verification
-  green; lines copied: parser 49/49; **896 passed**; capture 60/60; storage
+- Last verified commit: `051625c` (run `39156241115`, docker-verification
+  green; lines copied: parser 49/49; **922 passed**; capture 60/60; storage
   6/6).
 - Owner-blocked (parked, never wait on): everything in `docs/USER_ACTIONS.md`.
 - Decision defaults in force: see "Adopted defaults" below.
@@ -137,6 +137,10 @@
       passed + 65 skips → expected CI 968); pushed `60bb0e6`; run verifying.
 - [ ] **P17.8** — CLI + trail/dossier/coverage outputs + next-actions checklist +
       redaction/purge (no new adapters in this step).
+      → Implemented locally-green (cascade CLI group review/confirm/purge;
+      trail/dossier/coverage builders; next-actions checklist; deterministic
+      redaction; 21 tests; local 924 passed + 65 skips → expected CI 989);
+      pushed `ced6f08`; run verifying.
 - [ ] **P17.9** — synthetic worlds + adversarial + failure-injection suites in CI.
 - [ ] **P17.10** — fixture dry-run → local suite → CI → live cascade on
       `username:frost2233` (authorization on file). Owner confirmations and the
@@ -295,6 +299,17 @@ activate when the key exists.
   - storage-conformance.json: `"passing": ["file", "postgres", "neo4j",
     "elasticsearch", "minio", "redis"]`, `"unconfigured": []`,
     `"required_all": true`, `"ok": true`
-- Next: start P17.8 (CLI + trail/dossier/coverage outputs + next-actions
-  checklist + redaction/purge) locally; on `39156855944` green copy P17.6
-  evidence; on `39157495630` green copy P17.7 evidence.
+- 2026-10-18 — P17.8 implemented (cascade CLI group: `review` replays a
+  decision ledger and verifies its hash chain, `confirm` records
+  mine/not-mine/unsure labels with the cluster's recorded score, `purge`
+  deletes a case file and its labels; `trail.py` parent-linked trail builder
+  with the golden `trail_digest`; `dossier.py` tiered dossier builder that
+  flags unsupported fields instead of inventing evidence; `coverage.py` audit
+  with the design's end-of-run assertion; `next_actions.py` checklist copied
+  from USER_ACTIONS.md; `redact.py` deterministic person-identifier tokens;
+  21 tests; local 924 passed + 65 environment-only skips → expected CI 989)
+  and pushed as `ced6f08`.
+- Next: start P17.9 (synthetic worlds + adversarial + failure-injection
+  suites in CI) locally; on `39156855944` green copy P17.6 evidence; on
+  `39157495630` green copy P17.7 evidence; on `ced6f08`'s run green copy
+  P17.8 evidence.
