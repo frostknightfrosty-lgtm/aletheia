@@ -16,6 +16,11 @@
   calibration hook (P17.4).
 - :mod:`aletheia.cascade.evidence` — the claim-pair evidence decision table
   (P17.4).
+- :mod:`aletheia.cascade.falsify` — falsification-first disconfirming probes
+  (P17.5).
+- :mod:`aletheia.cascade.ach` — Analysis of Competing Hypotheses (P17.5).
+- :mod:`aletheia.cascade.merge_graph` — confirmed-merge equality graph with
+  union-find conflict propagation (P17.5).
 
 Nothing in this package changes existing CLI / router / adapter behavior; the
 cascade steps that consume it land in later P17 items.

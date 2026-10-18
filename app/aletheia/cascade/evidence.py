@@ -39,7 +39,7 @@ from __future__ import annotations
 
 from urllib.parse import urlsplit
 
-from aletheia.cascade.claims import Claim
+from aletheia.cascade.claims import Claim, pair_origin_key
 from aletheia.cascade.matching import fold_diacritics, jaro_winkler, names_equivalent
 from aletheia.cascade.phash import ImageHashes, is_match
 from aletheia.cascade.scoring import EvidenceClass, EvidenceItem
@@ -83,16 +83,6 @@ def _shared_host(host: str) -> bool:
 
 def _url_host(value: str) -> str | None:
     return urlsplit(value).hostname
-
-
-def _claim_origin(claim: Claim) -> str:
-    seed = "none" if claim.seed_index is None else str(claim.seed_index)
-    return f"{claim.source_adapter}|seed={seed}|{claim.type.value}"
-
-
-def _pair_origin(left: Claim, right: Claim) -> str:
-    first, second = sorted((_claim_origin(left), _claim_origin(right)))
-    return f"{first}~{second}"
 
 
 def _domain_of(claim: Claim) -> str | None:
@@ -321,7 +311,7 @@ def compare_claims(left: Claim, right: Claim) -> list[EvidenceItem]:
     """The evidence items for one claim pair (empty when the pair says nothing)."""
     if left.claim_id == right.claim_id:
         raise ValueError("compare_claims expects two distinct claims")
-    origin = _pair_origin(left, right)
+    origin = pair_origin_key(left, right)
     if left.type is right.type:
         return _same_type_evidence(left, right, origin)
     return _cross_type_evidence(left, right, origin)

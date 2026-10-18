@@ -10,6 +10,10 @@ Design of record: ``docs/PIVOT_CASCADE.md`` sections 6.2 and 6.3.
   existence, exposure signals) corroborates but can never clear a tier gate
   alone. Tiers are computed twice — with and without gated items — and a tier
   that only the gated subset reaches is reported as capped at the open tier.
+- Explicitly low-grade sources (Admiralty E/F labels on evidence items) get
+  the same sentence-faithful cap, checked after the review-gate cap; the
+  F6-unrated default is never attached, so ungraded sources are not capped
+  merely for being ungraded (section 17, resolution item 7).
 - Tiers follow section 6.3's counts: **confirmed** (>= 1 HARD, or >= 2
   independent STRONG), **probable** (1 STRONG + >= 1 MEDIUM, or >= 3
   independent MEDIUM), **possible** (anything above WEAK), **excluded** (any
@@ -26,6 +30,7 @@ Design of record: ``docs/PIVOT_CASCADE.md`` sections 6.2 and 6.3.
 from __future__ import annotations
 
 import math
+import re
 from collections.abc import Iterable, Mapping
 from dataclasses import dataclass, field
 from enum import StrEnum
@@ -35,6 +40,7 @@ from aletheia.core.models import IdentityTier
 
 __all__ = [
     "DEFAULT_LIKELIHOOD_RATIOS",
+    "LOW_GRADE_RELIABILITIES",
     "EvidenceClass",
     "EvidenceItem",
     "ScoreResult",
@@ -64,10 +70,24 @@ DEFAULT_LIKELIHOOD_RATIOS: dict[EvidenceClass, float] = {
     EvidenceClass.VETO: 1.0,
 }
 
+# Admiralty reliabilities that count as low-grade for the tier-gate cap
+# (design section 6.3: "low-grade sources alone can never clear a tier gate").
+LOW_GRADE_RELIABILITIES = frozenset({"E", "F"})
+
+_GRADE_LABEL_RE = re.compile(r"[A-F][1-6]")
+
 
 @dataclass(frozen=True)
 class EvidenceItem:
-    """One piece of evidence for a same-identity hypothesis."""
+    """One piece of evidence for a same-identity hypothesis.
+
+    ``source_grade_label`` is the Admiralty label (e.g. ``"B2"``) of the
+    producing source *when a producer actually graded it*. It is deliberately
+    ``None`` for ungraded sources: the F6-unrated default means "not yet
+    graded", not "judged unreliable" (``docs/PIVOT_CASCADE.md`` section 17,
+    resolution item 7), so the low-grade cap only ever fires on explicit
+    E/F labels.
+    """
 
     evidence_class: EvidenceClass
     reason: str
@@ -75,12 +95,17 @@ class EvidenceItem:
     similarity: float | None = None
     weight: float = 1.0
     review_gated: bool = False
+    source_grade_label: str | None = None
 
     def __post_init__(self) -> None:
         if not self.origin:
             raise ValueError("evidence origin must be non-empty (it keys independence)")
         if not 0.0 < self.weight <= 1.0:
             raise ValueError("evidence weight must be in (0, 1]")
+        if self.source_grade_label is not None and not _GRADE_LABEL_RE.fullmatch(
+            self.source_grade_label
+        ):
+            raise ValueError("source_grade_label must look like an Admiralty label (A1..F6)")
 
     def log_lr(self, table: Mapping[EvidenceClass, float] | None = None) -> float:
         """This item's log-likelihood-ratio contribution (vetoes excluded)."""
@@ -95,10 +120,11 @@ class EvidenceItem:
 
 @dataclass(frozen=True)
 class TierResult:
-    """The tier a member set reaches, with the review-gate cap made explicit."""
+    """The tier a member set reaches, with both gate caps made explicit."""
 
     tier: IdentityTier | None
     capped_by_review_gate: bool
+    capped_by_low_grade: bool = False
     notes: tuple[str, ...] = ()
 
 
@@ -113,6 +139,7 @@ class ScoreResult:
     excluded: bool
     tier: IdentityTier | None
     capped_by_review_gate: bool
+    capped_by_low_grade: bool
     calibrated: bool
     probability: float | None
     tier_notes: tuple[str, ...] = field(default=())
@@ -124,6 +151,17 @@ def _independent_counts(items: Iterable[EvidenceItem]) -> dict[EvidenceClass, in
     for item in items:
         seen.setdefault(item.evidence_class, set()).add(item.origin)
     return {evidence_class: len(origins) for evidence_class, origins in seen.items()}
+
+
+def _is_low_grade(item: EvidenceItem) -> bool:
+    """True only when a producer explicitly graded the source E or F.
+
+    The F6-unrated default is never attached to evidence items
+    (``docs/PIVOT_CASCADE.md`` section 17, resolution item 7): "not yet
+    graded" is not the same statement as "judged unreliable".
+    """
+    label = item.source_grade_label
+    return label is not None and label[0] in LOW_GRADE_RELIABILITIES
 
 
 def _tier_from_counts(counts: Mapping[EvidenceClass, int]) -> IdentityTier | None:
@@ -142,21 +180,64 @@ def _tier_from_counts(counts: Mapping[EvidenceClass, int]) -> IdentityTier | Non
 
 
 def tier_for(items: Iterable[EvidenceItem]) -> TierResult:
-    """The tier the evidence reaches, capped when only gated items clear it."""
+    """The tier the evidence reaches, capped when only exempt classes clear it.
+
+    Two axis-specific caps apply, each sentence-faithful to section 6.3: the
+    tier must be justified by evidence with review-gated items set aside, and
+    by evidence with explicitly low-grade (E/F) items set aside; the reported
+    tier is the weaker of the two per-axis tiers, and each flag records
+    whether its axis was binding. Vetoes are checked per axis the same way
+    (an exclusion survives an axis only when the remaining items still veto).
+    """
     materialized = tuple(items)
-    tier_all = _tier_from_counts(_independent_counts(materialized))
-    tier_open = _tier_from_counts(
+    tier_full = _tier_from_counts(_independent_counts(materialized))
+    if tier_full is None:
+        return TierResult(tier=None, capped_by_review_gate=False, capped_by_low_grade=False)
+    tier_no_gated = _tier_from_counts(
         _independent_counts(item for item in materialized if not item.review_gated)
     )
-    if tier_all is tier_open:
-        return TierResult(tier=tier_all, capped_by_review_gate=False)
-    if tier_all is None:
-        return TierResult(tier=None, capped_by_review_gate=False)
-    return TierResult(
-        tier=tier_open,
-        capped_by_review_gate=True,
-        notes=("review-gated evidence cannot clear a tier gate alone",),
+    tier_no_low = _tier_from_counts(
+        _independent_counts(item for item in materialized if not _is_low_grade(item))
     )
+    capped_by_review_gate = tier_no_gated is not tier_full
+    capped_by_low_grade = tier_no_low is not tier_full
+    notes: list[str] = []
+    if capped_by_review_gate:
+        notes.append("review-gated evidence cannot clear a tier gate alone")
+    if capped_by_low_grade:
+        notes.append("low-grade sources alone cannot clear a tier gate")
+    if tier_full is IdentityTier.EXCLUDED:
+        gated_stands = tier_no_gated is IdentityTier.EXCLUDED
+        low_stands = tier_no_low is IdentityTier.EXCLUDED
+        if gated_stands and low_stands:
+            tier: IdentityTier | None = IdentityTier.EXCLUDED
+        elif gated_stands:
+            tier = tier_no_low
+        elif low_stands:
+            tier = tier_no_gated
+        else:
+            tier = _weaker_tier(tier_no_gated, tier_no_low)
+    else:
+        tier = _weaker_tier(tier_no_gated, tier_no_low)
+    return TierResult(
+        tier=tier,
+        capped_by_review_gate=capped_by_review_gate,
+        capped_by_low_grade=capped_by_low_grade,
+        notes=tuple(notes),
+    )
+
+
+_TIER_ORDER: dict[IdentityTier | None, int] = {
+    None: 0,
+    IdentityTier.POSSIBLE: 1,
+    IdentityTier.PROBABLE: 2,
+    IdentityTier.CONFIRMED: 3,
+}
+
+
+def _weaker_tier(left: IdentityTier | None, right: IdentityTier | None) -> IdentityTier | None:
+    """The lower of two tiers by ordinal (never called with EXCLUDED)."""
+    return left if _TIER_ORDER[left] <= _TIER_ORDER[right] else right
 
 
 def score_evidence(
@@ -194,6 +275,7 @@ def score_evidence(
         excluded=bool(vetoes),
         tier=tier_result.tier,
         capped_by_review_gate=tier_result.capped_by_review_gate,
+        capped_by_low_grade=tier_result.capped_by_low_grade,
         calibrated=calibrated,
         probability=probability,
         tier_notes=tier_result.notes,

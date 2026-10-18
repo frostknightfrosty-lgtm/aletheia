@@ -41,8 +41,10 @@ __all__ = [
     "Claim",
     "block_claims",
     "claim_from_finding",
+    "claim_origin_key",
     "dedupe_claims",
     "normalize_claim_value",
+    "pair_origin_key",
     "strong_keys",
 ]
 
@@ -133,6 +135,22 @@ def dedupe_claims(claims: Iterable[Claim]) -> list[Claim]:
         seen.add(key)
         result.append(claim)
     return result
+
+
+def claim_origin_key(claim: Claim) -> str:
+    """The independence key of one claim: adapter + seed slot + claim type.
+
+    Two echoes of the same observation share this key, so tier counting can
+    collapse them; distinct adapters or claim types stay independent.
+    """
+    seed = "none" if claim.seed_index is None else str(claim.seed_index)
+    return f"{claim.source_adapter}|seed={seed}|{claim.type.value}"
+
+
+def pair_origin_key(left: Claim, right: Claim) -> str:
+    """A deterministic origin for evidence derived from one claim pair."""
+    first, second = sorted((claim_origin_key(left), claim_origin_key(right)))
+    return f"{first}~{second}"
 
 
 def strong_keys(claim: Claim) -> frozenset[str]:

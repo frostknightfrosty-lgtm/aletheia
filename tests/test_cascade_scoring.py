@@ -221,3 +221,44 @@ def test_name_prior_missing_table_and_unknown_tokens():
     assert any("alice" in note for note in partial.notes)
     unknown = name_prior_log_odds("Qwerty Zxcvb", rarity={"smith": 0.02})
     assert unknown.log_odds == 0.0
+
+
+def test_low_grade_sources_cannot_clear_a_gate_alone():
+    items = [
+        _item(EvidenceClass.HARD, origin="a|seed=0|record", source_grade_label="E2"),
+        _item(EvidenceClass.STRONG, origin="b|seed=1|email"),
+    ]
+    result = tier_for(items)
+    assert result.tier is IdentityTier.POSSIBLE
+    assert result.capped_by_low_grade is True
+    assert any("low-grade" in note for note in result.notes)
+    scored = score_evidence(items)
+    assert scored.capped_by_low_grade is True
+    assert scored.tier is IdentityTier.POSSIBLE
+
+
+def test_clean_hard_confirms_alongside_a_low_grade_hard():
+    items = [
+        _item(EvidenceClass.HARD, origin="a|seed=0|record", source_grade_label="F6"),
+        _item(EvidenceClass.HARD, origin="b|seed=1|email"),
+    ]
+    result = tier_for(items)
+    assert result.tier is IdentityTier.CONFIRMED
+    assert result.capped_by_low_grade is False
+
+
+def test_ungraded_items_are_not_capped_for_being_ungraded():
+    items = [
+        _item(EvidenceClass.STRONG, origin="a|seed=0|email"),
+        _item(EvidenceClass.STRONG, origin="b|seed=1|username"),
+    ]
+    result = tier_for(items)
+    assert result.tier is IdentityTier.CONFIRMED
+    assert result.capped_by_low_grade is False
+
+
+def test_grade_label_must_look_like_an_admiralty_label():
+    with pytest.raises(ValueError):
+        _item(EvidenceClass.HARD, source_grade_label="Z9")
+    with pytest.raises(ValueError):
+        _item(EvidenceClass.HARD, source_grade_label="B")
