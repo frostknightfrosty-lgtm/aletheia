@@ -147,7 +147,10 @@ def _policy_check() -> dict:
 
 
 def _run_checks(script_dir: Path, network: str, proxy_name: str, proxy_url: str, log_path: Path) -> dict:
-    checks: list[dict] = []
+    # One list, assembled here: an earlier version appended the policy check in
+    # main() and then overwrote it with this return value, so the check ran but
+    # never reached the summary.
+    checks: list[dict] = [_policy_check()]
     origin_host = "origin"
 
     # -- forward: proxy forwards to the local origin and logs the request ------
@@ -274,7 +277,6 @@ def main(argv: list[str] | None = None) -> int:
         ])
         _docker_or_raise(proxy.run_command(log_dir=log_dir, network=network, detached=True, publish_port=False))
 
-        summary["checks"].append(_policy_check())
         summary.update(_run_checks(script_dir, network, proxy_name, proxy.proxy_url, log_dir / egress.LOG_FILENAME))
         summary["chain"] = _append_log_to_chain(log_dir / egress.LOG_FILENAME, data_root)
 

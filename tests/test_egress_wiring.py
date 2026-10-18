@@ -310,6 +310,30 @@ def test_orchestrator_can_disable_wiring_for_offline_replays(tmp_path, monkeypat
     assert request.network_name is None
 
 
+# -- CI scenario ---------------------------------------------------------------
+
+
+def test_ci_egress_scenario_policy_check_matches_the_registry():
+    """The CI scenario must report the policy check under the name CI asserts.
+
+    Run 39083768809 proved the assertion in tests/test_docker_integration.py works:
+    the scenario computed this check but main() overwrote it before printing, so
+    the run failed on a missing name. The summary is now assembled in one place;
+    this pins the check itself.
+    """
+    import importlib.util
+
+    path = Path(__file__).resolve().parents[1] / "ci" / "egress_scenario.py"
+    spec = importlib.util.spec_from_file_location("aletheia_egress_scenario", path)
+    assert spec is not None and spec.loader is not None
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+
+    check = module._policy_check()
+    assert check["name"] == "phase15-egress-policy-covers-registry"
+    assert check["ok"], check["detail"]
+
+
 # -- CLI -----------------------------------------------------------------------
 
 
