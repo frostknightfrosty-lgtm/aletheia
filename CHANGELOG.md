@@ -1,5 +1,36 @@
 # Changelog
 
+## 2026-10-18 — P17.2: cascade data models, descriptor-derived routing graph, seed autodetection
+
+The first Phase 17 code step: the routing graph later cascade steps walk, plus
+the seed layer that feeds it. Every number below is copied from the downloaded
+artifact `ci-artifacts-39153749577` (run `39153749577`, commit `7900ce4`).
+
+- `PARSER PREFLIGHT: PASS — 49/49 adapters have parser coverage` (the registry
+  did not change in this step; the graph is derived from the same 49
+  descriptors).
+- `"console_summary": "815 passed, 1 warning"` with `"junit_total": 815`,
+  `"skipped_in_ci": []`, `"ok": true` — 29 new tests over the previous 786,
+  none skipped in CI.
+- `DOCKER CAPTURE: PASS — 60/60 cases captured`.
+- storage-conformance.json: `"passing": ["file", "postgres", "neo4j",
+  "elasticsearch", "minio", "redis"]`, `"unconfigured": []`,
+  `"required_all": true`, `"ok": true`.
+- What landed (additive; no behavior change outside the new package):
+  relationship types `SAME_AS_CONFIRMED` / `SAME_AS_EXCLUDED` /
+  `PIVOTED_FROM`, cascade fields on `Provenance`, and the `IdentityTier` /
+  `SourceGrade` / `Hypothesis` / `HypothesisAssessment` / `ClusterDecision` /
+  `PivotCandidate` models; the new `aletheia.cascade` package with
+  `routing.py` (bridge map over every entity type, terminal and autodetect
+  classes, coverage validators with negative controls) and `seeds.py` (only
+  validator-recognizable seed classes are auto-detected; canonicalization;
+  first-appearance order; mask-based no-double-reporting).
+- Honest limits recorded in the code: the seed detector never guesses
+  names/companies/places from raw text (a regex cannot recognize arbitrary
+  names honestly, so those are typed by the operator or extracted as claims
+  later), and phone detection is conservative (international numbers need
+  `+`, national ones need separators).
+
 ## 2026-10-18 — Authorized live self-audit of `username:frost2233` (run `39141366670`): round-3 repairs confirmed on the live path
 
 The owner opened Gate 2 for one target with the assertion recorded verbatim in the run's

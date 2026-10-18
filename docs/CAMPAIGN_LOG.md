@@ -14,18 +14,18 @@
 ## NOW (edited in place — this is the current position)
 
 - Campaign: **ACTIVE** — owner mandate received and executing.
-- Position: **P17.2** implemented locally-green (cascade models in
-  `core/models.py`; new `aletheia/cascade/` package with `routing.py` +
-  `seeds.py`; 29 new tests; local 750 passed + 65 environment-only skips).
-  Pushed as `7900ce4`; verification run `39153749577` watching in the
-  background.
-- Next action after verification: **P17.3** — claim normalization + blocking +
-  pivot extractors + fixtures.
-- In-flight CI: `39153749577` (P17.2 code `7900ce4`, watch running);
-  `39152717185` (staged-state push `e8ce609`) **green** — evidence copied to
-  the Log.
-- Last verified commit: `e8ce609` (run `39152717185`, docker-verification
-  green; lines copied: parser 49/49; 786 passed; capture 60/60; storage 6/6).
+- Position: **P17.2 verified green** (run `39153749577` on `7900ce4`); the
+  evidence lines are copied below. **P17.3** implemented locally-green (claim
+  layer + pivot extractors + 25 tests) and pushed as `d7f035a`; verification
+  run `39154364738` watching in the background. **P17.4** (matchers, perceptual
+  hashing, LR scoring, priors, calibration hook) implemented locally — tests
+  being written and run now.
+- Next action: finish P17.4 local tests → commit/push; copy P17.3 evidence when
+  `39154364738` notifies.
+- In-flight CI: `39154364738` (P17.3 code `d7f035a`, watch running).
+- Last verified commit: `7900ce4` (run `39153749577`, docker-verification
+  green; lines copied: parser 49/49; **815 passed**; capture 60/60; storage
+  6/6).
 - Owner-blocked (parked, never wait on): everything in `docs/USER_ACTIONS.md`.
 - Decision defaults in force: see "Adopted defaults" below.
 
@@ -95,13 +95,16 @@
 ## Queue
 
 ### Track 1 — Phase 17 cascade engine (`docs/PIVOT_CASCADE.md` §15)
-- [ ] **P17.2** — cascade models + descriptor-derived routing graph + coverage
+- [x] **P17.2** — cascade models + descriptor-derived routing graph + coverage
       invariant tests + seed autodetection (+ multi-seed wiring: reuse Phase 16
       `pending_seeds`, `<adapter>@seedN` workspaces, `seed_index` provenance,
       5% intersection boost that never creates a candidate, ContextFilters).
-      → Implemented locally-green; pushed `7900ce4`; run `39153749577` verifying
-      (checkbox flips when the evidence lines are copied).
+      → Implemented locally-green; pushed `7900ce4`; run `39153749577`
+      **green** — evidence lines copied to the Log (parser 49/49; 815 passed;
+      capture 60/60; storage 6/6).
 - [ ] **P17.3** — claim normalization + blocking + pivot extractors + fixtures.
+      → Implemented locally-green (25 tests); pushed `d7f035a`; run
+      `39154364738` verifying (checkbox flips when evidence is copied).
 - [ ] **P17.4** — matchers, perceptual hashing, LR scoring, base-rate priors,
       calibration hook (Platt/isotonic in `core/calibration.py` stays the only
       probability path; an untrained model is never presented as a probability).
@@ -184,5 +187,22 @@ activate when the key exists.
   (expected CI passed count: 815). Pushed as `7900ce4`; verification run
   `39153749577` in flight — evidence lines to be appended when the artifact
   is downloaded.
-- Next: on `39153749577` green → copy evidence, flip the Track 1 checkbox,
-  then start P17.3.
+- 2026-10-18 — P17.2 verification — commit `7900ce4` — run `39153749577` —
+  docker-verification **green**. Copied from the downloaded artifact
+  `ci-artifacts-39153749577`:
+  - `PARSER PREFLIGHT: PASS — 49/49 adapters have parser coverage`
+  - pytest-summary.json: `"console_summary": "815 passed, 1 warning"`,
+    `"junit_total": 815`, `"skipped_in_ci": []`, `"ok": true`
+    (786 → 815: the 29 new cascade tests, none skipped)
+  - docker-integration/capture.log: `DOCKER CAPTURE: PASS — 60/60 cases
+    captured`
+  - storage-conformance.json: `"passing": ["file", "postgres", "neo4j",
+    "elasticsearch", "minio", "redis"]`, `"unconfigured": []`,
+    `"required_all": true`, `"ok": true`
+- 2026-10-18 — P17.3 implemented (claim layer + pivot extractors + 25 tests;
+  local suite 775 passed + 65 environment-only skips → expected CI 840) and
+  pushed as `d7f035a` (docs commit `e86a042` adds the adopted defaults,
+  P17.13's recording, and prep-run evidence). Verification run
+  `39154364738` watching in the background.
+- Next: finish P17.4 local tests → commit/push; on `39154364738` green copy
+  evidence, flip the P17.3 checkbox.
