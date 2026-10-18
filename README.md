@@ -46,6 +46,18 @@ aletheia phase2 --run-id <RUN_ID>
 
 This writes `report.json`, `report.pdf`, `graph.graphml`, `report.stix2.json`, `resolution.json`, hashes, and an updated `HANDOFF.md` under the run directory.
 
+The report lists every matching adapter with its outcome and the reason for each sub-source it could not query (missing keys, retired endpoints, paid-only APIs), plus informational jurisdiction warnings when a seed or finding indicates a strong-privacy jurisdiction, a minor, health data, or a protected-class context.
+
+## Multi-seed investigations
+
+Repeat `--seed` to expand several seeds in one run. Each seed grows its own evidence tree (`Provenance.seed_index`), resolution runs an intersection pass where entities corroborated by more than one tree get a bounded, documented score boost, and optional context filters flag candidates that positively mismatch a recorded attribute (entities with no comparable attribute are never excluded):
+
+```bash
+aletheia investigate --seed domain:example.com --seed email:alice@example.com --filter-country gb
+```
+
+Semantics, compatibility, and honest limits are in [`docs/MULTI_SEED.md`](docs/MULTI_SEED.md) and [`docs/JURISDICTION_WARNINGS.md`](docs/JURISDICTION_WARNINGS.md).
+
 ## Audit chain
 
 Each run's `AUDIT.jsonl` is a SHA-256 hash chain. Entries carry a sequence number, the previous entry's hash, and their own hash; the final `chain_tip` is stored in that run's `MANIFEST.json`. Verify a run with `aletheia verify-chain <RUN_ID>`. This makes changes detectable relative to the manifest anchor, but it is not a digital signature or a guarantee of legal admissibility; preserve and protect the manifest and audit files together.

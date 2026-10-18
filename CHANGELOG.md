@@ -1,5 +1,65 @@
 # Changelog
 
+## 2026-10-18 — Phase 16: multi-seed investigations, context filters, jurisdiction warnings, adapter-run reporting, Tier 5 rejection, CI-verified
+- **Multi-seed runs implemented** (`f0352a4`): `create_run` accepts one seed
+  (unchanged single-seed behavior) or a sequence; every matching adapter is
+  scheduled once per supported seed (`manifest["pending_seeds"]`), each seed
+  expands in its own workspace (`adapter@seedN`, 1-based) and evidence tree
+  (`Provenance.seed_index`), and the resolver intersects the trees — an entity
+  corroborated by two or more trees gets a bounded boost
+  (`score * (1 + 0.05 * (trees - 1))`, capped at 1.0) that never creates a
+  candidate (the raw threshold is applied first) and never feeds the Phase 13
+  calibrator; the candidate explanation records `cross_seed_trees` and
+  `cross_seed_boost=<raw>-><boosted>`. `docs/MULTI_SEED.md` records the
+  semantics and limits. Single-seed runs keep their prior artifact shape:
+  provenance stays untagged, workspace names and `tools_invoked` labels are
+  unchanged, and `pending_seeds` is the only manifest addition; legacy manifests
+  without it remain resumable.
+- **Context filters** (country, age min/max, language, timezone) are stored in
+  the manifest, carried on every `AdapterRunRequest`, and enforced at
+  resolution: only positive mismatches flip a candidate to `filtered_out` with a
+  `context_filter_mismatch=...` explanation, and an entity that records nothing
+  for a filtered attribute is never excluded. No ISO-3166 dataset is bundled and
+  no adapter consumes the filters as query hints yet.
+- **Informational jurisdiction warnings** (`docs/JURISDICTION_WARNINGS.md`):
+  strong-privacy jurisdiction, minor, health-data, and protected-class
+  heuristics over seeds and entity attributes, deduplicated, recorded as
+  `jurisdiction_warning` audit events (before `phase2_finalize`, same hash
+  chain), in `report.json`, and in the PDF. They never gate a run and are not a
+  legal determination.
+- **Adapter-run reporting:** `resume` persists adapter-recorded sub-source skips
+  (missing keys, retired endpoints, paid-only APIs) to `manifest["skipped"]`;
+  `report.json`/`report.pdf` list every matching adapter with its outcome and
+  each skip reason, and mark failed and still-pending adapters. `resume` also
+  records the optional lawful-basis declaration in the audit trail on every run;
+  an empty declaration does not stop a run.
+- **Tier metadata is enforced:** `PROJECT_MANIFEST.json` validation requires
+  `legal_tier` (integer 1..5), `enabled_by_default`, and `batch_grouping` for
+  every adapter entry, with a non-empty `disabled_reason` when
+  `enabled_by_default` is false (all 49 adapter entries pass); the registry
+  refuses to construct an adapter whose entry declares `legal_tier=5` (Tier 5 is
+  the project floor). Tiers 1–4 build.
+- **CLI/API/MCP** accept repeatable seeds and context filters: `--seed` may be
+  repeated plus `--filter-country|--filter-age-min|--filter-age-max|--filter-language|--filter-timezone`;
+  the HTTP API and the MCP `investigate` tool take `seeds` + `context_filters`.
+- **Verified** by Docker Verification run `39116485331` on commit
+  `f0352a4f752934d8d5ae3bd320c659e4a8a475e3`
+  (https://github.com/frostknightfrosty-lgtm/aletheia/actions/runs/39116485331).
+  Lines copied from the downloaded artifact:
+  `PARSER PREFLIGHT: PASS — 49/49 adapters have parser coverage`;
+  `714 passed, 1 warning in 29.49s`;
+  `DOCKER CAPTURE: PASS — 57/57 cases captured`;
+  `STORAGE CONFORMANCE: PASS — 6/6 backends conform`.
+  `pytest-summary.json`: `junit_total` 714, `skipped_in_ci` `[]`, `ok` `true`.
+  `results.json`: 57 entries, 0 nonzero return codes.
+  `storage-conformance.json`: `configured` = file, postgres, neo4j,
+  elasticsearch, minio, redis; `unconfigured` `[]`; `required_all` `true`.
+  `egress-scenario.json`: all 6 checks ok, including
+  `phase15-egress-policy-covers-registry` = `adapters=49 network_required=44 wired=44`
+  and `phase15-egress-previously-unwired-adapter` = `crtsh rc=1 new CONNECT crt.sh entries=1 status=502`.
+  Local consistency: 653 passed + 61 skipped = 714 CI passed. 36 new tests; no
+  test was skipped, deleted, or weakened.
+
 ## 2026-10-18 — Phase 15: every network-requiring adapter routes egress through the proxy, CI-verified
 - **Coverage is a policy, not an allowlist.** `EGRESS_WIRED_ADAPTERS` (the
   `search_engines` / `ssl_tls` / `ip_intelligence` subset from Phase 12) is replaced by

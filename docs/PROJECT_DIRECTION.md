@@ -112,3 +112,31 @@ Expected accuracy improvement on multi-seed investigations: ~88% precision /
 65% recall → ~93% / 80%. Estimated effort: 2–4 sessions.
 
 Not part of Phase 8. Do not implement until the current phase pipeline is complete.
+
+## Implementation status (2026-10-18)
+
+The phase pipeline completed through Phase 15, and the user directive of
+2026-10-18 approved implementing the non-gated items in this document. Status of
+the deliverables:
+
+- **Implemented:** multi-seed investigations (per-seed scheduling, provenance
+  tagging, resolver intersection pass with a documented heuristic boost, context
+  filters at the resolution and reporting layers) — see
+  [`MULTI_SEED.md`](MULTI_SEED.md).
+- **Implemented:** informational jurisdiction warnings (strong-privacy
+  jurisdiction, minor, health-data, and protected-class signals), recorded in
+  the audit trail and the report and never gating a run — see
+  [`JURISDICTION_WARNINGS.md`](JURISDICTION_WARNINGS.md).
+- **Implemented:** manifest metadata for every adapter (`legal_tier`,
+  `enabled_by_default`, `disabled_reason`, `batch_grouping`) is validated for
+  all 49 adapter entries, and a Tier 5 declaration is rejected at registry
+  construction time; Tiers 1–4 (including Tier 4) build.
+- **Implemented:** the router records missing-key and no-free-endpoint sub-source
+  skips on the manifest, and the report lists adapters run, skipped, and the
+  reason for each skip.
+- **Implemented:** the optional lawful-basis declaration is recorded in the
+  audit trail on every resume; an empty declaration does not stop a run.
+- **Future / requires its own review:** the structural safeguard for Tier 4
+  credential sources activates with the first such source; no credential-parsing
+  code exists yet, so there is nothing to separate. The Phase 5b/5c tools remain
+  out of scope. Live investigation remains behind its gates (`GATES.md`).
