@@ -1,5 +1,28 @@
 # Changelog
 
+## 2026-10-18 — P17.7: case memory, cache/TTL, re-audit diffs, labels, blind spots
+
+Case memory and freshness infrastructure for re-audits. Every number below is
+copied from the downloaded artifact `ci-artifacts-39157495630` (run
+`39157495630`, commit `60bb0e6`).
+
+- `PARSER PREFLIGHT: PASS — 49/49 adapters have parser coverage` (registry
+  unchanged).
+- `"console_summary": "968 passed, 1 warning"` with `"junit_total": 968`,
+  `"skipped_in_ci": []`, `"ok": true` — 24 new tests over the previous 944,
+  none skipped in CI.
+- `DOCKER CAPTURE: PASS — 60/60 cases captured`.
+- storage-conformance.json: `"passing": ["file", "postgres", "neo4j",
+  "elasticsearch", "minio", "redis"]`, `"unconfigured": []`,
+  `"required_all": true`, `"ok": true`.
+- What landed: `case_store.py` (case snapshots as `section -> {key: JSON
+  value}`, structural diffs, timeline); `source_cache.py` (TTL classes —
+  profile 30d / dns 7d / configuration 7d — with freshness parity to the
+  scheduler's freshness factor); `labels.py` (append-only confirmation
+  labels, latest-wins views, `training_pairs` excluding unsure and scoreless
+  rows, feeding `Calibrator`); `blind_spots.py` (curated blind-spot table
+  citing only already-documented repo facts).
+
 ## 2026-10-18 — P17.6: VOI scheduler, adaptive budgets, stop policy, decision ledger
 
 Budget-aware frontier management with a hash-chained audit trail. Every

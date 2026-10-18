@@ -14,21 +14,20 @@
 ## NOW (edited in place — this is the current position)
 
 - Campaign: **ACTIVE** — owner mandate received and executing.
-- Position: **P17.8 pushed as `ced6f08`** (cascade CLI group — `review`
-  replays the decision ledger and verifies its hash chain, `confirm` records
-  confirmation labels, `purge` deletes case artifacts; trail/dossier/coverage
-  artifact builders; next-actions checklist; deterministic redaction; 21 new
-  tests; local 924 passed + 65 environment-only skips → expected CI 989).
-  **P17.3–P17.6 verified green**; P17.7 (`39157495630`) and P17.8
-  (`39158143846`) runs still watching.
-- Next action: start **P17.9** (synthetic worlds + adversarial +
-  failure-injection suites in CI) locally while CI runs; copy evidence when
-  the watches notify.
-- In-flight CI: `39157495630` (P17.7 code `60bb0e6` + docs `c18d973`),
-  `39157751920` (P17.5 evidence docs `70edb38`), `39158143846` (P17.8 code
-  `ced6f08` + docs `c8c02c3`).
-- Last verified commit: `86c68b6` (run `39156855944`, docker-verification
-  green; lines copied: parser 49/49; **944 passed**; capture 60/60; storage
+- Position: **P17.9 pushed as `e9b8de5`** (deterministic cascade engine over
+  an injectable observer — claims → gated pivots → VOI scheduler →
+  evidence/ACH → falsification-first confirmed merges; parent-linked trail +
+  hash-chained ledger; synthetic-world, adversarial, and failure-injection
+  suites; 9 new tests; local 933 passed + 65 environment-only skips →
+  expected CI 998). **P17.3–P17.7 verified green**; P17.8 (`39158143846`)
+  run still watching.
+- Next action: on `39158143846` green copy P17.8 evidence; then start
+  **P17.10** (fixture dry-run → CLI `cascade run` wiring → live cascade on
+  `username:frost2233`).
+- In-flight CI: `39158143846` (P17.8 code `ced6f08` + docs `c8c02c3`), plus
+  this P17.9 push's run.
+- Last verified commit: `c18d973` (run `39157495630`, docker-verification
+  green; lines copied: parser 49/49; **968 passed**; capture 60/60; storage
   6/6).
 - Owner-blocked (parked, never wait on): everything in `docs/USER_ACTIONS.md`.
 - Decision defaults in force: see "Adopted defaults" below.
@@ -132,11 +131,13 @@
       expected CI 944); pushed `341f055`; run `39156855944` **green** —
       evidence lines copied to the Log (parser 49/49; 944 passed; capture
       60/60; storage 6/6).
-- [ ] **P17.7** — case memory + cache/TTL + re-audit diffs.
+- [x] **P17.7** — case memory + cache/TTL + re-audit diffs.
       → Implemented locally-green (case store with snapshots/timeline/diffs,
       source cache with TTL classes and scheduler-parity freshness, label
       store feeding the calibrator, blind-spot registry; 24 tests; local 903
-      passed + 65 skips → expected CI 968); pushed `60bb0e6`; run verifying.
+      passed + 65 skips → expected CI 968); pushed `60bb0e6`; run
+      `39157495630` **green** — evidence lines copied to the Log (parser
+      49/49; 968 passed; capture 60/60; storage 6/6).
 - [ ] **P17.8** — CLI + trail/dossier/coverage outputs + next-actions checklist +
       redaction/purge (no new adapters in this step).
       → Implemented locally-green (cascade CLI group review/confirm/purge;
@@ -144,6 +145,13 @@
       redaction; 21 tests; local 924 passed + 65 skips → expected CI 989);
       pushed `ced6f08`; run verifying.
 - [ ] **P17.9** — synthetic worlds + adversarial + failure-injection suites in CI.
+      → Implemented locally-green (`cascade/engine.py`: deterministic engine
+      over an injectable observer — gated pivots, VOI scheduling,
+      falsification-first merges, per-origin claim independence, parent-linked
+      trail + hash-chained ledger; synthetic worlds, adversarial collisions,
+      blocked/429 + budget + hard-depth failure injection, golden-digest
+      determinism; 9 tests; local 933 passed + 65 skips → expected CI 998);
+      pushed `e9b8de5`; run verifying.
 - [ ] **P17.10** — fixture dry-run → local suite → CI → live cascade on
       `username:frost2233` (authorization on file). Owner confirmations and the
       first real calibration labels are owner-gated — park them.
@@ -323,6 +331,32 @@ activate when the key exists.
   - storage-conformance.json: `"passing": ["file", "postgres", "neo4j",
     "elasticsearch", "minio", "redis"]`, `"unconfigured": []`,
     `"required_all": true`, `"ok": true`
-- Next: start P17.9 (synthetic worlds + adversarial + failure-injection
-  suites in CI) locally; on `39157495630` green copy P17.7 evidence; on
-  `39158143846` green copy P17.8 evidence.
+- 2026-10-18 — P17.7 verification — commit `60bb0e6` — run `39157495630` —
+  docker-verification **green**. Copied from the downloaded artifact
+  `ci-artifacts-39157495630`:
+  - `PARSER PREFLIGHT: PASS — 49/49 adapters have parser coverage`
+  - pytest-summary.json: `"console_summary": "968 passed, 1 warning"`,
+    `"junit_total": 968`, `"skipped_in_ci": []`, `"ok": true`
+    (944 → 968: the 24 case-memory/cache/label/blind-spot tests, none
+    skipped)
+  - docker-integration/capture.log: `DOCKER CAPTURE: PASS — 60/60 cases
+    captured`
+  - storage-conformance.json: `"passing": ["file", "postgres", "neo4j",
+    "elasticsearch", "minio", "redis"]`, `"unconfigured": []`,
+    `"required_all": true`, `"ok": true`
+- 2026-10-18 — P17.9 implemented — `e9b8de5` — deterministic cascade engine
+  (`app/aletheia/cascade/engine.py`) over the injectable observer boundary
+  `Callable[[Seed], Observation]`; anchors are the subject by construction,
+  every other claim compares only through P17.3 blocking, a merge requires
+  the P17.4 confirmed tier **and** ACH `H_subject` survival, vetoes exclude
+  before evidence is summed, gated pivots are recorded (`pivot_gated`), and
+  stops latch through the P17.6 scheduler. Composition facts pinned by the
+  suites (v1 reachability): identical values from independent origins reach
+  HARD/STRONG (echo evidence), domain bridges reach MEDIUM/WEAK, and
+  name-class support cannot chain (identical-key blocking); an accepted
+  claim's own pivots are same-value duplicates, so deep fresh expansions are
+  the exception, not the rule — the hard-depth refusal path is tested
+  explicitly. 9 new tests; local 933 passed + 65 environment-only skips →
+  expected CI 998; pushed; run starting.
+- Next: on `39158143846` green copy P17.8 evidence into its queue line +
+  CHANGELOG; on this push's run green copy P17.9 evidence; then P17.10.
