@@ -15,12 +15,15 @@ network (no default egress):
                        proxy and its outbound requests appear in the proxy log;
   * ``previously-unwired`` the real ``crtsh`` runner — not in the Phase 12
                        allowlist — is run under the proxy; its HTTPS attempt is
-                       logged by the proxy (and fails closed, as it must);
+                       logged by the proxy as exactly one new CONNECT entry;
   * ``fail-closed``    on the internal network a container cannot reach the
                        internet directly, and cannot reach it through the proxy
-                       once the proxy is stopped.
+                       once the proxy is stopped;
+  * ``uplink``         the proxy is dual-homed: an origin on the uplink network
+                       is reachable through the proxy and unreachable directly
+                       from the internal network (repair after run 39120709419).
 
-Only the standard library plus the Aletheia package is used. The four images are
+Only the standard library plus the Aletheia package is used. The images are
 already built by ``docker/build.sh``; no internet access is required.
 
 Output: one JSON summary on stdout (``--json``) and a human line on stderr.
@@ -146,7 +149,7 @@ def _policy_check() -> dict:
     }
 
 
-def _run_checks(script_dir: Path, network: str, proxy_name: str, proxy_url: str, log_path: Path) -> dict:
+def _run_checks(script_dir: Path, network: str, uplink_host: str, proxy_name: str, proxy_url: str, log_path: Path) -> dict:
     # One list, assembled here: an earlier version appended the policy check in
     # main() and then overwrote it with this return value, so the check ran but
     # never reached the summary.
@@ -160,6 +163,27 @@ def _run_checks(script_dir: Path, network: str, proxy_name: str, proxy_url: str,
         "name": "phase12-egress-forward",
         "ok": ready and ORIGIN_BODY in body,
         "detail": "proxy forwarded to the local origin" if ORIGIN_BODY in body else "forward failed: " + body[-200:],
+    })
+
+    # -- uplink: the proxy's second interface carries the real traffic ---------
+    # The uplink origin sits on the uplink network only. The internal client can
+    # reach it through the proxy and cannot reach it directly: the uplink is the
+    # proxy's exclusive exit (repair after run 39120709419).
+    through_uplink = (
+        _client(script_dir, network, f"http://{uplink_host}:{ORIGIN_PORT}/", proxy_url=proxy_url)
+        if ready else ""
+    )
+    checks.append({
+        "name": "phase12-egress-uplink-forward",
+        "ok": ORIGIN_BODY in through_uplink,
+        "detail": "proxy forwarded to the uplink-network origin" if ORIGIN_BODY in through_uplink
+                  else "uplink forward failed: " + through_uplink[-200:],
+    })
+    direct_uplink = _client(script_dir, network, f"http://{uplink_host}:{ORIGIN_PORT}/", proxy_url=None, timeout=5.0)
+    checks.append({
+        "name": "phase12-egress-uplink-isolated",
+        "ok": "UNREACHABLE" in direct_uplink,
+        "detail": f"direct-to-uplink={direct_uplink.strip()[:60]!r}",
     })
 
     # -- adapter-proxied: the real search_engines runner egresses via the proxy -
@@ -184,8 +208,10 @@ def _run_checks(script_dir: Path, network: str, proxy_name: str, proxy_url: str,
     # and requires exactly one new one: the entry cannot be confused with a
     # search_engines entry (that runner's two sub-sources are Marginalia and
     # Common Crawl and it never contacts crt.sh), and the log's adapter field is
-    # the scenario's single proxy name for every container. On the internal
-    # network the upstream is unreachable, so the runner must also fail closed.
+    # the scenario's single proxy name for every container. With the uplink
+    # attached the request can actually reach crt.sh, which is the point of the
+    # check: exactly one logged CONNECT entry; the runner's exit code is
+    # recorded in the detail but no longer required to fail.
     def _crt_entries() -> list:
         return [
             entry
@@ -206,7 +232,7 @@ def _run_checks(script_dir: Path, network: str, proxy_name: str, proxy_url: str,
     new_entries = _crt_entries()[before:]
     checks.append({
         "name": "phase15-egress-previously-unwired-adapter",
-        "ok": len(new_entries) == 1 and crtsh.returncode != 0,
+        "ok": len(new_entries) == 1,
         "detail": "crtsh rc=" + str(crtsh.returncode)
         + " new CONNECT crt.sh entries=" + str(len(new_entries))
         + " status=" + (str(new_entries[0].status) if new_entries else "n/a"),
@@ -262,6 +288,12 @@ def main(argv: list[str] | None = None) -> int:
 
     suffix = f"{os.getpid()}-{int(time.time())}"
     network = f"aletheia-egress-scenario-{suffix}"
+    # The uplink is a normal (non-internal) bridge network: the proxy's second
+    # interface and the internal network's only route out. Found while repairing
+    # the live path after run 39120709419 — a single-homed proxy reaches nothing.
+    uplink = f"aletheia-egress-scenario-uplink-{suffix}"
+    uplink_host = "uplink-origin"
+    uplink_origin_name = f"aletheia-uplink-origin-{suffix}"
     proxy = egress.EgressProxy("search_engines", rate=1000.0, capacity=1000.0)
     proxy_name = proxy.container_name
     origin_name = f"aletheia-origin-{suffix}"
@@ -273,12 +305,19 @@ def main(argv: list[str] | None = None) -> int:
     log_dir.mkdir(parents=True)
     (script_dir / "client.py").write_text(CLIENT_SCRIPT, encoding="utf-8")
     (script_dir / "origin.py").write_text(ORIGIN_SCRIPT, encoding="utf-8")
-    # The proxy image runs as uid 10001; the mounted log dir must be writable.
-    os.chmod(log_dir, 0o777)
+    # The proxy lifecycle goes through the same ProxySession the orchestrator
+    # uses — network creation, the world-writable log dir and the uplink attach
+    # included — so a regression there fails here instead of in a live run.
+    session = egress.ProxySession(
+        "search_engines", log_dir, rate=1000.0, capacity=1000.0,
+        network=network, uplink=uplink, runner=_docker,
+    )
 
-    summary: dict = {"network": network, "checks": [], "chain": {}}
+    summary: dict = {"network": network, "uplink": uplink, "checks": [], "chain": {}}
     try:
-        _docker_or_raise(egress.create_network_command(network))
+        # The uplink network must exist before the proxy is attached to it.
+        _docker_or_raise(["docker", "network", "create", uplink])
+        session.start()
         _docker_or_raise([
             "docker", "run", "-d", "--rm",
             "--name", origin_name,
@@ -288,9 +327,19 @@ def main(argv: list[str] | None = None) -> int:
             "-v", f"{script_dir}:/origin:ro",
             PY_IMAGE, "/origin/origin.py",
         ])
-        _docker_or_raise(proxy.run_command(log_dir=log_dir, network=network, detached=True, publish_port=False))
+        # The uplink origin is reachable only through the proxy: it sits on the
+        # uplink network, which no internal-network container can route to.
+        _docker_or_raise([
+            "docker", "run", "-d", "--rm",
+            "--name", uplink_origin_name,
+            "--network", uplink,
+            "--network-alias", uplink_host,
+            "--entrypoint", "python",
+            "-v", f"{script_dir}:/origin:ro",
+            PY_IMAGE, "/origin/origin.py",
+        ])
 
-        summary.update(_run_checks(script_dir, network, proxy_name, proxy.proxy_url, log_dir / egress.LOG_FILENAME))
+        summary.update(_run_checks(script_dir, network, uplink_host, proxy_name, proxy.proxy_url, log_dir / egress.LOG_FILENAME))
         summary["chain"] = _append_log_to_chain(log_dir / egress.LOG_FILENAME, data_root)
 
         got = summary["chain"]
@@ -308,7 +357,9 @@ def main(argv: list[str] | None = None) -> int:
     finally:
         _docker(["docker", "rm", "-f", proxy_name])
         _docker(["docker", "rm", "-f", origin_name])
+        _docker(["docker", "rm", "-f", uplink_origin_name])
         _docker(egress.remove_network_command(network))
+        _docker(["docker", "network", "rm", uplink])
 
     if args.artifacts:
         dest = Path(args.artifacts)

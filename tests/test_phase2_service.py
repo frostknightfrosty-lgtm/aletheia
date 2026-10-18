@@ -24,6 +24,12 @@ def test_phase2_finalize_updates_manifest_and_writes_artifacts(tmp_path):
     graph_path = data / "graphs" / str(run_id) / "graph.json"
     graph_path.parent.mkdir(parents=True)
     graph_path.write_text(json.dumps(g.export(), indent=2))
+    # A completed adapter always has a result.json in a real run; the report
+    # now reads the invocation status back from it (run 39120709419).
+    result_dir = checkpoints.run_dir(run_id) / "theharvester"
+    result_dir.mkdir(parents=True)
+    (result_dir / "result.json").write_text(
+        json.dumps({"status": "ok", "exit_code": 0, "stderr_tail": ""}), encoding="utf-8")
 
     artifacts = Phase2Service(data).finalize(run_id)
     manifest = checkpoints.load(run_id)

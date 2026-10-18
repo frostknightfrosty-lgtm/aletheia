@@ -428,7 +428,9 @@ def append_log_to_chain(
 # The wiring pattern (docs/EGRESS_PROXY_CONTRACT.md, "Wiring pattern"):
 #   1. create one ``--internal`` network per adapter run: containers on it have
 #      no default route out, so the proxy is the only way off the network;
-#   2. start the egress proxy detached on that network, named after the adapter;
+#   2. start the egress proxy detached on that network, named after the adapter,
+#      then attach it to the uplink (``bridge`` by default) so the proxy itself
+#      has the only exit route on the host;
 #   3. run the adapter on the same network with HTTP_PROXY/HTTPS_PROXY pointing
 #      at the proxy and NO_PROXY for loopback;
 #   4. append the proxy's request log to the run's audit chain;
@@ -444,6 +446,9 @@ def append_log_to_chain(
 EGRESS_EXEMPT_ADAPTERS: tuple[str, ...] = ()
 
 NETWORK_PREFIX = "aletheia-egress"
+# The proxy's second interface: the ``--internal`` adapter network has no route
+# out, so the proxy — and only the proxy — reaches upstreams over this network.
+UPLINK_NETWORK = "bridge"
 
 
 def is_wired(adapter: str, *, network_required: bool) -> bool:
@@ -497,6 +502,8 @@ class ProxySession:
     rate: float = 1.0
     capacity: float = 1.0
     network: str | None = None
+    # Second interface for the proxy itself (see UPLINK_NETWORK).
+    uplink: str = UPLINK_NETWORK
     runner: Callable[[list[str]], Any] = _default_runner
     _proxy: EgressProxy | None = field(default=None, init=False)
 
@@ -520,13 +527,27 @@ class ProxySession:
         return completed
 
     def start(self) -> "ProxySession":
-        """Create the internal network and start the detached proxy container."""
+        """Create the internal network, start the detached proxy, uplink it.
+
+        The proxy needs the uplink interface before any adapter runs: the
+        ``--internal`` adapter network has no route out, so a single-homed
+        proxy cannot reach any upstream and every request would log a 502 —
+        found while repairing the live path after run 39120709419, before the
+        re-run could spend its budget on a proxy with no exit. The log dir is
+        made world-writable because the proxy image runs as an unprivileged
+        uid while the directory belongs to the orchestrator's user (same fix
+        as ``ci/egress_scenario.py``).
+        """
         self._run(create_network_command(self.network))
         self.log_dir.mkdir(parents=True, exist_ok=True)
+        os.chmod(self.log_dir, 0o777)
         argv = self._proxy.run_command(
             log_dir=self.log_dir, network=self.network, detached=True, publish_port=False
         )
         self._run(argv)
+        # Attach the uplink last: the proxy is the only container that may use
+        # it, and no adapter has started yet when this command returns.
+        self._run(["docker", "network", "connect", self.uplink, self._proxy.container_name])
         return self
 
     @property

@@ -32,7 +32,7 @@ class TheHarvesterAdapter(Adapter):
 
     def build_command(self, request: AdapterRunRequest, workspace: Path) -> list[str]:
         # crtsh/certspotter are passive sources documented by upstream; choose a small explicit set.
-        return ["theHarvester", "-d", request.seed.value, "-b", "crtsh,certspotter", "-l", "100", "-f", "/work/harvest"]
+        return ["-d", request.seed.value, "-b", "crtsh,certspotter", "-l", "100", "-f", "/work/harvest"]
 
     def parse(self, request: AdapterRunRequest, workspace: Path, stdout: str, stderr: str, exit_code: int) -> AdapterRunResult:
         started = datetime.now(timezone.utc)

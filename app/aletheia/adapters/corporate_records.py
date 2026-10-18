@@ -79,7 +79,7 @@ class SECEdgarAdapter(Phase6Adapter):
         return seed_type in self.descriptor.input_types
 
     def build_command(self, request: AdapterRunRequest, workspace: Path) -> list[str]:
-        return ["runner.py", request.seed.type.value, request.seed.value]
+        return [request.seed.type.value, request.seed.value]
 
     def parse(self, request, workspace, stdout, stderr, exit_code):
         started = datetime.now(timezone.utc)
@@ -150,7 +150,7 @@ class GLEIFAdapter(Phase6Adapter):
         requires_authorization_assertion=True,
     )
     def supports(self, seed_type): return seed_type == SeedType.NAME
-    def build_command(self, request, workspace): return ["runner.py", request.seed.value]
+    def build_command(self, request, workspace): return [request.seed.value]
     def parse(self, request, workspace, stdout, stderr, exit_code):
         started = datetime.now(timezone.utc); raw = stdout.encode(); data = _json(stdout); findings=[]
         records = data.get("records", []) if isinstance(data, dict) else []
@@ -184,7 +184,7 @@ class OpenCorporatesAdapter(Phase6Adapter):
         requires_authorization_assertion=True, secret_env=["OPENCORPORATES_API_TOKEN"],
     )
     def supports(self, seed_type): return seed_type in self.descriptor.input_types
-    def build_command(self, request, workspace): return ["runner.py", request.seed.type.value, request.seed.value]
+    def build_command(self, request, workspace): return [request.seed.type.value, request.seed.value]
     def parse(self, request, workspace, stdout, stderr, exit_code):
         started=datetime.now(timezone.utc); raw=stdout.encode(); data=_json(stdout); findings=[]
         companies=data.get("companies",[]) if isinstance(data,dict) else []
@@ -218,7 +218,7 @@ class OpenSanctionsAdapter(Phase6Adapter):
         requires_authorization_assertion=True, secret_env=["OPENSANCTIONS_API_KEY"],
     )
     def supports(self, seed_type): return seed_type in self.descriptor.input_types
-    def build_command(self, request, workspace): return ["runner.py", request.seed.type.value, request.seed.value]
+    def build_command(self, request, workspace): return [request.seed.type.value, request.seed.value]
     def parse(self, request, workspace, stdout, stderr, exit_code):
         started=datetime.now(timezone.utc); raw=stdout.encode(); data=_json(stdout); findings=[]
         results=data.get("results",[]) if isinstance(data,dict) else []
@@ -250,7 +250,7 @@ class CourtListenerAdapter(Phase6Adapter):
         requires_authorization_assertion=True,
     )
     def supports(self, seed_type): return seed_type == SeedType.NAME
-    def build_command(self, request, workspace): return ["runner.py", request.seed.value]
+    def build_command(self, request, workspace): return [request.seed.value]
     def parse(self, request, workspace, stdout, stderr, exit_code):
         started=datetime.now(timezone.utc); raw=stdout.encode(); data=_json(stdout); findings=[]
         results=data.get("results",[]) if isinstance(data,dict) else []

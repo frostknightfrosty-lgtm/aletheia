@@ -93,6 +93,12 @@ def test_phase2_reports_and_audits_warnings(tmp_path):
     graph_path = tmp_path / "graphs" / str(run_id) / "graph.json"
     graph_path.parent.mkdir(parents=True, exist_ok=True)
     graph_path.write_text(json.dumps(graph.export(), indent=2), encoding="utf-8")
+    # A completed adapter always has a result.json in a real run; the report
+    # now reads the invocation status back from it (run 39120709419).
+    result_dir = checkpoints.run_dir(run_id) / "social_profile"
+    result_dir.mkdir(parents=True, exist_ok=True)
+    (result_dir / "result.json").write_text(
+        json.dumps({"status": "succeeded", "exit_code": 0, "stderr_tail": ""}), encoding="utf-8")
 
     artifacts = Phase2Service(tmp_path).finalize(run_id)
 

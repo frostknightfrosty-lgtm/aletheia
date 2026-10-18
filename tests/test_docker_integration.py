@@ -259,6 +259,19 @@ def test_phase12_egress_fail_closed():
     assert check["ok"], check["detail"]
 
 
+def test_phase12_egress_uplink_forward():
+    """The proxy's second interface is its only route to any upstream (repair
+    after run 39120709419: a single-homed proxy can reach nothing)."""
+    check = _scenario_check("phase12-egress-uplink-forward")
+    assert check["ok"], check["detail"]
+
+
+def test_phase12_egress_uplink_is_isolated():
+    """Adapters on the internal network must not reach the uplink directly."""
+    check = _scenario_check("phase12-egress-uplink-isolated")
+    assert check["ok"], check["detail"]
+
+
 # -- Phase 15: wiring coverage is a policy, not an allowlist -------------------
 
 

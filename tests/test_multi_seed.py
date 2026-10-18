@@ -360,6 +360,42 @@ def test_adapter_summary_lists_runs_skips_and_pending():
     assert summary["d"]["status"] == "not_run"
 
 
+def test_adapter_summary_reflects_result_status_when_run_dir_is_given(tmp_path):
+    """Run 39120709419 reported a false green: every adapter listed "ran" while
+    every container had failed to start. With ``run_dir`` the status and a
+    copied stderr line come from each invocation's result.json."""
+    from aletheia.phase2.service import _adapter_summary
+
+    manifest = {"tools_invoked": ["a", "b", "c", "d"], "skipped": [], "failed": [], "pending": []}
+    (tmp_path / "a").mkdir()
+    (tmp_path / "a" / "result.json").write_text(
+        json.dumps({"status": "succeeded", "exit_code": 0, "stderr_tail": ""}), encoding="utf-8")
+    (tmp_path / "b").mkdir()
+    (tmp_path / "b" / "result.json").write_text(json.dumps({
+        "status": "partial", "exit_code": 1,
+        "stderr_tail": "Traceback (most recent call last):\n"
+                       "urllib.error.HTTPError: HTTP Error 401: Unauthorized\n",
+    }), encoding="utf-8")
+    (tmp_path / "c").mkdir()
+    (tmp_path / "c" / "result.json").write_text(json.dumps({
+        "status": "failed", "exit_code": 125,
+        "stderr_tail": "docker: Error response from daemon: no such image\n",
+    }), encoding="utf-8")
+    # "d" completed in the manifest but has no result.json on disk.
+
+    summary = {entry["adapter"]: entry for entry in _adapter_summary(manifest, run_dir=tmp_path)}
+
+    assert summary["a"] == {"adapter": "a", "invocation": "a", "status": "ran", "skipped_sources": []}
+    assert summary["b"]["status"] == "partial"
+    assert summary["b"]["exit_code"] == 1
+    # The last non-empty stderr line is the error line of a traceback.
+    assert summary["b"]["detail"] == "urllib.error.HTTPError: HTTP Error 401: Unauthorized"
+    assert summary["c"]["status"] == "failed"
+    assert summary["c"]["detail"] == "docker: Error response from daemon: no such image"
+    assert summary["d"]["status"] == "unknown"
+    assert summary["d"]["detail"] == "result.json could not be read"
+
+
 # -- CLI -------------------------------------------------------------------------
 
 

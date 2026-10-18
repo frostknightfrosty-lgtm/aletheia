@@ -16,19 +16,45 @@ from aletheia.phase2.resolution import EntityResolver
 from aletheia.storage.file_store import FileGraphStore
 
 
-def _adapter_summary(manifest: dict) -> list[dict]:
+# Result statuses written by adapters (``result.json``) mapped to the report's
+# ``status`` vocabulary. Run 39120709419 showed why the results must be read
+# back: every container had failed to start, yet the report called each adapter
+# "ran" because nothing consulted them.
+_RESULT_STATUS = {
+    "ok": "ran",
+    "succeeded": "ran",
+    "success": "ran",
+    "partial": "partial",
+    "failed": "failed",
+    "error": "failed",
+}
+
+
+def _result_detail(result: dict) -> str:
+    """Copy the last non-empty stderr line — the error line for tracebacks."""
+    lines = [
+        line.strip()
+        for line in str(result.get("stderr_tail") or "").splitlines()
+        if line.strip()
+    ]
+    return lines[-1][:200] if lines else ""
+
+
+def _adapter_summary(manifest: dict, run_dir: Path | None = None) -> list[dict]:
     """Every matching adapter with its outcome and its recorded skip reasons.
 
     Runs come from ``tools_invoked`` (which labels multi-seed invocations as
-    ``adapter@seedN``); skip records were persisted by ``resume`` from the
-    adapters' own findings, so every listed reason is copied from adapter
-    output, never inferred here.
+    ``adapter@seedN``); when ``run_dir`` is given the status is read back from
+    each invocation's ``result.json`` so a failed container can never be
+    reported as a successful run (run 39120709419). Skip records were persisted
+    by ``resume`` from the adapters' own findings, so every listed reason is
+    copied from adapter output, never inferred here.
     """
     skipped = manifest.get("skipped", [])
     summary: list[dict] = []
     for label in manifest.get("tools_invoked", []):
         adapter_name = label.split("@seed", 1)[0]
-        summary.append({
+        entry: dict = {
             "adapter": adapter_name,
             "invocation": label,
             "status": "ran",
@@ -37,7 +63,24 @@ def _adapter_summary(manifest: dict) -> list[dict]:
                 for item in skipped
                 if item.get("adapter") == label
             ],
-        })
+        }
+        if run_dir is not None:
+            result_path = run_dir / label / "result.json"
+            try:
+                result = json.loads(result_path.read_text(encoding="utf-8"))
+            except (OSError, json.JSONDecodeError):
+                entry["status"] = "unknown"
+                entry["detail"] = "result.json could not be read"
+            else:
+                entry["status"] = _RESULT_STATUS.get(
+                    str(result.get("status")), str(result.get("status") or "unknown")
+                )
+                if entry["status"] != "ran":
+                    entry["exit_code"] = result.get("exit_code")
+                    detail = _result_detail(result)
+                    if detail:
+                        entry["detail"] = detail
+        summary.append(entry)
     for name in manifest.get("failed", []):
         summary.append({
             "adapter": name,
@@ -84,7 +127,7 @@ class Phase2Service:
             else None
         )
         candidates = self.resolver.resolve(graph, context_filters=filters)
-        adapter_summary = _adapter_summary(manifest)
+        adapter_summary = _adapter_summary(manifest, run_dir=self.checkpoints.run_dir(run_id))
         warnings = evaluate_jurisdiction_warnings(seeds=seeds, entities=graph.entities.values())
         self.graph_store.save_graph(str(run_id), graph.export())
         resolution_path = self.checkpoints.run_dir(run_id) / "resolution.json"

@@ -63,7 +63,7 @@ class MaigretAdapter(IdentityAdapter):
     )
 
     def build_command(self, request: AdapterRunRequest, workspace: Path) -> list[str]:
-        return ["maigret", request.seed.value, "--json", "ndjson", "--folderoutput", "/work/results"]
+        return [request.seed.value, "--json", "ndjson", "--folderoutput", "/work/results"]
 
     def parse(self, request: AdapterRunRequest, workspace: Path, stdout: str, stderr: str, exit_code: int) -> AdapterRunResult:
         started = datetime.now(timezone.utc)
@@ -140,7 +140,7 @@ class HoleheAdapter(IdentityAdapter):
     )
 
     def build_command(self, request: AdapterRunRequest, workspace: Path) -> list[str]:
-        return ["holehe", request.seed.value]
+        return [request.seed.value]
 
     def parse(self, request: AdapterRunRequest, workspace: Path, stdout: str, stderr: str, exit_code: int) -> AdapterRunResult:
         started = datetime.now(timezone.utc)
@@ -181,7 +181,7 @@ class H8mailAdapter(IdentityAdapter):
     )
 
     def build_command(self, request: AdapterRunRequest, workspace: Path) -> list[str]:
-        return ["h8mail", "-t", request.seed.value, "-j", "/work/h8mail.json", "-sk", "--hide"]
+        return ["-t", request.seed.value, "-j", "/work/h8mail.json", "-sk", "--hide"]
 
     def parse(self, request: AdapterRunRequest, workspace: Path, stdout: str, stderr: str, exit_code: int) -> AdapterRunResult:
         started = datetime.now(timezone.utc)
@@ -253,7 +253,7 @@ class HIBPAdapter(IdentityAdapter):
     )
 
     def build_command(self, request: AdapterRunRequest, workspace: Path) -> list[str]:
-        return ["runner.py", "email", request.seed.value]
+        return ["email", request.seed.value]
 
     def parse(self, request: AdapterRunRequest, workspace: Path, stdout: str, stderr: str, exit_code: int) -> AdapterRunResult:
         started = datetime.now(timezone.utc)
@@ -347,7 +347,7 @@ class PhoneInfogaAdapter(IdentityAdapter):
     )
 
     def build_command(self, request: AdapterRunRequest, workspace: Path) -> list[str]:
-        return ["phoneinfoga", "scan", "-n", request.seed.value]
+        return ["scan", "-n", request.seed.value]
 
     def parse(self, request: AdapterRunRequest, workspace: Path, stdout: str, stderr: str, exit_code: int) -> AdapterRunResult:
         started = datetime.now(timezone.utc)
@@ -384,7 +384,7 @@ class LibPhoneNumberAdapter(IdentityAdapter):
     )
 
     def build_command(self, request: AdapterRunRequest, workspace: Path) -> list[str]:
-        return ["python", "/opt/runner.py", request.seed.value]
+        return [request.seed.value]
 
     def parse(self, request: AdapterRunRequest, workspace: Path, stdout: str, stderr: str, exit_code: int) -> AdapterRunResult:
         started = datetime.now(timezone.utc)

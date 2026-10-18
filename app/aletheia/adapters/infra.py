@@ -120,7 +120,7 @@ class AmassAdapter(DomainTextAdapter):
     )
 
     def build_command(self, request: AdapterRunRequest, workspace: Path) -> list[str]:
-        return ["amass", "enum", "-passive", "-d", request.seed.value, "-o", "/work/amass.txt", "-timeout", "1"]
+        return ["enum", "-passive", "-d", request.seed.value, "-o", "/work/amass.txt", "-timeout", "1"]
 
     def parse(self, request: AdapterRunRequest, workspace: Path, stdout: str, stderr: str, exit_code: int) -> AdapterRunResult:
         path = workspace / "amass.txt"
@@ -144,7 +144,7 @@ class SubfinderAdapter(DomainTextAdapter):
     )
 
     def build_command(self, request: AdapterRunRequest, workspace: Path) -> list[str]:
-        return ["subfinder", "-d", request.seed.value, "-silent", "-o", "/work/subfinder.txt"]
+        return ["-d", request.seed.value, "-silent", "-o", "/work/subfinder.txt"]
 
     def parse(self, request: AdapterRunRequest, workspace: Path, stdout: str, stderr: str, exit_code: int) -> AdapterRunResult:
         path = workspace / "subfinder.txt"
@@ -168,7 +168,7 @@ class AssetfinderAdapter(DomainTextAdapter):
     )
 
     def build_command(self, request: AdapterRunRequest, workspace: Path) -> list[str]:
-        return ["assetfinder", "--subs-only", request.seed.value]
+        return ["--subs-only", request.seed.value]
 
     def parse(self, request: AdapterRunRequest, workspace: Path, stdout: str, stderr: str, exit_code: int) -> AdapterRunResult:
         return self.parse_lines(request, stdout, stderr, exit_code)
@@ -191,7 +191,7 @@ class DnsxAdapter(DomainTextAdapter):
 
     def build_command(self, request: AdapterRunRequest, workspace: Path) -> list[str]:
         (workspace / "input.txt").write_text(request.seed.value + "\n", encoding="utf-8")
-        return ["dnsx", "-l", "/work/input.txt", "-recon", "-json", "-silent", "-o", "/work/dnsx.jsonl"]
+        return ["-l", "/work/input.txt", "-recon", "-json", "-silent", "-o", "/work/dnsx.jsonl"]
 
     def parse(self, request: AdapterRunRequest, workspace: Path, stdout: str, stderr: str, exit_code: int) -> AdapterRunResult:
         started = datetime.now(timezone.utc)
@@ -255,7 +255,7 @@ class MassdnsAdapter(DomainTextAdapter):
 
     def build_command(self, request: AdapterRunRequest, workspace: Path) -> list[str]:
         (workspace / "input.txt").write_text(request.seed.value + "\n", encoding="utf-8")
-        return ["massdns", "-r", "/opt/resolvers.txt", "-t", "A", "-o", "S", "-q", "/work/input.txt"]
+        return ["-r", "/opt/resolvers.txt", "-t", "A", "-o", "S", "-q", "/work/input.txt"]
 
     def parse(self, request: AdapterRunRequest, workspace: Path, stdout: str, stderr: str, exit_code: int) -> AdapterRunResult:
         started = datetime.now(timezone.utc)
@@ -296,7 +296,7 @@ class DnsreconAdapter(DomainTextAdapter):
     )
 
     def build_command(self, request: AdapterRunRequest, workspace: Path) -> list[str]:
-        return ["dnsrecon", "-d", request.seed.value, "-t", "std,crt", "-j", "/work/dnsrecon.json"]
+        return ["-d", request.seed.value, "-t", "std,crt", "-j", "/work/dnsrecon.json"]
 
     def parse(self, request: AdapterRunRequest, workspace: Path, stdout: str, stderr: str, exit_code: int) -> AdapterRunResult:
         started = datetime.now(timezone.utc)
@@ -350,7 +350,7 @@ class FierceAdapter(DomainTextAdapter):
     )
 
     def build_command(self, request: AdapterRunRequest, workspace: Path) -> list[str]:
-        return ["fierce", "--domain", request.seed.value]
+        return ["--domain", request.seed.value]
 
     def parse(self, request: AdapterRunRequest, workspace: Path, stdout: str, stderr: str, exit_code: int) -> AdapterRunResult:
         started = datetime.now(timezone.utc)
@@ -385,7 +385,7 @@ class ShodanAdapter(Adapter):
         return seed_type in self.descriptor.input_types
 
     def build_command(self, request: AdapterRunRequest, workspace: Path) -> list[str]:
-        return ["python", "/opt/runner.py", request.seed.type.value, request.seed.value]
+        return [request.seed.type.value, request.seed.value]
 
     def parse(self, request: AdapterRunRequest, workspace: Path, stdout: str, stderr: str, exit_code: int) -> AdapterRunResult:
         started = datetime.now(timezone.utc)
@@ -460,7 +460,7 @@ class CrtshAdapter(Adapter):
         return seed_type == SeedType.DOMAIN
 
     def build_command(self, request: AdapterRunRequest, workspace: Path) -> list[str]:
-        return ["python", "/opt/runner.py", request.seed.value]
+        return [request.seed.value]
 
     def parse(self, request: AdapterRunRequest, workspace: Path, stdout: str, stderr: str, exit_code: int) -> AdapterRunResult:
         started = datetime.now(timezone.utc)

@@ -43,6 +43,25 @@ def _result(request: AdapterRunRequest, adapter: AdapterDescriptor, started: dat
     )
 
 
+def _credential_skip(adapter: AdapterDescriptor, stderr: str) -> Finding:
+    """Record a runner-declared missing-credentials skip (exit code 5 convention).
+
+    Run 39120709419 showed why this must be a first-class record: without it a
+    key-gated adapter that never queried anything is indistinguishable in the
+    report from one that searched and found nothing. The reason is copied from
+    the runner's own stderr, never inferred.
+    """
+    reason = next((line.strip() for line in stderr.splitlines() if line.strip()),
+                  "runner reported missing credentials (exit code 5)")
+    return Finding(
+        entity_type=EntityType.UNKNOWN,
+        value=f"{adapter.name}:skipped",
+        attributes={"skipped": True, "source": adapter.name, "reason": reason},
+        provenance=_prov(adapter, source_url=adapter.upstream, confidence=1.0,
+                         raw=reason.encode(), notes=[f"Skipped: {reason}"]),
+    )
+
+
 def _stage_image(request: AdapterRunRequest, workspace: Path) -> Path:
     src = Path(request.seed.value).expanduser().resolve()
     if not src.exists() or not src.is_file():
@@ -76,7 +95,7 @@ class InstaloaderAdapter(Phase5Adapter):
         return seed_type == SeedType.USERNAME
 
     def build_command(self, request: AdapterRunRequest, workspace: Path) -> list[str]:
-        return ["runner.py", request.seed.value]
+        return [request.seed.value]
 
     def parse(self, request, workspace, stdout, stderr, exit_code):
         started = datetime.now(timezone.utc); raw = stdout.encode(); findings = []
@@ -102,18 +121,23 @@ class RedditAPIAdapter(Phase5Adapter):
         secret_env=["REDDIT_CLIENT_ID", "REDDIT_CLIENT_SECRET"],
     )
     def supports(self, seed_type): return seed_type == SeedType.USERNAME
-    def build_command(self, request, workspace): return ["runner.py", request.seed.value]
+    def build_command(self, request, workspace): return [request.seed.value]
     def parse(self, request, workspace, stdout, stderr, exit_code):
         started=datetime.now(timezone.utc); raw=stdout.encode(); findings=[]
         try: data=json.loads(stdout) if stdout.strip() else {}
         except json.JSONDecodeError: data={}
         if isinstance(data, dict):
             user=data.get("data", data)
-            if isinstance(user, dict):
-                name=user.get("name") or user.get("username") or request.seed.value
+            name=(user.get("name") or user.get("username")) if isinstance(user, dict) else None
+            # Run 39120709419: with no payload this used to fall back to the seed
+            # and emit a profile URL backed by the SHA-256 of the empty string.
+            # Claiming an account requires the payload to carry the username.
+            if isinstance(name, str) and name:
                 url=f"https://www.reddit.com/user/{name}/"
                 findings.append(Finding(entity_type=EntityType.URL,value=url,attributes={"platform":"reddit","username":name},provenance=_prov(self.descriptor,source_url=url,confidence=0.96,raw=raw)))
                 findings.append(Finding(entity_type=EntityType.SOCIAL_ACCOUNT,value=url,attributes={k:v for k,v in user.items() if k not in {"password","access_token"}},provenance=_prov(self.descriptor,source_url="https://www.reddit.com/dev/api/",confidence=0.95,raw=raw)))
+        if exit_code == 5 and not stdout.strip():
+            findings.append(_credential_skip(self.descriptor, stderr))
         return _result(request,self.descriptor,started,findings,stdout,stderr,exit_code)
 
 
@@ -126,7 +150,7 @@ class YouTubeAPIAdapter(Phase5Adapter):
         requires_authorization_assertion=True, secret_env=["YOUTUBE_API_KEY"],
     )
     def supports(self, seed_type): return seed_type == SeedType.USERNAME
-    def build_command(self, request, workspace): return ["runner.py", request.seed.value]
+    def build_command(self, request, workspace): return [request.seed.value]
     def parse(self, request, workspace, stdout, stderr, exit_code):
         started=datetime.now(timezone.utc); raw=stdout.encode(); findings=[]
         try: data=json.loads(stdout) if stdout.strip() else {}
@@ -141,6 +165,8 @@ class YouTubeAPIAdapter(Phase5Adapter):
             attrs={"platform":"youtube","title":snip.get("title"),"description":snip.get("description"),"custom_url":snip.get("customUrl"),"country":snip.get("country"),"statistics":stats}
             findings.append(Finding(entity_type=EntityType.URL,value=url,attributes={"platform":"youtube","channel_id":cid,"username_query":request.seed.value},provenance=_prov(self.descriptor,source_url=url,confidence=0.95,raw=raw)))
             findings.append(Finding(entity_type=EntityType.SOCIAL_ACCOUNT,value=url,attributes=attrs,provenance=_prov(self.descriptor,source_url="https://developers.google.com/youtube/v3",confidence=0.94,raw=raw)))
+        if exit_code == 5 and not stdout.strip():
+            findings.append(_credential_skip(self.descriptor, stderr))
         return _result(request,self.descriptor,started,findings,stdout,stderr,exit_code)
 
 
@@ -152,7 +178,7 @@ class OverpassAdapter(Phase5Adapter):
         upstream="https://overpass-api.de/", network_required=True, docker_image="aletheia/overpass:public", output_schema={"elements":"object[]"}, health_check="runner.py --health", requires_authorization_assertion=True,
     )
     def supports(self, seed_type): return seed_type == SeedType.GEOLOCATION
-    def build_command(self, request, workspace): return ["runner.py", request.seed.value]
+    def build_command(self, request, workspace): return [request.seed.value]
     def parse(self, request, workspace, stdout, stderr, exit_code):
         started=datetime.now(timezone.utc); raw=stdout.encode(); findings=[]
         try: payload=json.loads(stdout) if stdout.strip() else {}
@@ -176,7 +202,7 @@ class SunCalcAdapter(Phase5Adapter):
         upstream="https://www.npmjs.com/package/suncalc", network_required=False, docker_image="aletheia/suncalc:2.0.2", output_schema={"sun":"object"}, health_check="runner.js --health",
     )
     def supports(self, seed_type): return seed_type == SeedType.GEOLOCATION
-    def build_command(self, request, workspace): return ["node","/opt/runner.js",request.seed.value]
+    def build_command(self, request, workspace): return [request.seed.value]
     def parse(self, request, workspace, stdout, stderr, exit_code):
         started=datetime.now(timezone.utc); raw=stdout.encode(); findings=[]
         try: data=json.loads(stdout) if stdout.strip() else {}
@@ -197,7 +223,7 @@ class DeepFaceAdapter(Phase5Adapter):
     )
     def supports(self, seed_type): return seed_type in {SeedType.IMAGE, SeedType.FILE_PATH}
     def build_command(self, request, workspace):
-        image=_stage_image(request,workspace); return ["runner.py",str(image)]
+        image=_stage_image(request,workspace); return [f"/work/{image.name}"]
     def parse(self, request, workspace, stdout, stderr, exit_code):
         started=datetime.now(timezone.utc); raw=stdout.encode(); findings=[]
         try: data=json.loads(stdout) if stdout.strip() else {}
@@ -219,7 +245,7 @@ class InsightFaceAdapter(Phase5Adapter):
     )
     def supports(self, seed_type): return seed_type in {SeedType.IMAGE, SeedType.FILE_PATH}
     def build_command(self, request, workspace):
-        image=_stage_image(request,workspace); return ["runner.py",str(image)]
+        image=_stage_image(request,workspace); return [f"/work/{image.name}"]
     def parse(self, request, workspace, stdout, stderr, exit_code):
         started=datetime.now(timezone.utc); raw=stdout.encode(); findings=[]
         try: data=json.loads(stdout) if stdout.strip() else {}

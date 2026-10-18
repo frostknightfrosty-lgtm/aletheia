@@ -12,4 +12,8 @@ def test_image_file_is_staged_into_workspace(tmp_path):
     cmd=DeepFaceAdapter().build_command(request, ws)
     staged=ws/'input.jpg'
     assert staged.read_bytes()==b'JPEGTEST'
-    assert cmd==['runner.py',str(staged)]
+    # The image ENTRYPOINT supplies `python /opt/runner.py` and the mount puts
+    # the workspace at /work; the command is the container-side path only. The
+    # old form repeated the entrypoint's script and passed a host path
+    # (run 39120709419 era) and could never have executed.
+    assert cmd==['/work/input.jpg']

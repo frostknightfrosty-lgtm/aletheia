@@ -60,11 +60,47 @@ def test_reddit_parser():
     assert any(f.entity_type==EntityType.URL and 'reddit.com/user/alice' in f.value for f in result.findings)
 
 
+def test_reddit_parser_failed_run_never_fabricates_a_profile():
+    """Run 39120709419: the container never started and stdout was empty, yet
+    the parser emitted https://www.reddit.com/user/frost2233/ backed by the
+    SHA-256 of the empty string. No payload means no claimed account."""
+    result=RedditAPIAdapter().parse(req(SeedType.USERNAME,"frost2233"),Path('.'),"",
+                                    "docker: 'docker run' requires at least 1 argument",1)
+    assert result.findings == []
+    assert result.status == "partial"
+
+
+def test_reddit_parser_reports_missing_credentials_as_a_skip():
+    """Exit code 5 is the runners' missing-credentials convention; the report
+    must carry a skip with the runner's own reason instead of an ambiguous gap."""
+    from aletheia.core.orchestrator import extract_skipped_sources
+
+    result=RedditAPIAdapter().parse(req(SeedType.USERNAME,"alice"),Path('.'),"",
+                                    "REDDIT_CLIENT_ID and REDDIT_CLIENT_SECRET are required\n",5)
+    assert extract_skipped_sources(result.findings) == [{
+        "source": "reddit-api",
+        "reason": "REDDIT_CLIENT_ID and REDDIT_CLIENT_SECRET are required",
+    }]
+
+
 @parser_test('youtube-api')
 def test_youtube_parser():
     payload=json.dumps({"items":[{"id":"UC123","snippet":{"title":"Alice Channel"},"statistics":{"subscriberCount":"10"}}]})
     result=YouTubeAPIAdapter().parse(req(SeedType.USERNAME,"alice"),Path('.'),payload,'',0)
     assert any(f.entity_type==EntityType.SOCIAL_ACCOUNT and 'youtube.com/channel/UC123' in f.value for f in result.findings)
+
+
+def test_youtube_parser_reports_missing_key_as_a_skip():
+    """Same contract as reddit-api: exit code 5 with an empty payload is a
+    credentials skip carrying the runner's own reason, not silence."""
+    from aletheia.core.orchestrator import extract_skipped_sources
+
+    result=YouTubeAPIAdapter().parse(req(SeedType.USERNAME,"alice"),Path('.'),"",
+                                     "YOUTUBE_API_KEY is required\n",5)
+    assert extract_skipped_sources(result.findings) == [{
+        "source": "youtube-api",
+        "reason": "YOUTUBE_API_KEY is required",
+    }]
 
 
 @parser_test('overpass')

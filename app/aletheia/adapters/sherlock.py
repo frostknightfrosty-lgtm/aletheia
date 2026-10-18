@@ -51,13 +51,20 @@ class SherlockAdapter(Adapter):
                     provenance=Provenance(tool=self.descriptor.name, source_url=url,
                                           confidence=0.85, adapter_version=self.descriptor.version_pin),
                 ))
+        # Run 39120709419: the container never started, yet the seed claim still
+        # said "collector searched public sites". The seed stays anchored; the
+        # claim that the collector searched follows the evidence.
+        ran = exit_code == 0 or path.exists()
+        notes = ["Seed asserted by operator."]
+        if ran:
+            notes.append("Collector searched public sites.")
         findings.insert(0, Finding(
             entity_type=EntityType.USERNAME,
             value=request.seed.value,
-            attributes={"searched": True},
+            attributes={"searched": ran},
             provenance=Provenance(tool=self.descriptor.name, source_url=self.descriptor.upstream,
                                   confidence=1.0, adapter_version=self.descriptor.version_pin,
-                                  notes=["Seed asserted by operator; collector searched public sites."]),
+                                  notes=notes),
             source_kind="seed",
         ))
         return AdapterRunResult(run_id=request.run_id, adapter=self.descriptor, status="succeeded" if exit_code == 0 else "partial",

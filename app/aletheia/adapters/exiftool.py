@@ -33,7 +33,7 @@ class ExifToolAdapter(Adapter):
         # The orchestrator copies the input into the workspace before invoking the container in production.
         dest = workspace / "input.bin"
         dest.write_bytes(src.read_bytes())
-        return ["exiftool", "-j", "-G1", "/work/input.bin"]
+        return ["-j", "-G1", "/work/input.bin"]
 
     def parse(self, request: AdapterRunRequest, workspace: Path, stdout: str, stderr: str, exit_code: int) -> AdapterRunResult:
         started = datetime.now(timezone.utc)

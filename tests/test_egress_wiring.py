@@ -130,6 +130,9 @@ def test_session_starts_network_then_detached_proxy(tmp_path):
     assert session.proxy_url == "http://aletheia-egress-ssl-tls:8888"
     assert session.network == "aletheia-egress-net-ssl-tls"
     assert session.log_path == tmp_path / "egress" / egress.LOG_FILENAME
+    # The proxy is dual-homed: the adapter network has no route out, so the
+    # uplink is the proxy's — and only the proxy's — route to any upstream.
+    assert calls[2] == ["docker", "network", "connect", "bridge", "aletheia-egress-ssl-tls"]
 
 
 def test_session_forwards_operator_egress_limits(tmp_path):
@@ -147,6 +150,43 @@ def test_session_forwards_operator_egress_limits(tmp_path):
 
     assert "ALETHEIA_EGRESS_RATE=20.0" in calls[1]
     assert "ALETHEIA_EGRESS_BURST=100.0" in calls[1]
+
+
+def test_session_attaches_the_proxy_uplink(tmp_path):
+    """The proxy's second interface is its only route to any upstream.
+
+    The ``--internal`` adapter network has no default route out, so a
+    single-homed proxy logs 502 for every request. Found while repairing the
+    live path after run 39120709419; the uplink is a parameter so the CI
+    scenario can attach a local uplink network instead of the bridge.
+    """
+    calls, runner = _recorder()
+    session = egress.ProxySession(
+        "ssl_tls", tmp_path / "egress", uplink="aletheia-egress-uplink-scenario", runner=runner
+    )
+
+    session.start()
+
+    assert calls[2] == [
+        "docker", "network", "connect", "aletheia-egress-uplink-scenario",
+        "aletheia-egress-ssl-tls",
+    ]
+
+
+def test_session_makes_the_log_dir_writable_for_the_proxy_uid(tmp_path, monkeypatch):
+    """The proxy image runs as an unprivileged uid while the log dir belongs
+    to the orchestrator's user; without the chmod the bind-mounted log stays
+    unwritable and egress evidence silently disappears (same fix as
+    ``ci/egress_scenario.py``)."""
+    calls, runner = _recorder()
+    chmods: list[tuple[str, int]] = []
+    monkeypatch.setattr(
+        egress.os, "chmod", lambda path, mode: chmods.append((str(path), mode))
+    )
+
+    egress.ProxySession("ssl_tls", tmp_path / "egress", runner=runner).start()
+
+    assert chmods == [(str(tmp_path / "egress"), 0o777)]
 
 
 def test_session_context_manager_stops_proxy_and_network(tmp_path):
@@ -197,6 +237,9 @@ def test_run_docker_joins_named_network(monkeypatch, tmp_path):
     # The named network wins over the boolean "network" flag.
     assert argv[argv.index("--network") + 1] == "aletheia-egress-net-search-engines"
     assert "HTTP_PROXY=http://aletheia-egress-search-engines:8888" in argv
+    # The container invocation itself: image and command terminate the argv.
+    # Run 39120709419 sent bare options because this tail was never appended.
+    assert argv[-4:] == ["aletheia/search-engines:v1", "runner.py", "name", "example"]
 
 
 # -- orchestrator wiring -------------------------------------------------------

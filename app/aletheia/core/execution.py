@@ -46,6 +46,12 @@ def run_docker(*, image: str, command: Sequence[str], workspace: Path, timeout_s
     # Avoid leaking host credentials/config into child containers.
     for key in ("AWS_ACCESS_KEY_ID", "AWS_SECRET_ACCESS_KEY", "GITHUB_TOKEN", "OPENAI_API_KEY"):
         env.pop(key, None)
+    # The image and its command terminate the argv: `docker run [options]
+    # <image> <command...>`. Run 39120709419 was the first live invocation this
+    # function ever executed and every adapter died with "docker: 'docker run'
+    # requires at least 1 argument" because this append was missing — yet the
+    # run still reported success (see phase2's result-status reporting).
+    argv += [image, *command]
     try:
         completed = subprocess.run(argv, capture_output=True, text=True, timeout=timeout_seconds, env=env)
     except FileNotFoundError as exc:
