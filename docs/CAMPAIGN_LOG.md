@@ -14,17 +14,18 @@
 ## NOW (edited in place — this is the current position)
 
 - Campaign: **ACTIVE** — owner mandate received and executing.
-- Position: **P17.2 verified green** (run `39153749577` on `7900ce4`); the
-  evidence lines are copied below. **P17.3** implemented locally-green (claim
-  layer + pivot extractors + 25 tests) and pushed as `d7f035a`; verification
-  run `39154364738` watching in the background. **P17.4** (matchers, perceptual
-  hashing, LR scoring, priors, calibration hook) implemented locally — tests
-  being written and run now.
-- Next action: finish P17.4 local tests → commit/push; copy P17.3 evidence when
-  `39154364738` notifies.
-- In-flight CI: `39154364738` (P17.3 code `d7f035a`, watch running).
-- Last verified commit: `7900ce4` (run `39153749577`, docker-verification
-  green; lines copied: parser 49/49; **815 passed**; capture 60/60; storage
+- Position: **P17.5 pushed as `d561c9c`** (falsification pass, ACH, union-find
+  conflict propagation, low-grade gate cap; 26 new tests; local 857 passed +
+  65 environment-only skips → expected CI 922). Verification run starting.
+  **P17.3 verified green** (run `39154364738`); P17.4's run `39155284979`
+  still watching.
+- Next action: start **P17.6** (VOI scheduler + adaptive budgets + stop policy
+  + resume + decision ledger) locally while CI runs; copy evidence when the
+  watches notify.
+- In-flight CI: `39155284979` (P17.4 code `db5f03e`, watch running);
+  `d561c9c`'s run starting.
+- Last verified commit: `d7f035a` (run `39154364738`, docker-verification
+  green; lines copied: parser 49/49; **840 passed**; capture 60/60; storage
   6/6).
 - Owner-blocked (parked, never wait on): everything in `docs/USER_ACTIONS.md`.
 - Decision defaults in force: see "Adopted defaults" below.
@@ -102,13 +103,22 @@
       → Implemented locally-green; pushed `7900ce4`; run `39153749577`
       **green** — evidence lines copied to the Log (parser 49/49; 815 passed;
       capture 60/60; storage 6/6).
-- [ ] **P17.3** — claim normalization + blocking + pivot extractors + fixtures.
+- [x] **P17.3** — claim normalization + blocking + pivot extractors + fixtures.
       → Implemented locally-green (25 tests); pushed `d7f035a`; run
-      `39154364738` verifying (checkbox flips when evidence is copied).
+      `39154364738` **green** — evidence lines copied to the Log (parser
+      49/49; 840 passed; capture 60/60; storage 6/6).
 - [ ] **P17.4** — matchers, perceptual hashing, LR scoring, base-rate priors,
       calibration hook (Platt/isotonic in `core/calibration.py` stays the only
       probability path; an untrained model is never presented as a probability).
+      → Implemented locally-green (56 tests; local 831 passed + 65 skips →
+      expected CI 896); pushed `db5f03e`; run `39155284979` verifying.
 - [ ] **P17.5** — falsification pass + ACH + union-find conflict propagation.
+      → Implemented locally-green (26 tests; local 857 passed + 65 skips →
+      expected CI 922); pushed `d561c9c`; run verifying.
+      Notes: source-grade plumbing — the E/F low-grade gate cap mechanism
+      landed in `scoring.py`; wiring `Claim.source_grade` into evidence items
+      is deferred until a grading pass assigns real grades (F6-unrated stays
+      "not yet graded"; §17 resolution item 7).
 - [ ] **P17.6** — VOI scheduler + adaptive budgets + stop policy + resume +
       decision ledger.
 - [ ] **P17.7** — case memory + cache/TTL + re-audit diffs.
@@ -204,5 +214,24 @@ activate when the key exists.
   pushed as `d7f035a` (docs commit `e86a042` adds the adopted defaults,
   P17.13's recording, and prep-run evidence). Verification run
   `39154364738` watching in the background.
-- Next: finish P17.4 local tests → commit/push; on `39154364738` green copy
-  evidence, flip the P17.3 checkbox.
+- 2026-10-18 — P17.3 verification — commit `d7f035a` — run `39154364738` —
+  docker-verification **green**. Copied from the downloaded artifact
+  `ci-artifacts-39154364738`:
+  - `PARSER PREFLIGHT: PASS — 49/49 adapters have parser coverage`
+  - pytest-summary.json: `"console_summary": "840 passed, 1 warning"`,
+    `"junit_total": 840`, `"skipped_in_ci": []`, `"ok": true`
+    (815 → 840: the 25 new claim/extractor tests, none skipped)
+  - docker-integration/capture.log: `DOCKER CAPTURE: PASS — 60/60 cases
+    captured`
+  - storage-conformance.json: `"passing": ["file", "postgres", "neo4j",
+    "elasticsearch", "minio", "redis"]`, `"unconfigured": []`,
+    `"required_all": true`, `"ok": true`
+- 2026-10-18 — P17.4 implemented (matchers incl. NARA-vector Soundex and
+  nickname expansion; stdlib PNG/BMP/PPM decode + aHash/dHash/DCT pHash with
+  Pillow fallback; LR scoring with review-gate cap; base-rate priors;
+  calibration hook; claim-pair evidence table; 56 tests; local 831 passed +
+  65 environment-only skips → expected CI 896) and pushed as `db5f03e`
+  (docs commit `91e36cb` copies the P17.2 verification evidence). Verification
+  run `39155284979` watching in the background.
+- Next: finish P17.5 (falsify + ACH + merge graph) → commit/push; on
+  `39155284979` green copy evidence, flip the P17.4 checkbox.

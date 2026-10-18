@@ -238,9 +238,9 @@ never clear a tier gate alone.
 - **possible**: everything above WEAK.
 - **excluded**: any surviving VETO.
 
-**Falsification-first**: before confirming, a dedicated review pass runs
-disconfirming probes (rare-attribute conflicts, era contradictions, name
-conflicts) and records the strongest disconfirming evidence in the ledger.
+- **Falsification-first**: before confirming, a dedicated review pass runs
+  disconfirming probes (rare-attribute conflicts, era contradictions, name
+  conflicts) and records the strongest disconfirming evidence in the ledger.
 
 **Analysis of Competing Hypotheses (ACH)**: each hit is evaluated against
 hypotheses `H_subject` (belongs to the investigation subject), `H_other`
@@ -552,3 +552,10 @@ also listed as redline candidates in `docs/USER_ACTIONS.md`):
    stays last, behind container-level Tor, live runs gated.
 6. Face search: **adopted** — corroboration-only; never the sole basis and
    never a STRONG-alone path.
+7. Source grades (raised by P17.5): the low-grade cap mechanism (an explicitly
+   graded E/F source never clears a tier gate alone) lands with P17.5's
+   scoring upgrade, but wiring `Claim.source_grade` into evidence items is
+   deferred until a grading pass assigns real per-source grades. The
+   F6-unrated default reads as "not yet graded", not "judged unreliable".
+   Redline candidate: cap on F6-unrated too (which would hold every ungraded
+   merge at or below "possible" until grading lands).

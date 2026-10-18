@@ -1,5 +1,29 @@
 # Changelog
 
+## 2026-10-18 — P17.3: claim normalization, strong-key blocking, pivot extractors
+
+The claim layer the evidence engine compares: normalized claims, blocking that
+keeps comparisons out of O(n²), and the section-7 pivot gates. Every number
+below is copied from the downloaded artifact `ci-artifacts-39154364738` (run
+`39154364738`, commit `d7f035a`).
+
+- `PARSER PREFLIGHT: PASS — 49/49 adapters have parser coverage` (registry
+  unchanged).
+- `"console_summary": "840 passed, 1 warning"` with `"junit_total": 840`,
+  `"skipped_in_ci": []`, `"ok": true` — 25 new tests over the previous 815,
+  none skipped in CI.
+- `DOCKER CAPTURE: PASS — 60/60 cases captured`.
+- storage-conformance.json: `"passing": ["file", "postgres", "neo4j",
+  "elasticsearch", "minio", "redis"]`, `"unconfigured": []`,
+  `"required_all": true`, `"ok": true`.
+- What landed: `aletheia.cascade.claims` (claim model with an F6-unrated
+  Admiralty default, canonicalization for seed-backed types only, strong-key
+  blocking — email/phone/domain/exact-handle, with mail domains, URL hosts of
+  shared platforms handled conservatively and oversized blocks reported, never
+  silently dropped) and `aletheia.cascade.extractors` (claims → typed pivot
+  seeds with the section-7 gates per record class, deterministic and total
+  over every entity type; a fixture walk covers all rule types).
+
 ## 2026-10-18 — P17.2: cascade data models, descriptor-derived routing graph, seed autodetection
 
 The first Phase 17 code step: the routing graph later cascade steps walk, plus
