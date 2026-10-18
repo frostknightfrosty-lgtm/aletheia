@@ -179,10 +179,21 @@ def _run_checks(script_dir: Path, network: str, proxy_name: str, proxy_url: str,
     })
 
     # -- Phase 15: an adapter outside the old allowlist is proxied as well -----
-    # crtsh was NOT wired in Phase 12. On the internal network its upstream is
-    # unreachable, so the runner must fail; what this proves is that the attempt
-    # went through the proxy and was logged (the proxy records a 502 upstream
-    # failure for the CONNECT before closing the tunnel).
+    # crtsh was NOT wired in Phase 12. The crtsh runner makes exactly one request,
+    # so this counts the proxy's CONNECT crt.sh entries before and after the run
+    # and requires exactly one new one: the entry cannot be confused with a
+    # search_engines entry (that runner's two sub-sources are Marginalia and
+    # Common Crawl and it never contacts crt.sh), and the log's adapter field is
+    # the scenario's single proxy name for every container. On the internal
+    # network the upstream is unreachable, so the runner must also fail closed.
+    def _crt_entries() -> list:
+        return [
+            entry
+            for entry in egress.read_log(log_path)
+            if entry.host == "crt.sh" and entry.method == "CONNECT"
+        ]
+
+    before = len(_crt_entries())
     crtsh = _docker([
         "docker", "run", "--rm",
         "--network", network,
@@ -192,11 +203,13 @@ def _run_checks(script_dir: Path, network: str, proxy_name: str, proxy_url: str,
         "-e", "NO_PROXY=localhost,127.0.0.1",
         "aletheia/crtsh:public-json", "/opt/runner.py", "aletheia-egress-scenario.invalid",
     ])
-    crt_entries = [entry for entry in egress.read_log(log_path) if "crt.sh" in entry.host]
+    new_entries = _crt_entries()[before:]
     checks.append({
         "name": "phase15-egress-previously-unwired-adapter",
-        "ok": bool(crt_entries) and crtsh.returncode != 0,
-        "detail": "crtsh rc=" + str(crtsh.returncode) + " crt.sh log entries=" + str(len(crt_entries)),
+        "ok": len(new_entries) == 1 and crtsh.returncode != 0,
+        "detail": "crtsh rc=" + str(crtsh.returncode)
+        + " new CONNECT crt.sh entries=" + str(len(new_entries))
+        + " status=" + (str(new_entries[0].status) if new_entries else "n/a"),
     })
 
     # -- fail-closed: no direct internet, and no path once the proxy is stopped -
