@@ -222,6 +222,12 @@ def test_phase9_leak_checkers_container_health():
     assert r.stdout.strip() == "ok", r.stdout + r.stderr
 
 
+def test_phase17_zehef_container_health():
+    r = _run(["docker", "run", "--rm", "--network", "none", "aletheia/zehef:v1", "--health"])
+    assert r.returncode == 0, r.stderr or r.stdout
+    assert r.stdout.strip() == "ok", r.stdout + r.stderr
+
+
 def test_phase11_egress_proxy_container_health():
     r = _run(["docker", "run", "--rm", "--network", "none", "aletheia/egress-proxy:v1", "--health"])
     assert r.returncode == 0, r.stderr or r.stdout

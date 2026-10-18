@@ -376,6 +376,27 @@
       "batch_grouping": "email_intel"
     },
     {
+      "name": "zehef",
+      "upstream": "https://github.com/N0rz3/Zehef",
+      "license": "GPL-3.0-only",
+      "version_pin": "2.2.1 (commit 5b0c120efe846eae944dfea9410f925ca3036103)",
+      "invocation": "Docker / CLI",
+      "input_types": [
+        "email"
+      ],
+      "output_schema": "normalized positive account-registration signals and public account URLs",
+      "legal_notes": "Checks public account-registration signals reported by the pinned upstream modules (17 services); no login, no password-reset completion, and no CAPTCHA or anti-bot challenge; explicit authorization required. The upstream paste scraper (Google search scraping), the HudsonRock stealer-log module, and the random email-combination generator are never invoked; see docker/zehef/RATE_LIMITS.md.",
+      "network": "required",
+      "last_audited": "2026-10-18T00:00:00Z",
+      "verification_status": "verified-fixture",
+      "note": "Fixture parser coverage passes; fixture provenance: synthetic; fixture file: tests/fixtures/zehef.json. No live container run has occurred.",
+      "fixture_provenance": "synthetic",
+      "legal_tier": 2,
+      "enabled_by_default": true,
+      "disabled_reason": null,
+      "batch_grouping": "email_intel"
+    },
+    {
       "name": "h8mail",
       "upstream": "https://github.com/khast3x/h8mail",
       "license": "BSD-3-Clause",
@@ -1493,7 +1514,7 @@
           "enabled_by_default": false
         }
       ],
-      "note": "Synthetic parser fixture passed; fixture file: tests/fixtures/social_profile.json. No live source lookups occurred. Verified in Docker Verification run 38893145959 on commit ee8da34ec42df0e4d29362b04949b2b113f988b7 (https://github.com/frostknightfrosty-lgtm/aletheia/actions/runs/38893145959). Raw artifact evidence: PARSER PREFLIGHT: PASS — 47/47 adapters have parser coverage; 543 passed, 1 warning in 22.69s; DOCKER CAPTURE: PASS — 48/48 cases captured. results.json has 48 entries with 0 nonzero return codes and 48 stdout/stderr pairs; SHA-256 453552AFED1CAE3DD3CFC9EC2A82AD9DDB6DC84C857E2C69510FF86642EA6314. Case phase9-social-profile returned 0 with stdout ok under --network none, which confirms container startup only. Implementation includes CrossLinked 0.3.0 (one HTTPS search page each from Google and Bing) and Slinky pinned to commit e74a138b6bf7264c788871b2e0825455046d09ef (offline URL parsing). TikTok hashtag analysis is dropped because upstream error handling retries headed and the dependency uses anti-detection browser behavior; Zehef is dropped from this group because it is email/breach oriented and includes an account-creation endpoint check. See docker/social_profile/RATE_LIMITS.md."
+      "note": "Synthetic parser fixture passed; fixture file: tests/fixtures/social_profile.json. No live source lookups occurred. Verified in Docker Verification run 38893145959 on commit ee8da34ec42df0e4d29362b04949b2b113f988b7 (https://github.com/frostknightfrosty-lgtm/aletheia/actions/runs/38893145959). Raw artifact evidence: PARSER PREFLIGHT: PASS — 47/47 adapters have parser coverage; 543 passed, 1 warning in 22.69s; DOCKER CAPTURE: PASS — 48/48 cases captured. results.json has 48 entries with 0 nonzero return codes and 48 stdout/stderr pairs; SHA-256 453552AFED1CAE3DD3CFC9EC2A82AD9DDB6DC84C857E2C69510FF86642EA6314. Case phase9-social-profile returned 0 with stdout ok under --network none, which confirms container startup only. Implementation includes CrossLinked 0.3.0 (one HTTPS search page each from Google and Bing) and Slinky pinned to commit e74a138b6bf7264c788871b2e0825455046d09ef (offline URL parsing). TikTok hashtag analysis is dropped because upstream error handling retries headed and the dependency uses anti-detection browser behavior; Zehef is dropped from this group because it is email/breach oriented and includes an account-creation endpoint check. See docker/social_profile/RATE_LIMITS.md. Zehef became its own standalone email-input adapter (see the zehef entry)."
     },
     {
       "name": "social_username",

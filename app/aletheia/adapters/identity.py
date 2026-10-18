@@ -4,7 +4,7 @@ import json
 import re
 from datetime import datetime, timezone
 from pathlib import Path
-from urllib.parse import quote
+from urllib.parse import quote, urlsplit
 
 from aletheia.core.adapters import Adapter
 from aletheia.core.models import (
@@ -190,6 +190,102 @@ class HoleheAdapter(IdentityAdapter):
                 provenance=_prov(self.descriptor, source_url=self.descriptor.upstream, confidence=0.78, raw=raw,
                                  notes=["Parsed only positive/registered signals; negative, rate-limited, and error states are excluded."]),
             ))
+        return _result(request, self.descriptor, started, findings, stdout, stderr, exit_code)
+
+
+_ALLOWED_ACCOUNT_URL_HOSTS = {
+    "github.com", "www.github.com",
+    "flickr.com", "www.flickr.com",
+    "gravatar.com", "www.gravatar.com",
+}
+
+
+def _public_account_url(value: str) -> bool:
+    """Accept only https profile URLs on hosts the pinned modules print."""
+    try:
+        parts = urlsplit(value)
+    except ValueError:
+        return False
+    if parts.scheme != "https" or not parts.hostname:
+        return False
+    if parts.username or parts.password:
+        return False
+    if parts.hostname not in _ALLOWED_ACCOUNT_URL_HOSTS:
+        return False
+    return bool(parts.path and parts.path != "/")
+
+
+class ZehefAdapter(IdentityAdapter):
+    descriptor = AdapterDescriptor(
+        name="zehef", license="GPL-3.0-only", input_types=[SeedType.EMAIL],
+        output_types=[EntityType.SERVICE, EntityType.URL],
+        legal_notes=[
+            "Checks public account-registration signals reported by the pinned upstream modules (17 services); this wrapper completes no login, no password reset, and no CAPTCHA or anti-bot challenge.",
+            "The upstream paste scraper (Google search scraping), the HudsonRock stealer-log module, and the random email-combination generator are never invoked; see docker/zehef/RATE_LIMITS.md.",
+            "Only run against an email address you are authorized to investigate; honor provider terms and rate limits."
+        ],
+        rate_limit="One email per container invocation; each of the 17 account checks is requested once, sequentially, with no retries.",
+        invocation="CLI in dedicated Docker container",
+        version_pin="2.2.1 (commit 5b0c120efe846eae944dfea9410f925ca3036103)",
+        upstream="https://github.com/N0rz3/Zehef", network_required=True,
+        docker_image="aletheia/zehef:v1",
+        output_schema={"registered_services": "object[]", "account_urls": "string[]"},
+        health_check="--health", requires_authorization_assertion=True,
+    )
+
+    def build_command(self, request: AdapterRunRequest, workspace: Path) -> list[str]:
+        return [request.seed.value]
+
+    def parse(self, request: AdapterRunRequest, workspace: Path, stdout: str, stderr: str, exit_code: int) -> AdapterRunResult:
+        started = datetime.now(timezone.utc)
+        findings: list[Finding] = []
+        notes: list[str] = []
+        try:
+            payload = json.loads(stdout) if stdout.strip() else {}
+        except json.JSONDecodeError:
+            payload = {}
+        modules = payload.get("modules") if isinstance(payload, dict) else None
+        if isinstance(modules, list):
+            for module in modules:
+                if not isinstance(module, dict):
+                    continue
+                service = module.get("service")
+                status = module.get("status")
+                if not isinstance(service, str) or not service:
+                    continue
+                if status == "error":
+                    notes.append(f"{service}: error ({module.get('error') or 'unknown'})")
+                    continue
+                if status != "registered":
+                    continue
+                details = module.get("details") if isinstance(module.get("details"), dict) else {}
+                raw = json.dumps(module, ensure_ascii=False, sort_keys=True).encode()
+                attributes = {"email": request.seed.value, "account_status": "registered_signal"}
+                for key, attribute in (
+                    ("username", "username"), ("name", "name"),
+                    ("created_on", "account_created"), ("updated_on", "account_updated"),
+                ):
+                    value = details.get(key)
+                    if isinstance(value, str) and value.strip():
+                        attributes[attribute] = value.strip()
+                findings.append(Finding(
+                    entity_type=EntityType.SERVICE, value=service, attributes=attributes,
+                    provenance=_prov(self.descriptor, source_url=self.descriptor.upstream, confidence=0.78, raw=raw,
+                                     notes=["Parsed only positive/registered signals; negative and error states are excluded."]),
+                ))
+                account = details.get("account")
+                if isinstance(account, str) and _public_account_url(account.strip()):
+                    url = account.strip()
+                    url_attributes = {"service": service, "email": request.seed.value}
+                    if "username" in attributes:
+                        url_attributes["username"] = attributes["username"]
+                    findings.append(Finding(
+                        entity_type=EntityType.URL, value=url, attributes=url_attributes,
+                        provenance=_prov(self.descriptor, source_url=url, confidence=0.85, raw=raw,
+                                         notes=["Public account URL printed by the pinned upstream module."]),
+                    ))
+        if notes:
+            stderr = ((stderr + "\n") if stderr else "") + "; ".join(notes)
         return _result(request, self.descriptor, started, findings, stdout, stderr, exit_code)
 
 

@@ -1,0 +1,24 @@
+{
+  "sub_source": "zehef",
+  "email": "alice@example.com",
+  "pinned_commit": "5b0c120efe846eae944dfea9410f925ca3036103",
+  "modules": [
+    {"service": "adobe", "status": "not_registered", "details": {}, "output": "> Adobe\n"},
+    {"service": "bandlab", "status": "registered", "details": {}, "output": "> Bandlab\n"},
+    {"service": "chess", "status": "error", "error": "ReadTimeout", "details": {}, "output": ""},
+    {"service": "deezer", "status": "not_registered", "details": {}, "output": "> Deezer\n"},
+    {"service": "duolingo", "status": "registered", "details": {}, "output": "> Duolingo\n"},
+    {"service": "flickr", "status": "registered", "details": {"username": "alice-example", "account": "https://www.flickr.com/people/1234@N00/"}, "output": "> Flickr\n  \u251c\u2500\u2500> Username : alice-example\n  \u2514\u2500\u2500> Account : https://www.flickr.com/people/1234@N00/\n"},
+    {"service": "github", "status": "registered", "details": {"username": "alice-example", "name": "Alice Example", "id": "583231", "avatar": "https://example.invalid/avatar.png", "created_on": "2011-01-25 18:44:36", "updated_on": "2024-10-01 00:00:00", "account": "https://github.com/alice-example"}, "output": "> Github\n  \u251c\u2500\u2500> Username : alice-example\n  \u251c\u2500\u2500> Name : Alice Example\n  \u251c\u2500\u2500> Id : 583231\n  \u251c\u2500\u2500> Avatar : https://example.invalid/avatar.png\n  \u251c\u2500\u2500> Created on : 2011-01-25 18:44:36\n  \u251c\u2500\u2500> Update on : 2024-10-01 00:00:00\n  \u2514\u2500\u2500> Account : https://github.com/alice-example\n"},
+    {"service": "gravatar", "status": "registered", "details": {"username": "alice", "account": "https://gravatar.com/alice/"}, "output": "> Gravatar\n  \u251c\u2500\u2500> Username : alice\n  \u2514\u2500\u2500> Account : https://gravatar.com/alice/\n"},
+    {"service": "imgur", "status": "not_registered", "details": {}, "output": "> Imgur\n"},
+    {"service": "instagram", "status": "error", "error": "KeyError", "details": {}, "output": "> Instagram error: KeyError\n"},
+    {"service": "picsart", "status": "not_registered", "details": {}, "output": "> Picsart\n"},
+    {"service": "pinterest", "status": "not_registered", "details": {}, "output": "> Pinterest\n"},
+    {"service": "pornhub", "status": "not_registered", "details": {}, "output": "> Pornhub\n"},
+    {"service": "protonmail", "status": "registered", "details": {"created_on": "2019-05-14 08:30:00"}, "output": "> ProtonMail\n  \u2514\u2500\u2500> Created on : 2019-05-14 08:30:00\n"},
+    {"service": "spotify", "status": "registered", "details": {}, "output": "> Spotify\n"},
+    {"service": "strava", "status": "not_registered", "details": {}, "output": "> Strava\n"},
+    {"service": "twitter", "status": "not_registered", "details": {}, "output": "> X\n"}
+  ]
+}
