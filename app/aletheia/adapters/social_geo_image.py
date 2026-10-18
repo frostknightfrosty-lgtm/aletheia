@@ -170,6 +170,94 @@ class YouTubeAPIAdapter(Phase5Adapter):
         return _result(request,self.descriptor,started,findings,stdout,stderr,exit_code)
 
 
+_TIKTOK_POST_RE = re.compile(r"^https://www\.tiktok\.com/@[A-Za-z0-9_.]{1,32}/video/[0-9]{5,25}$")
+_TIKTOK_HANDLE_RE = re.compile(r"^[A-Za-z0-9_.]{1,32}$")
+
+
+def _tiktok_post_url(value: str) -> bool:
+    """Only the exact public post shape (https, www host) is accepted."""
+    return bool(_TIKTOK_POST_RE.match(value))
+
+
+class TiktokHashtagAdapter(Phase5Adapter):
+    descriptor = AdapterDescriptor(
+        name="tiktok-hashtag-analysis", license="MIT",
+        input_types=[SeedType.HASHTAG],
+        output_types=[EntityType.SOCIAL_ACCOUNT, EntityType.URL, EntityType.UNKNOWN],
+        legal_notes=[
+            "Public hashtag search via the pinned bellingcat library (logged out, headless only): no login, cookies, ms_tokens, media downloads, or platform actions.",
+            "The driver disables the TikTokApi browser-stealth patching before any session starts, and the upstream headed retry is structurally unreachable (see docker/tiktok_hashtag/RATE_LIMITS.md); bot-detection responses are recorded as an honest blocked status, never retried, challenged, or evaded.",
+            "Only run against hashtags you are authorized to investigate; honor TikTok's terms and rate limits.",
+        ],
+        rate_limit="One hashtag per container invocation; one anonymous browser session, a bounded post sample (default 40), and no retries beyond the pinned client's bounded transient-error retry.",
+        invocation="CLI in dedicated Docker container",
+        version_pin="commit 2a4af674efc4af7c7d592053ec3f475555f37694 (TikTokApi 6.2.2; Playwright 1.42.0)",
+        upstream="https://github.com/bellingcat/tiktok-hashtag-analysis", network_required=True,
+        docker_image="aletheia/tiktok-hashtag:v1",
+        output_schema={"hashtag": "string", "posts": "object[]", "cohashtag_counts": "object"},
+        health_check="--health", requires_authorization_assertion=True,
+    )
+
+    def supports(self, seed_type: SeedType) -> bool:
+        return seed_type == SeedType.HASHTAG
+
+    def build_command(self, request: AdapterRunRequest, workspace: Path) -> list[str]:
+        return [request.seed.value]
+
+    def parse(self, request: AdapterRunRequest, workspace: Path, stdout: str, stderr: str, exit_code: int) -> AdapterRunResult:
+        started = datetime.now(timezone.utc); raw = stdout.encode(); findings = []
+        try: payload = json.loads(stdout) if stdout.strip() else {}
+        except json.JSONDecodeError: payload = {}
+        hashtag = request.seed.value
+        status = None
+        posts: list = []
+        if isinstance(payload, dict):
+            status = payload.get("status")
+            if isinstance(payload.get("hashtag"), str) and payload["hashtag"]:
+                hashtag = payload["hashtag"]
+            if isinstance(payload.get("posts"), list):
+                posts = payload["posts"]
+        authors: dict[str, dict] = {}
+        for post in posts:
+            if not isinstance(post, dict):
+                continue
+            url = post.get("url")
+            if not (isinstance(url, str) and _tiktok_post_url(url)):
+                continue
+            attrs = {"platform": "tiktok", "hashtag": hashtag}
+            if isinstance(post.get("id"), str) and post["id"]:
+                attrs["post_id"] = post["id"]
+            cohashtags = post.get("cohashtags")
+            clean = [c for c in cohashtags if isinstance(c, str) and c] if isinstance(cohashtags, list) else []
+            if clean:
+                attrs["cohashtags"] = clean[:20]
+            findings.append(Finding(
+                entity_type=EntityType.URL, value=url, attributes=attrs,
+                provenance=_prov(self.descriptor, source_url=url, confidence=0.6, raw=raw,
+                                 notes=["Public hashtag-search hit; the author handle is a same-handle candidate, not a verified identity."]),
+            ))
+            author = post.get("author")
+            if isinstance(author, str) and _TIKTOK_HANDLE_RE.match(author):
+                entry = authors.setdefault(author, {"posts": 0, "example_url": url})
+                entry["posts"] += 1
+        for handle, meta in authors.items():
+            findings.append(Finding(
+                entity_type=EntityType.SOCIAL_ACCOUNT, value=handle,
+                attributes={"platform": "tiktok", "hashtag": hashtag, "posts_in_sample": meta["posts"], "example_post_url": meta["example_url"]},
+                provenance=_prov(self.descriptor, source_url=meta["example_url"], confidence=0.6, raw=raw,
+                                 notes=["Handle observed as the author of a public post under the queried hashtag."]),
+            ))
+        if not posts and isinstance(status, str) and status in {"blocked", "error", "invalid_hashtag"}:
+            reason = payload.get("error") if isinstance(payload.get("error"), str) else status
+            findings.append(Finding(
+                entity_type=EntityType.UNKNOWN, value=f"{self.descriptor.name}:{status}",
+                attributes={"source": self.descriptor.name, "status": status, "hashtag": hashtag, "reason": reason},
+                provenance=_prov(self.descriptor, source_url=self.descriptor.upstream, confidence=1.0, raw=raw,
+                                 notes=[f"Driver recorded status '{status}' with no posts; nothing was retried or fabricated."]),
+            ))
+        return _result(request,self.descriptor,started,findings,stdout,stderr,exit_code)
+
+
 class OverpassAdapter(Phase5Adapter):
     descriptor=AdapterDescriptor(
         name="overpass", license="OpenStreetMap data / ODbL; Overpass API service", input_types=[SeedType.GEOLOCATION], output_types=[EntityType.PLACE, EntityType.GEOLOCATION, EntityType.UNKNOWN],

@@ -63,6 +63,8 @@ CASES = [
     ("phase9-leak-checkers", "aletheia/leak-checkers:v1", ["--health"]),
     ("phase17-zehef-health", "aletheia/zehef:v1", ["--health"]),
     ("phase17-zehef-selftest", "aletheia/zehef:v1", ["--selftest"]),
+    ("phase17-tiktok-hashtag-health", "aletheia/tiktok-hashtag:v1", ["--health"]),
+    ("phase17-tiktok-hashtag-selftest", "aletheia/tiktok-hashtag:v1", ["--selftest"]),
     ("phase11-egress-proxy", "aletheia/egress-proxy:v1", ["--health"]),
 ]
 

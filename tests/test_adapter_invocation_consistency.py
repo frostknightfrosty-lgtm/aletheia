@@ -72,6 +72,7 @@ def _sample_request(seed_type: SeedType, tmp_path: Path) -> AdapterRunRequest:
         SeedType.LOBBYIST_NAME: "Jane Doe",
         SeedType.CRYPTO_ADDRESS: "12dRugNcdxK39288NjcDV4GX7rMsKCGn6B",
         SeedType.INTELLECTUAL_PROPERTY: "US1234567",
+        SeedType.HASHTAG: "osint",
     }
     return AdapterRunRequest(
         run_id=uuid.uuid4(),

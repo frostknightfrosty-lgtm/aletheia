@@ -95,6 +95,7 @@ def canonicalize_seed(seed: Seed) -> Seed:
     """Return the canonical form of ``seed`` for dedup and scheduling.
 
     - username: leading ``@`` stripped, lowercased;
+    - hashtag: leading ``#`` stripped, lowercased;
     - email: lowercased;
     - domain: lowercased, trailing dot stripped, IDN -> punycode;
     - URL: scheme and host lowercased, fragment dropped (path/query preserved);
@@ -110,6 +111,8 @@ def canonicalize_seed(seed: Seed) -> Seed:
         value = value.lower()
     elif seed_type is SeedType.USERNAME:
         value = value.lstrip("@").lower()
+    elif seed_type is SeedType.HASHTAG:
+        value = value.lstrip("#").strip().lower()
     elif seed_type is SeedType.DOMAIN:
         value = value.lower().rstrip(".")
         try:

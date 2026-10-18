@@ -1,0 +1,18 @@
+{
+  "source": "tiktok-hashtag-analysis",
+  "sub_source": "hashtag-search",
+  "hashtag": "osint",
+  "pinned_commit": "2a4af674efc4af7c7d592053ec3f475555f37694",
+  "checkout_version": "2.0.4",
+  "stealth_neutralized": true,
+  "requested_limit": 40,
+  "status": "ok",
+  "fetched": 4,
+  "posts": [
+    {"id": "7300000000000000001", "url": "https://www.tiktok.com/@alice_example/video/7300000000000000001", "author": "alice_example", "create_time": 1710000001, "desc_excerpt": "sunset mix #newmusic", "cohashtags": ["newmusic", "osint"]},
+    {"id": "7300000000000000002", "url": "https://www.tiktok.com/@alice_example/video/7300000000000000002", "author": "alice_example", "create_time": 1710000002, "desc_excerpt": "night drive", "cohashtags": ["newmusic"]},
+    {"id": "7300000000000000003", "url": "https://www.tiktok.com/@bob.builder/video/7300000000000000003", "author": "bob.builder", "create_time": 1710000003, "desc_excerpt": "airport timelapse", "cohashtags": ["osint", "travel"]},
+    {"id": "7300000000000000004", "url": "https://www.tiktok.com/@carol_osint/video/7300000000000000004", "author": "carol_osint", "create_time": 1710000004, "desc_excerpt": "weekly roundup", "cohashtags": ["newmusic", "osint", "travel"]}
+  ],
+  "cohashtag_counts": {"newmusic": 3, "travel": 2}
+}

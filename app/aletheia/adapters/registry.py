@@ -19,7 +19,8 @@ from aletheia.core.project_manifest import enforce_adapter_tier_policy, load_pro
 from aletheia.adapters.corporate_records import (SECEdgarAdapter, GLEIFAdapter, OpenCorporatesAdapter, OpenSanctionsAdapter, CourtListenerAdapter)
 from aletheia.adapters.social_geo_image import (
     DeepFaceAdapter, InsightFaceAdapter, InstaloaderAdapter,
-    OverpassAdapter, RedditAPIAdapter, SunCalcAdapter, YouTubeAPIAdapter,
+    OverpassAdapter, RedditAPIAdapter, SunCalcAdapter, TiktokHashtagAdapter,
+    YouTubeAPIAdapter,
 )
 from aletheia.adapters.phase5c import GravatarAdapter, RdapAdapter
 from aletheia.adapters.government_records_us import GovernmentRecordsUSAdapter
@@ -111,6 +112,7 @@ def phase7_adapters() -> dict[str, Adapter]:
     adapters[SocialUsernameAdapter.descriptor.name] = SocialUsernameAdapter()
     adapters[LeakCheckersAdapter.descriptor.name] = LeakCheckersAdapter()
     adapters[ZehefAdapter.descriptor.name] = ZehefAdapter()
+    adapters[TiktokHashtagAdapter.descriptor.name] = TiktokHashtagAdapter()
     # Construction-time Tier 5 rejection: every adapter must have a manifest
     # entry, and an entry declaring legal_tier=5 refuses construction.
     enforce_adapter_tier_policy(adapters.keys(), manifest=_manifest_entries())
