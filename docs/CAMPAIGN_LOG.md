@@ -22,17 +22,15 @@
   failure class the repair targeted is closed). **P17.11 Wave A**: re-checks
   recorded; §A 33 (Unpaywall) CI-verified and flipped; §A 31 (SearXNG)
   CI-verified and flipped; §A 36 (CipherScan) CI-verified and flipped; §A 11
-  (Bron Vault) pushed — run in flight.
+  (Bron Vault) CI-verified and flipped.
   **P17.3–P17.10 verified green.**
-- Next action: on the Bron Vault run (`39168364470`, head `d3e7d16`) green:
-  copy lines, flip §A 11, update the `leak_checkers` manifest entry; then the
-  rest of the Wave A list (Zehef, scrawler, tiktok-hashtag-analysis, VENOM,
-  PicImageSearch, tracelines, ShadowFinder, pybdshadow, GeoLocator, crypttrace
-  CLI wrap, ERATV, BigQuery), then Waves B–E.
-- In-flight CI: `39168364470` (Bron Vault, expected 1034 passed / capture
-  63/63).
-- Last verified commit: `f785aa7` (run `39167510546`; parser 49/49;
-  **1030 passed**; capture 62/62; storage 6/6).
+- Next action: continue Wave A — Zehef (#2) design/implementation in
+  progress; then scrawler, tiktok-hashtag-analysis, VENOM, PicImageSearch,
+  tracelines, ShadowFinder, pybdshadow, GeoLocator, crypttrace CLI wrap,
+  ERATV, BigQuery; then Waves B–E.
+- In-flight CI: `39169543833` (docs/state push, head `513ac7c`).
+- Last verified commit: `d3e7d16` (run `39168364470`; parser 49/49;
+  **1034 passed**; capture 63/63; storage 6/6).
 - Owner-blocked (parked, never wait on): everything in `docs/USER_ACTIONS.md`.
 - Decision defaults in force: see "Adopted defaults" below.
 
@@ -211,8 +209,10 @@ activate when the key exists.
       61/61; storage 6/6; §A 31 flipped and the `search_engines` manifest
       entry updated. §A 36 (CipherScan) **CI-verified**: run `39167510546` —
       parser 49/49; 1030 passed; capture 62/62; storage 6/6; §A 36 flipped and
-      the `ssl_tls` manifest entry updated. §A 11 (Bron Vault) built and
-      pushed (`d3e7d16`) — run in flight.
+      the `ssl_tls` manifest entry updated. §A 11 (Bron Vault)
+      **CI-verified**: run `39168364470` — parser 49/49; 1034 passed; capture
+      63/63; storage 6/6; §A 11 flipped and the `leak_checkers` manifest entry
+      updated.
 - [ ] **Wave B — free-registration/keyed builds (skip paths recorded):** §A 1
       (OWASP SocialOSINTLM), 8 (Intelligence X), 9 (BreachDirectory), 10
       (Leak-Lookup), 17 (youtube-geofind), 19 (Betaface), 30 (EUIPO), 34
@@ -566,6 +566,20 @@ activate when the key exists.
     `"ok": true`, `"unconfigured": []` (6/6 backends passing)
   §A 36 flipped in `SOURCE_COMPLETENESS.md`; `ssl_tls` manifest entry updated
   (six sub-sources; cipherscan removed from the dropped list).
-- Next: on the Bron Vault run (`39168364470`, head `d3e7d16`) green: copy
-  lines, flip §A 11, update the `leak_checkers` manifest entry; then the
-  rest of the Wave A list.
+- 2026-10-18 — P17.11 Bron Vault verification — commit `d3e7d16` — run
+  `39168364470` — docker-verification **green**. Copied from the downloaded
+  artifact `ci-artifacts-39168364470`:
+  - `PARSER PREFLIGHT: PASS — 49/49 adapters have parser coverage`
+  - pytest-summary.json: `"console_summary": "1034 passed, 1 warning"`,
+    `"junit_total": 1034`, `"skipped_in_ci": []`, `"ok": true` (1030 → 1034:
+    the 4 Bron Vault tests, none skipped)
+  - `DOCKER CAPTURE: PASS — 63/63 cases captured` (new case
+    `phase17-leak-checkers-bron-vault` runs the loopback selftest under
+    `--network none`); storage-conformance.json: `"required_all": true`,
+    `"ok": true`, `"unconfigured": []` (6/6 backends passing)
+  §A 11 flipped in `SOURCE_COMPLETENESS.md`; `leak_checkers` manifest entry
+  updated (bron-vault is now the third enabled sub-source, loopback-only).
+- Next: continue Wave A — Zehef (#2) design/implementation in progress; then
+  scrawler, tiktok-hashtag-analysis, VENOM, PicImageSearch, tracelines,
+  ShadowFinder, pybdshadow, GeoLocator, crypttrace CLI wrap, ERATV,
+  BigQuery.

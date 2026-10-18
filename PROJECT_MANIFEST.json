@@ -1542,9 +1542,9 @@
     {
       "name": "leak_checkers",
       "upstream": "https://github.com/frostknightfrosty-lgtm/aletheia/tree/main/docker/leak_checkers",
-      "license": "Composite adapter for LeakIX search and GrayhatWarfare bucket-file search; see vendor terms before use.",
+      "license": "Composite adapter; sub-sources are the LeakIX search API, the GrayhatWarfare bucket-file search API, and a loopback-only client for the operator's own Broń Vault self-hosted instance (Apache-2.0, contract pinned to release v1.4.0); see vendor terms before use.",
       "version_pin": "1.0",
-      "invocation": "HTTPS JSON leak-index APIs via dedicated Docker runner (aletheia/leak-checkers:v1)",
+      "invocation": "HTTPS JSON leak-index APIs plus a loopback-only local-instance client, via dedicated Docker runner (aletheia/leak-checkers:v1)",
       "input_types": [
         "email",
         "username",
@@ -1554,7 +1554,7 @@
         "name"
       ],
       "output_schema": "LeakCheckResult[]",
-      "legal_notes": "LeakIX uses its documented GET /search API with scope=leak, q, page=0, and api-key header (https://docs.leakix.net/docs/api/search/); its docs specify approximately 1 request/second. GrayhatWarfare uses GET /api/v2/files with keywords, limit=25, start=0 and Authorization: Bearer token (https://buckets.grayhatwarfare.com/docs/api/v2); no returned file is fetched. Both credentials are optional at runtime but required for their respective sources, are read from environment variables, and are never emitted. BreachDirectory is skipped because its official site returned HTTP 403 during this review and no first-party contract could be verified; no endpoint is guessed. Leak-Lookup is skipped because its terms require self-search or written authorization, which this adapter cannot verify (https://leak-lookup.com/support/terms#use-of-service). Broń Vault is skipped because its official README describes a self-hosted Docker application accepting uploaded local log archives, not a public hosted source; see https://github.com/ITSEC-Research/bron-vault. Exact notes are in docker/leak_checkers/RATE_LIMITS.md.",
+      "legal_notes": "LeakIX uses its documented GET /search API with scope=leak, q, page=0, and api-key header (https://docs.leakix.net/docs/api/search/); its docs specify approximately 1 request/second. GrayhatWarfare uses GET /api/v2/files with keywords, limit=25, start=0 and Authorization: Bearer token (https://buckets.grayhatwarfare.com/docs/api/v2); no returned file is fetched. Both credentials are optional at runtime but required for their respective sources, are read from environment variables, and are never emitted. BreachDirectory is skipped because its official site returned HTTP 403 during this review and no first-party contract could be verified; no endpoint is guessed. Leak-Lookup is skipped because its terms require self-search or written authorization, which this adapter cannot verify (https://leak-lookup.com/support/terms#use-of-service). Broń Vault is integrated as a loopback-only client for an instance the operator runs themselves: only POST /api/v1/search/credentials on a loopback host (X-API-Key header; contract pinned to release v1.4.0, commit 6bfdcc0196ac90ed38a35a1099697497680c1666) is ever sent, non-loopback URLs are refused before any socket is opened, off-host redirects are refused, environment proxies are bypassed, full passwords are never requested, and the source reports a documented skip until BRON_VAULT_URL and BRON_VAULT_API_KEY are set; no upload, deployment, or off-host traffic is involved. See https://github.com/ITSEC-Research/bron-vault. Exact notes are in docker/leak_checkers/RATE_LIMITS.md.",
       "network": "required",
       "last_audited": "2026-10-16T00:00:00Z",
       "verification_status": "verified-fixture",
@@ -1592,11 +1592,11 @@
         {
           "name": "bron-vault",
           "requires_key": true,
-          "enabled_by_default": false,
-          "disabled_reason": "Self-hosted app requiring local log uploads and a separate operator-managed deployment."
+          "key_cost": "operator-run local instance (own API key)",
+          "enabled_by_default": true
         }
       ],
-      "note": "Synthetic fixture and Docker health smoke verified in Docker Verification run 38952489236 on commit 2fc9933d375917c133fc4af44db26dc07c2949d4 (https://github.com/frostknightfrosty-lgtm/aletheia/actions/runs/38952489236). Raw artifact evidence: PARSER PREFLIGHT: PASS — 49/49 adapters have parser coverage; 560 passed, 1 warning in 16.17s; DOCKER CAPTURE: PASS — 50/50 cases captured. results.json contains 50 entries with 0 nonzero return codes; phase9-leak-checkers returned 0 with stdout ok under --network none. fixture file: tests/fixtures/leak_checkers.json. No live source lookups occurred. Two implemented sources: leakix and grayhatwarfare; three candidates are documented skips in docker/leak_checkers/RATE_LIMITS.md."
+      "note": "Synthetic fixture and Docker health smoke verified in Docker Verification run 38952489236 on commit 2fc9933d375917c133fc4af44db26dc07c2949d4 (https://github.com/frostknightfrosty-lgtm/aletheia/actions/runs/38952489236). Raw artifact evidence: PARSER PREFLIGHT: PASS — 49/49 adapters have parser coverage; 560 passed, 1 warning in 16.17s; DOCKER CAPTURE: PASS — 50/50 cases captured. results.json contains 50 entries with 0 nonzero return codes; phase9-leak-checkers returned 0 with stdout ok under --network none. fixture file: tests/fixtures/leak_checkers.json. No live source lookups occurred. Two keyed sources are enabled by default: leakix and grayhatwarfare; breachdirectory and leak-lookup remain documented skips. The bron-vault sub-source was added later and verified in CI run 39168364470 on commit d3e7d16 (parser 49/49; 1034 passed, 1 warning; capture 63/63 cases, including the phase17-leak-checkers-bron-vault offline selftest case; storage 6/6); it only queries an operator-run loopback instance and reports a documented skip until BRON_VAULT_URL and BRON_VAULT_API_KEY are set."
     },
     {
       "name": "egress_proxy",

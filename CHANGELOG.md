@@ -1,5 +1,32 @@
 # Changelog
 
+## 2026-10-18 — P17.11: Broń Vault loopback sub-source (source #11)
+
+Every number below is copied from the downloaded artifact
+`ci-artifacts-39168364470` (run `39168364470`, commit `d3e7d16`).
+
+- `PARSER PREFLIGHT: PASS — 49/49 adapters have parser coverage` (the
+  sub-source extends `leak_checkers`; no new adapter).
+- `"console_summary": "1034 passed, 1 warning"` with `"junit_total": 1034`,
+  `"skipped_in_ci": []`, `"ok": true` — 4 new tests (route-contract
+  conformance, email/username input mapping, the unconfigured-skip plus
+  non-loopback refusal, and the loopback selftest), none skipped in CI
+  (1030 → 1034).
+- `DOCKER CAPTURE: PASS — 63/63 cases captured`, including the new
+  `phase17-leak-checkers-bron-vault` case, which runs the client's loopback
+  selftest under `--network none`.
+- What landed: `docker/leak_checkers/runner.py` gained `bron-vault` as a
+  third sub-source. The route contract is pinned to release v1.4.0, commit
+  `6bfdcc0196ac90ed38a35a1099697497680c1666`: `POST
+  /api/v1/search/credentials` with the `X-API-Key` header and
+  `includePasswords=false`. The client refuses any non-loopback host before
+  opening a socket, refuses off-host redirects, bypasses environment proxies,
+  never requests full passwords, and reports a documented skip until
+  `BRON_VAULT_URL` and `BRON_VAULT_API_KEY` are set. The README names GET for
+  the search route while the route file implements POST — the client follows
+  the route file; the discrepancy is recorded in
+  `docker/leak_checkers/RATE_LIMITS.md`.
+
 ## 2026-10-18 — P17.11: CipherScan sub-source (source #36)
 
 Every number below is copied from the downloaded artifact

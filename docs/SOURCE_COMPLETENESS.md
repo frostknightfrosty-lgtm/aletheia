@@ -53,7 +53,7 @@ below may be upgraded except from copied artifact lines.
 | 8 | Intelligence X | 2 | Not built; Gate 6 | Build with registered `x-key` (free tier ~50 selector searches/day) | Owner: register free key |
 | 9 | BreachDirectory | 3 | Wired as documented skip (`leak_checkers`) | Implement live call path (RapidAPI); skip without key | Owner: free RapidAPI key |
 | 10 | Leak-Lookup | 3 | Wired as documented skip (`leak_checkers`) | Implement live call path (`/api/search`, breach names only) | Owner: free registration key |
-| 11 | Bron Vault | 3 | Wired as documented skip (local execution) | Build offline local-log parser adapter (no egress) | — |
+| 11 | Bron Vault | 3 | **Wired (CI-verified)**: loopback-only sub-source of `leak_checkers` for the operator's own self-hosted instance (contract pinned to release v1.4.0 commit `6bfdcc0196ac90ed38a35a1099697497680c1666`; non-loopback URLs refused before any socket; off-host redirects refused; proxies bypassed; skips unless `BRON_VAULT_URL`/`BRON_VAULT_API_KEY` set) — run `39168364470`, 1034 passed. See `docker/leak_checkers/RATE_LIMITS.md` | Build offline local-log parser adapter (no egress) | — |
 | 12 | VENOM | 3 | Not built (one-off) | Build one-off; review and constrain its 25+-service request set | — |
 | 13 | PicImageSearch | 4 | Not built (among `geolocation_image` drops) | Build reverse-image step, free engines only (SauceNAO/IqDB/Ascii2d; Google/Yandex/Bing per-engine terms review) | — |
 | 14 | tracelines | 4 | Not built (`geolocation_image` drop) | Build offline (street-view coverage lines) | — |
