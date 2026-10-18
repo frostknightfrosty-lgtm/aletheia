@@ -1,5 +1,55 @@
 # Changelog
 
+## 2026-10-18 — Phase 14: storage backends behind one conformance contract, CI-verified against real services
+- **One contract, six backends.** `app/aletheia/storage/base.py` defines `StorageBackend`
+  (graph snapshots + run manifests), implemented by `file`, `postgres`, `neo4j`,
+  `elasticsearch`, `minio` and `redis`. Backends store whole JSON documents so a snapshot
+  round-trips byte-for-byte; Neo4j *additionally* materialises `(:AletheiaEntity)` nodes and
+  `[:RELATED]` relationships scoped by `run_id`, with `verify_materialised()` as the
+  conformance hook that proves it.
+- **Migration runner.** `MigrationRunner` applies ordered migrations once, records
+  `(version, name, checksum, applied_at)`, and raises `MigrationError` on checksum or name
+  drift. `prepare_migrations()` runs before the runner reads that log, because the log table
+  cannot be created by a migration the runner has not yet read.
+- **Shared conformance contract.** `app/aletheia/storage/conformance.py` is used by both the
+  pytest suite and the CI evidence script so they cannot drift; a `BrokenBackend` negative
+  control proves the contract can fail. The five service tests skip *only* when their
+  environment variable is unset, so in CI a broken service is a failure, never a skip.
+- **CLI.** `aletheia storage health|migrate|sync`; `sync` applies the backend's migrations
+  first, so mirroring a run into a fresh database works in one step.
+- Honest limits (documented in `docs/STORAGE_BACKENDS.md`): the hash-chained `AUDIT.jsonl`
+  stays on local disk (its tamper-evidence depends on atomic `fsync` appends), the
+  orchestrator still writes through `FileGraphStore` by default (networked backends are
+  populated via `storage sync`), and Redis is a fast-path cache, not a system of record.
+- **MinIO substitution, disclosed:** `minio/minio` returns 404 on Docker Hub (deleted
+  2026-09) and `quay.io/minio/minio` refuses anonymous pulls, so CI verifies the S3 code path
+  (`minio-py`) against `adobe/s3mock:5.2.3`, a real S3-protocol server, rather than against a
+  MinIO server.
+- Verified by Docker Verification run `39081533916` on commit
+  `e9bfdda953622c4eda69f342f294a09e23d0b73b`
+  (https://github.com/frostknightfrosty-lgtm/aletheia/actions/runs/39081533916). Lines copied
+  from the downloaded artifact: `PARSER PREFLIGHT: PASS — 49/49 adapters have parser coverage`;
+  `672 passed, 1 warning in 36.02s`; `DOCKER CAPTURE: PASS — 55/55 cases captured`;
+  `STORAGE CONFORMANCE: PASS — 6/6 backends conform`. `pytest-summary.json`: `junit_total` 672,
+  `skipped_in_ci` `[]`, `ok` `true`. `storage-conformance.json`: `passing` = file, postgres,
+  neo4j, elasticsearch, minio, redis, `unconfigured` `[]`. `results.json`: 55 entries, 0
+  nonzero return codes. Local consistency: 613 passed + 59 skipped = 672 CI passed. No test was
+  skipped, deleted, or weakened; no `parser_test_exempt`.
+- **Two defects found only by CI** (runs `39078543221` → `39079850431` → `39081533916`):
+  PostgreSQL health always reported `ok: false` because pg8000 appends every row as a Python
+  `list`, so `[[1]] != [(1,)]`; and `migrate` failed with `relation
+  "aletheia_schema_migrations" does not exist` because the runner read that table before
+  migration 1 created it. Both are fixed and pinned by tests that need no server. A third
+  failure was a test asserting the developer machine's environment (every backend variable
+  unset), which fails in CI where they are all set; it is now environment-independent.
+- **CI now proves execution, not just success.** `ci/pytest_summary.py` cross-checks the JUnit
+  XML against the pytest console summary and fails the job if anything skipped;
+  `ci/storage_conformance.py --require-all` fails when a backend is unconfigured. Both exist
+  because run `39078543221` reported `STORAGE CONFORMANCE: PASS` while no storage service had
+  started at all. The workflow also frees the runner's unused SDKs before building (13 GB → 35 GB
+  free; the earlier run died with `no space left on device` while pulling the Elasticsearch
+  image) and captures the service logs as evidence.
+
 ## 2026-10-17 — Phase 13: score calibration (Platt scaling + isotonic regression), CI-verified
 - **Calibration.** `app/aletheia/core/calibration.py` — new. `PlattScaling` fits
   `sigmoid(slope * score + intercept)` by Newton-Raphson on Platt-smoothed targets;

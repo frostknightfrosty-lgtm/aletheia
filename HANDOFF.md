@@ -1,6 +1,6 @@
-# Aletheia Handoff — Phase 13 complete (score calibration)
+# Aletheia Handoff — Phase 14 complete (storage backends)
 
-Last updated: 2026-10-17T15:10:00Z
+Last updated: 2026-10-18T00:25:00Z
 
 ## Project boundaries
 
@@ -13,21 +13,100 @@ prerequisites are met. A tier classification is project policy, not a legal conc
 
 ## Repository and CI state
 
-- Latest CI-verified commit: `f1a9a840c3dc9e0e16caefb640b2c934b2b6edeb`
-  (`phase-13: implement score calibration (Platt + isotonic)`).
-- Docker Verification run **38972618582** —
-  https://github.com/frostknightfrosty-lgtm/aletheia/actions/runs/38972618582 — **green**.
+- Latest CI-verified commit: `e9bfdda953622c4eda69f342f294a09e23d0b73b`
+  (`phase-14: fix the two defects CI found, and make sync migrate a fresh backend`).
+- Docker Verification run **39081533916** —
+  https://github.com/frostknightfrosty-lgtm/aletheia/actions/runs/39081533916 — **green**.
 - Evidence lines copied from the downloaded artifact
-  (`ci-artifacts-38972618582`), not typed:
+  (`ci-artifacts-39081533916`), not typed:
   - `PARSER PREFLIGHT: PASS — 49/49 adapters have parser coverage`
-  - `634 passed, 1 warning in 30.13s`
+  - `672 passed, 1 warning in 36.02s`
   - `DOCKER CAPTURE: PASS — 55/55 cases captured`
-- `results.json`: 55 entries, 0 nonzero return codes.
-- Local consistency: **580 passed + 54 skipped = 634**, which equals the CI passed count
-  exactly. The state-only commit `9bdf8cf` (`state: record Phase 12 proxy wiring, next is
-  score calibration`) also passed run `38972568001` (`616 passed`; capture 55/55).
+  - `STORAGE CONFORMANCE: PASS — 6/6 backends conform`
+- `pytest-summary.json`: `junit_total` 672, `skipped_in_ci` `[]`, `ok` `true`.
+  `storage-conformance.json`: `passing` = `file`, `postgres`, `neo4j`, `elasticsearch`,
+  `minio`, `redis`; `unconfigured` `[]`. `results.json`: 55 entries, 0 nonzero return codes.
+- Local consistency: **613 passed + 59 skipped = 672**, which equals the CI passed count
+  exactly. The 59 skips are 54 `tests/test_docker_integration.py` (no Docker on this machine)
+  and 5 `tests/test_storage_services.py` (no `ALETHEIA_STORAGE_*` service configured); both
+  groups execute in CI, and CI now *fails* if either group skips — see
+  `docs/SKIPPED_IN_CI.md`.
 - 49 registered adapters, all `verified-fixture`. No `verified-live` adapters. One
-  infrastructure component (`egress_proxy`), `verified-fixture`.
+  infrastructure component (`egress_proxy`), `verified-fixture`. Six storage backends, all
+  conformance-verified against real services in CI.
+
+## Phase 14 — storage backends (complete)
+
+Implemented and CI-verified in commits `c87f52f` (contract + six backends), `597428f`
+(prove every test ran; fix the service startup), `e9bfdda` (the two defects CI found).
+
+- `app/aletheia/storage/base.py` — `StorageBackend`, one narrow contract covering the two
+  artefacts the directive names: graph snapshots and run manifests. Backends store whole JSON
+  documents so a snapshot round-trips byte-for-byte, rather than forcing a universal
+  normalised schema. `MigrationRunner` applies ordered migrations once, records
+  `(version, name, checksum, applied_at)`, and raises `MigrationError` on checksum or name
+  drift. `prepare_migrations()` runs before the runner reads that log, because the log table
+  cannot be created by a migration the runner has not yet read.
+- Backends: `file_store.py` (`FileGraphStore`, the default the orchestrator uses),
+  `postgres_store.py` (JSONB tables through `pg8000`), `neo4j_store.py` (JSON snapshot plus
+  native `(:AletheiaEntity)`/`[:RELATED]` materialisation scoped by `run_id`, with
+  `verify_materialised()` as the conformance hook), `elasticsearch_store.py` (indexed
+  documents with a real `search_entities` field query), `minio_store.py` (one JSON object per
+  run), `redis_store.py` (namespaced keys, `scan`-based listing).
+- `app/aletheia/storage/conformance.py` — the single shared contract, used by both the pytest
+  suite and the CI evidence script so they cannot drift, plus a `BrokenBackend` negative
+  control proving the contract can fail. `tests/test_storage.py` (15 tests) and
+  `tests/test_storage_services.py` (5 tests, one per service) consume it.
+- CLI: `aletheia storage health|migrate|sync`. `sync` applies the backend's migrations first,
+  so mirroring into a brand-new database works in one step.
+- `docs/STORAGE_BACKENDS.md` — contract, backend table, migration runner, CLI, verification
+  path, and the honest limits below.
+
+### Honest limitations (recorded, not softened)
+
+- The hash-chained `AUDIT.jsonl` stays on local disk. Its tamper-evidence depends on atomic
+  `fsync` appends; no backend stores it in this phase.
+- The orchestrator still writes through `FileGraphStore` by default. Networked backends are
+  populated via `aletheia storage sync` (or the Python API) — the pipeline is not yet wired to
+  write to them directly.
+- Redis is a fast-path cache, not a system of record; `minio` is verified against an
+  S3-protocol server, not a MinIO server (see below).
+- **MinIO substitution, disclosed:** `minio/minio` returns 404 on Docker Hub (the image was
+  deleted in 2026-09) and `quay.io/minio/minio` refuses anonymous pulls, so CI verifies the S3
+  code path (`minio-py`) against `adobe/s3mock:5.2.3`, a real S3-protocol server, rather than
+  against a MinIO server. This is recorded in `docs/STORAGE_BACKENDS.md`, `docker-compose.yml`
+  and `RESUME_STATE.json`; supplying Quay credentials or another S3 endpoint would let the
+  same code path be verified against MinIO itself.
+
+### Defects CI found that local runs could not
+
+1. PostgreSQL health always returned `ok: false`. pg8000's protocol layer builds every row as
+   a Python `list` (`pg8000/core.py`, `handle_DATA_ROW`), so `SELECT 1` yields `[[1]]`, and the
+   check compared that against the literal `[(1,)]`. `_fetchall` now normalises rows to
+   tuples and `health()` compares values and records what it saw.
+2. `MigrationRunner.run()` read `aletheia_schema_migrations` before applying anything, while
+   migration 1 was what created that table, so `migrate` failed with
+   `relation "aletheia_schema_migrations" does not exist` on a fresh database.
+3. A unit test asserted the developer machine's environment (every backend variable unset) and
+   therefore failed in CI, where all of them are set.
+
+All three are fixed and pinned by tests that need no server: runner ordering, the exact
+pg8000 row shape, a configured-but-unreachable backend, and `sync` applying migrations first.
+
+### CI now proves execution, not just success
+
+- `ci/pytest_summary.py` cross-checks the run's JUnit XML against the pytest console summary
+  and **fails the job if any test skipped**. It exists because a storage service that failed to
+  start would otherwise make its test skip while CI still reported success.
+- `ci/storage_conformance.py --require-all` fails when a backend is unconfigured. Run
+  `39078543221` reported `STORAGE CONFORMANCE: PASS` while no service had started at all.
+- The workflow frees the runner's unused SDKs before building (`ci-artifacts/disk-space.txt`
+  records 13 GB free before and 35 GB after; the earlier run died with `no space left on
+  device` while pulling the Elasticsearch image) and captures the service logs as evidence.
+- `docs/SKIPPED_IN_CI.md` documents why 59 tests skip locally and never in CI.
+- Run `39079850431` was the first run in which all 54 Docker integration tests and all 5
+  storage service tests actually executed: 665 cases, 0 skipped, and the two failures it
+  reported were genuine defects rather than skips.
 
 ## Phase 13 — score calibration (complete)
 
@@ -151,25 +230,31 @@ manifest**, not a digital signature and not a legal-admissibility guarantee.
 
 ## Next action
 
-**Phase 12 — not started.** The egress proxy is a standalone component only; it is **not**
-yet wired into the adapter Dockerfiles, so no adapter traffic is forced through it and there
-is no per-request proxy logging, rate limiting, kill switch, or network-level fail-closed
-behaviour in the running system. Wiring the proxy into the adapter images and the run
-network is the next session. The `docs/EGRESS_PROXY_CONTRACT.md` design record exists.
+**Phase 15 — egress proxy coverage (46 adapters remain).** Phase 12 hand-wired three
+adapters (`search_engines`, `ssl_tls`, `ip_intelligence`); the other 46 still run without the
+proxy, so "all adapter traffic is forced through the proxy" is only partially met. The shape
+to pursue is to make the `--internal` network plus proxy the **default** path inside
+`execution.run_docker` for `network_required` adapters instead of per-adapter hand-wiring, then
+extend `ci/egress_scenario.py` and raise `EGRESS_WIRED_ADAPTERS` to the full set. After that:
+the remaining batched adapters (`transport_movement` and `darkweb_search` stay deferred on Gate
+6), the authorized live investigation (Gate 2 needs a user-owned target, Gate 3 needs API keys
+in GitHub Secrets), and the final documentation and CI reconciliation.
 
 ## Known deferred issues
 
-- No adapter traffic is yet forced through an egress proxy; the Phase 11 component
-  (`app/aletheia/core/egress.py`, `docker/egress_proxy`) exists and is CI-verified, but it is
-  not wired into the adapter Dockerfiles or the run network, so there is no per-request proxy
-  logging, rate limiting, kill switch, or network-level fail-closed behaviour in the running
-  system yet.
-- Graph/checkpoint storage is file-backed JSON; no Postgres/Neo4j/Elasticsearch/MinIO/Redis
-  backends yet.
+- **Egress coverage is partial.** The Phase 11 component
+  (`app/aletheia/core/egress.py`, `docker/egress_proxy`) is CI-verified and Phase 12 wired it
+  into three adapters through an `--internal` network with no published proxy port; the
+  remaining 46 adapters still egress directly, so there is no per-request proxy
+  logging, rate limiting, kill switch, or network-level fail-closed behaviour for them yet.
 - No `verified-live` adapters; every fixture is synthetic unless separately documented.
 - Score/confidence separation is incomplete; `--purpose` is not a required adapter field.
 - `AUTONOMOUS_DIRECTIVE.md` and `AGENT_SETUP.md` live at the repo root, but both reference
   `docs/AUTONOMOUS_DIRECTIVE.md`. Worth fixing or documenting.
+- **Point-in-time documents deliberately left unedited.** `audit/CLAIMS_VS_VERIFIED_AUDIT.md`
+  still lists the storage backends as unimplemented (superseded by Phase 14), and
+  `aletheia_step3_CI_READY.md` still calls the egress proxy non-existent (superseded by Phase
+  11). They record the state at their moment of writing; this handoff supersedes both.
 - The audit trail of unverified claims in `RESUME_STATE.json` before 2026-10-14 should be
   treated as reconstructed, not primary evidence.
 
@@ -180,6 +265,9 @@ network is the next session. The `docs/EGRESS_PROXY_CONTRACT.md` design record e
 - **Gate 5** — evidence lines must be copied from a downloaded artifact, never typed.
 - **Gate 6** — `transport_movement` and `darkweb_search` remain deferred pending user
   action / source verification.
+- **Gate 6 (MinIO server)** — deferred pending a usable image or endpoint: `minio/minio`
+  returns 404 on Docker Hub and `quay.io/minio/minio` refuses anonymous pulls, so the S3 code
+  path is verified against `adobe/s3mock:5.2.3` instead.
 
 ## Briefing corrections (standing rule 10)
 
