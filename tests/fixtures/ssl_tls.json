@@ -250,13 +250,84 @@
     },
     {
       "source": "cipherscan",
-      "skipped": true,
-      "skip_reason": "CipherScan publishes no releases and no version tags: the project's own releases list (https://github.com/mozilla/cipherscan/releases) and tags list (https://github.com/mozilla/cipherscan/tags) are both empty, so no pinned, verifiable release artefact exists. Its README additionally documents that it ships its own pre-built OpenSSL binaries for Linux/64 and Darwin/64 rather than depending on a package-managed OpenSSL, so it cannot be pinned and installed from the project's own releases page.",
+      "skipped": false,
+      "skip_reason": null,
       "timestamp": "2026-10-16T09:00:06+00:00",
       "http_status": 0,
       "error": null,
-      "raw_hash": null,
-      "data": null
+      "raw_hash": "81cb6b9570f5f2400632d98c931ff0849dd620724acc3f4f623e765bafa94ca5",
+      "data": {
+        "api_source": "CipherScan (openssl s_client wrapper)",
+        "api_documentation": "https://github.com/mozilla/cipherscan",
+        "endpoint": null,
+        "invocation": "cipherscan [-j|--json] <target:port>  (port defaults to 443)",
+        "source_kind": "local_tool",
+        "tool": "cipherscan",
+        "tool_version": "30bd23938853d68b51c2ebe4bcc922cc3113c5e2",
+        "command": [
+          "/opt/cipherscan/cipherscan",
+          "-j",
+          "example.com"
+        ],
+        "exit_code": 0,
+        "query": "example.com",
+        "record_count": 2,
+        "truncated": false,
+        "raw_output_lines": 1,
+        "raw_output_tail": "{\"target\":\"example.com:443\",\"utctimestamp\":\"2026-10-16T09:00:00Z\",\"serverside\":\"True\",\"ciphersuite\":[{\"cipher\":\"AES256-SHA\",\"protocols\":[\"TLSv1\",\"TLSv1.1\",\"TLSv1.2\"],\"pfs\":\"None\",\"trusted\":\"True\"}],\"renegotiation\":\"False\",\"compression\":\"False\"}\n",
+        "target": "example.com:443",
+        "utctimestamp": "2026-10-16T09:00:00Z",
+        "serverside": "True",
+        "renegotiation": "False",
+        "compression": "False",
+        "configs_tested": 8,
+        "intolerancies_present": true,
+        "pinned_commit": "30bd23938853d68b51c2ebe4bcc922cc3113c5e2",
+        "records": [
+          {
+            "record_id": "example.com:443/AES256-SHA",
+            "detail": "AES256-SHA protocols=TLSv1,TLSv1.1,TLSv1.2 pfs=None trusted=True",
+            "severity": "info",
+            "protocols": [
+              "TLSv1",
+              "TLSv1.1",
+              "TLSv1.2"
+            ],
+            "pubkey": [
+              "2048"
+            ],
+            "sigalg": [
+              "sha1WithRSAEncryption"
+            ],
+            "trusted": "True",
+            "ticket_hint": "None",
+            "ocsp_stapling": "False",
+            "pfs": "None"
+          },
+          {
+            "record_id": "example.com:443/ECDHE-RSA-AES256-GCM-SHA384",
+            "detail": "ECDHE-RSA-AES256-GCM-SHA384 protocols=TLSv1.2 pfs=ECDH,P-256,256bits trusted=True",
+            "severity": "info",
+            "protocols": [
+              "TLSv1.2"
+            ],
+            "pubkey": [
+              "2048"
+            ],
+            "sigalg": [
+              "sha256WithRSAEncryption"
+            ],
+            "trusted": "True",
+            "ticket_hint": "None",
+            "ocsp_stapling": "False",
+            "pfs": "ECDH,P-256,256bits",
+            "curves": [
+              "prime256v1"
+            ],
+            "curves_ordering": "server"
+          }
+        ]
+      }
     }
   ]
 }

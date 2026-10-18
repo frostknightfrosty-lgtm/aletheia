@@ -53,25 +53,16 @@ SUPPORTED_SOURCES = (
     "certgraph",
     "sslscan",
     "tlsx",
+    "cipherscan",
 )
 
-LOCAL_TOOL_SOURCES = ("testssl", "certgraph", "sslscan", "tlsx")
+LOCAL_TOOL_SOURCES = ("testssl", "certgraph", "sslscan", "tlsx", "cipherscan")
 
-# cipherscan is dropped, not implemented: CipherScan publishes no releases and
-# no version tags at all, so no pinned verifiable release artefact exists and
-# its README documents a bundled pre-built OpenSSL instead of a packaged
-# dependency. It therefore appears in the fixture as a skip carrying this exact
-# reason and is never queried.
-SKIP_REASONS = {
-    "cipherscan": (
-        "CipherScan publishes no releases and no version tags: the project's own releases list "
-        "(https://github.com/mozilla/cipherscan/releases) and tags list "
-        "(https://github.com/mozilla/cipherscan/tags) are both empty, so no pinned, verifiable release "
-        "artefact exists. Its README additionally documents that it ships its own pre-built OpenSSL "
-        "binaries for Linux/64 and Darwin/64 rather than depending on a package-managed OpenSSL, so it "
-        "cannot be pinned and installed from the project's own releases page."
-    ),
-}
+# No candidate of this batch is dropped: CipherScan publishes no releases and
+# no tags, but the 2026-10-18 re-review (docs/PHASE17_RECHECKS.md #36) resolved
+# it to a pinned commit and it is now implemented, so the skip-reason map is
+# empty.
+SKIP_REASONS: dict[str, str] = {}
 
 # The single documented endpoint the one HTTP sub-source calls, and the official
 # documentation URL of every implemented sub-source. The runner resolves each
@@ -87,6 +78,7 @@ DOCS_CONSTANTS = {
     "certgraph": "CERTGRAPH_DOCS",
     "sslscan": "SSLSCAN_DOCS",
     "tlsx": "TLSX_DOCS",
+    "cipherscan": "CIPHERSCAN_DOCS",
 }
 
 INVOCATION_CONSTANTS = {
@@ -95,6 +87,7 @@ INVOCATION_CONSTANTS = {
     "certgraph": "CERTGRAPH_INVOCATION",
     "sslscan": "SSLSCAN_INVOCATION",
     "tlsx": "TLSX_INVOCATION",
+    "cipherscan": "CIPHERSCAN_INVOCATION",
 }
 
 # The pinned version of each local tool, and where the pin came from:
@@ -102,11 +95,16 @@ INVOCATION_CONSTANTS = {
 #   sslscan  -> Debian bookworm package sslscan 2.0.7-1
 #   certgraph-> go install github.com/lanrat/certgraph@v0.1.3 (project releases)
 #   tlsx     -> go install github.com/projectdiscovery/tlsx/cmd/tlsx@v1.4.0
+#   cipherscan -> pinned commit 30bd23938853d68b51c2ebe4bcc922cc3113c5e2 (the
+#                 project has no releases or tags; the script documents no
+#                 version switch, so the recorded version is the commit the
+#                 image checked out)
 PINNED_TOOL_VERSIONS = {
     "testssl": "3.0.8",
     "certgraph": "0.1.3",
     "sslscan": "2.0.7",
     "tlsx": "1.4.0",
+    "cipherscan": "30bd23938853d68b51c2ebe4bcc922cc3113c5e2",
 }
 
 VERSION_FLAGS = {"--version", "-version"}
@@ -159,6 +157,21 @@ def test_extract_subject_tlsx():
     assert _extract_subject(data, "tlsx") == "TLSX:example.com:443:tls13 TLS_AES_256_GCM_SHA384"
 
 
+def test_extract_subject_cipherscan():
+    data = {
+        "records": [
+            {
+                "record_id": "example.com:443/AES256-SHA",
+                "detail": "AES256-SHA protocols=TLSv1,TLSv1.1,TLSv1.2 pfs=None trusted=True",
+            }
+        ]
+    }
+    assert _extract_subject(data, "cipherscan") == (
+        "CIPHERSCAN:example.com:443/AES256-SHA:"
+        "AES256-SHA protocols=TLSv1,TLSv1.1,TLSv1.2 pfs=None trusted=True"
+    )
+
+
 def test_extract_subject_without_a_record_falls_back_to_source():
     """A payload with no record never claims a TLS observation."""
     for source in SUPPORTED_SOURCES:
@@ -175,7 +188,7 @@ def test_extract_record_type():
         ("certgraph", "certgraph_domain_node"),
         ("sslscan", "sslscan_protocol_or_cipher"),
         ("tlsx", "tlsx_tls_record"),
-        ("cipherscan", None),
+        ("cipherscan", "cipherscan_cipher_suite"),
         ("unknown-source", None),
     ]
     for source, expected in cases:
@@ -332,6 +345,36 @@ def test_extract_details_tlsx():
     assert result["subject_cn"] == "www.example.com"
 
 
+def test_extract_details_cipherscan():
+    data = {
+        "target": "example.com:443",
+        "serverside": "True",
+        "renegotiation": "False",
+        "configs_tested": 8,
+        "pinned_commit": "30bd23938853d68b51c2ebe4bcc922cc3113c5e2",
+        "records": [
+            {
+                "record_id": "example.com:443/ECDHE-RSA-AES256-GCM-SHA384",
+                "detail": "ECDHE-RSA-AES256-GCM-SHA384 protocols=TLSv1.2 pfs=ECDH,P-256,256bits trusted=True",
+                "severity": "info",
+                "protocols": ["TLSv1.2"],
+                "pfs": "ECDH,P-256,256bits",
+                "curves": ["prime256v1"],
+                "curves_ordering": "server",
+            }
+        ],
+    }
+    result = _extract_details(data, "cipherscan")
+    assert result["protocols"] == ["TLSv1.2"]
+    assert result["pfs"] == "ECDH,P-256,256bits"
+    assert result["curves"] == ["prime256v1"]
+    assert result["curves_ordering"] == "server"
+    assert result["serverside"] == "True"
+    assert result["renegotiation"] == "False"
+    assert result["configs_tested"] == 8
+    assert result["pinned_commit"] == "30bd23938853d68b51c2ebe4bcc922cc3113c5e2"
+
+
 def test_extract_details_without_a_record_is_none():
     for source in SUPPORTED_SOURCES:
         assert _extract_details({"records": []}, source) is None
@@ -418,12 +461,8 @@ def test_fixture_covers_every_sub_source_once():
         assert isinstance(by_source[source]["data"]["command"], list), source
         assert by_source[source]["data"]["tool_version"] == PINNED_TOOL_VERSIONS[source], source
 
-    # The dropped sub-source is present exactly once, as an auditable skip.
-    skipped = by_source["cipherscan"]
-    assert skipped["skipped"] is True
-    assert skipped["data"] is None
-    assert skipped["raw_hash"] is None
-    assert skipped["skip_reason"] == SKIP_REASONS["cipherscan"]
+    # No sub-source is dropped: every fixture entry above is a real payload and
+    # the skip block that used to follow is gone.
 
 
 def test_fixture_uses_only_synthetic_values():
@@ -515,7 +554,7 @@ def test_parse_success():
     assert len(result.findings) == len(fixture["sources"]) == 6
 
     by_source = {f.attributes["source"]: f for f in result.findings}
-    assert set(by_source) == set(SUPPORTED_SOURCES) | {"cipherscan"}
+    assert set(by_source) == set(SUPPORTED_SOURCES)
 
     qualys = by_source["qualys-ssl-labs"]
     assert qualys.value == "SSL_LABS:93.184.216.34:grade A"
@@ -559,16 +598,19 @@ def test_parse_success():
         assert finding.provenance.source_url == f"sub-source:{finding.attributes['source']}"
         assert finding.provenance.confidence == 0.80
 
-    # The dropped sub-source must appear as a skip with its documented reason and
-    # must never be reported as a TLS observation.
-    skipped_finding = by_source["cipherscan"]
-    assert skipped_finding.value == "cipherscan:skipped"
-    assert skipped_finding.record_type is None
-    assert skipped_finding.attributes["details"] == {
-        "skipped": True,
-        "reason": SKIP_REASONS["cipherscan"],
-    }
-    assert f"Skipped: {SKIP_REASONS['cipherscan']}" in skipped_finding.provenance.notes
+    cipherscan = by_source["cipherscan"]
+    assert cipherscan.value == (
+        "CIPHERSCAN:example.com:443/AES256-SHA:"
+        "AES256-SHA protocols=TLSv1,TLSv1.1,TLSv1.2 pfs=None trusted=True"
+    )
+    assert cipherscan.record_type == "cipherscan_cipher_suite"
+    assert cipherscan.attributes["target"] == "example.com"
+    assert cipherscan.attributes["tool"] == "cipherscan"
+    assert cipherscan.attributes["tool_version"] == PINNED_TOOL_VERSIONS["cipherscan"]
+    assert cipherscan.attributes["details"]["protocols"] == ["TLSv1", "TLSv1.1", "TLSv1.2"]
+    assert cipherscan.attributes["details"]["trusted"] == "True"
+    assert cipherscan.attributes["details"]["serverside"] == "True"
+    assert cipherscan.attributes["details"]["pinned_commit"] == PINNED_TOOL_VERSIONS["cipherscan"]
 
     _assert_provenance_hash_invariant(result.findings)
 
@@ -628,7 +670,7 @@ def test_parse_success():
 
 def test_parse_skipped():
     """A skipped sub-source produces a finding that carries the skip reason."""
-    reason = SKIP_REASONS["cipherscan"]
+    reason = "cipherscan binary not found in the image"
     payload = _payload([_source("cipherscan", skipped=True, skip_reason=reason)])
 
     adapter = SslTlsAdapter()
@@ -778,18 +820,16 @@ def test_adapter_is_registered_and_not_parser_test_exempt():
     assert descriptor.upstream.endswith("docker/ssl_tls")
 
 
-def test_adapter_documents_the_dropped_cipherscan_sub_source():
-    """The dropped candidate sub-source stays an auditable, reasoned skip."""
-    assert set(UNSUPPORTED_SUB_SOURCES) == {"cipherscan"}
+def test_every_candidate_sub_source_is_implemented():
+    """No candidate of the batch is dropped any more."""
+    assert UNSUPPORTED_SUB_SOURCES == {}
     assert not set(UNSUPPORTED_SUB_SOURCES) & set(SUPPORTED_SUB_SOURCES)
-    reason = UNSUPPORTED_SUB_SOURCES["cipherscan"]
-    assert "no releases and no version tags" in reason
-    assert "https://github.com/mozilla/cipherscan/releases" in reason
-    assert "pre-built OpenSSL" in reason
+    assert "cipherscan" in SUPPORTED_SOURCES
 
-    runner_source = (ROOT / "docker" / "ssl_tls" / "runner.py").read_text(encoding="utf-8")
-    assert "UNSUPPORTED_SUB_SOURCES: dict[str, str] = {" in runner_source
-    function_source = inspect.getsource(_runner_function(_load_runner(), "cipherscan"))
+    runner = _load_runner()
+    assert runner.UNSUPPORTED_SUB_SOURCES == {}
+    function_source = inspect.getsource(_runner_function(runner, "cipherscan"))
+    assert "CIPHERSCAN_PINNED_COMMIT" in function_source
     assert "http://" not in function_source
     assert "https://" not in function_source
 
@@ -832,7 +872,7 @@ def test_runner_health_check_reports_tools_without_network_or_subprocess(monkeyp
     for entry in inventory["sub_sources"]:
         assert entry["kind"] in {"http_api", "local_tool"}
         assert "usable" in entry
-    assert inventory["dropped_sub_sources"] == ["cipherscan"]
+    assert inventory["dropped_sub_sources"] == []
 
 
 def test_runner_rejects_invalid_arguments():
@@ -869,20 +909,10 @@ def test_runner_reports_every_sub_source():
     }
 
 
-def test_runner_defines_no_endpoint_for_the_dropped_sub_source():
-    """A dropped sub-source is an auditable skip with no URL, never a guessed call."""
+def test_runner_has_no_dropped_sub_sources():
+    """Every candidate is implemented, so no skip reason is kept."""
     runner = _load_runner()
-    assert runner.UNSUPPORTED_SUB_SOURCES == UNSUPPORTED_SUB_SOURCES
-    for source, reason in UNSUPPORTED_SUB_SOURCES.items():
-        assert isinstance(reason, str) and reason.strip()
-        function_source = inspect.getsource(_runner_function(runner, source))
-        assert "http://" not in function_source
-        assert "https://" not in function_source
-        result = _runner_function(runner, source)("example.com")
-        assert result.skipped is True
-        assert result.skip_reason == reason
-        assert result.data is None
-        assert result.raw_hash is None
+    assert runner.UNSUPPORTED_SUB_SOURCES == UNSUPPORTED_SUB_SOURCES == {}
 
 
 def test_runner_supported_sources_cite_a_documented_invocation():
@@ -1257,3 +1287,156 @@ def test_runner_never_prints_a_configured_secret(monkeypatch):
     )
     result = runner.query_qualys_ssl_labs("example.com")
     assert "secret-" not in json.dumps(result.to_dict())
+
+
+# -- CipherScan (local tool) ---------------------------------------------------
+
+CIPHERSCAN_JSON = {
+    "target": "example.com:443",
+    "utctimestamp": "2026-10-16T09:00:00Z",
+    "serverside": "True",
+    "ciphersuite": [
+        {
+            "cipher": "AES256-SHA",
+            "protocols": ["TLSv1", "TLSv1.1", "TLSv1.2"],
+            "pubkey": ["2048"],
+            "sigalg": ["sha1WithRSAEncryption"],
+            "trusted": "True",
+            "ticket_hint": "None",
+            "ocsp_stapling": "False",
+            "npn": [],
+            "pfs": "None",
+        },
+        {
+            "cipher": "ECDHE-RSA-AES256-GCM-SHA384",
+            "protocols": ["TLSv1.2"],
+            "pubkey": ["2048"],
+            "sigalg": ["sha256WithRSAEncryption"],
+            "trusted": "True",
+            "ticket_hint": "None",
+            "ocsp_stapling": "False",
+            "npn": [],
+            "pfs": "ECDH,P-256,256bits",
+            "curves": ["prime256v1"],
+            "curves_ordering": "server",
+        },
+    ],
+    "renegotiation": "False",
+    "compression": "False",
+    "configs": {"Modern": {"tolerant": "True"}},
+    "intolerancies": [{"name": "TLS 1.0", "tolerant": "False"}],
+}
+
+
+def test_runner_parses_the_cipherscan_json_shape(monkeypatch):
+    runner = _load_runner()
+    calls = _install_fake_tools(monkeypatch, runner, stdout=json.dumps(CIPHERSCAN_JSON))
+    result = runner.query_cipherscan("example.com")
+
+    assert result.error is None
+    data = result.data
+    # The scan is the only subprocess: no version probe exists for CipherScan.
+    assert calls == [["/fake/bin/cipherscan", "-j", "example.com"]]
+    assert data["api_source"] == "CipherScan (openssl s_client wrapper)"
+    assert data["source_kind"] == "local_tool"
+    assert data["tool_version"] == runner.CIPHERSCAN_PINNED_COMMIT
+    assert data["record_count"] == 2
+    first = data["records"][0]
+    assert first["record_id"] == "example.com:443/AES256-SHA"
+    assert first["detail"] == "AES256-SHA protocols=TLSv1,TLSv1.1,TLSv1.2 pfs=None trusted=True"
+    assert first["protocols"] == ["TLSv1", "TLSv1.1", "TLSv1.2"]
+    assert first["trusted"] == "True"
+    second = data["records"][1]
+    assert second["curves"] == ["prime256v1"]
+    assert second["curves_ordering"] == "server"
+    assert data["target"] == "example.com:443"
+    assert data["renegotiation"] == "False"
+    assert data["compression"] == "False"
+    assert data["configs_tested"] == 1
+    assert data["intolerancies_present"] is True
+    assert data["pinned_commit"] == runner.CIPHERSCAN_PINNED_COMMIT
+    assert result.raw_hash == hashlib.sha256(json.dumps(data, sort_keys=True).encode()).hexdigest()
+
+
+def test_runner_cipherscan_rejects_output_that_is_not_json(monkeypatch):
+    runner = _load_runner()
+    _install_fake_tools(monkeypatch, runner, stdout="not json at all")
+    result = runner.query_cipherscan("example.com")
+    assert result.data is None
+    assert result.error == "cipherscan did not print JSON output"
+
+
+def test_runner_cipherscan_with_no_cipher_suites_is_an_empty_payload(monkeypatch):
+    runner = _load_runner()
+    _install_fake_tools(
+        monkeypatch, runner, stdout=json.dumps({"target": "example.com:443", "ciphersuite": []})
+    )
+    result = runner.query_cipherscan("example.com")
+    assert result.data is None
+    assert result.error is None
+
+
+def test_runner_cipherscan_reports_a_tool_failure(monkeypatch):
+    runner = _load_runner()
+    _install_fake_tools(monkeypatch, runner, stdout="", stderr="boom", code=1)
+    result = runner.query_cipherscan("example.com")
+    assert result.data is None
+    assert result.error == "cipherscan exited with code 1: boom"
+
+
+def test_runner_cipherscan_selftest_reports_a_missing_binary(monkeypatch):
+    runner = _load_runner()
+    monkeypatch.setattr(runner, "_find_tool", lambda name: None)
+    report = runner._cipherscan_selftest()
+    assert report["cipherscan_selftest"] == "failed"
+    assert "binary not found" in report["error"]
+    assert report["pinned_commit"] == runner.CIPHERSCAN_PINNED_COMMIT
+
+
+def test_runner_selftest_mode_runs_the_cipherscan_selftest(monkeypatch):
+    runner = _load_runner()
+    monkeypatch.setattr(
+        runner,
+        "_cipherscan_selftest",
+        lambda: {
+            "cipherscan_selftest": "ok",
+            "pinned_commit": runner.CIPHERSCAN_PINNED_COMMIT,
+            "ciphers_found": 2,
+        },
+    )
+    old_argv = sys.argv
+    old_stdout = sys.stdout
+    try:
+        sys.argv = ["runner.py", "--selftest-cipherscan"]
+        sys.stdout = io.StringIO()
+        assert runner.main() == 0
+        report = json.loads(sys.stdout.getvalue())
+    finally:
+        sys.argv = old_argv
+        sys.stdout = old_stdout
+    assert report["cipherscan_selftest"] == "ok"
+    assert report["pinned_commit"] == runner.CIPHERSCAN_PINNED_COMMIT
+
+
+def test_runner_selftest_mode_fails_when_the_cipherscan_selftest_fails(monkeypatch):
+    runner = _load_runner()
+    monkeypatch.setattr(
+        runner,
+        "_cipherscan_selftest",
+        lambda: {
+            "cipherscan_selftest": "failed",
+            "pinned_commit": runner.CIPHERSCAN_PINNED_COMMIT,
+            "error": "boom",
+        },
+    )
+    old_argv = sys.argv
+    old_stdout = sys.stdout
+    try:
+        sys.argv = ["runner.py", "--selftest-cipherscan"]
+        sys.stdout = io.StringIO()
+        assert runner.main() == 1
+        report = json.loads(sys.stdout.getvalue())
+    finally:
+        sys.argv = old_argv
+        sys.stdout = old_stdout
+    assert report["error"] == "boom"

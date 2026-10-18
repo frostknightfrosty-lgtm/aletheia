@@ -25,9 +25,11 @@ import hashlib
 import json
 import os
 import shutil
+import socket
 import subprocess
 import sys
 import tempfile
+import time
 import urllib.error
 import urllib.parse
 import urllib.request
@@ -37,33 +39,29 @@ from typing import Any
 
 # -- sub-sources ---------------------------------------------------------------
 
-# Implemented sub-sources. Four are local command line tools installed in the
-# image; one is the Qualys SSL Labs assessment API.
+# Implemented sub-sources. Five are local command line tools installed in the
+# image (CipherScan, which publishes no releases, is checked out at a pinned
+# commit); one is the Qualys SSL Labs assessment API.
 #   qualys-ssl-labs  GET https://api.ssllabs.com/api/v4/analyze?host=<host>
 #   testssl          testssl [OPTIONS] <URI>              (testssl --jsonfile-pretty)
 #   certgraph        certgraph [OPTION]... HOST...        (certgraph -json)
 #   sslscan          sslscan [options] [host:port | host] (sslscan --xml=<file>)
 #   tlsx             tlsx -u <host> -json -silent
+#   cipherscan       cipherscan [-j|--json] <target:port>  (port defaults to 443)
 SUPPORTED_SUB_SOURCES = (
     "qualys-ssl-labs",
     "testssl",
     "certgraph",
     "sslscan",
     "tlsx",
+    "cipherscan",
 )
 
-# Dropped sub-source. CipherScan is never queried and no URL or version is
-# invented for it, so it is reported once per run as an auditable skip.
-UNSUPPORTED_SUB_SOURCES: dict[str, str] = {
-    "cipherscan": (
-        "CipherScan publishes no releases and no version tags: the project's own releases list "
-        "(https://github.com/mozilla/cipherscan/releases) and tags list "
-        "(https://github.com/mozilla/cipherscan/tags) are both empty, so no pinned, verifiable release "
-        "artefact exists. Its README additionally documents that it ships its own pre-built OpenSSL "
-        "binaries for Linux/64 and Darwin/64 rather than depending on a package-managed OpenSSL, so it "
-        "cannot be pinned and installed from the project's own releases page."
-    ),
-}
+# No candidate of this batch is dropped: every sub-source is implemented. The
+# mapping is kept (and reported by the health inventory) so a future candidate
+# that cannot be pinned still lands here as an auditable, reasoned skip rather
+# than a silent omission; nobody is in it today.
+UNSUPPORTED_SUB_SOURCES: dict[str, str] = {}
 
 # Official documentation of every implemented sub-source, and the exact
 # documented endpoint of the one HTTP API.
@@ -73,6 +71,15 @@ TESTSSL_DOCS = "https://testssl.sh/"
 CERTGRAPH_DOCS = "https://github.com/lanrat/certgraph"
 SSLSCAN_DOCS = "https://github.com/rbsec/sslscan"
 TLSX_DOCS = "https://github.com/projectdiscovery/tlsx"
+# CipherScan publishes no releases and no tags; it is pinned by the exact
+# commit the image checks out (verified with git rev-parse at build time).
+# cscan.sh -- the "more precise scan" the script runs in its tolerance section
+# -- needs tlslite-ng and python-ecdsa, which the image pre-provisions at
+# pinned releases (SHAs below) so no scan clones anything at run time.
+CIPHERSCAN_DOCS = "https://github.com/mozilla/cipherscan"
+CIPHERSCAN_PINNED_COMMIT = "30bd23938853d68b51c2ebe4bcc922cc3113c5e2"
+CIPHERSCAN_TLSLITE_NG_PIN = "c93df82603ab4a72c8d65645a3aeee73eeb24b3f (v0.8.2)"
+CIPHERSCAN_PYTHON_ECDSA_PIN = "bd66899550d7185939bf27b75713a2ac9325a9d3 (python-ecdsa-0.19.2)"
 
 # The documented invocation of each sub-source, verbatim from its own synopsis.
 QUALYS_INVOCATION = "GET https://api.ssllabs.com/api/v4/analyze?host=<host>"
@@ -80,6 +87,7 @@ TESTSSL_INVOCATION = "testssl [OPTIONS] <URI>  (JSON: --jsonfile-pretty <file>)"
 CERTGRAPH_INVOCATION = "certgraph [OPTION]... HOST...  (JSON: -json)"
 SSLSCAN_INVOCATION = "sslscan [options] [host:port | host]  (XML: --xml=<file>)"
 TLSX_INVOCATION = "tlsx -u <host> -json -silent"
+CIPHERSCAN_INVOCATION = "cipherscan [-j|--json] <target:port>  (port defaults to 443)"
 
 # Debian bookworm installs the testssl.sh package as /usr/bin/testssl; the
 # upstream script is called testssl.sh. Both names are accepted.
@@ -88,10 +96,13 @@ TOOL_BINARY_NAMES: dict[str, tuple[str, ...]] = {
     "certgraph": ("certgraph",),
     "sslscan": ("sslscan",),
     "tlsx": ("tlsx",),
+    "cipherscan": ("cipherscan",),
 }
 
 # Documented version switches: testssl -v/--version, sslscan --version,
-# certgraph -version, tlsx -version.
+# certgraph -version, tlsx -version. CipherScan's usage text documents no
+# version switch, so it has no entry here: the version recorded for it is the
+# pinned commit the image checked out.
 TOOL_VERSION_FLAG: dict[str, str] = {
     "testssl": "--version",
     "certgraph": "-version",
@@ -100,7 +111,10 @@ TOOL_VERSION_FLAG: dict[str, str] = {
 }
 
 # go install writes to /go/bin in the golang image; apt writes to /usr/bin.
-TOOL_SEARCH_PATHS = ("/go/bin", "/usr/local/bin", "/usr/bin", "/bin")
+# The CipherScan checkout lives at /opt/cipherscan and is invoked from there
+# (never through a symlink) so the script resolves its own bundled OpenSSL and
+# cscan.sh next to itself.
+TOOL_SEARCH_PATHS = ("/go/bin", "/usr/local/bin", "/usr/bin", "/bin", "/opt/cipherscan")
 
 # One run answers a single input. Store at most this many records per sub-source.
 MAX_RECORDS = 50
@@ -879,16 +893,206 @@ def query_tlsx(host: str) -> SourceResult:
     return SourceResult("tlsx", data=data)
 
 
-# -- CipherScan (dropped) ------------------------------------------------------
+# -- CipherScan (local tool) ---------------------------------------------------
+#
+# CipherScan is a wrapper around "openssl s_client" (its README) whose JSON
+# output is documented in the README ("Exporting to JSON with the -j command
+# line option") and whose synopsis documents "[-j|--json] [-o|--openssl file]
+# [openssl s_client args] <target:port>" with "Port defaults to 443". The
+# script ships its own pre-built OpenSSL for Linux/64 and falls back to the
+# system one when the bundled binary is not executable.
+#
+# The JSON object this runner reads is the one the script's own
+# display_results_in_json emits: "target", "utctimestamp", "serverside",
+# "ciphersuite" (an array of objects with "cipher", "protocols", "pubkey",
+# "sigalg", "trusted", "ticket_hint", "ocsp_stapling", "npn", "pfs" and, for
+# ECDH ciphers, "curves" and "curves_ordering"), "renegotiation",
+# "compression", a "configs" object and, when the tolerance test ran, an
+# "intolerancies" array. All values are OpenSSL-style strings ("True"/"False")
+# and are recorded verbatim, never converted.
+CIPHERSCAN_CIPHER_FIELDS = (
+    "protocols",
+    "pubkey",
+    "sigalg",
+    "trusted",
+    "ticket_hint",
+    "ocsp_stapling",
+    "npn",
+    "pfs",
+    "curves",
+    "curves_ordering",
+)
+
+
+def _cipherscan_records(payload: dict[str, Any]) -> list[dict[str, Any]]:
+    records: list[dict[str, Any]] = []
+    target = _clean(payload.get("target")) or "unknown"
+    for entry in payload.get("ciphersuite") or []:
+        if not isinstance(entry, dict):
+            continue
+        cipher = _clean(entry.get("cipher"))
+        if not cipher:
+            continue
+        detail_parts = [cipher]
+        protocols = entry.get("protocols")
+        if isinstance(protocols, list) and protocols:
+            detail_parts.append("protocols=" + ",".join(_clean(part) for part in protocols))
+        pfs = _clean(entry.get("pfs"))
+        if pfs:
+            detail_parts.append("pfs=" + pfs)
+        trusted = _clean(entry.get("trusted"))
+        if trusted:
+            detail_parts.append("trusted=" + trusted)
+        extra = {field: entry.get(field) for field in CIPHERSCAN_CIPHER_FIELDS}
+        records.append(
+            _record(
+                target + "/" + cipher,
+                " ".join(detail_parts),
+                "info",
+                **extra,
+            )
+        )
+    return records
 
 
 def query_cipherscan(host: str) -> SourceResult:
-    """Never queried: CipherScan publishes no release or tag to pin.
+    binary = _find_tool("cipherscan")
+    if not binary:
+        return SourceResult("cipherscan", error="cipherscan binary not found in the image")
 
-    The runner reports the documented reason so the source is an auditable skip
-    rather than a silent omission, and no URL or version is invented for it.
+    # CipherScan documents no version switch, so the recorded version is the
+    # pinned commit the image checked out and verified at build time.
+    argv = [binary, "-j", host]
+    stdout, stderr, code, error = _run_tool(argv)
+    if error:
+        return SourceResult("cipherscan", error=error)
+
+    try:
+        payload = json.loads(stdout)
+    except json.JSONDecodeError:
+        if code != 0:
+            return SourceResult("cipherscan", error=_local_tool_error("cipherscan", code, stderr))
+        return SourceResult("cipherscan", error="cipherscan did not print JSON output")
+    if not isinstance(payload, dict):
+        return SourceResult("cipherscan", error="cipherscan JSON output is not an object")
+
+    records = _cipherscan_records(payload)
+    if not records:
+        if code != 0:
+            return SourceResult("cipherscan", error=_local_tool_error("cipherscan", code, stderr))
+        return SourceResult("cipherscan")
+
+    extra = {
+        "target": _clean(payload.get("target")),
+        "utctimestamp": _clean(payload.get("utctimestamp")),
+        "serverside": _clean(payload.get("serverside")),
+        "renegotiation": _clean(payload.get("renegotiation")),
+        "compression": _clean(payload.get("compression")),
+        "configs_tested": len(payload.get("configs") or {}),
+        "intolerancies_present": bool(payload.get("intolerancies")),
+        "pinned_commit": CIPHERSCAN_PINNED_COMMIT,
+    }
+    extra = {key: value for key, value in extra.items() if value not in (None, "", [], {})}
+    data = _payload(
+        api_source="CipherScan (openssl s_client wrapper)",
+        api_documentation=CIPHERSCAN_DOCS,
+        endpoint=None,
+        invocation=CIPHERSCAN_INVOCATION,
+        source_kind="local_tool",
+        tool="cipherscan",
+        tool_version=CIPHERSCAN_PINNED_COMMIT,
+        command=argv,
+        exit_code=code,
+        query=host,
+        records=records[:MAX_RECORDS],
+        total=len(records),
+        raw_output=stdout,
+        extra=extra,
+    )
+    return SourceResult("cipherscan", data=data)
+
+
+def _cipherscan_selftest() -> dict[str, Any]:
+    """Boot a loopback TLS server, scan it with the pinned checkout, stop it.
+
+    This is the capture case for the sub-source: a self-signed certificate is
+    generated in a temporary directory with the system openssl, a local
+    "openssl s_server" answers on 127.0.0.1, the very same query_cipherscan
+    runs against it, and the server is stopped again. It exercises the pinned
+    checkout end to end -- including the pre-provisioned tolerance-test
+    dependencies -- without touching any host outside the container.
     """
-    return _skip("cipherscan", UNSUPPORTED_SUB_SOURCES["cipherscan"])
+    report: dict[str, Any] = {
+        "cipherscan_selftest": "failed",
+        "pinned_commit": CIPHERSCAN_PINNED_COMMIT,
+    }
+    binary = _find_tool("cipherscan")
+    if not binary:
+        report["error"] = "cipherscan binary not found in the image"
+        return report
+    openssl = shutil.which("openssl")
+    if not openssl:
+        report["error"] = "system openssl binary not found in the image"
+        return report
+
+    with tempfile.TemporaryDirectory() as tmp:
+        cert = os.path.join(tmp, "cert.pem")
+        key = os.path.join(tmp, "key.pem")
+        generated = subprocess.run(
+            [
+                openssl, "req", "-x509", "-newkey", "rsa:2048", "-nodes",
+                "-keyout", key, "-out", cert, "-days", "1",
+                "-subj", "/CN=aletheia-selftest",
+            ],
+            capture_output=True,
+            text=True,
+            timeout=60,
+        )
+        if generated.returncode != 0:
+            report["error"] = "self-signed certificate generation failed"
+            return report
+
+        with socket.socket() as probe:
+            probe.bind(("127.0.0.1", 0))
+            port = probe.getsockname()[1]
+        target = "127.0.0.1:" + str(port)
+        server = subprocess.Popen(
+            [openssl, "s_server", "-accept", target, "-cert", cert, "-key", key, "-www"],
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+        )
+        try:
+            ready = False
+            for _ in range(50):
+                try:
+                    with socket.create_connection(("127.0.0.1", port), timeout=1):
+                        ready = True
+                        break
+                except OSError:
+                    time.sleep(0.2)
+            if not ready:
+                report["error"] = "loopback TLS server did not become ready"
+                return report
+            result = query_cipherscan(target)
+        finally:
+            server.terminate()
+            try:
+                server.wait(timeout=10)
+            except subprocess.TimeoutExpired:
+                server.kill()
+                server.wait(timeout=10)
+
+    if result.error:
+        report["error"] = result.error
+        return report
+    data = result.data or {}
+    report["cipherscan_selftest"] = "ok"
+    report["target"] = target
+    report["ciphers_found"] = data.get("record_count", 0)
+    report["tool_version"] = data.get("tool_version")
+    report["renegotiation"] = data.get("renegotiation")
+    report["configs_tested"] = data.get("configs_tested")
+    return report
 
 
 # -- health --------------------------------------------------------------------
@@ -903,6 +1107,7 @@ def _health_inventory() -> dict[str, Any]:
         ("certgraph", "local_tool"),
         ("sslscan", "local_tool"),
         ("tlsx", "local_tool"),
+        ("cipherscan", "local_tool"),
     ):
         if kind == "http_api":
             entries.append(
@@ -944,6 +1149,11 @@ def main() -> int:
         print("ok")
         return 0
 
+    if sys.argv[1:] == ["--selftest-cipherscan"]:
+        report = _cipherscan_selftest()
+        print(json.dumps(report, ensure_ascii=False, sort_keys=True))
+        return 0 if report.get("cipherscan_selftest") == "ok" else 1
+
     if len(sys.argv) < 3:
         print("usage: runner.py <input_type> <value>", file=sys.stderr)
         print("input_type: domain, ip", file=sys.stderr)
@@ -960,8 +1170,8 @@ def main() -> int:
         )
         return 2
 
-    # Every candidate sub-source is reported once per run. The dropped
-    # sub-source is reported as a documented skip and is never queried.
+    # Every candidate sub-source of the batch is implemented and queried; the
+    # results list keeps one entry per candidate.
     results = [
         query_qualys_ssl_labs(value),
         query_testssl(value),

@@ -48,6 +48,7 @@ CASES = [
     ("phase9-sanctions-watchlists", "aletheia/sanctions-watchlists:v1", ["--health"]),
     ("phase9-academic-search", "aletheia/academic-search:v1", ["--health"]),
     ("phase9-ssl-tls", "aletheia/ssl-tls:v1", ["--health"]),
+    ("phase17-ssl-tls-cipherscan", "aletheia/ssl-tls:v1", ["--selftest-cipherscan"]),
     ("phase9-crypto-blockchain", "aletheia/crypto-blockchain:v1", ["--health"]),
     ("phase9-patents-trademarks", "aletheia/patents-trademarks:v1", ["--health"]),
     ("phase9-email-auth", "aletheia/email-auth:v1", ["--health"]),

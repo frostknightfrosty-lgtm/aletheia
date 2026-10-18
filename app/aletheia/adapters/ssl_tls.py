@@ -16,9 +16,11 @@ from aletheia.core.models import (
     SeedType,
 )
 
-# Sub-sources implemented by docker/ssl_tls/runner.py. Four of them are local
-# command line tools that the image installs and the runner dispatches to by
-# sub-source; one is the Qualys SSL Labs assessment API. Every documented
+# Sub-sources implemented by docker/ssl_tls/runner.py. Five of them are local
+# command line tools that the image installs (cipherscan is checked out pinned
+# by commit, which is the re-review outcome recorded in
+# docs/PHASE17_RECHECKS.md #36) and the runner dispatches to by sub-source; one
+# is the Qualys SSL Labs assessment API. Every documented
 # invocation/endpoint, authentication requirement, documented rate limit, docs
 # URL and version pin is recorded in docker/ssl_tls/RATE_LIMITS.md, together
 # with the source of each pin.
@@ -28,22 +30,14 @@ SUPPORTED_SUB_SOURCES = (
     "certgraph",
     "sslscan",
     "tlsx",
+    "cipherscan",
 )
 
-# Sub-sources that cannot be pinned and installed from a verifiable source and
-# are therefore never queried. The runner reports each one once per run as a
-# skipped source carrying this exact reason; no URL or version is invented for
-# it.
-UNSUPPORTED_SUB_SOURCES: dict[str, str] = {
-    "cipherscan": (
-        "CipherScan publishes no releases and no version tags: the project's own releases list "
-        "(https://github.com/mozilla/cipherscan/releases) and tags list "
-        "(https://github.com/mozilla/cipherscan/tags) are both empty, so no pinned, verifiable release "
-        "artefact exists. Its README additionally documents that it ships its own pre-built OpenSSL "
-        "binaries for Linux/64 and Darwin/64 rather than depending on a package-managed OpenSSL, so it "
-        "cannot be pinned and installed from the project's own releases page."
-    ),
-}
+# No candidate of this batch is dropped: every sub-source is implemented. The
+# mapping is kept so a future candidate that cannot be pinned still lands here
+# as an auditable, reasoned skip rather than a silent omission; nobody is in it
+# today.
+UNSUPPORTED_SUB_SOURCES: dict[str, str] = {}
 
 
 class SslTlsFinding(Finding):
@@ -148,6 +142,7 @@ _SUBJECT_PREFIXES = {
     "certgraph": "CERTGRAPH",
     "sslscan": "SSLSCAN",
     "tlsx": "TLSX",
+    "cipherscan": "CIPHERSCAN",
 }
 
 _RECORD_TYPES = {
@@ -156,6 +151,7 @@ _RECORD_TYPES = {
     "certgraph": "certgraph_domain_node",
     "sslscan": "sslscan_protocol_or_cipher",
     "tlsx": "tlsx_tls_record",
+    "cipherscan": "cipherscan_cipher_suite",
 }
 
 
@@ -281,25 +277,48 @@ def _extract_details(data: dict, source: str) -> dict[str, Any] | None:
                 "sni": record.get("sni"),
             }
         )
+    elif source == "cipherscan":
+        details.update(
+            {
+                "protocols": record.get("protocols"),
+                "pubkey": record.get("pubkey"),
+                "sigalg": record.get("sigalg"),
+                "trusted": record.get("trusted"),
+                "ticket_hint": record.get("ticket_hint"),
+                "ocsp_stapling": record.get("ocsp_stapling"),
+                "npn": record.get("npn"),
+                "pfs": record.get("pfs"),
+                "curves": record.get("curves"),
+                "curves_ordering": record.get("curves_ordering"),
+                "target": data.get("target"),
+                "utctimestamp": data.get("utctimestamp"),
+                "serverside": data.get("serverside"),
+                "renegotiation": data.get("renegotiation"),
+                "compression": data.get("compression"),
+                "configs_tested": data.get("configs_tested"),
+                "intolerancies_present": data.get("intolerancies_present"),
+                "pinned_commit": data.get("pinned_commit"),
+            }
+        )
     return details
 
 
 class SslTlsAdapter(Adapter):
     descriptor = AdapterDescriptor(
         name="ssl_tls",
-        license="Composite adapter; sub-sources are the Qualys SSL Labs assessment API v4, the Debian bookworm testssl.sh and sslscan packages, and the CertGraph and tlsx Go modules",
+        license="Composite adapter; sub-sources are the Qualys SSL Labs assessment API v4, the Debian bookworm testssl.sh and sslscan packages, the CertGraph and tlsx Go modules, and the CipherScan checkout pinned by commit (repository licence MPL-2.0; the checkout ships its own pre-built OpenSSL, with its licence file included)",
         input_types=[SeedType.DOMAIN, SeedType.IP],
         output_types=[EntityType.TLS_OBSERVATION],
         legal_notes=[
-            "Composite adapter covering the five verified sub-sources of the ssl_tls batch: qualys-ssl-labs (Qualys SSL Labs assessment API v4), testssl (testssl.sh), certgraph (CertGraph), sslscan and tlsx. The sixth candidate, cipherscan, is dropped and never queried; the runner reports it once per run as a skipped source with the documented reason.",
-            "Four sub-sources are local command line tools installed in the image and invoked as subprocesses with an argv list. No shell string is ever built, so an input value cannot be interpreted as shell syntax. Only the Docker runner dispatches to them; the adapter itself runs nothing locally.",
+            "Composite adapter covering all six verified sub-sources of the ssl_tls batch: qualys-ssl-labs (Qualys SSL Labs assessment API v4), testssl (testssl.sh), certgraph (CertGraph), sslscan, tlsx and cipherscan (CipherScan, pinned by commit; the earlier dropped status was resolved by the 2026-10-18 re-review recorded in docs/PHASE17_RECHECKS.md). No candidate of the batch is dropped, so the runner reports no skipped sub-source.",
+            "Five sub-sources are local command line tools installed in the image (CipherScan is checked out at a pinned commit) and invoked as subprocesses with an argv list. No shell string is ever built, so an input value cannot be interpreted as shell syntax. Only the Docker runner dispatches to them; the adapter itself runs nothing locally.",
             "Every documented invocation, endpoint, authentication requirement, documented rate limit, documentation URL and version pin is recorded in docker/ssl_tls/RATE_LIMITS.md, each with the source of its pin. No flag, endpoint or version was inferred from an example response.",
             "The Qualys SSL Labs API v4 analyze call documents a mandatory email request header holding the address registered through the registration API and answers 441 for an unregistered client. The runner sends the header only when SSLLABS_EMAIL is set and otherwise reports the sub-source as a documented skip; the address is never written to the runner output.",
             "A TLS observation is a technical measurement of a service, not a statement about the organisation operating it. Direct probes connect to the target, so a run needs authorisation and the assertion is required; results must be reviewed before any security conclusion is drawn.",
-            "sslscan, certgraph and tlsx publish no severity classification, so their records are recorded with severity 'info' rather than an invented rating. Only the severities and letter grades the sources themselves publish (testssl.sh OK/INFO/WARN/LOW/MEDIUM/HIGH/CRITICAL and SSL Labs endpoint grades) are normalized.",
+            "sslscan, certgraph, tlsx and cipherscan publish no severity classification, so their records are recorded with severity 'info' rather than an invented rating. Only the severities and letter grades the sources themselves publish (testssl.sh OK/INFO/WARN/LOW/MEDIUM/HIGH/CRITICAL and SSL Labs endpoint grades) are normalized.",
         ],
-        rate_limit="At most one assessment per sub-source per run: one API call to the documented SSL Labs analyze endpoint and one local invocation each of testssl, certgraph, sslscan and tlsx. No pagination and no parallel assessments. SSL Labs documents that evaluations take at least 60 seconds, that clients should poll no faster than every 5 seconds and then 10 seconds, that concurrent assessments should be kept to a minimum, and that it may answer 429 (Too Many Requests) when a client submits new assessments too fast; testssl.sh, certgraph, sslscan and tlsx publish no numeric limit. See docker/ssl_tls/RATE_LIMITS.md",
-        invocation="Local command line tools (testssl, certgraph, sslscan, tlsx) dispatched by sub-source plus the Qualys SSL Labs assessment API v4, via dedicated Docker runner (aletheia/ssl-tls:v1)",
+        rate_limit="At most one assessment per sub-source per run: one API call to the documented SSL Labs analyze endpoint and one local invocation each of testssl, certgraph, sslscan, tlsx and cipherscan. No pagination and no parallel assessments. SSL Labs documents that evaluations take at least 60 seconds, that clients should poll no faster than every 5 seconds and then 10 seconds, that concurrent assessments should be kept to a minimum, and that it may answer 429 (Too Many Requests) when a client submits new assessments too fast; testssl.sh, certgraph, sslscan, tlsx and cipherscan publish no numeric limit. See docker/ssl_tls/RATE_LIMITS.md",
+        invocation="Local command line tools (testssl, certgraph, sslscan, tlsx, cipherscan) dispatched by sub-source plus the Qualys SSL Labs assessment API v4, via dedicated Docker runner (aletheia/ssl-tls:v1)",
         version_pin="1.0",
         upstream="https://github.com/frostknightfrosty-lgtm/aletheia/tree/main/docker/ssl_tls",
         network_required=True,
