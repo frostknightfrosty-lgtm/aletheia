@@ -13,14 +13,19 @@
 
 ## NOW (edited in place — this is the current position)
 
-- Campaign: **STAGED** — anchors written, launch prompt delivered to the owner.
-- Next action: **P17.2** — cascade models + descriptor-derived routing graph +
-  coverage invariant tests + seed autodetection (+ multi-seed wiring).
-- In-flight CI: prep-state push (docs + state anchors) — run id recorded in the
-  Log below once known.
-- Last verified commit: `c4faa40` (run `39150858549`, docker-verification green;
-  lines copied from the artifact: parser 49/49; 786 passed; capture 60/60;
-  storage 6/6).
+- Campaign: **ACTIVE** — owner mandate received and executing.
+- Position: **P17.2** implemented locally-green (cascade models in
+  `core/models.py`; new `aletheia/cascade/` package with `routing.py` +
+  `seeds.py`; 29 new tests; local 750 passed + 65 environment-only skips).
+  Pushed as `7900ce4`; verification run `39153749577` watching in the
+  background.
+- Next action after verification: **P17.3** — claim normalization + blocking +
+  pivot extractors + fixtures.
+- In-flight CI: `39153749577` (P17.2 code `7900ce4`, watch running);
+  `39152717185` (staged-state push `e8ce609`) **green** — evidence copied to
+  the Log.
+- Last verified commit: `e8ce609` (run `39152717185`, docker-verification
+  green; lines copied: parser 49/49; 786 passed; capture 60/60; storage 6/6).
 - Owner-blocked (parked, never wait on): everything in `docs/USER_ACTIONS.md`.
 - Decision defaults in force: see "Adopted defaults" below.
 
@@ -94,6 +99,8 @@
       invariant tests + seed autodetection (+ multi-seed wiring: reuse Phase 16
       `pending_seeds`, `<adapter>@seedN` workspaces, `seed_index` provenance,
       5% intersection boost that never creates a candidate, ContextFilters).
+      → Implemented locally-green; pushed `7900ce4`; run `39153749577` verifying
+      (checkbox flips when the evidence lines are copied).
 - [ ] **P17.3** — claim normalization + blocking + pivot extractors + fixtures.
 - [ ] **P17.4** — matchers, perceptual hashing, LR scoring, base-rate priors,
       calibration hook (Platt/isotonic in `core/calibration.py` stays the only
@@ -139,10 +146,12 @@ activate when the key exists.
       stays blocked at Gate 7.
 
 ### Track 3 — Horizon completion
-- [ ] Record it as **P17.13** in `docs/PIVOT_CASCADE.md` before building, then:
-      Wayback CDX; Wikidata/ORCID; keyservers (WKD / GitHub `.keys`); GitHub
-      endpoints expansion; Mojang/NameMC; WhatsMyName; social-graph lists;
-      Phase 9 residuals (news_search, Open-Meteo, historical).
+- [x] Recorded as **P17.13** in `docs/PIVOT_CASCADE.md` §15 item 13 (2026-10-18,
+      campaign); adopted defaults recorded in §17 the same day.
+- [ ] Build, interleaved with Track 2 whenever no completeness item is locally
+      unblocked: Wayback CDX; Wikidata/ORCID; keyservers (WKD / GitHub `.keys`);
+      GitHub endpoints expansion; Mojang/NameMC; WhatsMyName; social-graph
+      lists; Phase 9 residuals (news_search, Open-Meteo, historical).
 
 ### Track 4 — Close-out
 - [ ] Final full verification pass on the final tree; copy all evidence lines.
@@ -157,3 +166,23 @@ activate when the key exists.
 - 2026-10-18 — Campaign staged: anchors written (`docs/CAMPAIGN_LOG.md`,
   `docs/USER_ACTIONS.md`, `RESUME_STATE.json`, `HANDOFF.md`). Prep push next;
   verify its run, then start P17.2.
+- 2026-10-18 — Prep commit `e8ce609` (docs + state anchors) — run
+  `39152717185` — docker-verification **green** (15m34s). Copied from the
+  downloaded artifact `ci-artifacts-39152717185`:
+  - `PARSER PREFLIGHT: PASS — 49/49 adapters have parser coverage`
+  - pytest-summary.json: `"console_summary": "786 passed, 1 warning"`,
+    `"junit_total": 786`, `"skipped_in_ci": []`, `"ok": true`
+  - docker-integration/capture.log: `DOCKER CAPTURE: PASS — 60/60 cases
+    captured`
+  - storage-conformance.json: `"passing": ["file", "postgres", "neo4j",
+    "elasticsearch", "minio", "redis"]`, `"unconfigured": []`,
+    `"required_all": true`, `"ok": true`
+- 2026-10-18 — P17.2 implemented (cascade models in `core/models.py`; new
+  `aletheia/cascade/` package: `routing.py` descriptor-derived graph +
+  coverage validators, `seeds.py` autodetection/canonicalization/dedup;
+  29 new tests). Local suite: 750 passed + 65 environment-only skips
+  (expected CI passed count: 815). Pushed as `7900ce4`; verification run
+  `39153749577` in flight — evidence lines to be appended when the artifact
+  is downloaded.
+- Next: on `39153749577` green → copy evidence, flip the Track 1 checkbox,
+  then start P17.3.

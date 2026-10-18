@@ -453,6 +453,10 @@ the facts, or recorded with evidence if the facts block implementation.
 
 ## 15. Build plan (each step CI-verified; docs commits separate from code)
 
+Implementation status is tracked in `docs/CAMPAIGN_LOG.md` (the campaign's
+working memory): P17.2 landed first (commit `7900ce4`), everything else below
+is pending.
+
 1. **P17.1** — this design document (v3) + PROJECT_DIRECTION pointer.
 2. **P17.2** — cascade models + descriptor-derived routing graph + coverage
    invariant test + seed autodetection.
@@ -497,6 +501,13 @@ the facts, or recorded with evidence if the facts block implementation.
     source in authorized runs where gates permit; copy per-source evidence
     from the artifacts (Gate 5); update verification statuses and the
     completeness tracker only from those lines.
+13. **P17.13** — horizon completion (added by the campaign, 2026-10-18):
+    Wayback CDX, Wikidata/ORCID, keyservers (WKD / GitHub `.keys`), GitHub
+    endpoint expansion, Mojang/NameMC, WhatsMyName, social-graph lists, and the
+    Phase 9 residuals (news_search, Open-Meteo, historical). Interleaves with
+    Track 2 whenever no completeness item is locally unblocked; every source
+    still gets its own scoped review first, and the registry, Dockerfile,
+    parser, fixture, capture-case, and manifest counts grow exactly with it.
 
 ## 16. Honest ceilings
 
@@ -522,3 +533,22 @@ the facts, or recorded with evidence if the facts block implementation.
    exposure checkers, then face search; dark-web last, at Gate 6)?
 6. Face search: corroboration-only (proposed) or allowed as STRONG alone
    with a margin over alternatives?
+
+### Resolution — adopted provisionally by the campaign (2026-10-18)
+
+The owner's autonomous-campaign mandate was executed on these provisional
+defaults while the owner is away; any of them can be redlined later (they are
+also listed as redline candidates in `docs/USER_ACTIONS.md`):
+
+1. Adaptive depth: **adopted** — default 3, escalate to 5 on HARD evidence in
+   `owner_self_audit` mode.
+2. `pivot_scope`: **adopted** — owner mode (self-audit): email/name/phone
+   pivots on; subject mode: personal pivots off unless declared in the
+   lawful-basis.
+3. Case model: **adopted** — opt-in `--case X`; no case attached by default.
+4. Cache TTL: **adopted** — 30 days for profile-ish data, 7 days for DNS.
+5. Wave-2 prioritization: **superseded** by the completeness wave order in
+   `docs/CAMPAIGN_LOG.md` (keyless-first, waves A → B → C → D → E); dark web
+   stays last, behind container-level Tor, live runs gated.
+6. Face search: **adopted** — corroboration-only; never the sole basis and
+   never a STRONG-alone path.
