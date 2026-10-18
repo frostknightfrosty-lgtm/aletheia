@@ -124,9 +124,15 @@ jobs:
             docker logs "aletheia-$name" >&2 || true
             return 1
           }
-          wait_for postgres 60 docker exec aletheia-postgres pg_isready -U aletheia
+          # psql over TCP: the temporary server initdb runs listens on a unix
+          # socket only, so this cannot pass before the real server is up, and
+          # it proves the real server accepts the credentials the tests use.
+          wait_for postgres 60 docker exec -e PGPASSWORD=aletheia aletheia-postgres \
+            psql -h 127.0.0.1 -U aletheia -d aletheia -c 'SELECT 1'
           wait_for redis 30 docker exec aletheia-redis redis-cli ping
-          wait_for s3 30 curl -fsS http://127.0.0.1:19090/
+          # Any HTTP answer means the S3-protocol server is listening; the
+          # conformance test itself proves buckets, objects and listings work.
+          wait_for s3 30 curl -s -o /dev/null --max-time 3 http://127.0.0.1:19090/
           wait_for elasticsearch 90 curl -fsS http://127.0.0.1:19200/_cluster/health
           wait_for neo4j 90 docker exec aletheia-neo4j cypher-shell -u neo4j -p aletheia1234 'RETURN 1'
 
@@ -159,6 +165,17 @@ jobs:
           # silent skip. Run 39078543221 reported PASS here while no storage
           # service had actually started.
           python ci/storage_conformance.py --require-all 2>&1 | tee ci-artifacts/storage-conformance.log
+
+      - name: Capture storage service logs (proof the services really ran)
+        if: always()
+        run: |
+          set -uo pipefail
+          mkdir -p ci-artifacts
+          for name in postgres redis neo4j elasticsearch s3; do
+            echo "===== aletheia-$name ====="
+            docker logs --tail 120 "aletheia-$name" 2>&1 || true
+          done > ci-artifacts/storage-service-logs.txt
+          cat ci-artifacts/storage-service-logs.txt
 
       - name: Upload verification evidence
         if: always()

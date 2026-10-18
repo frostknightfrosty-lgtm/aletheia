@@ -100,6 +100,16 @@ class StorageBackend(ABC):
         """Return this backend's migrations, ordered by version."""
         return []
 
+    def prepare_migrations(self) -> None:
+        """Create this backend's migration bookkeeping if it needs any.
+
+        Called by :class:`MigrationRunner` before it reads the recorded
+        migrations, so a backend that keeps that bookkeeping in a table can
+        create it on a fresh database (the table cannot be created by a
+        migration, because the runner reads it before applying anything).
+        Must be idempotent; the default is to do nothing.
+        """
+
     @abstractmethod
     def apply_migration(self, migration: Migration) -> None:
         """Apply a single migration's effect idempotently."""
@@ -120,6 +130,7 @@ class MigrationRunner:
         self.backend = backend
 
     def status(self) -> dict[str, Any]:
+        self.backend.prepare_migrations()
         recorded = {int(row["version"]): row for row in self.backend.applied_migrations()}
         pending = [m.version for m in self.backend.migrations() if m.version not in recorded]
         return {
@@ -129,6 +140,7 @@ class MigrationRunner:
         }
 
     def run(self) -> dict[str, Any]:
+        self.backend.prepare_migrations()
         recorded = {int(row["version"]): row for row in self.backend.applied_migrations()}
         planned = sorted(self.backend.migrations(), key=lambda m: m.version)
         applied_now: list[int] = []

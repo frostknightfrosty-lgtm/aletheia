@@ -17,6 +17,11 @@ from typing import Any
 from aletheia.storage.base import Migration, StorageBackend
 from aletheia.storage.dsn import parse_dsn
 
+_MIGRATIONS_TABLE = (
+    "CREATE TABLE IF NOT EXISTS aletheia_schema_migrations ("
+    " version integer PRIMARY KEY, name text NOT NULL, checksum text NOT NULL, applied_at text NOT NULL)"
+)
+
 _MIGRATIONS = [
     Migration(
         version=1,
@@ -26,8 +31,7 @@ _MIGRATIONS = [
             " run_id text PRIMARY KEY, payload jsonb NOT NULL, updated_at timestamptz NOT NULL DEFAULT now())",
             "CREATE TABLE IF NOT EXISTS aletheia_manifests ("
             " run_id text PRIMARY KEY, payload jsonb NOT NULL, updated_at timestamptz NOT NULL DEFAULT now())",
-            "CREATE TABLE IF NOT EXISTS aletheia_schema_migrations ("
-            " version integer PRIMARY KEY, name text NOT NULL, checksum text NOT NULL, applied_at text NOT NULL)",
+            _MIGRATIONS_TABLE,
         ),
     )
 ]
@@ -83,7 +87,12 @@ class PostgresBackend(StorageBackend):
         cur = conn.cursor()
         try:
             cur.execute(sql, params)
-            return list(cur.fetchall())
+            # pg8000's protocol layer builds every row as a list
+            # (pg8000/core.py, handle_DATA_ROW), so normalise here: a caller
+            # comparing rows must not have to know that. Run 39079850431 found
+            # this: health() compared [[1]] against [(1,)] and reported a
+            # perfectly reachable server as unreachable.
+            return [tuple(row) for row in cur.fetchall()]
         finally:
             cur.close()
 
@@ -122,16 +131,16 @@ class PostgresBackend(StorageBackend):
         return [str(row[0]) for row in rows]
 
     def health(self) -> dict[str, Any]:
+        base = {"backend": self.backend_name, "host": self._dsn.host, "port": self._dsn.port}
         try:
             rows = self._fetchall("SELECT 1")
-            return {
-                "backend": self.backend_name,
-                "ok": rows == [(1,)],
-                "host": self._dsn.host,
-                "port": self._dsn.port,
-            }
         except Exception as exc:  # noqa: BLE001 - health never raises
-            return {"backend": self.backend_name, "ok": False, "detail": f"{type(exc).__name__}: {exc}"}
+            return {**base, "ok": False, "detail": f"{type(exc).__name__}: {exc}"}
+        # Value-based on purpose: the probe must not depend on how the driver
+        # types its rows. `detail` always records what came back, so a surprise
+        # is visible in the evidence instead of only showing as ok: false.
+        ok = len(rows) == 1 and len(rows[0]) == 1 and int(rows[0][0]) == 1
+        return {**base, "ok": ok, "detail": f"SELECT 1 -> {rows!r}"}
 
     def close(self) -> None:
         if self._conn is not None:
@@ -143,6 +152,15 @@ class PostgresBackend(StorageBackend):
     # -- migrations ------------------------------------------------------
     def migrations(self) -> list[Migration]:
         return list(_MIGRATIONS)
+
+    def prepare_migrations(self) -> None:
+        """Create the migration log table on a fresh database.
+
+        The runner reads this table before it applies anything, so it cannot be
+        created by migration 1; migration 1 keeps the same ``IF NOT EXISTS``
+        statement for databases that were bootstrapped by an older build.
+        """
+        self._execute(_MIGRATIONS_TABLE)
 
     def apply_migration(self, migration: Migration) -> None:
         for statement in migration.statements:

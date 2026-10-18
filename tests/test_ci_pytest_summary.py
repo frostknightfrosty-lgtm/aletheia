@@ -83,6 +83,23 @@ def test_failure_fails(tmp_path: Path) -> None:
     assert report["failed"]
 
 
+def test_failures_count_towards_the_total(tmp_path: Path) -> None:
+    """Run 39079850431: 663 passed + 2 failed = 665 cases must not read as a mismatch."""
+    junit = """<?xml version="1.0" encoding="utf-8"?>
+<testsuites><testsuite name="pytest" tests="2">
+  <testcase classname="tests.test_a" name="test_ok" time="0.01"/>
+  <testcase classname="tests.test_a" name="test_bad" time="0.01">
+    <failure message="boom">traceback</failure>
+  </testcase>
+</testsuite></testsuites>
+"""
+    junit_path, console_path = _write(tmp_path, junit, "F.\n1 failed, 1 passed in 1.00s\n")
+    report = pytest_summary.build_report(junit_path, console_path)
+
+    assert report["ok"] is False  # the failure itself still fails the run
+    assert not any("but JUnit recorded" in problem for problem in report["problems"]), report["problems"]
+
+
 def test_passed_count_mismatch_fails(tmp_path: Path) -> None:
     junit, console = _write(tmp_path, JUNIT_TWO_PASSED, "..\n3 passed in 3.21s\n")
     report = pytest_summary.build_report(junit, console)

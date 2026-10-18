@@ -39,6 +39,18 @@ because no backend was configured and every one of them counted as skipped. The
 workflow now frees disk space before building, uses non-conflicting loopback
 ports, and refuses to pass when a backend is missing.
 
+The next run,
+[39079850431](https://github.com/frostknightfrosty-lgtm/aletheia/actions/runs/39079850431),
+shows both gates working:
+
+* `pytest-summary.json` recorded `junit_total: 665`, `skipped_in_ci: []` — all
+  54 Docker integration tests **and** all 5 storage service tests executed;
+* the log line was `2 failed, 663 passed, 1 warning`, and the two failures were
+  real defects in the code (a PostgreSQL bootstrap bug and a test that asserted
+  the developer machine's environment), not skips;
+* the conformance step reported `STORAGE CONFORMANCE: FAIL — 5/6 backends
+  conform`, naming the backend that failed instead of passing quietly.
+
 Local skip counts are expected and are reconciled against CI on every commit:
 `local passed + local skipped = CI passed`, with `CI skipped = 0`.
 

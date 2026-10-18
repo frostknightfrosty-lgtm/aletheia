@@ -94,11 +94,14 @@ def build_report(junit_path: Path, console_path: Path) -> dict:
         problems.append(f"console summary reports {console_skipped} skipped")
     if console_failed:
         problems.append(f"console summary reports {console_failed} failed/errored")
-    if console["found"] and console_passed is not None and (console_passed + (console_skipped or 0)) != junit["total"]:
-        problems.append(
-            f"console reports {console_passed} passed + {console_skipped or 0} skipped "
-            f"but JUnit recorded {junit['total']} test cases"
-        )
+    if console["found"] and console_passed is not None:
+        expected_total = console_passed + (console_skipped or 0) + console_failed
+        if expected_total != junit["total"]:
+            problems.append(
+                f"console reports {console_passed} passed + {console_skipped or 0} skipped "
+                f"+ {console_failed} failed = {expected_total} but JUnit recorded "
+                f"{junit['total']} test cases"
+            )
 
     return {
         "ok": not problems,

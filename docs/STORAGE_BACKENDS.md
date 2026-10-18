@@ -83,6 +83,14 @@ migration list (SQL DDL for Postgres, Cypher constraints for Neo4j, index
 mappings for Elasticsearch, bucket creation for S3, and a namespace reservation
 for Redis, which is schema-less).
 
+The runner calls `backend.prepare_migrations()` before it reads the recorded
+versions, so a backend whose bookkeeping lives in a table can create that table
+on a fresh database. This is not cosmetic: the runner reads
+`aletheia_schema_migrations` before it applies anything, so migration 1 cannot be
+the thing that creates it. PostgreSQL failed with `relation
+"aletheia_schema_migrations" does not exist` until the hook existed (found by CI
+run 39079850431 on the first run that reached a real server).
+
 ## CLI
 
 ```bash
@@ -95,7 +103,9 @@ aletheia storage sync --run-id UUID --backend NAME [--target DSN]
   backend with no DSN is reported `"configured": false` rather than omitted.
 * `migrate` runs the migration runner and prints `applied_now` / `applied_total`.
 * `sync` copies a run's graph and manifest from the file store into the backend
-  and asserts a round-trip read-back matches. **The file store remains
+  and asserts a round-trip read-back matches. It applies the backend's
+  migrations first, so syncing into a brand-new database works in one step; the
+  applied versions are reported in the result. **The file store remains
   authoritative**; `sync` mirrors, it does not migrate ownership.
 
 ## Verification

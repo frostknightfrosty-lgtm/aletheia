@@ -30,6 +30,7 @@ class FakeBackend(StorageBackend):
         self.manifests: dict[str, dict[str, Any]] = {}
         self._migrations: list[dict[str, Any]] = []
         self.applied: list[int] = []
+        self.calls: list[str] = []
 
     def save_graph(self, run_id: str, graph: dict[str, Any]) -> str:
         self.graphs[run_id] = graph
@@ -53,10 +54,14 @@ class FakeBackend(StorageBackend):
     def migrations(self) -> list[Migration]:
         return [Migration(version=1, name="first", statement="a"), Migration(version=2, name="second", statement="b")]
 
+    def prepare_migrations(self) -> None:
+        self.calls.append("prepare")
+
     def apply_migration(self, migration: Migration) -> None:
         self.applied.append(migration.version)
 
     def applied_migrations(self) -> list[dict[str, Any]]:
+        self.calls.append("applied")
         return list(self._migrations)
 
     def record_migration(self, applied: dict[str, Any]) -> None:
@@ -85,6 +90,26 @@ def test_migration_runner_applies_in_order_once(tmp_path: Path) -> None:
     assert second["applied_now"] == []
     assert backend.applied == [1, 2]
     assert [row["version"] for row in backend.applied_migrations()] == [1, 2]
+
+
+def test_migration_runner_prepares_backend_before_reading_recorded_state() -> None:
+    """The runner must create its bookkeeping before it queries it.
+
+    Run 39079850431 failed ``migrate`` on PostgreSQL with
+    ``relation "aletheia_schema_migrations" does not exist``: the log table was
+    created by migration 1, but the runner reads that table before it applies
+    anything. No file-backed test could see the ordering, so this pins it.
+    """
+    backend = FakeBackend()
+    MigrationRunner(backend).run()
+    assert backend.calls[:2] == ["prepare", "applied"], backend.calls
+    assert backend.applied == [1, 2]
+
+
+def test_migration_runner_status_also_prepares_the_backend() -> None:
+    backend = FakeBackend()
+    MigrationRunner(backend).status()
+    assert backend.calls[:2] == ["prepare", "applied"], backend.calls
 
 
 def test_migration_runner_detects_checksum_drift() -> None:
@@ -205,14 +230,91 @@ def _seed_run(data_dir: Path, run_id: str) -> dict[str, Any]:
     return graph
 
 
-def test_health_report_marks_unconfigured_backends(tmp_path: Path) -> None:
+def test_health_report_marks_unconfigured_backends(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     from aletheia.storage import health_report
+
+    # Deterministic in every environment on purpose. The first version of this
+    # test read whatever the machine happened to have exported, so it failed in
+    # CI (run 39079850431), where every backend variable is set.
+    for var in ENV_VARS.values():
+        monkeypatch.delenv(var, raising=False)
 
     report = health_report(data_dir=tmp_path)
     assert report["file"]["ok"] is True
     assert report["file"]["configured"] is True
     for name in NETWORKED_BACKENDS:
         assert report[name]["configured"] is False
+        assert report[name]["detail"] == "env var not set"
+
+
+def test_health_report_marks_a_configured_but_unreachable_backend(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    from aletheia.storage import health_report
+
+    # Port 1 on loopback has no listener: the backend is configured, so it must
+    # be probed and reported unhealthy rather than quietly skipped.
+    monkeypatch.setenv("ALETHEIA_STORAGE_POSTGRES", "postgresql://u:p@127.0.0.1:1/db")
+
+    report = health_report(["postgres"], data_dir=tmp_path)
+    assert report["postgres"]["configured"] is True
+    assert report["postgres"]["ok"] is False
+    assert report["postgres"]["detail"]
+
+
+def test_postgres_health_accepts_driver_rows_typed_as_lists(monkeypatch: pytest.MonkeyPatch) -> None:
+    """pg8000 appends every row as a Python ``list``, so ``[[1]] != [(1,)]``.
+
+    Run 39079850431 reported a perfectly healthy PostgreSQL as unreachable
+    because ``health`` compared the driver's rows against a literal tuple. This
+    reproduces the driver's exact row shape without needing a server.
+    """
+    from aletheia.storage.postgres_store import PostgresBackend
+
+    class _Cursor:
+        def execute(self, sql: str, params: tuple = ()) -> None:
+            self.sql = sql
+
+        def fetchall(self):
+            return ([1],)  # pg8000/core.py handle_DATA_ROW builds lists
+
+        def close(self) -> None:
+            pass
+
+    class _Conn:
+        autocommit = False
+
+        def cursor(self) -> _Cursor:
+            return _Cursor()
+
+        def commit(self) -> None:
+            pass
+
+    backend = PostgresBackend("postgresql://u:p@127.0.0.1:5432/db")
+    monkeypatch.setattr(backend, "_connection", lambda: _Conn())
+
+    health = backend.health()
+    assert health["ok"] is True, health
+    assert "SELECT 1" in health["detail"]
+
+
+def test_postgres_health_reports_connection_failure_with_context(monkeypatch: pytest.MonkeyPatch) -> None:
+    from aletheia.storage.postgres_store import PostgresBackend
+
+    backend = PostgresBackend("postgresql://u:p@127.0.0.1:5432/db")
+
+    def _refuse():
+        raise OSError("connection refused")
+
+    monkeypatch.setattr(backend, "_connection", _refuse)
+
+    health = backend.health()
+    assert health["ok"] is False
+    assert "connection refused" in health["detail"]
+    # The first CI failure printed no host/port, which made the diagnosis
+    # harder than it needed to be.
+    assert health["host"] == "127.0.0.1"
+    assert health["port"] == 5432
 
 
 def test_sync_run_mirrors_graph_and_manifest(tmp_path: Path) -> None:
@@ -225,8 +327,29 @@ def test_sync_run_mirrors_graph_and_manifest(tmp_path: Path) -> None:
     result = sync_run(mirror, run_id, tmp_path)
     assert result["verified"] is True
     assert result["synced"] == ["graph", "manifest"]
+    assert "migrations" in result
     assert mirror.load_graph(run_id) == graph
     assert mirror.load_manifest(run_id)["goal"] == "cli smoke"
+
+
+def test_sync_run_applies_the_backends_migrations_first(tmp_path: Path) -> None:
+    """Syncing into a brand-new backend must create its schema.
+
+    Before this, ``aletheia storage sync`` into a fresh PostgreSQL failed with
+    "relation does not exist" unless the operator happened to run
+    ``storage migrate`` first.
+    """
+    from aletheia.storage import sync_run
+
+    run_id = "cccccccc-dddd-eeee-ffff-000000000000"
+    _seed_run(tmp_path, run_id)
+    mirror = FakeBackend()
+
+    result = sync_run(mirror, run_id, tmp_path)
+
+    assert mirror.applied == [1, 2], mirror.calls
+    assert result["migrations"] == [1, 2]
+    assert result["verified"] is True
 
 
 def test_storage_cli_round_trip(tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture) -> None:

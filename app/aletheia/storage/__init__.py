@@ -145,7 +145,9 @@ def sync_run(backend: StorageBackend, run_id: str | UUID, data_dir: Path) -> dic
     """Copy a run's graph and manifest from the file store into ``backend``.
 
     The file store stays authoritative; this mirrors the two JSON documents the
-    backend contract covers. A round-trip read-back is asserted before returning.
+    backend contract covers. The backend's migrations are applied first, so
+    syncing into a brand-new database works without a separate migrate step. A
+    round-trip read-back is asserted before returning.
     """
     from aletheia.core.checkpoint import CheckpointStore
 
@@ -158,6 +160,8 @@ def sync_run(backend: StorageBackend, run_id: str | UUID, data_dir: Path) -> dic
     if graph is None and manifest is None:
         raise SystemExit(f"run {run} has no graph or manifest under {data_dir}")
 
+    migrations = MigrationRunner(backend).run()
+
     synced: list[str] = []
     if graph is not None:
         backend.save_graph(run, graph)
@@ -166,7 +170,13 @@ def sync_run(backend: StorageBackend, run_id: str | UUID, data_dir: Path) -> dic
         backend.save_manifest(run, manifest)
         synced.append("manifest")
 
-    result = {"backend": backend.backend_name, "run_id": run, "synced": synced, "verified": False}
+    result = {
+        "backend": backend.backend_name,
+        "run_id": run,
+        "synced": synced,
+        "migrations": migrations["applied_now"],
+        "verified": False,
+    }
     if graph is not None:
         result["verified"] = backend.load_graph(run) == graph
     elif manifest is not None:
