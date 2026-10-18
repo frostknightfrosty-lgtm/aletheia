@@ -1,5 +1,12 @@
 # Claims vs. Verified Audit — Step 3
 
+> **Superseded in part (2026-10-18).** This file is the Step 3 audit record and is kept as
+> written, so a later reader can see what was true then. Later phases superseded several
+> rows: the egress proxy exists and is CI-verified (Phases 11–12, with coverage completed in
+> Phase 15), and the storage backends exist and are CI-verified against real services (Phase
+> 14). Read `HANDOFF.md` for the current state. Treat `unknown` below as "unknown when this
+> audit was written", not as a current verdict.
+
 Machine status vocabulary and adapter fixture provenance are sourced from `PROJECT_MANIFEST.json`; the CSV and this Markdown are derived from the same manifest-backed table. `n/a` denotes claims that are not individual adapter inventory entries.
 
 | Claim | Phase | How verified | Evidence | Status | Manifest Entry | Fixture Provenance |

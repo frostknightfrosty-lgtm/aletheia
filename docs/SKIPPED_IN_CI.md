@@ -5,7 +5,7 @@ skipped at project start. Two groups of tests skip locally:
 
 | Group | Count | Skip condition | Where it runs |
 | --- | --- | --- | --- |
-| `tests/test_docker_integration.py` | 54 | the Docker CLI is unavailable | CI (GitHub runner has Docker) |
+| `tests/test_docker_integration.py` | 56 | the Docker CLI is unavailable | CI (GitHub runner has Docker) |
 | `tests/test_storage_services.py` | 5 | the backend's `ALETHEIA_STORAGE_*` variable is unset | CI (services started and DSNs exported) |
 
 Skipping is correct locally: this development machine has no Docker, so there is

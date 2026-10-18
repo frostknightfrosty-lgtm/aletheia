@@ -50,6 +50,12 @@ This writes `report.json`, `report.pdf`, `graph.graphml`, `report.stix2.json`, `
 
 Each run's `AUDIT.jsonl` is a SHA-256 hash chain. Entries carry a sequence number, the previous entry's hash, and their own hash; the final `chain_tip` is stored in that run's `MANIFEST.json`. Verify a run with `aletheia verify-chain <RUN_ID>`. This makes changes detectable relative to the manifest anchor, but it is not a digital signature or a guarantee of legal admissibility; preserve and protect the manifest and audit files together.
 
+## Egress proxy
+
+Adapter traffic goes through a local forward proxy that logs every request (adapter, method, host, path, status, bytes, purpose id, timestamp), enforces a per-adapter rate limit, and provides one kill switch. The proxy runs on a per-adapter `--internal` Docker network, so a container on it has no route out except the proxy; if the proxy is down, the adapter cannot reach the internet.
+
+Coverage is a policy, not an allowlist: every adapter whose descriptor declares `network_required=True` is wired. `aletheia investigate` and `aletheia resume` wire by default; pass `--no-egress-proxy` only for offline replays. The request log is appended to the run's hash-chained `AUDIT.jsonl` as `egress_request` events. See [`docs/EGRESS_PROXY_CONTRACT.md`](docs/EGRESS_PROXY_CONTRACT.md) for the contract and the honest limits (the log records what reached the proxy, and an adapter whose client ignores the proxy variables fails closed rather than egressing unproxied).
+
 ## Storage backends (Phase 14)
 
 Graph snapshots and run manifests persist through one backend contract. The default is the local file store; five networked backends implement the same contract: PostgreSQL, Neo4j, Elasticsearch, an S3-compatible object store (`minio`), and Redis (fast-path cache). Drivers live in the `storage` extra (`pip install -e '.[storage]'`).
