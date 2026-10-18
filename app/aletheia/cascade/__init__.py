@@ -21,6 +21,10 @@
 - :mod:`aletheia.cascade.ach` — Analysis of Competing Hypotheses (P17.5).
 - :mod:`aletheia.cascade.merge_graph` — confirmed-merge equality graph with
   union-find conflict propagation (P17.5).
+- :mod:`aletheia.cascade.ledger` — append-only hash-chained decision ledger
+  (P17.6).
+- :mod:`aletheia.cascade.scheduler` — VOI scheduler, adaptive budgets, stop
+  policy, and resume checkpoints (P17.6).
 
 Nothing in this package changes existing CLI / router / adapter behavior; the
 cascade steps that consume it land in later P17 items.
