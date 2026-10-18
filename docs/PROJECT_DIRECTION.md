@@ -113,6 +113,16 @@ Expected accuracy improvement on multi-seed investigations: ~88% precision /
 
 Not part of Phase 8. Do not implement until the current phase pipeline is complete.
 
+### Pivot cascade (Phase 17)
+
+Aletheia should expand an investigation automatically: typed findings from one
+adapter become candidate seeds for the next round (adapter → adapter chaining),
+gated by an evidence-based identity score so only attributable findings spawn
+new searches, until a full pass adds nothing new (saturation). It reuses the
+existing scheduling, resolver, calibration, checkpoint, egress, and audit
+machinery. Design: [`PIVOT_CASCADE.md`](PIVOT_CASCADE.md). **Not implemented**;
+the design is recorded for review before any code.
+
 ## Implementation status (2026-10-18)
 
 The phase pipeline completed through Phase 15, and the user directive of
@@ -136,6 +146,8 @@ the deliverables:
   reason for each skip.
 - **Implemented:** the optional lawful-basis declaration is recorded in the
   audit trail on every resume; an empty declaration does not stop a run.
+- **Design drafted (not implemented):** the pivot cascade (Phase 17) — see
+  [`PIVOT_CASCADE.md`](PIVOT_CASCADE.md).
 - **Future / requires its own review:** the structural safeguard for Tier 4
   credential sources activates with the first such source; no credential-parsing
   code exists yet, so there is nothing to separate. The Phase 5b/5c tools remain
