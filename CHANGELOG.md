@@ -1,5 +1,75 @@
 # Changelog
 
+## 2026-10-18 — Live-path repair after run `39125383530`: CONNECT tunnel, env proxies, maigret startup, CI-verified
+- **The CONNECT tunnel pumped one direction only.** Every tunneled request in
+  run `39125383530` failed while the proxy logged `200`. The artifact shows
+  sherlock's CONNECT entries recording `"bytes": 0` (`api.github.com`,
+  `data.sherlockproject.xyz`), instaloader's recording `"bytes": 7` — the
+  length of a TLS alert — three times, and instaloader's stderr ending in
+  `SSLError(SSLError(1, '[SSL] unknown error (_ssl.c:1032)'))`: `_tunnel`
+  relayed the upstream reply to the client but never the client's bytes to the
+  upstream, so the TLS ClientHello never left the proxy. `_pump_bidirectional`
+  now runs both pumps concurrently, sends one EOF per direction, cancels the
+  sibling when a side breaks, and its count of both directions is what lands
+  in `EGRESS.jsonl`; the egress contract's `bytes` row documents the CONNECT
+  semantics.
+- **`social_username` ignored the environment proxies.** Its runner built the
+  urllib opener with an explicitly empty `ProxyHandler({})`, so both sub-sources
+  failed with `masto: URLError: <urlopen error [Errno -3] Temporary failure in
+  name resolution>` and `octosuite: ...` while the proxy log stayed empty for
+  that adapter. The opener now installs a default `ProxyHandler()` (which reads
+  `HTTP_PROXY`/`HTTPS_PROXY`) alongside the no-redirect handler; the tests that
+  had pinned the empty map now assert the environment-proxy handler and that
+  requests go through a stub proxy.
+- **`maigret` crashed before its first check under `--read-only`:** the
+  database autoupdate called `os.makedirs('/root/.maigret')` and the
+  container's stderr ended
+  `OSError: [Errno 30] Read-only file system: '/root/.maigret'`.
+  `MaigretAdapter.build_command` now passes `--no-autoupdate` (the flag skips
+  the home-directory state entirely), plus `--no-progressbar`, `--no-color`,
+  `--dns-resolver threaded`, `--json ndjson` and `--folderoutput /work/results`,
+  and `--proxy` when the request carries one.
+- **The scenario pins the tunnel defect class:** `ci/egress_scenario.py`
+  generates a throwaway `-subj /CN=uplink-origin` certificate, serves a TLS
+  origin beside the plain origin on the uplink network and asserts a new
+  `phase12-egress-uplink-https` check (the origin body through the CONNECT
+  tunnel plus a logged CONNECT entry with `bytes > 0`). Two local unit tests
+  cover `_pump_bidirectional` and the CONNECT handler's relay + byte logging.
+- **Two CI-only defects found while verifying the repair** (cancelled run
+  `39128092472`, both in the new code's CI path): the new pump test used
+  blocking `socket.socketpair()` ends with `loop.sock_recv()`, which deadlocks
+  the Linux selector loop — the job sat at that test for 40+ minutes while
+  Windows' proactor loop masks the defect; the ends are now non-blocking. The
+  TLS origin runs as uid 10001 while OpenSSL writes private keys mode 0600, so
+  the origin could not read `/origin/key.pem` and never listened (the run's
+  `EGRESS.jsonl`: 24 origin requests all `status` 502 with `bytes` 0); the
+  scenario now chmods both throwaway files 0644. The CONNECT test also closes
+  its client writer and bounds `wait_closed()` so a future mid-test failure
+  fails fast instead of stalling CI.
+- **Verified** by Docker Verification run `39133692280` on commit
+  `692e4181596be816d092a8bf9c1ed12b17594848`
+  (https://github.com/frostknightfrosty-lgtm/aletheia/actions/runs/39133692280).
+  Lines copied from the downloaded artifact:
+  `PARSER PREFLIGHT: PASS — 49/49 adapters have parser coverage`;
+  `783 passed, 1 warning in 48.68s`;
+  `DOCKER CAPTURE: PASS — 60/60 cases captured`;
+  `STORAGE CONFORMANCE: PASS — 6/6 backends conform`.
+  `pytest-summary.json`: `junit_total` 783, `skipped_in_ci` `[]`, `ok` `true`.
+  `results.json`: 60 entries, 0 nonzero return codes.
+  `storage-conformance.json`: `configured`/`passing` = file, postgres, neo4j,
+  elasticsearch, minio, redis; `unconfigured` `[]`; `required_all` `true`.
+  `egress-scenario.json`: all 9 checks ok, including
+  `phase12-egress-forward` = `proxy forwarded to the local origin`,
+  `phase12-egress-uplink-https` = `tls through the CONNECT tunnel ok; bytes=2804`
+  and `phase15-egress-previously-unwired-adapter` =
+  `crtsh rc=1 new CONNECT crt.sh entries=1 status=200`.
+  `EGRESS.jsonl` (scenario): 7 entries, every one `status` 200 with nonzero
+  `bytes` — the origin and uplink-origin GETs (25 each) and the CONNECT
+  tunnels `uplink-origin` 2804, `api2.marginalia-search.com` 5695,
+  `index.commoncrawl.org` 5335, `crt.sh` 8763.
+  Local consistency: 718 passed + 65 skipped = 783 CI passed. 6 new tests; no
+  test was skipped, deleted, or weakened.
+
 ## 2026-10-18 — Live-path repair after run `39120709419`: docker argv, entrypoint-args commands, honest reporting, CI-verified
 - **`run_docker` never told Docker what to run.** Run `39120709419` was the
   first live invocation of the container path in the project's history; every

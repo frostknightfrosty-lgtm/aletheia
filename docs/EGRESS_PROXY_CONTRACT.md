@@ -28,9 +28,9 @@ adapter registry and does not carry `parser_test` coverage.
 | Forwarder | `docker/egress_proxy/proxy.py` | the proxy process (standard library only) |
 | Image | `docker/egress_proxy/Dockerfile` | `aletheia/egress-proxy:v1` |
 | Fixture | `tests/fixtures/egress_proxy_log.jsonl` | synthetic request log |
-| Tests | `tests/test_egress.py` | schema, rate limiter, kill switch, helpers, chain writer |
+| Tests | `tests/test_egress.py` | schema, rate limiter, kill switch, helpers, chain writer, bidirectional pump, CONNECT handler |
 | Wiring + tests | `app/aletheia/core/egress.py` (`ProxySession`), `tests/test_egress_wiring.py` | network + proxy lifecycle, unit-tested with an injected runner |
-| End-to-end scenario | `ci/egress_scenario.py` | real-Docker `--internal` network, local origin, adapter image |
+| End-to-end scenario | `ci/egress_scenario.py` | real-Docker `--internal` network, local plain + TLS origins, adapter image |
 | Docker smoke | `tests/test_docker_integration.py::test_phase11_egress_proxy_container_health` | container health |
 | Capture cases | `ci/capture_docker_integration.py` — `phase11-egress-proxy`, `phase12-egress-*` | raw stdout/stderr capture |
 
@@ -85,10 +85,11 @@ Coverage is verified from the registry, not asserted: a unit test checks the
 policy against all 49 adapters, and `ci/egress_scenario.py` reports a
 `phase15-egress-policy-covers-registry` check, two real-container checks that
 prove the uplink is the proxy's exclusive exit (`phase12-egress-uplink-forward`
-and `phase12-egress-uplink-isolated`), and a real-container check that `crtsh` —
-an adapter outside the Phase 12 allowlist — has its egress attempt logged by the
-proxy as exactly one new CONNECT entry. The `phase12-*` and `phase15-*` Docker
-integration tests assert those checks.
+and `phase12-egress-uplink-isolated`), a real-container TLS check that a
+CONNECT tunnel relays both directions (`phase12-egress-uplink-https`), and a
+real-container check that `crtsh` — an adapter outside the Phase 12 allowlist —
+has its egress attempt logged by the proxy as exactly one new CONNECT entry.
+The `phase12-*` and `phase15-*` Docker integration tests assert those checks.
 
 ## Request log schema
 
@@ -103,7 +104,7 @@ The proxy writes one JSON object per line to `ALETHEIA_EGRESS_LOG`
 | `host` | string | target host |
 | `path` | string | request path (empty for `CONNECT`) |
 | `status` | int ≥ 0 | upstream status, or `403`/`429`/`502` for refused/failed requests |
-| `bytes` | int ≥ 0 | response bytes returned to the adapter |
+| `bytes` | int ≥ 0 | response bytes returned to the adapter; for `CONNECT`, bytes relayed in both directions |
 | `purpose_id` | string | from the `X-Aletheia-Purpose` request header, else `unspecified` |
 | `request_id` | string | unique per request |
 
@@ -157,8 +158,10 @@ the append instead of recording on top of the tampered chain.
 - The proxy log records what reached the proxy. It is not proof of what an
   adapter did before that point, and it cannot see inside an already-tunnelled
   TLS session.
-- The forwarding loop is exercised only in Docker/CI. Only the pure helpers and
-  the request-log schema are unit-tested locally.
+- The forwarding loop is exercised end to end only in Docker/CI. The pure
+  helpers, the request-log schema, the bidirectional pump and the CONNECT
+  handler's relay + byte logging are unit-tested locally (`tests/test_egress.py`,
+  including an explicit selector-event-loop run).
 - Coverage is complete by policy, not by proof of every adapter's runtime
   behaviour: all 49 adapters are classified from their descriptors, and the
   proxied path is exercised end to end for `search_engines`, `ssl_tls`,
@@ -181,10 +184,11 @@ Docker-invoked adapters — the proxy entry deliberately does not contain the wo
 CI: `aletheia/egress-proxy:v1` is built by `docker/build.sh`, health-checked by
 the Docker integration smoke and captured by case `phase11-egress-proxy` under
 `--network none`. `ci/egress_scenario.py` additionally wires the proxy (through
-the real `ProxySession` lifecycle, uplink included), a local origin, an origin
-on the uplink network and the adapter image onto an `--internal` Docker network
-and asserts the forwarded request, the uplink forward, the internal network's
-isolation from the uplink, the adapter's proxied egress, the audit-chain append,
-and the fail-closed behaviour; those become the `phase12-egress-*` capture
-cases. The status in `PROJECT_MANIFEST.json` moves from `unverified-fixture` to
+the real `ProxySession` lifecycle, uplink included), a local origin, a
+throwaway-certificate TLS origin on the uplink network and the adapter image
+onto an `--internal` Docker network and asserts the forwarded request, the
+uplink forward, the internal network's isolation from the uplink, the TLS
+origin through the CONNECT tunnel with a nonzero logged byte count, the
+adapter's proxied egress, the audit-chain append, and the fail-closed
+behaviour; those become the `phase12-egress-*` capture cases. The status in `PROJECT_MANIFEST.json` moves from `unverified-fixture` to
 `verified-fixture` only from artifact-copied lines (Gate 5).
