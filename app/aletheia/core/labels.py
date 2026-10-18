@@ -8,7 +8,8 @@ labels".
 
 Storage: append-only JSONL at the path given (``<data_root>/labels.jsonl`` by
 convention). The latest label per ``(case_id, cluster_id)`` wins in
-:meth:`LabelStore.resolved`; nothing is deleted, so the audit keeps every
+:meth:`LabelStore.resolved`; nothing is deleted except through an explicit
+:meth:`LabelStore.purge_case` (the section-11 purge), so the audit keeps every
 call. ``training_pairs()`` yields ``(score, label)`` pairs for
 ``core/calibration.py``: mine -> 1, not_mine -> 0; unsure is excluded, and a
 label with no recorded score is excluded — the calibrator is never fed a
@@ -146,3 +147,28 @@ class LabelStore:
         for record in self.resolved().values():
             counts[record.label.value] += 1
         return counts
+
+    def purge_case(self, case_id: str) -> int:
+        """Remove every label for one case; returns the number removed.
+
+        This is the only deletion path (design section 11's purge command);
+        everything else is append-only.
+        """
+        if not self.path.exists():
+            return 0
+        kept: list[str] = []
+        removed = 0
+        for line in self.path.read_text(encoding="utf-8").splitlines():
+            if not line.strip():
+                continue
+            raw = json.loads(line)
+            if str(raw.get("case_id")) == case_id:
+                removed += 1
+            else:
+                kept.append(line)
+        if removed:
+            content = ("\n".join(kept) + "\n") if kept else ""
+            tmp = self.path.with_suffix(".tmp")
+            tmp.write_text(content, encoding="utf-8", newline="\n")
+            tmp.replace(self.path)
+        return removed

@@ -25,7 +25,15 @@
   (P17.6).
 - :mod:`aletheia.cascade.scheduler` — VOI scheduler, adaptive budgets, stop
   policy, and resume checkpoints (P17.6).
+- :mod:`aletheia.cascade.trail` — parent-linked cascade trail and its golden
+  regression digest (P17.8).
+- :mod:`aletheia.cascade.dossier` — tiered dossier artifact builder (P17.8).
+- :mod:`aletheia.cascade.coverage` — coverage audit artifact and the end-of-run
+  assertion (P17.8).
+- :mod:`aletheia.cascade.next_actions` — next-actions checklist (P17.8).
+- :mod:`aletheia.cascade.redact` — deterministic redaction for shareable
+  artifacts (P17.8).
 
-Nothing in this package changes existing CLI / router / adapter behavior; the
-cascade steps that consume it land in later P17 items.
+Nothing in this package changes existing CLI / router / adapter behavior — the
+``cascade`` CLI group is additive; the engine wiring lands in later P17 items.
 """

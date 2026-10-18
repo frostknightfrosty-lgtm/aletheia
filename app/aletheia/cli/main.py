@@ -81,6 +81,22 @@ def build_parser() -> argparse.ArgumentParser:
     storage_sync.add_argument("--backend", required=True, choices=sorted(_BACKENDS))
     storage_sync.add_argument("--target", default=None, help="override the backend DSN/path")
     storage_sync.add_argument("--data-dir", default=os.getenv("ALETHEIA_DATA_DIR", "./data"))
+
+    cascade = sub.add_parser("cascade", help="Phase 17 cascade tools: review, confirm, purge")
+    cascade_sub = cascade.add_subparsers(dest="cascade_cmd", required=True)
+    cascade_review = cascade_sub.add_parser("review", help="replay a decision ledger and verify its hash chain")
+    cascade_review.add_argument("--ledger", required=True, help="path to the decision ledger (JSONL records or a JSON list)")
+    cascade_review.add_argument("--kinds", default=None, help="comma-separated kinds to show, e.g. pivot_granted,stop")
+    cascade_confirm = cascade_sub.add_parser("confirm", help="record a confirmation label (mine/not-mine/unsure) for a cluster")
+    cascade_confirm.add_argument("--case-id", required=True)
+    cascade_confirm.add_argument("--cluster-id", required=True)
+    cascade_confirm.add_argument("--label", required=True, choices=["mine", "not_mine", "unsure"])
+    cascade_confirm.add_argument("--score", type=float, default=None, help="the cluster's recorded score, when one exists (never invented)")
+    cascade_confirm.add_argument("--note", default="")
+    cascade_confirm.add_argument("--data-dir", default=os.getenv("ALETHEIA_DATA_DIR", "./data"))
+    cascade_purge = cascade_sub.add_parser("purge", help="delete a case's artifacts (case file + its labels) on request")
+    cascade_purge.add_argument("--case-id", required=True, type=UUID)
+    cascade_purge.add_argument("--data-dir", default=os.getenv("ALETHEIA_DATA_DIR", "./data"))
     return parser
 
 
@@ -150,6 +166,50 @@ def main() -> None:
                     wire_egress=not args.no_egress_proxy,
                     egress_rate=args.egress_rate, egress_burst=args.egress_burst)
         print(f"resumed: {args.run_id}")
+    elif args.cmd == "cascade":
+        from aletheia.core.case_store import CaseStore
+        from aletheia.core.labels import ConfirmLabel, LabelStore
+
+        if args.cascade_cmd == "review":
+            from aletheia.cascade.ledger import DecisionLedger
+
+            raw = Path(args.ledger).read_text(encoding="utf-8")
+            records = (
+                json.loads(raw)
+                if raw.lstrip().startswith("[")
+                else [json.loads(line) for line in raw.splitlines() if line.strip()]
+            )
+            try:
+                ledger = DecisionLedger.from_dicts(records)
+            except ValueError as exc:
+                print(f"invalid ledger: {exc}")
+                raise SystemExit(1)
+            ok, detail = ledger.verify()
+            print(f"ledger: {detail}")
+            kinds = [kind for kind in (args.kinds or "").split(",") if kind] or None
+            for entry in ledger.replay(kinds=kinds):
+                print(f"{entry.sequence:>4}  {entry.kind}  {json.dumps(dict(entry.payload), sort_keys=True)}")
+        elif args.cascade_cmd == "confirm":
+            store = LabelStore(Path(args.data_dir) / "labels.jsonl")
+            record = store.add(
+                case_id=args.case_id,
+                cluster_id=args.cluster_id,
+                label=ConfirmLabel(args.label),
+                score=args.score,
+                note=args.note,
+            )
+            print(f"recorded: {record.case_id}/{record.cluster_id} = {record.label.value}")
+        else:
+            data_dir = Path(args.data_dir)
+            case_store = CaseStore(data_dir / "cases")
+            inventory = case_store.purge(args.case_id)
+            removed = LabelStore(data_dir / "labels.jsonl").purge_case(str(args.case_id))
+            print(
+                "case file: deleted "
+                f"({inventory['runs_removed']} runs, {inventory['snapshots_removed']} snapshots, "
+                f"{inventory['timeline_events']} timeline events)"
+            )
+            print(f"labels removed: {removed}")
     elif args.cmd == "storage":
         from aletheia import storage as storage_mod
         from aletheia.storage.base import MigrationRunner

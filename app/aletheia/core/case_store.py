@@ -152,6 +152,22 @@ class CaseStore:
         cases = [self._load_raw(UUID(path.stem)) for path in sorted(self.root.glob("*.json"))]
         return sorted(cases, key=lambda case: (case.get("created_at", ""), case["case_id"]))
 
+    def purge(self, case_id: UUID) -> dict[str, Any]:
+        """Delete the case file; returns an inventory of what was removed.
+
+        Purge is the only deletion path in the case model (design section 11:
+        "a ``purge`` command deletes case artifacts on request"); everything
+        else is append-only. Unknown cases raise ``FileNotFoundError``.
+        """
+        payload = self._load_raw(case_id)
+        self._path(case_id).unlink()
+        return {
+            "case_id": str(case_id),
+            "runs_removed": len(payload.get("runs", [])),
+            "snapshots_removed": len(payload.get("snapshots", [])),
+            "timeline_events": len(payload.get("timeline", [])),
+        }
+
     # -- runs and timeline ----------------------------------------------------
 
     def record_run(
