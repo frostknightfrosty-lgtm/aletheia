@@ -20,16 +20,20 @@
   `expansions=1`, `trail_digest=f2af6529…`, `coverage_ok=True`,
   `manifest anchor: verified`; instaloader blocked ×2 and recorded — the
   failure class the repair targeted is closed). **P17.11 Wave A**: re-checks
-  recorded; §A 33 (Unpaywall) CI-verified and flipped.
+  recorded; §A 33 (Unpaywall) CI-verified and flipped; §A 31 (SearXNG)
+  CI-verified and flipped; §A 36 (CipherScan) and §A 11 (Bron Vault) units
+  pushed — runs in flight.
   **P17.3–P17.10 verified green.**
-- Next action: continue Wave A builds (SearXNG self-hosted container;
-  CipherScan pinned commit `30bd2393`; Bron Vault offline parser), then the
-  rest of the Wave A list.
-- In-flight CI: this push's run (expected 1011); head `c5d0830` (state-only)
-  folds into the next code push's verification.
-- Last verified commit: `fe5fc7f` (run `39162358358`, docker-verification
-  green; lines copied: parser 49/49; **1011 passed**; capture 60/60; storage
-  6/6). Head `c5d0830` (state-only) folds into the next code push's run.
+- Next action: on the CipherScan run (`39167510546`, head `f785aa7`) and the
+  Bron Vault run (`39168364470`, head `d3e7d16`) green: copy lines, flip §A 36
+  and §A 11, update the `ssl_tls` / `leak_checkers` manifest entries; then the
+  rest of the Wave A list (Zehef, scrawler, tiktok-hashtag-analysis, VENOM,
+  PicImageSearch, tracelines, ShadowFinder, pybdshadow, GeoLocator, crypttrace
+  CLI wrap, ERATV, BigQuery), then Waves B–E.
+- In-flight CI: `39167510546` (CipherScan, expected 1030 passed / capture
+  62/62); `39168364470` (Bron Vault, expected 1034 passed / capture 63/63).
+- Last verified commit: `1c18b80` (run `39166656036`; parser 49/49;
+  **1021 passed**; capture 61/61; storage 6/6).
 - Owner-blocked (parked, never wait on): everything in `docs/USER_ACTIONS.md`.
 - Decision defaults in force: see "Adopted defaults" below.
 
@@ -201,9 +205,13 @@ activate when the key exists.
       successor behind a USPTO account; 29 sandbox no-billing route exists
       (build queued; owner token); 32 closed notice stands — Marginalia +
       Common Crawl carry the class; 35 no free tier surfaced; 27 no public
-      SPARQL/RDF (NXDOMAIN + browser-only app). 33 (Unpaywall DOI route)
+      SPARQL/RDF (NXDOMAIN + browser-only app). §A 33 (Unpaywall DOI route)
       **CI-verified**: run `39160798771` — parser 49/49; 1009 passed; capture
-      60/60; storage ok (lines in the Log); §A 33 flipped.
+      60/60; storage ok (lines in the Log); §A 33 flipped. §A 31 (SearXNG)
+      **CI-verified**: run `39166656036` — parser 49/49; 1021 passed; capture
+      61/61; storage 6/6; §A 31 flipped and the `search_engines` manifest
+      entry updated. §A 36 (CipherScan) and §A 11 (Bron Vault) built and
+      pushed (`f785aa7`, `d3e7d16`) — runs in flight.
 - [ ] **Wave B — free-registration/keyed builds (skip paths recorded):** §A 1
       (OWASP SocialOSINTLM), 8 (Intelligence X), 9 (BreachDirectory), 10
       (Leak-Lookup), 17 (youtube-geofind), 19 (Betaface), 30 (EUIPO), 34
@@ -518,3 +526,29 @@ activate when the key exists.
 - Next: continue P17.11 Wave A builds (SearXNG self-hosted container,
   CipherScan pinned commit `30bd2393`, Bron Vault offline parser); on this
   push's run green copy its lines; then the rest of the queue.
+- 2026-10-19 — docs/state push verification — commits `d436593` (docs) +
+  `ac68b89` (state) — run `39165890328` — docker-verification **green**.
+  Copied from the downloaded artifact `ci-artifacts-39165890328`:
+  - `PARSER PREFLIGHT: PASS — 49/49 adapters have parser coverage`
+  - pytest-summary.json: `"console_summary": "1011 passed, 1 warning"`,
+    `"junit_total": 1011`, `"skipped_in_ci": []`, `"ok": true`
+  - `DOCKER CAPTURE: PASS — 60/60 cases captured`; storage-conformance.json:
+    `"required_all": true`, `"ok": true`, `"unconfigured": []` (6/6 backends
+    passing)
+- 2026-10-19 — P17.11 SearXNG verification — commit `1c18b80` — run
+  `39166656036` — docker-verification **green**. Copied from the downloaded
+  artifact `ci-artifacts-39166656036`:
+  - `PARSER PREFLIGHT: PASS — 49/49 adapters have parser coverage`
+  - pytest-summary.json: `"console_summary": "1021 passed, 1 warning"`,
+    `"junit_total": 1021`, `"skipped_in_ci": []`, `"ok": true` (1011 → 1021:
+    the 10 SearXNG tests, none skipped)
+  - `DOCKER CAPTURE: PASS — 61/61 cases captured` (new case
+    `phase17-search-engines-searxng` runs the offline selftest under
+    `--network none`); storage-conformance.json: `"required_all": true`,
+    `"ok": true`, `"unconfigured": []` (6/6 backends passing)
+  §A 31 flipped in `SOURCE_COMPLETENESS.md`; `search_engines` manifest entry
+  updated (three sub-sources; searxng removed from the dropped list).
+- Next: on the CipherScan run (`39167510546`, head `f785aa7`) and the Bron
+  Vault run (`39168364470`, head `d3e7d16`) green: copy lines, flip §A 36 and
+  §A 11, update the `ssl_tls` / `leak_checkers` manifest entries; then the
+  rest of the Wave A list.

@@ -1,5 +1,29 @@
 # Changelog
 
+## 2026-10-19 — P17.11: SearXNG self-hosted sub-source (source #31)
+
+Every number below is copied from the downloaded artifact
+`ci-artifacts-39166656036` (run `39166656036`, commit `1c18b80`).
+
+- `PARSER PREFLIGHT: PASS — 49/49 adapters have parser coverage` (the
+  sub-source extends `search_engines`; no new adapter).
+- `"console_summary": "1021 passed, 1 warning"` with `"junit_total": 1021`,
+  `"skipped_in_ci": []`, `"ok": true` — 10 new tests (subject/details
+  extraction, the documented search shape, boot failure, settings generation,
+  selftest reporting), none skipped in CI (1011 → 1021).
+- `DOCKER CAPTURE: PASS — 61/61 cases captured`, including the new
+  `phase17-search-engines-searxng` case, which boots the pinned instance
+  offline under `--network none`.
+- What landed: `docker/search_engines/runner.py` gained `searxng` as a third
+  sub-source operated inside the same image: upstream pinned to commit
+  `1c10abe2d3e4ab7ddcc4e9da1a7d07dc7ca7f8f4` (AGPL-3.0-or-later, operated
+  unmodified), engines kept to `duckduckgo`, `brave` and `wikipedia` via the
+  documented `keep_only` mechanism, JSON enabled in the generated settings,
+  `SEARXNG_SECRET` randomized at boot, and live runs route the instance's
+  engine requests through the same egress proxy as every other outbound
+  request (loopback queries never use it). The source reports its documented
+  skip when no live instance is available.
+
 ## 2026-10-18 — P17.11: Unpaywall DOI-keyed live path (source #33)
 
 Completes the first Wave-A build of the source-completeness directive. Every
