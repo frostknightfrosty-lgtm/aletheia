@@ -14,20 +14,21 @@
 ## NOW (edited in place — this is the current position)
 
 - Campaign: **ACTIVE** — owner mandate received and executing.
-- Position: **P17.9 pushed as `e9b8de5`** (deterministic cascade engine over
-  an injectable observer — claims → gated pivots → VOI scheduler →
-  evidence/ACH → falsification-first confirmed merges; parent-linked trail +
-  hash-chained ledger; synthetic-world, adversarial, and failure-injection
-  suites; 9 new tests; local 933 passed + 65 environment-only skips →
-  expected CI 998). **P17.3–P17.7 verified green**; P17.8 (`39158143846`)
-  run still watching.
-- Next action: on `39158143846` green copy P17.8 evidence; then start
-  **P17.10** (fixture dry-run → CLI `cascade run` wiring → live cascade on
-  `username:frost2233`).
-- In-flight CI: `39158143846` (P17.8 code `ced6f08` + docs `c8c02c3`), plus
-  this P17.9 push's run.
-- Last verified commit: `c18d973` (run `39157495630`, docker-verification
-  green; lines copied: parser 49/49; **968 passed**; capture 60/60; storage
+- Position: **P17.10 pushed as `dc44fc5`** (cascade runner: fixture dry-run
+  path + live `AdapterObserver` reusing the egress proxy/audit-chain
+  patterns; one audited run per cascade with the manifest `cascade` section;
+  artifacts ledger/trail/dossier/coverage/next-actions; `aletheia cascade
+  run` CLI; `live-cascade.yml` dispatch workflow; 7 new runner tests; local
+  940 passed + 65 environment-only skips → expected CI 1005). **P17.3–P17.8
+  verified green**; P17.9 (`39159218589`) run still watching.
+- Next action: on `39159218589` green copy P17.9 evidence; when this push's
+  run is green dispatch `live-cascade` for `username:frost2233` with the
+  Gate 2 assertion verbatim, then copy the live evidence from the downloaded
+  artifact.
+- In-flight CI: `39159218589` (P17.9 `e9b8de5` + docs `5a0a201`), plus this
+  P17.10 push's run.
+- Last verified commit: `c8c02c3` (run `39158143846`, docker-verification
+  green; lines copied: parser 49/49; **989 passed**; capture 60/60; storage
   6/6).
 - Owner-blocked (parked, never wait on): everything in `docs/USER_ACTIONS.md`.
 - Decision defaults in force: see "Adopted defaults" below.
@@ -138,12 +139,13 @@
       passed + 65 skips → expected CI 968); pushed `60bb0e6`; run
       `39157495630` **green** — evidence lines copied to the Log (parser
       49/49; 968 passed; capture 60/60; storage 6/6).
-- [ ] **P17.8** — CLI + trail/dossier/coverage outputs + next-actions checklist +
+- [x] **P17.8** — CLI + trail/dossier/coverage outputs + next-actions checklist +
       redaction/purge (no new adapters in this step).
       → Implemented locally-green (cascade CLI group review/confirm/purge;
       trail/dossier/coverage builders; next-actions checklist; deterministic
       redaction; 21 tests; local 924 passed + 65 skips → expected CI 989);
-      pushed `ced6f08`; run verifying.
+      pushed `ced6f08`; run `39158143846` **green** — evidence lines copied
+      to the Log (parser 49/49; 989 passed; capture 60/60; storage 6/6).
 - [ ] **P17.9** — synthetic worlds + adversarial + failure-injection suites in CI.
       → Implemented locally-green (`cascade/engine.py`: deterministic engine
       over an injectable observer — gated pivots, VOI scheduling,
@@ -155,6 +157,16 @@
 - [ ] **P17.10** — fixture dry-run → local suite → CI → live cascade on
       `username:frost2233` (authorization on file). Owner confirmations and the
       first real calibration labels are owner-gated — park them.
+      → Implemented locally-green (`cascade/runner.py`: one audited run per
+      cascade — fixture observer (no I/O) + live `AdapterObserver` reusing the
+      egress proxy/audit-chain patterns; the manifest `cascade` section
+      carries the verbatim authorization assertion and the scheduler
+      checkpoint; artifacts ledger/trail/dossier/coverage/next-actions under
+      `runs/<id>/cascade/`; the coverage audit is asserted at the end of the
+      run; optional case recording via `--case-id`; `aletheia cascade run`
+      CLI; `live-cascade.yml` dispatch workflow; 7 runner tests; local 940
+      passed + 65 skips → expected CI 1005); pushed `dc44fc5`; run verifying.
+      Live dispatch on `username:frost2233` pending this run green.
 
 ### Track 2 — Source completeness (`docs/SOURCE_COMPLETENESS.md`; P17.11–P17.12)
 
@@ -358,5 +370,32 @@ activate when the key exists.
   the exception, not the rule — the hard-depth refusal path is tested
   explicitly. 9 new tests; local 933 passed + 65 environment-only skips →
   expected CI 998; pushed; run starting.
-- Next: on `39158143846` green copy P17.8 evidence into its queue line +
-  CHANGELOG; on this push's run green copy P17.9 evidence; then P17.10.
+- 2026-10-18 — P17.8 verification — commit `ced6f08` — run `39158143846` —
+  docker-verification **green**. Copied from the downloaded artifact
+  `ci-artifacts-39158143846`:
+  - `PARSER PREFLIGHT: PASS — 49/49 adapters have parser coverage`
+  - pytest-summary.json: `"console_summary": "989 passed, 1 warning"`,
+    `"junit_total": 989`, `"skipped_in_ci": []`, `"ok": true`
+    (968 → 989: the 21 cascade CLI/artifact/redaction tests, none skipped)
+  - docker-integration/capture.log: `DOCKER CAPTURE: PASS — 60/60 cases
+    captured`
+  - storage-conformance.json: `"passing": ["file", "postgres", "neo4j",
+    "elasticsearch", "minio", "redis"]`, `"unconfigured": []`,
+    `"required_all": true`, `"ok": true`
+- 2026-10-18 — P17.10 implemented — `dc44fc5` — cascade run wiring:
+  `cascade/runner.py` builds one audited run per cascade (verbatim
+  authorization assertion + scheduler checkpoint on the manifest), runs the
+  engine over either the pure fixture observer (CI dry-run; no I/O at all)
+  or the live `AdapterObserver` (one invocation per supporting adapter,
+  egress proxied and chain-appended, failures recorded as blocked hops,
+  skip records kept out of the claims), then writes ledger/trail/dossier/
+  coverage/next-actions artifacts, asserts the coverage audit, and
+  optionally records the run on a case. `aletheia cascade run` wires it into
+  the CLI; `.github/workflows/live-cascade.yml` is the dispatch path for
+  authorized live runs. 7 new runner tests; local 940 passed + 65
+  environment-only skips → expected CI 1005; pushed; run starting. Live
+  dispatch for `username:frost2233` (Gate 2 assertion verbatim) happens when
+  this run is green.
+- Next: on this push's run green copy P17.10 evidence + P17.9 verification
+  (watch `39159218589`) into the queue and CHANGELOG; dispatch the live
+  cascade for `username:frost2233`; then P17.11.

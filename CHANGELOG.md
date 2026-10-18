@@ -1,5 +1,29 @@
 # Changelog
 
+## 2026-10-18 — P17.8: cascade CLI, trail/dossier/coverage artifacts, redaction, purge
+
+The cascade's review surface: CLI group, artifact builders, and the deletion
+path. Every number below is copied from the downloaded artifact
+`ci-artifacts-39158143846` (run `39158143846`, commit `ced6f08`).
+
+- `PARSER PREFLIGHT: PASS — 49/49 adapters have parser coverage` (no new
+  adapters in this step).
+- `"console_summary": "989 passed, 1 warning"` with `"junit_total": 989`,
+  `"skipped_in_ci": []`, `"ok": true` — 21 new tests over the previous 968,
+  none skipped in CI.
+- `DOCKER CAPTURE: PASS — 60/60 cases captured`.
+- storage-conformance.json: `"passing": ["file", "postgres", "neo4j",
+  "elasticsearch", "minio", "redis"]`, `"unconfigured": []`,
+  `"required_all": true`, `"ok": true`.
+- What landed: `aletheia cascade review|confirm|purge` (ledger replay and
+  hash-chain verification, confirmation labels, case purge as the only
+  deletion path); `trail.py` (validated parent-linked hops, SHA-256 digest
+  over canonical hops); `dossier.py` (tiered clusters with evidence chains;
+  `supported: false` never invents evidence); `coverage.py` (matched-but-
+  neither-ran-nor-skipped, gate-evaluation, and balanced-egress audits);
+  `next_actions.py` (checklist mirroring `docs/USER_ACTIONS.md`); `redact.py`
+  (deterministic `redacted:<sha256-16>` tokens for person-identifier types).
+
 ## 2026-10-18 — P17.7: case memory, cache/TTL, re-audit diffs, labels, blind spots
 
 Case memory and freshness infrastructure for re-audits. Every number below is
