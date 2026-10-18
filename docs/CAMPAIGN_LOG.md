@@ -18,8 +18,9 @@
   store with snapshots/timeline and re-audit diffs, cross-run source cache
   with per-source TTLs, confirmation label store feeding the calibrator,
   blind-spot registry; 24 new tests; local 903 passed + 65 environment-only
-  skips → expected CI 968). **P17.3, P17.4 verified green**; P17.5
-  (`39156241115`) and P17.6 (`39156855944`) runs still watching.
+  skips → expected CI 968). **P17.3–P17.5 verified green** (P17.5 run
+  `39156241115` on `051625c`: 922 passed); P17.6 (`39156855944`) and P17.7
+  (`39157495630`) runs still watching.
 - Next action: start **P17.8** (CLI + trail/dossier/coverage outputs +
   next-actions checklist + redaction/purge; parser preflight stays 49/49)
   locally while CI runs; copy evidence when the watches notify.
@@ -116,9 +117,11 @@
       expected CI 896); pushed `db5f03e`; run `39155284979` **green** —
       evidence lines copied to the Log (parser 49/49; 896 passed; capture
       60/60; storage 6/6).
-- [ ] **P17.5** — falsification pass + ACH + union-find conflict propagation.
+- [x] **P17.5** — falsification pass + ACH + union-find conflict propagation.
       → Implemented locally-green (26 tests; local 857 passed + 65 skips →
-      expected CI 922); pushed `d561c9c`; run verifying.
+      expected CI 922); pushed `d561c9c`; run `39156241115` **green** —
+      evidence lines copied to the Log (parser 49/49; 922 passed; capture
+      60/60; storage 6/6).
       Notes: source-grade plumbing — the E/F low-grade gate cap mechanism
       landed in `scoring.py`; wiring `Claim.source_grade` into evidence items
       is deferred until a grading pass assigns real grades (F6-unrated stays
@@ -280,7 +283,18 @@ activate when the key exists.
   diverges on a perfectly separable small sample (decision boundary lands far
   left of the data; every prediction saturates at 1.0). Real calibration data
   overlaps, where the fit converges — noted for future calibration work.
+- 2026-10-18 — P17.5 verification — commit `d561c9c` — run `39156241115` —
+  docker-verification **green**. Copied from the downloaded artifact
+  `ci-artifacts-39156241115`:
+  - `PARSER PREFLIGHT: PASS — 49/49 adapters have parser coverage`
+  - pytest-summary.json: `"console_summary": "922 passed, 1 warning"`,
+    `"junit_total": 922`, `"skipped_in_ci": []`, `"ok": true`
+    (896 → 922: the 26 new falsification/ACH/merge-graph tests, none skipped)
+  - docker-integration/capture.log: `DOCKER CAPTURE: PASS — 60/60 cases
+    captured`
+  - storage-conformance.json: `"passing": ["file", "postgres", "neo4j",
+    "elasticsearch", "minio", "redis"]`, `"unconfigured": []`,
+    `"required_all": true`, `"ok": true`
 - Next: start P17.8 (CLI + trail/dossier/coverage outputs + next-actions
-  checklist + redaction/purge) locally; on `39156241115` green copy P17.5
-  evidence; on `39156855944` green copy P17.6 evidence; on `60bb0e6`'s run
-  green copy P17.7 evidence.
+  checklist + redaction/purge) locally; on `39156855944` green copy P17.6
+  evidence; on `39157495630` green copy P17.7 evidence.

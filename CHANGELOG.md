@@ -1,5 +1,36 @@
 # Changelog
 
+## 2026-10-18 — P17.5: falsification pass, ACH hypothesis scoring, union-find merge graph
+
+Consistency checks and conflict propagation the cascade trusts before it
+merges or expands. Every number below is copied from the downloaded artifact
+`ci-artifacts-39156241115` (run `39156241115`, commit `d561c9c`).
+
+- `PARSER PREFLIGHT: PASS — 49/49 adapters have parser coverage` (registry
+  unchanged).
+- `"console_summary": "922 passed, 1 warning"` with `"junit_total": 922`,
+  `"skipped_in_ci": []`, `"ok": true` — 26 new tests over the previous 896,
+  none skipped in CI.
+- `DOCKER CAPTURE: PASS — 60/60 cases captured`.
+- storage-conformance.json: `"passing": ["file", "postgres", "neo4j",
+  "elasticsearch", "minio", "redis"]`, `"unconfigured": []`,
+  `"required_all": true`, `"ok": true`.
+- What landed: `falsify.py` (cross-claim veto sweep reusing the evidence VETO
+  rules, attribute contradictions on `date_of_birth`/`national_id`, era
+  disjointness as a soft warning that never vetoes — era overlap is weak
+  evidence, not proof of sameness); `ach.py` (competing-hypothesis assessment
+  with a reviewable contribution table — +3/+2/+1/+0.5/−3 for the subject
+  hypothesis, mirrored for `H_other`, halved for `H_shared` — a
+  `DEFAULT_MARGIN = 1.0`, and the conservative tie order OTHER, SHARED,
+  SUBJECT); `merge_graph.py` (confirmed-only merges, a conflict re-opens the
+  chain and demotes the weakest link — path-local, tie-broken by
+  `(score, lexicographic)` — with no silent split or merge); `claims.py`
+  gained public `claim_origin_key`/`pair_origin_key` (evidence.py switched
+  over); `scoring.py` gained the `source_grade_label` field and the E/F
+  low-grade cap (the mechanism can only fire on explicitly attached E/F
+  labels; an unrated source stays "not yet graded", never assumed
+  unreliable).
+
 ## 2026-10-18 — P17.4: matchers, stdlib perceptual hashing, LR scoring, base-rate priors, calibration hook
 
 The comparison and scoring engine the cascade evaluates with. Every number
