@@ -64,6 +64,7 @@ from __future__ import annotations
 import math
 from collections.abc import Callable, Sequence
 from dataclasses import dataclass
+from typing import Any
 from uuid import NAMESPACE_URL, UUID, uuid5
 
 from aletheia.cascade.ach import assess_hypotheses
@@ -145,6 +146,7 @@ class CascadeResult:
     stop_note: str
     expansions: int
     passes: int
+    checkpoint: dict[str, Any]
 
 
 def _sigmoid(value: float) -> float:
@@ -305,6 +307,7 @@ class CascadeEngine:
             stop_note=scheduler.stop_note,
             expansions=scheduler.expansions,
             passes=scheduler.passes,
+            checkpoint=scheduler.checkpoint(),
         )
 
     # -- internals ------------------------------------------------------------

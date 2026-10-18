@@ -82,8 +82,21 @@ def build_parser() -> argparse.ArgumentParser:
     storage_sync.add_argument("--target", default=None, help="override the backend DSN/path")
     storage_sync.add_argument("--data-dir", default=os.getenv("ALETHEIA_DATA_DIR", "./data"))
 
-    cascade = sub.add_parser("cascade", help="Phase 17 cascade tools: review, confirm, purge")
+    cascade = sub.add_parser("cascade", help="Phase 17 cascade tools: run, review, confirm, purge")
     cascade_sub = cascade.add_subparsers(dest="cascade_cmd", required=True)
+    cascade_run = cascade_sub.add_parser("run", help="run the pivot cascade (fixture dry-run or live adapters) and write its artifacts")
+    cascade_run.add_argument("--seed", required=True, action="append", help="type:value; repeat for a multi-seed cascade")
+    cascade_run.add_argument("--fixture", default=None, help="fixture observer JSON for a network-free dry-run")
+    cascade_run.add_argument("--authorization-assertion", default=None, help="Explicit authorization statement; stored verbatim on the run manifest")
+    cascade_run.add_argument("--case-id", default=None, type=UUID, help="record the run on this case (P17.7 case memory)")
+    cascade_run.add_argument("--data-dir", default=os.getenv("ALETHEIA_DATA_DIR", "./data"))
+    cascade_run.add_argument("--timeout", type=int, default=120)
+    cascade_run.add_argument("--proxy", default=os.getenv("ALETHEIA_HTTP_PROXY") or None)
+    cascade_run.add_argument("--no-egress-proxy", action="store_true", help="run network adapters without the egress proxy (offline replays only)")
+    cascade_run.add_argument("--egress-rate", type=float, default=1.0, help="per-adapter egress proxy limit: sustained requests/second (default 1; the proxy answers 429 over the limit)")
+    cascade_run.add_argument("--egress-burst", type=float, default=1.0, help="per-adapter egress proxy limit: burst capacity (default 1)")
+    cascade_run.add_argument("--max-expansions", type=int, default=None, help="hard budget on pivot expansions (default: uncapped)")
+    cascade_run.add_argument("--owner-mode", action="store_true", help="owner mode: depth escalation to 5 once HARD evidence is seen")
     cascade_review = cascade_sub.add_parser("review", help="replay a decision ledger and verify its hash chain")
     cascade_review.add_argument("--ledger", required=True, help="path to the decision ledger (JSONL records or a JSON list)")
     cascade_review.add_argument("--kinds", default=None, help="comma-separated kinds to show, e.g. pivot_granted,stop")
@@ -170,7 +183,32 @@ def main() -> None:
         from aletheia.core.case_store import CaseStore
         from aletheia.core.labels import ConfirmLabel, LabelStore
 
-        if args.cascade_cmd == "review":
+        if args.cascade_cmd == "run":
+            from aletheia.cascade.runner import CascadeRunConfig, fixture_observer, run_cascade
+
+            config = CascadeRunConfig(
+                data_root=Path(args.data_dir),
+                seeds=[parse_seed(raw) for raw in args.seed],
+                authorization_assertion=args.authorization_assertion,
+                case_id=args.case_id,
+                timeout_seconds=args.timeout,
+                proxy_url=args.proxy,
+                wire_egress=not args.no_egress_proxy,
+                egress_rate=args.egress_rate,
+                egress_burst=args.egress_burst,
+                max_expansions=args.max_expansions,
+                owner_mode=args.owner_mode,
+            )
+            observer = fixture_observer(Path(args.fixture)) if args.fixture else None
+            outcome = run_cascade(config, observer=observer)
+            print(f"run: {outcome.run_id}")
+            for name, path in outcome.artifacts.items():
+                print(f"{name}={path}")
+            print(f"stop_reason={outcome.stop_reason}")
+            print(f"expansions={outcome.expansions}")
+            print(f"trail_digest={outcome.trail_digest}")
+            print(f"coverage_ok={outcome.coverage_ok}")
+        elif args.cascade_cmd == "review":
             from aletheia.cascade.ledger import DecisionLedger
 
             raw = Path(args.ledger).read_text(encoding="utf-8")

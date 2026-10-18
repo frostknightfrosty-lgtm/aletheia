@@ -1,0 +1,131 @@
+name: Aletheia Live Cascade
+
+on:
+  workflow_dispatch:
+    inputs:
+      seed:
+        description: "Cascade root seed, such as username:my_target"
+        required: true
+        type: string
+      authorization_assertion:
+        description: "Text describing the legal basis for this investigation"
+        required: true
+        type: string
+      timeout_seconds:
+        description: "Timeout for each adapter invocation"
+        required: false
+        default: 120
+        type: number
+      egress_rate:
+        description: "Per-adapter egress proxy limit: sustained requests/second (default 1)"
+        required: false
+        default: 1
+        type: number
+      egress_burst:
+        description: "Per-adapter egress proxy limit: burst capacity (default 1)"
+        required: false
+        default: 1
+        type: number
+      max_expansions:
+        description: "Hard budget on pivot expansions"
+        required: false
+        default: 25
+        type: number
+      owner_mode:
+        description: "Owner mode: depth escalation to 5 once HARD evidence is seen"
+        required: false
+        default: true
+        type: boolean
+
+permissions:
+  contents: read
+
+jobs:
+  live-cascade:
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Set up Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: '3.13'
+          cache: pip
+
+      - name: Install Aletheia dependencies
+        run: |
+          set -euo pipefail
+          python -m pip install --upgrade pip
+          python -m pip install -e '.[dev]'
+
+      - name: Verify Docker runtime
+        run: |
+          set -euo pipefail
+          docker --version
+          docker info
+
+      - name: Build all Aletheia images
+        run: |
+          set -euo pipefail
+          bash docker/build.sh 2>&1 | tee build.log
+
+      - name: Run the cascade
+        env:
+          ALETHEIA_SEED: ${{ inputs.seed }}
+          ALETHEIA_AUTHORIZATION_ASSERTION: ${{ inputs.authorization_assertion }}
+          ALETHEIA_TIMEOUT_SECONDS: ${{ inputs.timeout_seconds }}
+          ALETHEIA_EGRESS_RATE: ${{ inputs.egress_rate }}
+          ALETHEIA_EGRESS_BURST: ${{ inputs.egress_burst }}
+          ALETHEIA_MAX_EXPANSIONS: ${{ inputs.max_expansions }}
+          ALETHEIA_OWNER_MODE: ${{ inputs.owner_mode }}
+          REDDIT_CLIENT_ID: ${{ secrets.REDDIT_CLIENT_ID }}
+          REDDIT_CLIENT_SECRET: ${{ secrets.REDDIT_CLIENT_SECRET }}
+          YOUTUBE_API_KEY: ${{ secrets.YOUTUBE_API_KEY }}
+          PYTHONUNBUFFERED: '1'
+        run: |
+          set -euo pipefail
+          OWNER_FLAG=""
+          if [ "$ALETHEIA_OWNER_MODE" = "true" ]; then OWNER_FLAG="--owner-mode"; fi
+          aletheia cascade run \
+            --seed "$ALETHEIA_SEED" \
+            --data-dir ./data \
+            --timeout "$ALETHEIA_TIMEOUT_SECONDS" \
+            --egress-rate "$ALETHEIA_EGRESS_RATE" \
+            --egress-burst "$ALETHEIA_EGRESS_BURST" \
+            --max-expansions "$ALETHEIA_MAX_EXPANSIONS" \
+            --authorization-assertion "$ALETHEIA_AUTHORIZATION_ASSERTION" \
+            $OWNER_FLAG \
+            2>&1 | tee cascade.log
+
+      - name: Capture run ID
+        id: capture-run-id
+        run: |
+          set -euo pipefail
+          RUN_ID="$(grep '^run: ' cascade.log | head -n 1 | cut -d' ' -f2)"
+          if [ -z "$RUN_ID" ]; then
+            echo "No run ID was found in cascade.log" >&2
+            exit 1
+          fi
+          printf 'run_id=%s\n' "$RUN_ID" >> "$GITHUB_OUTPUT"
+          echo "Captured run ID: $RUN_ID"
+
+      - name: Verify the audit chain
+        env:
+          RUN_ID: ${{ steps.capture-run-id.outputs.run_id }}
+        run: |
+          set -euo pipefail
+          aletheia verify-chain "$RUN_ID" --data-dir ./data 2>&1 | tee verify-chain.log
+
+      - name: Upload live cascade artifact
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: aletheia-live-cascade-${{ github.run_id }}
+          path: |
+            ./data/
+            build.log
+            cascade.log
+            verify-chain.log
+          if-no-files-found: error
