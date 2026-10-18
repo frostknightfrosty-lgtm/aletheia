@@ -59,15 +59,21 @@ BRIDGE_SEED_TYPES: dict[EntityType, frozenset[SeedType]] = {
     EntityType.COMPANY: frozenset({SeedType.COMPANY_NAME}),
     EntityType.LEGAL_ENTITY: frozenset({SeedType.COMPANY_NAME}),
     EntityType.LEI: frozenset({SeedType.COMPANY_NAME}),
-    EntityType.FILING: frozenset({SeedType.COMPANY_NAME, SeedType.PERSON_NAME}),
-    EntityType.COURT_CASE: frozenset({SeedType.PERSON_NAME, SeedType.COMPANY_NAME}),
-    EntityType.SANCTION: frozenset({SeedType.PERSON_NAME, SeedType.COMPANY_NAME}),
-    EntityType.GOVERNMENT_RECORD: frozenset({SeedType.PERSON_NAME, SeedType.COMPANY_NAME}),
-    EntityType.COMPANY_REGISTRY_RECORD: frozenset({SeedType.COMPANY_NAME, SeedType.PERSON_NAME}),
+    EntityType.FILING: frozenset({SeedType.COMPANY_NAME, SeedType.PERSON_NAME, SeedType.NAME}),
+    EntityType.COURT_CASE: frozenset({SeedType.PERSON_NAME, SeedType.COMPANY_NAME, SeedType.NAME}),
+    EntityType.SANCTION: frozenset({SeedType.PERSON_NAME, SeedType.COMPANY_NAME, SeedType.NAME}),
+    EntityType.GOVERNMENT_RECORD: frozenset(
+        {SeedType.PERSON_NAME, SeedType.COMPANY_NAME, SeedType.NAME}
+    ),
+    EntityType.COMPANY_REGISTRY_RECORD: frozenset(
+        {SeedType.COMPANY_NAME, SeedType.PERSON_NAME, SeedType.NAME}
+    ),
     EntityType.ACADEMIC_RECORD: frozenset({SeedType.PERSON_NAME}),
     EntityType.TLS_OBSERVATION: frozenset({SeedType.DOMAIN, SeedType.IP}),
     EntityType.BLOCKCHAIN_INTEL_RECORD: frozenset({SeedType.CRYPTO_ADDRESS, SeedType.URL}),
-    EntityType.INTELLECTUAL_PROPERTY_RECORD: frozenset({SeedType.PERSON_NAME, SeedType.COMPANY_NAME}),
+    EntityType.INTELLECTUAL_PROPERTY_RECORD: frozenset(
+        {SeedType.PERSON_NAME, SeedType.COMPANY_NAME, SeedType.NAME}
+    ),
     EntityType.EMAIL_AUTH_RECORD: frozenset({SeedType.DOMAIN}),
     EntityType.TECHNICAL_FINDING: frozenset(
         {SeedType.EMAIL, SeedType.URL, SeedType.DOMAIN, SeedType.USERNAME}

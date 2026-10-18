@@ -33,7 +33,18 @@ from urllib.parse import urlsplit, urlunsplit
 
 from aletheia.core.models import Seed, SeedType
 
-__all__ = ["canonicalize_seed", "dedupe_seeds", "detect_seeds"]
+__all__ = [
+    "canonicalize_seed",
+    "dedupe_seeds",
+    "detect_seeds",
+    "find_domain_like",
+    "is_crypto_address",
+    "is_domain_like",
+    "is_email_like",
+    "is_handle_like",
+    "is_url_like",
+    "is_vin_like",
+]
 
 _EMAIL_RE = re.compile(
     r"[A-Za-z0-9._%+\-]+@(?:[A-Za-z0-9](?:[A-Za-z0-9\-]{0,61}[A-Za-z0-9])?\.)+[A-Za-z]{2,}"
@@ -49,6 +60,7 @@ _DOMAIN_RE = re.compile(
     r"(?<![@\w.\-])(?:[A-Za-z0-9](?:[A-Za-z0-9\-]{0,61}[A-Za-z0-9])?\.)+[A-Za-z]{2,63}(?![\w\-])"
 )
 _HANDLE_RE = re.compile(r"(?<![\w.@])@([A-Za-z0-9_]{2,30})\b")
+_HANDLE_LIKE_RE = re.compile(r"@?[A-Za-z0-9][A-Za-z0-9_.\-]{1,29}")
 
 # Common file extensions: "report.pdf" is a file name in prose, not a domain.
 _FILE_EXTENSIONS = frozenset(
@@ -251,3 +263,51 @@ def detect_seeds(text: str) -> list[Seed]:
 
     found.sort(key=lambda item: item[0])
     return dedupe_seeds(seed for _, seed in found)
+
+
+def is_email_like(value: str) -> bool:
+    """True when the whole value is a syntactically complete email address."""
+    return _EMAIL_RE.fullmatch(value.strip()) is not None
+
+
+def is_url_like(value: str) -> bool:
+    """True when the whole value is an http(s) URL with a host."""
+    parts = urlsplit(value.strip())
+    return parts.scheme in {"http", "https"} and bool(parts.netloc)
+
+
+def is_domain_like(value: str) -> bool:
+    """True when the whole value is a domain name (no scheme, no path)."""
+    stripped = value.strip().rstrip(".")
+    if not stripped:
+        return False
+    if stripped.rsplit(".", 1)[-1].casefold() in _FILE_EXTENSIONS:
+        return False
+    return _DOMAIN_RE.fullmatch(stripped) is not None
+
+
+def find_domain_like(value: str) -> str | None:
+    """First standalone domain token in the text (best-effort, extension-filtered)."""
+    for match in _DOMAIN_RE.finditer(value):
+        candidate = match.group(0)
+        if candidate.rsplit(".", 1)[-1].casefold() in _FILE_EXTENSIONS:
+            continue
+        return candidate
+    return None
+
+
+def is_vin_like(value: str) -> bool:
+    """True when the whole value is shaped like a VIN (mixed alphanumerics, no I/O/Q)."""
+    stripped = value.strip().upper()
+    return _VIN_RE.fullmatch(stripped) is not None and _vin_is_plausible(stripped)
+
+
+def is_crypto_address(value: str) -> bool:
+    """True when the whole value matches a supported crypto address shape (BTC/ETH)."""
+    stripped = value.strip()
+    return _ETH_RE.fullmatch(stripped) is not None or _BTC_RE.fullmatch(stripped) is not None
+
+
+def is_handle_like(value: str) -> bool:
+    """True when the whole value is shaped like an account handle (optional @, 2-30 chars)."""
+    return _HANDLE_LIKE_RE.fullmatch(value.strip()) is not None
