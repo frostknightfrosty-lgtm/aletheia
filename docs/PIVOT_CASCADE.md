@@ -1,22 +1,32 @@
 # Pivot Cascade — Design (Phase 17)
 
-> Status: design draft **v2 — maximal scope, for review; not implemented**. No
+> Status: design draft **v3 — maximal scope, for review; not implemented**. No
 > cascade code exists yet. This is the review artifact that precedes
 > implementation, per the project sequence (design → tests → CI-verified code).
 > Nothing here changes the current CLI, router, adapter enforcement, or
-> live-investigation behavior. Prerequisites: everything below is achievable
-> with free / open-source tools or free-tier API registrations only —
-> **nothing paid**, and no source is added without its own scoped review.
+> live-investigation behavior. Everything below runs on free / open-source
+> tools or free-tier API registrations only — **nothing paid**. Tier 2–4
+> sources are enabled by project policy and marked review-gated; the Tier 5
+> floor is unchanged; no source is added without its own scoped review.
 
-Revision note — v2 adds, on top of v1: seed autodetection, likelihood-ratio
-scoring (Fellegi–Sunter) with base-rate priors, falsification-first review and
-Analysis of Competing Hypotheses, union-find conflict propagation, source
-reliability grading, VOI-based scheduling with adaptive budgets, case memory
-with cross-run caching and re-audit diffs, a much wider free-source playbook
-(archived web, open knowledge graphs, key servers, CT/RDAP, common crawl),
-human-loop tooling (confirm fast-lane, next-actions checklist, redaction,
-purge), a third-party firewall, a synthetic-world + adversarial test program,
-and an explicit list of free-but-rejected techniques.
+Revision note — v3 adds, on top of v2: (a) the **universal seed horizon** —
+any entry point, including raw pasted text or a screenshot, a location, a
+name, an organization, an image, a document, a phone, a crypto address, a
+vehicle or a patent, is a first-class start with its own playbook and
+bridge-claim class-jumping; (b) a **classified expansion policy** — every
+item previously listed as "excluded though free" is now sorted against the
+Florida Tier ladder: Tier 2–4 items are included as review-gated expansions
+(email-existence checks, GHunt on the operator's own account, people-search
+free tiers, face search free paths, stealer-log checkers, paste indexes,
+reverse-image search, dark-web indexes at Gate 6), while the Tier 5 floor
+(unauthorized access, interception, criminal-marketplace transactions,
+stalking/harassment) and paid-only defaults stay out; (c) a Wave-2 build
+phase for those expansions. v2 brought: seed autodetection, likelihood-ratio
+scoring (Fellegi–Sunter) with base-rate priors, falsification-first review
+and ACH, union-find conflict propagation, source grading, VOI scheduling
+with adaptive budgets, case memory with caching and re-audit diffs, the wide
+free-source playbook, human-loop tooling, the third-party firewall, and the
+synthetic-world test program.
 
 ## 1. Objective
 
@@ -34,9 +44,14 @@ Given any seed (or seed set, or raw text containing seeds), the engine must:
 
 ### Non-goals (unchanged policy)
 
-- No paid-only sources; no breach corpora beyond free registered APIs; no
-  login-walled scraping; no ToS violations; no Tier 5 activity. `GATES.md` and
-  the tier model are unchanged.
+- No paid-only sources or paid default dependencies (Gate 3); no Tier 5
+  activity — unauthorized computer access, communications interception,
+  criminal-marketplace transactions, stalking/harassment. Tiers 1–4 are
+  enabled by project policy; ToS-hostile-public sources are Tier 2 and
+  enabled, with per-source risk recorded at integration.
+- No target-account logins: adapters read public surfaces; the single
+  authenticated-workflow exception is the operator's own account with
+  explicit authorization (the GHunt pattern).
 - No fabricated unification: the cascade never merges identities without
   evidence; uncalibrated scores are always marked.
 - No third-party expansion (see firewall, section 11).
@@ -57,13 +72,17 @@ Given any seed (or seed set, or raw text containing seeds), the engine must:
 6. **Stopping is a feature** — saturation, diminishing returns, vetoes, and
    budgets end expansion early and record the reason.
 7. **Nothing paid** — free tools, free datasets, free-tier registrations only.
+8. **Universal horizon** — any entry point is first-class: a playbook for
+   every `SeedType`, raw-text/screenshot autodetection, and bridge claims
+   that jump between classes until that class is honestly exhausted.
 
 ## 3. Seed layer
 
-- **Autodetection**: accept raw text; extract candidate seeds (usernames,
-  emails, phones, URLs/domains, IPs, crypto addresses, VINs, company names)
-  via validators/regex; present the typed list for confirmation before a live
-  run. Multi-seed input runs as one investigation tree set (existing
+- **Autodetection**: accept raw text — or an image/screenshot via OCR — and
+  extract candidate seeds (usernames, emails, phones, URLs/domains, IPs,
+  crypto addresses, VINs, company names, names, places, document metadata)
+  via validators/regex; present the typed list for confirmation before a
+  live run. Multi-seed input runs as one investigation tree set (existing
   multi-seed machinery).
 - **Canonicalization** per type (case, URL/IDN normalization, E.164 for
   phones) drives dedup: a seed never runs twice in a run.
@@ -102,6 +121,47 @@ username:frost2233 --(sherlock, identity, social_username)--> accounts + urls
       domain --(theharvester, ssl_tls, crt.sh-class, RDAP-class)--> hosts, cert observations, more candidates
 ```
 *keys-gated adapters skip without secrets, as today.
+
+### 4.1 Universal seed horizon — every entry point is first-class
+
+"Anything the operator inputs" is a design invariant, not a slogan. Raw text
+or a screenshot is autodetected into typed seeds (section 3); every
+`SeedType` member has a playbook below; and every hop re-runs **bridge
+extraction** — the mechanism that makes the cascade jump between classes.
+
+**Bridge claims (the class-jumping mechanism).** A bridge claim is any claim
+that is itself a seed for another class: `url <-> domain`, `email <-> domain
+<-> avatar`, `image <-> place <-> device`, `name <-> records <-> org <->
+officers`, `phone <-> person`, `crypto_address <-> donation pages <->
+handles`, `file <-> metadata <-> author`, `ip <-> host <-> domain <-> site`,
+`company <-> officers`, `intellectual_property <-> inventors`, `vin <->
+registries`. Bridge extraction runs on *every* claim at *every* hop; it is
+not hardcoded per seed type. A build-time test asserts every `EntityType`
+resolves to >= 1 bridge extractor or an explicit terminal classification.
+
+**Per-seed playbooks** (first wave -> convergence -> squeeze):
+
+| Seed | First wave | Convergence path | "Squeezed" means |
+| --- | --- | --- | --- |
+| username | sherlock, identity, social_username/profile, search, code, WhatsMyName-class | avatars/bios/cross-links -> clusters; profile links -> domains/emails | all adapters ran; variants tried; profile links evaluated; no new claims |
+| email | Gravatar, WKD/keyservers, email_auth, exposure checks, code search, review-gated existence checks | avatar -> pHash vs accounts; key -> identity; domain -> infra | every free email-intel source ran; avatar compared; domain exhausted |
+| phone | PhoneInfoga-class, libphonenumber | corroboration attribute; messaging handles where public | carrier/geo + free lookups exhausted; recorded as thin if so |
+| person_name / name | search, academic, records, registry, sanctions, patents, open knowledge graphs | auto-bundled with context (place/age/org) -> candidate accounts | record families exhausted; disambiguation shown against context |
+| geolocation | geo/image adapters; records tied to place | context filter + intersection boost; place -> orgs/persons via records | imagery/records exhausted; honest "place intelligence" if no person is bound |
+| domain / url | theHarvester, ssl_tls, infra, ip_intel, email_auth, CT, RDAP, crawl/archive | emails/people on site; infra -> more domains | DNS/auth/CT/RDAP/crawl/archive pulled; extracted emails pivoted |
+| ip | ip_intel, infra, ssl_tls | reverse resolution -> domains -> sites -> people | reverse resolutions exhausted; hosting class recorded |
+| image / file_path | exiftool, geo-image, steg, OCR; local pHash | GPS -> place; device/time; author metadata -> name; reuse -> accounts | metadata/steg/OCR/hash cross-match done |
+| crypto_address | crypto_blockchain | transactions -> counterparties; donation pages -> handles | graph classified; public linkage recorded |
+| company_name / bank_name | registry, records, sanctions, patents | officers/directors -> person cascade | registries exhausted for relevant jurisdictions |
+| intellectual_property | patents/trademarks | inventors/assignees -> person/org cascade | jurisdiction sets exhausted |
+| lobbyist_name | government records | filings -> employers/clients -> people | disclosure sets exhausted |
+| vin | transport registry adapters | vehicle facts; owner data only where public | reachable facts recorded; ownership ceiling stated |
+
+Honest convergence notes: an isolated place, phone, or VIN has no person in
+it — the engine returns *place/vehicle intelligence* plus any people bound to
+it by public records, and says so. Name seeds are auto-bundled with supplied
+context (`ContextFilters`) to fight ambiguity. Multiple pasted seeds run as
+one investigation with the intersection engine.
 
 ## 5. Claim layer, blocking, and conflict ledger
 
@@ -150,11 +210,17 @@ distinct identities" when conflicts exist.
 | STRONG | identical bio / media asset hash | strong |
 | STRONG | same personal domain | strong |
 | STRONG | explicit cross-platform declaration | strong |
+| STRONG* | face-search match (review-gated; free paths only; never sole basis) | strong, capped |
 | MEDIUM | IDF name match + era coherence | medium |
 | MEDIUM | country + window + tag overlap | medium |
 | MEDIUM | handle-variant family + era | medium-weak |
+| MEDIUM* | account-exists observation (endpoint existence checks; review-gated) | medium |
+| MEDIUM* | exposure/stealer-check signal (review-gated; signal fields only) | medium |
 | WEAK | common-name similarity, broad geography | weak |
 | VETO | conflicting rare identifier / rare name / demographics | exclude |
+
+`*` = review-gated expansions per section 10.1; these corroborate but can
+never clear a tier gate alone.
 
 ### 6.3 Tiers and hypothesis review
 
@@ -196,7 +262,8 @@ grade; low-grade sources alone can never clear a tier gate.
 
 Policy: personal identifiers (email, phone, person_name) pivot only from
 **confirmed**; structural seeds from **confirmed or probable**; media seeds
-from probable+ for local comparison only (no third-party biometrics);
+from probable+ — local comparison by default, face-search corroboration
+only as a review-gated expansion (section 10.1) and never a sole basis;
 possible/excluded spawn nothing.
 
 ## 8. Scheduler
@@ -255,17 +322,50 @@ Each new source requires its own scoped review before integration.
 | Social graph | public follow/friend lists | mutual-overlap evidence (medium) |
 | Geo | Mapillary/Nominatim/OSM, exiftool, steg analysis (existing) | place evidence from images |
 
-Media handling: reverse-image-search scraping is excluded (ToS); the engine
-uses local perceptual hashing, EXIF, OCR, and archived avatar captures only.
+Media handling: local perceptual hashing, EXIF, OCR, and archived avatar
+captures run by default. Face search and reverse-image search are
+review-gated expansions (10.1), free paths only.
 
-**Free-tier key registrations (Gate 3 class)**: reddit-api, youtube-api,
-LeakIX community, GrayhatWarfare free tier, GitHub token (higher rate
-limits). Each unlock is listed in the report's next-actions checklist.
+**Free-tier key registrations (Gate 3 class — free keys only; no paid
+defaults)**: reddit-api, youtube-api, LeakCheck free OSINT-Hub path, LeakIX
+community, GrayhatWarfare free tier, Hudson Rock free endpoints, Shodan
+free-account key, GitHub token (higher rate limits). HIBP direct email
+lookups require a subscription and stay out under the nothing-paid rule
+(XposedOrNot and the LeakCheck free path cover that class). Each unlock is
+listed in the report's next-actions checklist.
 
-**Excluded even though free** (policy): holehe-class reset-endpoint probing
-(ToS/gray), reverse-image-search scraping (ToS), people-search/dossier
-scraping (ToS/law), darkweb indexes (Gate 6), stealer-log corpora beyond
-existing leak-checker scope, brute-force enumeration of non-public endpoints.
+### 10.1 Review-gated expansions — included (Tiers 2–4, project-allowed)
+
+Each item below is allowed by project policy (`DIRECTIVE_AMENDMENT_FLORIDA.md`)
+and is part of the Wave-2 build plan (P17.11); each still needs its own
+source, license, scope, and implementation review before code. Permitted
+sources with open interface facts (Blackbird licensing, Lullar's missing
+machine interface) stay backlogged until their review resolves those facts.
+
+| Expansion | Class | Conditions and safeguards |
+| --- | --- | --- |
+| Email-existence endpoint checks (holehe-class tools) | 2, public automation | owner-subject first (third-party firewall); per-site scoped allowlist; recorded as "account-exists observation"; no credential use; politeness limits |
+| GHunt (Google-account surface) | 3-class, operator-owned account | only on the operator's own Google account with explicit authorization; read-only output |
+| People-search aggregators (TruePeopleSearch, Whitepages free, PeekYou) | 4, aggregators | free paths only (paid-only products rejected); politeness; firewall; coverage limits recorded |
+| Face search (free-path services; e.g. Search4Faces) | policy-allowed | free paths only (paid subscriptions such as PimEyes excluded by nothing-paid); corroboration only, never a sole basis |
+| Stealer-log checkers (Hudson Rock, LeakRadar) | 4, stealer logs | structural safeguard before any credential-field parsing; signal/existence fields preferred; found credentials are never used for any login |
+| Paste indexes (psbdmp-class, LeakCheck OSINT-Hub) | 4, leak indexes | flag-only storage — existence, date, source name; never dump contents beyond evidence hashes |
+| Reverse-image-search automation | 2, ToS-hostile public | per-engine terms analysis at review; free engines only; fallback stays local pHash + archived captures |
+| Dark-web search indexes (Ahmia, Torch, OnionLand, DarkSearch) | 4, dark-web indexes | policy-allowed; **Gate 6 deferred** (no verifiable request contract; Tor setup) — adapter slot designed, activates when Gate 6 clears |
+| Bulk/paste data processing | 4 | allowed by policy; subject scope and retention rules apply |
+
+### 10.2 Stays excluded — Tier 5 floor and paid defaults
+
+- Brute-force or any access to non-public / access-controlled endpoints
+  (unauthorized computer access).
+- CAPTCHA / paywall bypass.
+- Using another person's credentials; authenticating against target services.
+- Communications interception.
+- Criminal-marketplace transactions (index lookup only — never buying dumps).
+- Stalking / harassment patterns (e.g., reset-email spam at scale).
+- Paid-only products and paid default dependencies (e.g., HIBP direct email
+  lookups; OpenCorporates non-open access paths).
+- ONYPHE (Free View limited to the operator's own systems).
 
 ## 11. Firewalls and honesty
 
@@ -284,6 +384,9 @@ existing leak-checker scope, brute-force enumeration of non-public endpoints.
   from further pivoting, keeps claims for audit, marked.
 - **Collision honesty**: report ties to multiple distinct identities when
   conflicts exist; never print uncalibrated numbers as probabilities.
+- **Found-material rule**: credentials or dump contents encountered by any
+  allowed source are never used, never stored beyond evidence hashes/flags,
+  and never trigger authenticated activity.
 - **Redaction & retention**: reports can be generated `--redact`ed for
   sharing; labels and cache live under the data root (never committed); a
   `purge` command deletes case artifacts on request.
@@ -317,7 +420,8 @@ existing leak-checker scope, brute-force enumeration of non-public endpoints.
 - **Property tests**: no merge without the evidence rule; vetoes always win;
   determinism (same seeds + budget => identical order and trail); dedup
   invariant; budgets never exceeded; egress only via proxy; third-party
-  firewall holds.
+  firewall holds; Tier 5 line holds (no credential-use paths); bridge
+  coverage (every `EntityType` has an extractor or terminal classification).
 - **Golden cascade run**: fixed fixture => stable trail hash (regression
   detector for scoring changes).
 - **Failure injection**: proxy 429/503, bot walls, malformed HTML; assert
@@ -338,7 +442,7 @@ existing leak-checker scope, brute-force enumeration of non-public endpoints.
 
 ## 15. Build plan (each step CI-verified; docs commits separate from code)
 
-1. **P17.1** — this design document (v2) + PROJECT_DIRECTION pointer.
+1. **P17.1** — this design document (v3) + PROJECT_DIRECTION pointer.
 2. **P17.2** — cascade models + descriptor-derived routing graph + coverage
    invariant test + seed autodetection.
 3. **P17.3** — claim normalization + blocking + pivot extractors + fixtures.
@@ -354,6 +458,11 @@ existing leak-checker scope, brute-force enumeration of non-public endpoints.
    CI.
 10. **P17.10** — fixture dry-run -> local suite -> CI -> live cascade on the
     owner's own seed with owner confirmations; first real calibration labels.
+11. **P17.11** — Wave-2 expansions, each with its own scoped review before
+    code: email-existence checks, GHunt (own account), people-search free
+    tiers, face search (free paths), stealer-log checkers, paste indexes,
+    reverse-image search; the dark-web adapter slot activates only when
+    Gate 6 clears.
 
 ## 16. Honest ceilings
 
@@ -374,5 +483,8 @@ existing leak-checker scope, brute-force enumeration of non-public endpoints.
 2. `pivot_scope` defaults per mode (owner mode: email/name on, phone on?).
 3. Case model: opt-in `--case X` (proposed) or always case-attached?
 4. Cache TTL defaults (30d profiles / 7d DNS proposed) — confirm.
-5. Whether psbdmp-class paste indexing proceeds once its own Tier 4 scoped
-   review is written (independent of the cascade).
+5. Wave-2 prioritization: which review-gated expansion first (proposed:
+   email-existence checks + GHunt, then people-search free tiers, then
+   exposure checkers, then face search; dark-web last, at Gate 6)?
+6. Face search: corroboration-only (proposed) or allowed as STRONG alone
+   with a margin over alternatives?
