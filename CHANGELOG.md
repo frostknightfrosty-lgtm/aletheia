@@ -1,5 +1,43 @@
 # Changelog
 
+## 2026-10-18 — Phase 15: every network-requiring adapter routes egress through the proxy, CI-verified
+- **Coverage is a policy, not an allowlist.** `EGRESS_WIRED_ADAPTERS` (the
+  `search_engines` / `ssl_tls` / `ip_intelligence` subset from Phase 12) is replaced by
+  `egress.is_wired(name, network_required=descriptor.network_required)`: an adapter's egress
+  goes through the proxy whenever its descriptor declares `network_required=True`.
+  `EGRESS_EXEMPT_ADAPTERS` is the (empty) list of documented exceptions. Measured against the
+  registry: 49 adapters, 44 declare `network_required=True`, 44 wired.
+- **The proxy is now the default path.** `Orchestrator.resume` wires by default; previously it
+  required `wire_egress=True`, which neither the CLI nor the MCP server ever passed, so the
+  proxy was effectively test-only in production paths. Offline replays pass
+  `wire_egress=False`, and `aletheia investigate` / `aletheia resume` gained
+  `--no-egress-proxy` as the explicit opt-out.
+- **Coverage is checked, not claimed.** `tests/test_egress_wiring.py` walks all 49 adapters and
+  asserts the policy matches their descriptors. `ci/egress_scenario.py` adds
+  `phase15-egress-policy-covers-registry` and a real-container
+  `phase15-egress-previously-unwired-adapter` check: `crtsh`, never in the Phase 12 allowlist,
+  runs on an `--internal` network and its HTTPS attempt is logged by the proxy
+  (`crtsh rc=1 crt.sh log entries=1` — fail-closed, as it must be). Two Docker integration
+  tests assert those checks.
+- Honest limits recorded in `docs/EGRESS_PROXY_CONTRACT.md`: the proxied path is proven end to
+  end for four adapters; an adapter whose client ignores `HTTP_PROXY` / `HTTPS_PROXY` fails
+  closed rather than egressing unproxied, but that failure mode is not separately demonstrated
+  per adapter, and some third-party CLI adapters may use their own resolvers.
+- Verified by Docker Verification run `39084899431` on commit
+  `9f1c09288961d5175ff6c2d68b8b6f7f307074d7`
+  (https://github.com/frostknightfrosty-lgtm/aletheia/actions/runs/39084899431). Lines copied
+  from the downloaded artifact: `PARSER PREFLIGHT: PASS — 49/49 adapters have parser coverage`;
+  `678 passed, 1 warning in 36.14s`; `DOCKER CAPTURE: PASS — 57/57 cases captured`;
+  `STORAGE CONFORMANCE: PASS — 6/6 backends conform`. `pytest-summary.json`: `junit_total` 678,
+  `skipped_in_ci` `[]`, `ok` `true`. `results.json`: 57 entries, 0 nonzero return codes, both
+  `phase15-*` entries present. Local consistency: 617 passed + 61 skipped = 678 CI passed. No
+  test was skipped, deleted, or weakened.
+- **A defect caught before it shipped: the evidence was computed but not reported.** Run
+  `39083768809` executed all 677 cases with 0 skipped and failed one test because the scenario
+  appended the policy check and then `main()` overwrote `summary["checks"]` with the dict
+  returned by `_run_checks`. The list is now assembled in one place, and a unit test pins the
+  check's name and result.
+
 ## 2026-10-18 — Phase 14: storage backends behind one conformance contract, CI-verified against real services
 - **One contract, six backends.** `app/aletheia/storage/base.py` defines `StorageBackend`
   (graph snapshots + run manifests), implemented by `file`, `postgres`, `neo4j`,

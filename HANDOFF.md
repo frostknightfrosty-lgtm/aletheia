@@ -1,6 +1,6 @@
-# Aletheia Handoff — Phase 14 complete (storage backends)
+# Aletheia Handoff — Phase 15 complete (egress coverage)
 
-Last updated: 2026-10-18T00:25:00Z
+Last updated: 2026-10-18T01:18:27Z
 
 ## Project boundaries
 
@@ -13,27 +13,70 @@ prerequisites are met. A tier classification is project policy, not a legal conc
 
 ## Repository and CI state
 
-- Latest CI-verified commit: `e9bfdda953622c4eda69f342f294a09e23d0b73b`
-  (`phase-14: fix the two defects CI found, and make sync migrate a fresh backend`).
-- Docker Verification run **39081533916** —
-  https://github.com/frostknightfrosty-lgtm/aletheia/actions/runs/39081533916 — **green**.
+- Latest CI-verified commit: `9f1c09288961d5175ff6c2d68b8b6f7f307074d7`
+  (`phase-15: keep the policy check in the scenario summary`).
+- Docker Verification run **39084899431** —
+  https://github.com/frostknightfrosty-lgtm/aletheia/actions/runs/39084899431 — **green**.
 - Evidence lines copied from the downloaded artifact
-  (`ci-artifacts-39081533916`), not typed:
+  (`ci-artifacts-39084899431`), not typed:
   - `PARSER PREFLIGHT: PASS — 49/49 adapters have parser coverage`
-  - `672 passed, 1 warning in 36.02s`
-  - `DOCKER CAPTURE: PASS — 55/55 cases captured`
+  - `678 passed, 1 warning in 36.14s`
+  - `DOCKER CAPTURE: PASS — 57/57 cases captured`
   - `STORAGE CONFORMANCE: PASS — 6/6 backends conform`
-- `pytest-summary.json`: `junit_total` 672, `skipped_in_ci` `[]`, `ok` `true`.
+- `pytest-summary.json`: `junit_total` 678, `skipped_in_ci` `[]`, `ok` `true`.
   `storage-conformance.json`: `passing` = `file`, `postgres`, `neo4j`, `elasticsearch`,
-  `minio`, `redis`; `unconfigured` `[]`. `results.json`: 55 entries, 0 nonzero return codes.
-- Local consistency: **613 passed + 59 skipped = 672**, which equals the CI passed count
-  exactly. The 59 skips are 54 `tests/test_docker_integration.py` (no Docker on this machine)
+  `minio`, `redis`; `unconfigured` `[]`. `results.json`: 57 entries, 0 nonzero return codes,
+  with both `phase15-*` scenario checks present. `egress-scenario.json`:
+  `phase15-egress-policy-covers-registry` = `adapters=49 network_required=44 wired=44`;
+  `phase15-egress-previously-unwired-adapter` = `crtsh rc=1 crt.sh log entries=1`; all four
+  `phase12-*` checks still pass.
+- Local consistency: **617 passed + 61 skipped = 678**, which equals the CI passed count
+  exactly. The 61 skips are 56 `tests/test_docker_integration.py` (no Docker on this machine)
   and 5 `tests/test_storage_services.py` (no `ALETHEIA_STORAGE_*` service configured); both
   groups execute in CI, and CI now *fails* if either group skips — see
   `docs/SKIPPED_IN_CI.md`.
 - 49 registered adapters, all `verified-fixture`. No `verified-live` adapters. One
   infrastructure component (`egress_proxy`), `verified-fixture`. Six storage backends, all
-  conformance-verified against real services in CI.
+  conformance-verified against real services in CI. 44 of the 49 adapters declare
+  `network_required=True`, and the egress policy wires all 44.
+
+## Phase 15 — egress proxy coverage (complete)
+
+Implemented and CI-verified in commits `5add1b5` (policy, default wiring, CLI flag), `4ed8772`
+(docs), `9f1c092` (report the policy check).
+
+- The Phase 12 allowlist `EGRESS_WIRED_ADAPTERS = (search_engines, ssl_tls, ip_intelligence)`
+  is gone. `egress.is_wired(name, network_required=descriptor.network_required)` is true for
+  every adapter whose descriptor declares `network_required=True`; `EGRESS_EXEMPT_ADAPTERS` is
+  the empty, documented exception list. Registry measurement: 49 adapters, 44
+  network-requiring, 44 wired.
+- `Orchestrator.resume` wires **by default**. That is a production-path change: previously
+  `wire_egress` defaulted to `False`, and neither `aletheia investigate` / `aletheia resume` nor
+  the MCP server passed it, so the proxy was effectively test-only outside
+  `ci/egress_scenario.py`. Offline replays pass `wire_egress=False`; the CLI exposes
+  `--no-egress-proxy`.
+- Coverage is checked rather than asserted: a unit test walks the registry, and CI reports
+  `phase15-egress-policy-covers-registry` (`adapters=49 network_required=44 wired=44`) plus a
+  real-container check that runs `crtsh` — never in the Phase 12 allowlist — on an `--internal`
+  network and finds its HTTPS attempt in the proxy log (`crtsh rc=1 crt.sh log entries=1`,
+  fail-closed).
+- The wiring pattern itself is unchanged from Phase 12: one `--internal` network per adapter
+  run, the proxy as the only route out, `HTTP_PROXY`/`HTTPS_PROXY`/`NO_PROXY` in the container,
+  the proxy log appended to the run's hash-chained `AUDIT.jsonl`, then the proxy stopped and the
+  network removed.
+
+### Honest limitations (recorded, not softened)
+
+- Coverage is complete **by policy**: every network-requiring adapter is classified from its
+  descriptor. The proxied path is proven end to end for four adapters (`search_engines`,
+  `ssl_tls`, `ip_intelligence`, `crtsh`). An adapter whose client ignores the proxy variables
+  (or speaks a non-HTTP protocol) fails closed on the `--internal` network instead of egressing
+  unproxied; that failure mode is not separately demonstrated per adapter.
+- Some adapters wrap third-party CLIs (`sherlock`, `theharvester`, `amass`, …) that may use
+  their own resolvers; the network policy still removes any route out, so the worst case is a
+  failed lookup, not an unlogged request.
+- The proxy log records what reached the proxy; it cannot see inside an established TLS tunnel
+  and is not a packet capture.
 
 ## Phase 14 — storage backends (complete)
 
@@ -230,29 +273,33 @@ manifest**, not a digital signature and not a legal-admissibility guarantee.
 
 ## Next action
 
-**Phase 15 — egress proxy coverage (46 adapters remain).** Phase 12 hand-wired three
-adapters (`search_engines`, `ssl_tls`, `ip_intelligence`); the other 46 still run without the
-proxy, so "all adapter traffic is forced through the proxy" is only partially met. The shape
-to pursue is to make the `--internal` network plus proxy the **default** path inside
-`execution.run_docker` for `network_required` adapters instead of per-adapter hand-wiring, then
-extend `ci/egress_scenario.py` and raise `EGRESS_WIRED_ADAPTERS` to the full set. After that:
-the remaining batched adapters (`transport_movement` and `darkweb_search` stay deferred on Gate
-6), the authorized live investigation (Gate 2 needs a user-owned target, Gate 3 needs API keys
-in GitHub Secrets), and the final documentation and CI reconciliation.
+**Blocked on the user.** The verified-fixture work is complete: 678 tests execute in CI with 0
+skipped, all 49 adapters are `verified-fixture`, 6/6 storage backends conform against real
+services, and adapter egress is proxied by policy (44 of 49 adapters declare network access; all
+44 are wired). The next substantive step is the authorized live investigation, which needs:
+
+- **Gate 2** — an explicit, user-owned live target and an authorization assertion for the first
+  `verified-live` run. No live lookup has been made, and none should be made without this.
+- **Gate 3** — free API keys, if an adapter is to be proven live, supplied as GitHub Secrets
+  (never in the repo) and cost-checked first.
+
+`transport_movement` and `darkweb_search` remain deferred on Gate 6 (registrations / written
+permission; no verifiable request contract). Nothing left in the backlog can be advanced
+honestly without those decisions.
 
 ## Known deferred issues
 
-- **Egress coverage is partial.** The Phase 11 component
-  (`app/aletheia/core/egress.py`, `docker/egress_proxy`) is CI-verified and Phase 12 wired it
-  into three adapters through an `--internal` network with no published proxy port; the
-  remaining 46 adapters still egress directly, so there is no per-request proxy
-  logging, rate limiting, kill switch, or network-level fail-closed behaviour for them yet.
+- **Egress coverage is proven by policy per adapter and by execution for four adapters.** Every
+  `network_required=True` adapter is wired (checked against the registry), but the proxied path
+  has only been exercised end to end for `search_engines`, `ssl_tls`, `ip_intelligence` and
+  `crtsh`. An adapter whose client ignores the proxy variables fails closed rather than
+  egressing unproxied; that failure mode is not demonstrated per adapter.
 - No `verified-live` adapters; every fixture is synthetic unless separately documented.
 - Score/confidence separation is incomplete; `--purpose` is not a required adapter field.
 - `AUTONOMOUS_DIRECTIVE.md` and `AGENT_SETUP.md` live at the repo root, but both reference
   `docs/AUTONOMOUS_DIRECTIVE.md`. Worth fixing or documenting.
 - **Point-in-time documents deliberately left unedited.** `audit/CLAIMS_VS_VERIFIED_AUDIT.md`
-  still lists the storage backends as unimplemented (superseded by Phase 14), and
+  keeps its Step 3 rows (with a superseded-in-part banner) rather than being rewritten, and
   `aletheia_step3_CI_READY.md` still calls the egress proxy non-existent (superseded by Phase
   11). They record the state at their moment of writing; this handoff supersedes both.
 - The audit trail of unverified claims in `RESUME_STATE.json` before 2026-10-14 should be
