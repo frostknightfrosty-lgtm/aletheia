@@ -1,5 +1,58 @@
 # Changelog
 
+## 2026-10-18 — Live-path repair after run `39120709419`: docker argv, entrypoint-args commands, honest reporting, CI-verified
+- **`run_docker` never told Docker what to run.** Run `39120709419` was the
+  first live invocation of the container path in the project's history; every
+  adapter "completed" in seconds while its `result.json` recorded exit code 1
+  and `docker: 'docker run' requires at least 1 argument` on stderr, and
+  `report.json` still listed them as ran. `execution.run_docker` now appends
+  `[image, *command]`, and `_adapter_summary` reads each invocation's
+  `result.json` (`ok`/`succeeded` -> ran, `partial`, `failed`/`error`, missing
+  -> unknown) with `exit_code` plus the last non-empty stderr line.
+- **29 of 49 adapters repeated their image's ENTRYPOINT** inside
+  `build_command` (full entrypoint, `runner.py` script, or bare Go binary), so
+  even a correct argv would have run the wrong program. Commands are now
+  arguments-only; `deepface`/`insightface` additionally passed a host workspace
+  path into the container and now pass `/work/input.<ext>`. New invariant test
+  `tests/test_adapter_invocation_consistency.py` (49 parametrized cases) builds
+  every adapter's command with a sample seed and checks it against the
+  ENTRYPOINT parsed from the Dockerfile `docker/build.sh` builds the image from
+  (basename-aware; rejects host workspace paths in commands).
+- **Two honesty defects found in the same artifact:** `reddit-api` fabricated a
+  profile URL from the seed when its payload was empty
+  (`raw_evidence_sha256` was the SHA-256 of the empty string), and `sherlock`
+  marked its seed claim `searched` ("Collector searched public sites") even
+  when no container had run. Claiming an account now requires the payload to
+  carry the username; the sherlock attribute and note follow the evidence.
+  `reddit-api`/`youtube-api` emit credential-skip findings on exit code 5 so a
+  key-gated adapter appears in `manifest["skipped"]` and in the report with the
+  runner's own reason instead of an ambiguous gap.
+- **`ProxySession` dual-homes the proxy** (`uplink`, default `bridge`): the
+  `--internal` network has no route out, so a single-homed proxy could reach no
+  upstream at all; the bind-mounted log dir is now made world-writable for the
+  proxy's unprivileged uid. `ci/egress_scenario.py` runs the real
+  `ProxySession` lifecycle and added `phase12-egress-uplink-forward` /
+  `phase12-egress-uplink-isolated`; the crtsh check asserts exactly one new
+  CONNECT entry rather than requiring the runner to fail closed.
+- **Verified** by Docker Verification run `39123918529` on commit
+  `4583d38a0db45756fccfe978087e0abec343bcb8`
+  (https://github.com/frostknightfrosty-lgtm/aletheia/actions/runs/39123918529).
+  Lines copied from the downloaded artifact:
+  `PARSER PREFLIGHT: PASS — 49/49 adapters have parser coverage`;
+  `777 passed, 1 warning in 158.97s (0:02:38)`;
+  `DOCKER CAPTURE: PASS — 59/59 cases captured`;
+  `STORAGE CONFORMANCE: PASS — 6/6 backends conform`.
+  `pytest-summary.json`: `junit_total` 777, `skipped_in_ci` `[]`, `ok` `true`.
+  `results.json`: 59 entries, 0 nonzero return codes.
+  `storage-conformance.json`: `configured` = file, postgres, neo4j,
+  elasticsearch, minio, redis; `unconfigured` `[]`; `required_all` `true`.
+  `egress-scenario.json`: all 8 checks ok, including
+  `phase12-egress-uplink-forward` = `proxy forwarded to the uplink-network origin`,
+  `phase12-egress-uplink-isolated` = `direct-to-uplink='UNREACHABLE URLError'`, and
+  `phase15-egress-previously-unwired-adapter` = `crtsh rc=1 new CONNECT crt.sh entries=1 status=200`.
+  Local consistency: 714 passed + 63 skipped = 777 CI passed. 59 new tests; no
+  test was skipped, deleted, or weakened.
+
 ## 2026-10-18 — Phase 16: multi-seed investigations, context filters, jurisdiction warnings, adapter-run reporting, Tier 5 rejection, CI-verified
 - **Multi-seed runs implemented** (`f0352a4`): `create_run` accepts one seed
   (unchanged single-seed behavior) or a sequence; every matching adapter is

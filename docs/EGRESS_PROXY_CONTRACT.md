@@ -57,7 +57,12 @@ adapter run:
    only route off the network.
 2. Start the egress proxy detached on that network
    (`EgressProxy.run_command(..., detached=True, publish_port=False)`), so it is
-   addressed by container name and never exposed on the host.
+   addressed by container name and never exposed on the host, then attach it to
+   an **uplink** network (default `bridge`, `ProxySession.uplink`). The
+   `--internal` network has no route out, so a single-homed proxy cannot reach
+   any upstream at all; the uplink is the proxy's only exit, and no adapter can
+   use it (run 39120709419's repair added both this step and the checks that
+   prove it).
 3. Run the adapter container on the *same* network with `HTTP_PROXY` and
    `HTTPS_PROXY` set to `http://<proxy-container>:<port>` (and
    `NO_PROXY=localhost,127.0.0.1` for loopback) instead of `--network bridge`.
@@ -65,7 +70,9 @@ adapter run:
    hash-chained audit log with `append_log_to_chain`.
 5. Stop the proxy and delete the network.
 
-`ProxySession` implements steps 1, 2, and 5; `AdapterRunRequest.proxy_url` /
+`ProxySession` implements steps 1, 2, and 5 (including the uplink attach and
+making the bind-mounted log directory writable for the proxy's unprivileged
+uid); `AdapterRunRequest.proxy_url` /
 `network_name` and `run_docker(..., network_name=...)` carry step 3; and the
 orchestrator performs step 4. The decision for step 3 is a policy, not a list:
 `egress.is_wired(name, network_required=descriptor.network_required)` is true for
@@ -76,10 +83,12 @@ by default; offline replays pass `wire_egress=False`, and the CLI exposes
 
 Coverage is verified from the registry, not asserted: a unit test checks the
 policy against all 49 adapters, and `ci/egress_scenario.py` reports a
-`phase15-egress-policy-covers-registry` check plus a real-container check that
-`crtsh` — an adapter outside the Phase 12 allowlist — has its egress attempt
-logged by the proxy. The `phase12-*` and `phase15-*` Docker integration tests
-assert those checks.
+`phase15-egress-policy-covers-registry` check, two real-container checks that
+prove the uplink is the proxy's exclusive exit (`phase12-egress-uplink-forward`
+and `phase12-egress-uplink-isolated`), and a real-container check that `crtsh` —
+an adapter outside the Phase 12 allowlist — has its egress attempt logged by the
+proxy as exactly one new CONNECT entry. The `phase12-*` and `phase15-*` Docker
+integration tests assert those checks.
 
 ## Request log schema
 
@@ -117,6 +126,14 @@ Per-adapter token bucket, persisted across restarts:
 
 The proxy applies the same decision before opening any upstream connection and
 logs refusals with status `429`.
+
+The defaults are deliberately polite (`rate=1.0`, `capacity=1.0`); an operator
+running a wide sweep raises both with `aletheia investigate --egress-rate N
+--egress-burst M` (or the Live Investigation workflow's `egress_rate` /
+`egress_burst` inputs), which reach `ProxySession(rate=…, capacity=…)` and the
+proxy's `ALETHEIA_EGRESS_RATE` / `ALETHEIA_EGRESS_BURST` environment. The proxy
+never queues over the limit: excess requests are answered `429`, so overload is
+visible in `EGRESS.jsonl` instead of silent.
 
 ## Kill switch
 
@@ -163,9 +180,11 @@ Docker-invoked adapters — the proxy entry deliberately does not contain the wo
 
 CI: `aletheia/egress-proxy:v1` is built by `docker/build.sh`, health-checked by
 the Docker integration smoke and captured by case `phase11-egress-proxy` under
-`--network none`. `ci/egress_scenario.py` additionally wires the proxy, a local
-origin and the adapter image onto an `--internal` Docker network and asserts the
-forwarded request, the adapter's proxied egress, the audit-chain append, and the
-fail-closed behaviour; those become the `phase12-egress-*` capture cases. The
-status in `PROJECT_MANIFEST.json` moves from `unverified-fixture` to
+`--network none`. `ci/egress_scenario.py` additionally wires the proxy (through
+the real `ProxySession` lifecycle, uplink included), a local origin, an origin
+on the uplink network and the adapter image onto an `--internal` Docker network
+and asserts the forwarded request, the uplink forward, the internal network's
+isolation from the uplink, the adapter's proxied egress, the audit-chain append,
+and the fail-closed behaviour; those become the `phase12-egress-*` capture
+cases. The status in `PROJECT_MANIFEST.json` moves from `unverified-fixture` to
 `verified-fixture` only from artifact-copied lines (Gate 5).
