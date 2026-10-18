@@ -133,6 +133,43 @@ def test_session_starts_network_then_detached_proxy(tmp_path):
     # The proxy is dual-homed: the adapter network has no route out, so the
     # uplink is the proxy's — and only the proxy's — route to any upstream.
     assert calls[2] == ["docker", "network", "connect", "bridge", "aletheia-egress-ssl-tls"]
+    # Readiness: `docker run -d` returns before the proxy process has bound the
+    # port; the session must probe before any adapter can start (live run
+    # 39135219248: social_username raced that window and got "Connection
+    # refused" with no egress log at all).
+    assert len(calls) == 4
+    assert calls[3][:5] == ["docker", "exec", "aletheia-egress-ssl-tls", "python", "-c"]
+    assert "create_connection(('127.0.0.1',8888)" in calls[3][5]
+    assert "sys.exit(0)" in calls[3][5]
+
+
+def test_session_fails_loudly_when_the_proxy_never_accepts(tmp_path):
+    """A proxy that never binds must fail the session with a clear readiness
+    error, not surface later as a bare adapter-side "Connection refused" with
+    zero egress evidence (live run 39135219248, social_username)."""
+    calls: list[list[str]] = []
+
+    def runner(argv: list[str]):
+        calls.append(list(argv))
+        if argv[:2] == ["docker", "exec"]:
+            return _Completed(
+                returncode=1, stderr="proxy not accepting connections: ConnectionRefusedError()"
+            )
+        return _Completed()
+
+    session = egress.ProxySession("search_engines", tmp_path / "egress", runner=runner)
+    with pytest.raises(egress.DockerCommandError, match="did not accept"):
+        session.start()
+    assert calls[3][:2] == ["docker", "exec"]
+
+
+def test_probe_command_targets_the_proxy_loopback(tmp_path):
+    session = egress.ProxySession(
+        "ssl_tls", tmp_path / "egress", runner=lambda argv: _Completed()
+    )
+    probe = session.probe_command()
+    assert probe[:5] == ["docker", "exec", "aletheia-egress-ssl-tls", "python", "-c"]
+    assert "sys.exit(1)" in probe[5]  # the loop must be able to give up
 
 
 def test_session_forwards_operator_egress_limits(tmp_path):

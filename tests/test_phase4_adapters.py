@@ -69,7 +69,7 @@ def test_maigret_parser_only_accepts_claimed_results(tmp_path):
     assert {f.value for f in result.findings if f.entity_type == EntityType.URL} == {"https://github.com/alice"}
 
 
-def test_maigret_command_survives_a_read_only_root_and_takes_the_injected_proxy():
+def test_maigret_command_survives_a_read_only_root_and_leaves_the_transport_to_env():
     adapter = MaigretAdapter()
     plain = adapter.build_command(req(SeedType.USERNAME, "alice"), Path("."))
     # The autoupdate check creates ~/.maigret, which a --read-only container
@@ -85,9 +85,12 @@ def test_maigret_command_survives_a_read_only_root_and_takes_the_injected_proxy(
         proxy_url="http://aletheia-egress-maigret:8888",
     )
     proxied = adapter.build_command(request, Path("."))
-    # maigret's aiohttp stack ignores HTTP(S)_PROXY: the EgressProxy transport
-    # must arrive as an argument (live run 39125383530 made direct DNS instead).
-    assert proxied[proxied.index("--proxy") + 1] == "http://aletheia-egress-maigret:8888"
+    # The proxy is injected via HTTP_PROXY/HTTPS_PROXY in the container
+    # environment (core.execution). An explicit --proxy flag made maigret
+    # 0.6.6's aiohttp transport tunnel to the proxy through the proxy itself
+    # (live run 39135219248: 455 self-CONNECTs, 46% "Proxy" errors); the
+    # env-only path is single-hop for both transports.
+    assert "--proxy" not in proxied
     assert "--dns-resolver" in proxied
 
 

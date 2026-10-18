@@ -79,10 +79,16 @@ class MaigretAdapter(IdentityAdapter):
             "--json", "ndjson",
             "--folderoutput", "/work/results",
         ]
-        if request.proxy_url:
-            # The container has no route out except the egress proxy, and
-            # maigret's aiohttp stack ignores HTTP(S)_PROXY: pass it explicitly.
-            command += ["--proxy", request.proxy_url]
+        # The egress proxy arrives via HTTP_PROXY/HTTPS_PROXY in the container
+        # environment (core.execution); no --proxy flag on purpose. Passing
+        # --proxy as well made maigret 0.6.6 double-hop: its
+        # SimpleAiohttpChecker combines an aiohttp_socks ProxyConnector built
+        # from --proxy with ClientSession(trust_env=True), so aiohttp tunnelled
+        # through the connector *to the environment proxy address* and the
+        # proxy dialled itself (live run 39135219248: 455 self-CONNECTs, 46% of
+        # checks failed as "Proxy" errors). Both transports - aiohttp with
+        # trust_env and curl_cffi via libcurl - honour the environment proxies
+        # (verified against docker/egress_proxy/proxy.py in local repros).
         return command
 
     def parse(self, request: AdapterRunRequest, workspace: Path, stdout: str, stderr: str, exit_code: int) -> AdapterRunResult:

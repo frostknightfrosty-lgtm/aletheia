@@ -39,6 +39,26 @@ DEFAULT_IMAGE = "aletheia/egress-proxy:v1"
 DEFAULT_PORT = 8888
 LOG_FILENAME = "EGRESS.jsonl"
 
+# Readiness probe: `docker run -d` returns before the proxy process inside has
+# bound its port, so the session must wait or an adapter can lose the race and
+# see "Connection refused" with no egress log at all (live run 39135219248).
+PROBE_TIMEOUT_SECONDS = 15.0
+PROBE_INTERVAL_SECONDS = 0.25
+_PROBE_TEMPLATE = (
+    "import socket,sys,time\n"
+    "deadline=time.time()+{timeout}\n"
+    "last=None\n"
+    "while time.time()<deadline:\n"
+    "    try:\n"
+    "        socket.create_connection(('127.0.0.1',{port}),1).close()\n"
+    "        sys.exit(0)\n"
+    "    except OSError as exc:\n"
+    "        last=exc\n"
+    "        time.sleep({interval})\n"
+    "sys.stderr.write('proxy not accepting connections: %r\\n' % (last,))\n"
+    "sys.exit(1)\n"
+)
+
 
 def _dns_safe(name: str) -> str:
     """Make an adapter name usable as a Docker container/network DNS label."""
@@ -527,7 +547,7 @@ class ProxySession:
         return completed
 
     def start(self) -> "ProxySession":
-        """Create the internal network, start the detached proxy, uplink it.
+        """Create the internal network, start the detached proxy, uplink it, wait.
 
         The proxy needs the uplink interface before any adapter runs: the
         ``--internal`` adapter network has no route out, so a single-homed
@@ -536,7 +556,11 @@ class ProxySession:
         re-run could spend its budget on a proxy with no exit. The log dir is
         made world-writable because the proxy image runs as an unprivileged
         uid while the directory belongs to the orchestrator's user (same fix
-        as ``ci/egress_scenario.py``).
+        as ``ci/egress_scenario.py``). The method returns only once the proxy
+        accepts TCP connections (``probe_command``): ``docker run -d``
+        succeeds while the proxy process inside is still importing, and an
+        adapter that fired in that window failed with "Connection refused"
+        and no egress log at all (live run 39135219248, social_username).
         """
         self._run(create_network_command(self.network))
         self.log_dir.mkdir(parents=True, exist_ok=True)
@@ -548,7 +572,27 @@ class ProxySession:
         # Attach the uplink last: the proxy is the only container that may use
         # it, and no adapter has started yet when this command returns.
         self._run(["docker", "network", "connect", self.uplink, self._proxy.container_name])
+        try:
+            self._run(self.probe_command())
+        except DockerCommandError as exc:
+            raise DockerCommandError(
+                "egress proxy " + self._proxy.container_name
+                + " did not accept a TCP connection within the readiness window\n" + str(exc)
+            ) from exc
         return self
+
+    def probe_command(self) -> list[str]:
+        """An exec that retries a loopback connect until the proxy listens.
+
+        Runs a bounded python one-liner inside the proxy container itself, so
+        it needs neither a published port (the live path publishes none) nor
+        the uplink: it asks the only question that matters before an adapter
+        starts - is the listening socket there yet.
+        """
+        code = _PROBE_TEMPLATE.format(
+            timeout=PROBE_TIMEOUT_SECONDS, port=self.port, interval=PROBE_INTERVAL_SECONDS
+        )
+        return ["docker", "exec", self._proxy.container_name, "python", "-c", code]
 
     @property
     def proxy_url(self) -> str:
