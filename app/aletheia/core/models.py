@@ -96,6 +96,10 @@ class RelationshipType(StrEnum):
     DERIVED_FROM = "derived_from"
     MENTIONS = "mentions"
     SAME_AS_CANDIDATE = "same_as_candidate"
+    # Phase 17 (P17.2) additions — written once cascade decisions exist.
+    SAME_AS_CONFIRMED = "same_as_confirmed"
+    SAME_AS_EXCLUDED = "same_as_excluded"
+    PIVOTED_FROM = "pivoted_from"
 
 
 class Seed(BaseModel):
@@ -166,6 +170,13 @@ class Provenance(BaseModel):
     # value stays ``None`` for single-seed runs so their artifacts keep the
     # pre-multi-seed shape.
     seed_index: int | None = None
+    # Phase 17 (P17.2) cascade provenance. The defaults keep a single-pass
+    # finding's meaning unchanged: depth 0 means "produced directly from a
+    # seed", and no parent finding or pivot reason is recorded outside the
+    # cascade.
+    parent_finding_id: UUID | None = None
+    cascade_depth: int = Field(default=0, ge=0)
+    pivot_reason: str | None = None
 
 
 class Finding(BaseModel):
@@ -261,3 +272,113 @@ class AuditEvent(BaseModel):
     command: list[str] | None = None
     request_meta: dict[str, Any] = Field(default_factory=dict)
     outcome: str | None = None
+
+
+# ---------------------------------------------------------------------------
+# Phase 17 (P17.2) cascade models (design section 14). All additions are
+# additive and backward compatible: nothing here changes existing behavior.
+# ---------------------------------------------------------------------------
+
+
+class IdentityTier(StrEnum):
+    """Identity-cluster tier (design section 6.3).
+
+    A cluster that has not been reviewed yet keeps no tier (``None`` where the
+    field is optional); these four members are the review outcomes.
+    """
+
+    CONFIRMED = "confirmed"
+    PROBABLE = "probable"
+    POSSIBLE = "possible"
+    EXCLUDED = "excluded"
+
+
+class SourceGrade(BaseModel):
+    """Admiralty-style source grading (design section 6.3).
+
+    ``reliability`` is A (completely reliable) through F (cannot be judged);
+    ``credibility`` is 1 (confirmed) through 6 (cannot be judged). Claims
+    inherit their source's grade and a low-grade source alone can never clear
+    a tier gate. The honest default for an ungraded source is F6.
+    """
+
+    model_config = ConfigDict(extra="forbid")
+    reliability: str
+    credibility: int = Field(ge=1, le=6)
+
+    @field_validator("reliability")
+    @classmethod
+    def _reliability_is_admiralty(cls, value: str) -> str:
+        value = value.strip().upper()
+        if value not in {"A", "B", "C", "D", "E", "F"}:
+            raise ValueError("reliability must be one of A-F (Admiralty scale)")
+        return value
+
+    @property
+    def label(self) -> str:
+        return f"{self.reliability}{self.credibility}"
+
+    @classmethod
+    def unrated(cls) -> "SourceGrade":
+        return cls(reliability="F", credibility=6)
+
+
+class Hypothesis(StrEnum):
+    """Analysis-of-Competing-Hypotheses labels (design section 6.3)."""
+
+    SUBJECT = "H_subject"
+    OTHER = "H_other"
+    SHARED = "H_shared"
+
+
+class HypothesisVerdict(StrEnum):
+    CONSISTENT = "consistent"
+    INCONSISTENT = "inconsistent"
+    NEUTRAL = "neutral"
+
+
+class HypothesisAssessment(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    hypothesis: Hypothesis
+    verdict: HypothesisVerdict
+    evidence: list[str] = Field(default_factory=list)
+    rationale: str = ""
+
+
+class ClusterDecision(BaseModel):
+    """One merge / no-merge decision over a set of identity clusters.
+
+    ``score`` is the uncalibrated likelihood-ratio sum and is never presented
+    as a probability; ``calibrated_probability`` stays ``None`` until the
+    calibrator is trained.
+    """
+
+    model_config = ConfigDict(extra="forbid")
+    decision_id: UUID = Field(default_factory=uuid4)
+    entity_ids: list[UUID] = Field(min_length=2)
+    tier: IdentityTier | None = None
+    accepted: bool = False
+    score: float | None = None
+    calibrated_probability: float | None = Field(default=None, ge=0.0, le=1.0)
+    assessments: list[HypothesisAssessment] = Field(default_factory=list)
+    conflict: str | None = None
+    reason: str = ""
+
+
+class PivotCandidate(BaseModel):
+    """A typed seed derived from an observed claim (design sections 4, 7).
+
+    ``gate`` is the minimum surviving cluster tier that permits the pivot;
+    personal identifiers require ``confirmed``, structural seeds
+    ``probable``, and media seeds ``probable`` with local comparison.
+    """
+
+    model_config = ConfigDict(extra="forbid")
+    pivot_id: UUID = Field(default_factory=uuid4)
+    claim_entity_type: EntityType
+    claim_value: str
+    seed: Seed
+    gate: IdentityTier
+    reason: str = ""
+    seed_index: int | None = None
+    parent_finding_id: UUID | None = None
