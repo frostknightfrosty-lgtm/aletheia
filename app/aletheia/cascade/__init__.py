@@ -33,7 +33,11 @@
 - :mod:`aletheia.cascade.next_actions` — next-actions checklist (P17.8).
 - :mod:`aletheia.cascade.redact` — deterministic redaction for shareable
   artifacts (P17.8).
+- :mod:`aletheia.cascade.engine` — deterministic cascade engine over an
+  injectable observer; composes claims -> pivots -> scheduler -> evidence ->
+  ACH -> merges and records the trail + ledger (P17.9).
 
 Nothing in this package changes existing CLI / router / adapter behavior — the
-``cascade`` CLI group is additive; the engine wiring lands in later P17 items.
+``cascade`` CLI group is additive; the live (adapter-backed) observer wiring
+lands in later P17 items.
 """
