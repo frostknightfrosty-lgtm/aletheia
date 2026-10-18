@@ -53,9 +53,21 @@ the live dispatch's failure is recorded verbatim.
 - Repair: one egress session per adapter for the whole run (network names are
   adapter-derived), incremental proxy-entry chaining, wiring-start failures
   recorded as blocked and never retried or run unwired, `close()` teardown in
-  `run_cascade`; 2 regression tests. Local `946 passed` + 65
-  environment-only skips → expected CI 1011; re-dispatch follows this
-  repair's green.
+  `run_cascade`; 2 regression tests. Repair verified — run `39161437568`
+  green: `PARSER PREFLIGHT: PASS — 49/49`; `"console_summary": "1011 passed,
+  1 warning"` with `"skipped_in_ci": []`, `"ok": true`; `DOCKER CAPTURE: PASS
+  — 60/60`; storage `ok: true`.
+- **Live cascade green** (re-dispatch on the repaired tree `9a9cb38`, run
+  `39161463451`): `stop_reason=saturated`; `expansions=1`;
+  `trail_digest=f2af6529df6125190d1b88994be038b941b60459dcd2598bd88a511ff60c0247`;
+  `coverage_ok=True`; `verify-chain.log`: `valid:
+  e86fefe0-ff40-4c98-b7e8-9d846b59460b`, `chain tip:
+  feaad1a7811bedd9b0a917f05dbe776388bcfe85542d3d6d44be80cd626b5edc`, `manifest
+  anchor: verified`. 6 of 7 expected adapters ran; instaloader timed out in
+  both rounds and was recorded (`cascade_adapter_error x2`) without killing
+  the run — exactly the failure class the repair closed. 1,146 egress
+  requests were chained; 1 identity cluster now awaits the owner
+  (`USER_ACTIONS.md` §3).
 
 ## 2026-10-18 — P17.9: deterministic cascade engine + synthetic-world suites
 

@@ -66,8 +66,12 @@ their recorded key states. HIBP direct email lookups stay out under nothing-paid
 ## 3. Owner confirmations (needed near the end)
 
 - [ ] **P17.10 live cascade on the owner's own seed** — confirm/deny candidate
-      identities (mine / not-mine). These are the first real calibration labels;
-      the calibrator stays untrained until they exist.
+      identities (mine / not-mine). The live run (`39161463451`) produced 1
+      identity cluster awaiting confirmation
+      (`4bb198ed-daa5-4412-a1cc-dbd34872e7bb` — see
+      `runs/e86fefe0-ff40-4c98-b7e8-9d846b59460b/cascade/next_actions.json`
+      in artifact `aletheia-live-cascade-39161463451`). These are the first
+      real calibration labels; the calibrator stays untrained until they exist.
 - [ ] Optional: **verified-live promotion** of adapters exercised by authorized
       runs (evidence already copied; the promotion itself is a bookkeeping
       decision).

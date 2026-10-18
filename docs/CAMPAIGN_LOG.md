@@ -14,23 +14,22 @@
 ## NOW (edited in place — this is the current position)
 
 - Campaign: **ACTIVE** — owner mandate received and executing.
-- Position: **P17.10 CI green** (run `39159820872`; parser 49/49; 1005
-  passed; capture 60/60; storage 6/6 — lines copied to the Log); the first
-  live dispatch (run `39159843080`) failed on an egress-session Docker
-  network collision, **repaired** (`708ad27`; local 946 + 65 → expected CI
-  1011) and **re-dispatched** (run `39161463451`, in flight). **P17.11
-  Wave A**: re-checks recorded; §A 33 (Unpaywall DOI route) **CI-verified**
-  (run `39160798771`; parser 49/49; 1009 passed; capture 60/60; storage ok)
-  and flipped. **P17.3–P17.9 verified green.**
-- Next action: copy the live-cascade evidence when `39161463451` finishes;
-  on the repair's run green copy its evidence; continue Wave A (next:
-  SearXNG self-hosted container, CipherScan pinned commit, Bron Vault
-  offline parser).
-- In-flight CI: live cascade `39161463451`, repair run `39161437568`
-  (expected 1011), plus this docs push's run.
-- Last verified commit: `39680b0` (run `39159820872`, docker-verification
-  green; lines copied: parser 49/49; **1005 passed**; capture 60/60; storage
-  6/6).
+- Position: **P17.10 complete** — CI green (run `39159820872`; 1005 passed),
+  repair verified (run `39161437568`; 1011 passed), and the live cascade
+  **green** (run `39161463451`, tree `9a9cb38`: `stop_reason=saturated`,
+  `expansions=1`, `trail_digest=f2af6529…`, `coverage_ok=True`,
+  `manifest anchor: verified`; instaloader blocked ×2 and recorded — the
+  failure class the repair targeted is closed). **P17.11 Wave A**: re-checks
+  recorded; §A 33 (Unpaywall) CI-verified and flipped.
+  **P17.3–P17.10 verified green.**
+- Next action: continue Wave A builds (SearXNG self-hosted container;
+  CipherScan pinned commit `30bd2393`; Bron Vault offline parser), then the
+  rest of the Wave A list.
+- In-flight CI: this push's run (expected 1011); head `c5d0830` (state-only)
+  folds into the next code push's verification.
+- Last verified commit: `fe5fc7f` (run `39162358358`, docker-verification
+  green; lines copied: parser 49/49; **1011 passed**; capture 60/60; storage
+  6/6). Head `c5d0830` (state-only) folds into the next code push's run.
 - Owner-blocked (parked, never wait on): everything in `docs/USER_ACTIONS.md`.
 - Decision defaults in force: see "Adopted defaults" below.
 
@@ -156,9 +155,10 @@
       determinism; 9 tests; local 933 passed + 65 skips → expected CI 998);
       pushed `e9b8de5`; run `39159218589` **green** — evidence lines copied
       to the Log (parser 49/49; 998 passed; capture 60/60; storage 6/6).
-- [ ] **P17.10** — fixture dry-run → local suite → CI → live cascade on
+- [x] **P17.10** — fixture dry-run → local suite → CI → live cascade on
       `username:frost2233` (authorization on file). Owner confirmations and the
-      first real calibration labels are owner-gated — park them.
+      first real calibration labels are owner-gated — parked (one cluster now
+      awaiting confirmation; `USER_ACTIONS.md` §3).
       → CI green: pushed `dc44fc5` + docs `39680b0`; run `39159820872`
       **green** — parser 49/49; 1005 passed; capture 60/60; storage 6/6 (lines
       copied to the Log). First live dispatch (run `39159843080`) **failed in
@@ -166,11 +166,19 @@
       invocation collided with the leftover per-invocation Docker network
       (`docker network create --internal aletheia-egress-net-instaloader` →
       "already exists"), crashing outside the per-adapter error handling.
-      Repair: one egress session per adapter per run (network names are
-      adapter-derived), incremental proxy-entry chaining, start failures
-      recorded as blocked and never retried or run unwired, `close()` drains
-      and tears down in `run_cascade` (local 946 passed + 65 skips → expected
-      CI 1011); re-dispatch on this repair's green.
+      Repair `708ad27`: one egress session per adapter per run (network names
+      are adapter-derived), incremental chaining, start failures recorded and
+      never run unwired, `close()` teardown — repair verified by run
+      `39161437568` **green** (parser 49/49; **1011 passed**; capture 60/60;
+      storage 6/6). **Live cascade green**: run `39161463451` on the repaired
+      tree `9a9cb38` — `stop_reason=saturated`; `expansions=1`;
+      `trail_digest=f2af6529df6125190d1b88994be038b941b60459dcd2598bd88a511ff60c0247`;
+      `coverage_ok=True`; `verify-chain.log` `valid` + `chain tip
+      feaad1a7811bedd9b0a917f05dbe776388bcfe85542d3d6d44be80cd626b5edc` +
+      `manifest anchor: verified`. 6/7 expected adapters ran; instaloader
+      blocked ×2 and recorded (`cascade_adapter_error x2`) — the exact failure
+      class the repair closed; `egress_request x1146`. 1 identity cluster
+      awaits owner confirmation (parked). Lines copied to the Log.
 
 ### Track 2 — Source completeness (`docs/SOURCE_COMPLETENESS.md`; P17.11–P17.12)
 
@@ -470,6 +478,43 @@ activate when the key exists.
     captured`; storage-conformance.json: `"required_all": true`,
     `"ok": true`, `"unconfigured": []`
   §A 33 flipped in `SOURCE_COMPLETENESS.md`.
-- Next: on this repair's run green (expected 1011) re-dispatch the live
-  cascade for `username:frost2233`; on Unpaywall's run (`39160798771`) green
-  flip §A 33 + CHANGELOG; continue Wave A.
+- 2026-10-18 — P17.10 live cascade verification — repair commit `708ad27`
+  (docs `9a9cb38`) — repair run `39161437568` docker-verification **green**.
+  Copied from `ci-artifacts-39161437568`:
+  - `PARSER PREFLIGHT: PASS — 49/49 adapters have parser coverage`
+  - pytest-summary.json: `"console_summary": "1011 passed, 1 warning"`,
+    `"junit_total": 1011`, `"skipped_in_ci": []`, `"ok": true`
+  - `DOCKER CAPTURE: PASS — 60/60 cases captured`; storage-conformance.json:
+    `"required_all": true`, `"ok": true`, `"unconfigured": []`
+  Live cascade re-dispatch (same tree `9a9cb38`) — run `39161463451` —
+  **green** (`conclusion: success`). Copied from the artifact
+  `ci-live-cascade-39161463451`:
+  - `cascade.log` tail: `run: e86fefe0-ff40-4c98-b7e8-9d846b59460b`;
+    `stop_reason=saturated`; `expansions=1`;
+    `trail_digest=f2af6529df6125190d1b88994be038b941b60459dcd2598bd88a511ff60c0247`;
+    `coverage_ok=True`
+  - `verify-chain.log`: `valid: e86fefe0-ff40-4c98-b7e8-9d846b59460b`;
+    `chain tip: feaad1a7811bedd9b0a917f05dbe776388bcfe85542d3d6d44be80cd626b5edc`;
+    `manifest anchor: verified`
+  - `MANIFEST.json` cascade section: `"mode": "live"`, `"coverage_ok": true`,
+    `"expansions": 1`, `"stop_reason": "saturated"`,
+    `"authorization_assertion"` carries the Gate 2 text verbatim; scheduler
+    checkpoint `{"checkpoint_version": 1, ..., "saturated": true,
+    "used_by_type": {"username": 1}}`; `chain_tip` present
+  - `coverage.json`: 7 adapters expected, 6 ran — instaloader
+    `"blocked: container…"` recorded; documented skips
+    (breachdirectory / bron-vault / grayhatwarfare) unchanged
+  - `AUDIT.jsonl`: `cascade_run_started x1`, `adapter_invocation x16`,
+    `adapter_complete x12`, `cascade_adapter_error x2` (instaloader timeout,
+    both rounds — recorded; run survived), `egress_request x1146`,
+    `cascade_run_finished x1`
+  - expansions `0002–0007` + `0009–0014` (second pass reused the per-adapter
+    egress sessions — no collision; the first dispatch's failure class)
+  - `next_actions.json`: free keys (already parked in `USER_ACTIONS.md`);
+    provider permissions (OpenSky, EUIPO — parked); 1 identity cluster
+    awaiting owner confirmation (`4bb198ed-daa5-4412-a1cc-dbd34872e7bb`)
+  Docs run `39162358358` (tree `fe5fc7f`) **green** — parser 49/49; 1011
+  passed; capture 60/60; storage 6/6.
+- Next: continue P17.11 Wave A builds (SearXNG self-hosted container,
+  CipherScan pinned commit `30bd2393`, Bron Vault offline parser); on this
+  push's run green copy its lines; then the rest of the queue.
