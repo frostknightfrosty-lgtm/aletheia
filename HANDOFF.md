@@ -1,6 +1,6 @@
-# Aletheia Handoff — Phase 16 complete (multi-seed investigations and context features)
+# Aletheia Handoff — Phase 17 staged (pivot cascade + source completeness; autonomous campaign)
 
-Last updated: 2026-10-18T10:03:14Z
+Last updated: 2026-10-18T18:05:00Z
 
 ## Project boundaries
 
@@ -13,11 +13,21 @@ prerequisites are met. A tier classification is project policy, not a legal conc
 
 ## Repository and CI state
 
-- Latest CI-verified commits: `b5ff9e2` (run **39139434131**, `785 passed` — single-hop
-  proxying, proxy readiness probe), `de6b218` (run **39139781693**, `786 passed` —
-  `sherlock --txt`), and `8939517` (round-3 docs; run **39141365915**, `786 passed`).
+- Latest CI-verified commit: `c4faa40` (docs: source completeness directive; docker
+  verification run **39150858549** green — same evidence lines as the last
+  code-verified tree). Latest code-verified tree: `8939517` (run **39141365915**,
+  `786 passed`). Earlier: `b5ff9e2` (run **39139434131**, `785 passed` — single-hop
+  proxying, proxy readiness probe) and `de6b218` (run **39139781693**, `786 passed` —
+  `sherlock --txt`).
 - The authorized live run **39141366670** ran on tree `8939517` and is green (37m19s) —
   see the live-audit section below.
+- Newest artifact check (run **39150858549**, commit `c4faa40`): lines copied from the
+  downloaded artifact (`ci-artifacts-39150858549`), not typed —
+  `PARSER PREFLIGHT: PASS — 49/49 adapters have parser coverage`; `786 passed,
+  1 warning`; `DOCKER CAPTURE: PASS — 60/60 cases captured`;
+  `storage-conformance.json`: `passing` = file, postgres, neo4j, elasticsearch, minio,
+  redis, `unconfigured` = [], `required_all` = `true`; `pytest-summary.json`:
+  `junit_total` 786, `skipped_in_ci` [], `ok` `true`.
 - Evidence lines copied from the downloaded artifact of run `39141365915`
   (`ci-artifacts-39141365915`), not typed:
   - `PARSER PREFLIGHT: PASS — 49/49 adapters have parser coverage`
@@ -39,6 +49,37 @@ prerequisites are met. A tier classification is project policy, not a legal conc
   `verified-fixture`. Six storage backends, all conformance-verified against real services
   in CI. 44 of the 49 adapters declare `network_required=True`, and the egress policy wires
   all 44.
+
+## Phase 17 — pivot cascade + source completeness (staged 2026-10-18; autonomous campaign)
+
+Where older sections of this file describe next steps, **this section and
+`docs/CAMPAIGN_LOG.md` supersede them.**
+
+Design of record: `docs/PIVOT_CASCADE.md` v3 (+ the 2026-10-18 directive addendum) —
+any seed (seed list / raw text / screenshot) → evidence-gated adapter→adapter chaining
+→ tiered identity map to exhaustion, every step evidence-gated. Owner directive of
+2026-10-18: everything in the 111 accepted candidates and every policy-permitted
+not-yet-integrated source becomes fully integrated, wired and working — tracked
+item-by-item in `docs/SOURCE_COMPLETENESS.md` (75 of 111 already built; 36 gaps in §A;
+§B policy-permitted set; §C owner actions; §D recorded blockers).
+
+Both were recorded in docs commits `61cd60d` → `b6ad26d` → `c4faa40` (each
+CI-verified). The owner then mandated a **fully autonomous campaign** (2026-10-18
+evening): execute the entire remaining plan — P17.2–P17.9 cascade engine, P17.10
+(fixture/local/CI first; the live segment runs on the owner's own authorized seed),
+P17.11–P17.12 completeness, P17.13 horizon completion, close-out — and stop only when
+nothing remains but owner-gated items.
+
+- Campaign anchors: `docs/CAMPAIGN_LOG.md` (journal + queue + landmines — read after
+  every compaction) and `docs/USER_ACTIONS.md` (the only owner-gated items: free-key
+  registrations, provider permissions, owner confirmations, redlines).
+- Provisional defaults adopted by the campaign unless the owner redlines: adaptive
+  depth 3 → 5 on HARD in owner mode; owner-mode pivots email/name/phone on; case model
+  opt-in (`--case X`); cache TTL 30d profiles / 7d DNS; face search
+  corroboration-only; completeness waves keyless-first A → E.
+- Live policy during the campaign: live runs only for targets whose Gate 2 assertion
+  is already on file (`username:frost2233`); every other target parks. No
+  `verification_status` moves except from copied artifact lines (Gate 5).
 
 ## Authorized live self-audit of `username:frost2233` (2026-10-18, complete)
 
@@ -421,10 +462,14 @@ the top CHANGELOG entry and the live-audit section above). What remains needs us
   2026-10-18 for `username:frost2233` (owner assertion recorded verbatim in the run
   manifest); any other target re-opens the gate.
 - **Gate 3** — verify API keys and cost before a phase depends on them. Still open; no keys
-  are configured, so `reddit-api`, `youtube-api` and `leak_checkers` skip by design.
+  are configured, so `reddit-api`, `youtube-api` and `leak_checkers` skip by design. The
+  grouped free-registration master list is `docs/USER_ACTIONS.md` (see also
+  `docs/SOURCE_COMPLETENESS.md` §C).
 - **Gate 5** — evidence lines must be copied from a downloaded artifact, never typed.
-- **Gate 6** — `transport_movement` and `darkweb_search` remain deferred pending user
-  action / source verification.
+- **Gate 6** — `transport_movement` and `darkweb_search` build in the autonomous campaign
+  (transport with recorded skip paths; dark web behind container-level Tor); live coverage
+  for each remains gated on owner registrations / written permission and Tor setup —
+  grouped in `docs/USER_ACTIONS.md`.
 - **Gate 6 (MinIO server)** — deferred pending a usable image or endpoint: `minio/minio`
   returns 404 on Docker Hub and `quay.io/minio/minio` refuses anonymous pulls, so the S3 code
   path is verified against `adobe/s3mock:5.2.3` instead.
