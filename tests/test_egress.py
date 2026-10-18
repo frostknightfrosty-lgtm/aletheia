@@ -350,6 +350,12 @@ def test_pump_bidirectional_relays_client_and_server_bytes():
     async def scenario():
         client_side, proxy_client_side = socket.socketpair()
         server_side, proxy_server_side = socket.socketpair()
+        # loop.sock_recv() requires non-blocking sockets: on the selector loop a
+        # blocking recv blocks the whole loop, so the wait_for timeouts below
+        # can never fire (run 39128092472 hung here for 40+ minutes; Windows'
+        # proactor uses overlapped I/O and had masked it locally).
+        client_side.setblocking(False)
+        server_side.setblocking(False)
         client_reader, client_writer = await asyncio.open_connection(sock=proxy_client_side)
         remote_reader, remote_writer = await asyncio.open_connection(sock=proxy_server_side)
         pump = asyncio.create_task(
@@ -395,6 +401,7 @@ def test_connect_tunnel_relays_data_and_logs_the_bytes(tmp_path):
         })
         proxy_server = await asyncio.start_server(proxy.handle, "127.0.0.1", 0)
         proxy_port = proxy_server.sockets[0].getsockname()[1]
+        writer = None
         try:
             reader, writer = await asyncio.open_connection("127.0.0.1", proxy_port)
             writer.write(
@@ -416,10 +423,16 @@ def test_connect_tunnel_relays_data_and_logs_the_bytes(tmp_path):
                     break
                 await asyncio.sleep(0.05)
         finally:
+            if writer is not None:
+                writer.close()
             proxy_server.close()
-            await proxy_server.wait_closed()
             upstream_server.close()
-            await upstream_server.wait_closed()
+            # Python 3.13's wait_closed() waits for every live handler, so a
+            # mid-test failure with the client still connected would hang CI
+            # here (same run 39128092472 class of defect). Bound it: a broken
+            # assertion must stay a failure instead of a stall.
+            await asyncio.wait_for(proxy_server.wait_closed(), timeout=10)
+            await asyncio.wait_for(upstream_server.wait_closed(), timeout=10)
 
     asyncio.run(scenario())
     entries = [json.loads(line) for line in log_path.read_text(encoding="utf-8").splitlines()]

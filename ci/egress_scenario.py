@@ -371,6 +371,13 @@ def main(argv: list[str] | None = None) -> int:
         print("openssl failed to create the scenario certificate:\n" + openssl.stderr, file=sys.stderr)
         shutil.rmtree(work, ignore_errors=True)
         return 2
+    # The origins run as uid 10001 and OpenSSL writes private keys as 0600, so
+    # the key would be unreadable and the origin would die before it ever
+    # listens (run 39128092472: every origin request 502ed at the proxy and all
+    # three origin checks failed). The certificate is a throwaway local
+    # artifact, so widen the mode instead of running the origin as root.
+    os.chmod(script_dir / "cert.pem", 0o644)
+    os.chmod(script_dir / "key.pem", 0o644)
     # The proxy lifecycle goes through the same ProxySession the orchestrator
     # uses — network creation, the world-writable log dir and the uplink attach
     # included — so a regression there fails here instead of in a live run.
