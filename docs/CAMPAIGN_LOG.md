@@ -14,21 +14,21 @@
 ## NOW (edited in place — this is the current position)
 
 - Campaign: **ACTIVE** — owner mandate received and executing.
-- Position: **P17.10 pushed as `dc44fc5`** (cascade runner: fixture dry-run
-  path + live `AdapterObserver` reusing the egress proxy/audit-chain
-  patterns; one audited run per cascade with the manifest `cascade` section;
-  artifacts ledger/trail/dossier/coverage/next-actions; `aletheia cascade
-  run` CLI; `live-cascade.yml` dispatch workflow; 7 new runner tests; local
-  940 passed + 65 environment-only skips → expected CI 1005). **P17.3–P17.8
-  verified green**; P17.9 (`39159218589`) run still watching.
-- Next action: on `39159218589` green copy P17.9 evidence; when this push's
-  run is green dispatch `live-cascade` for `username:frost2233` with the
-  Gate 2 assertion verbatim, then copy the live evidence from the downloaded
-  artifact.
-- In-flight CI: `39159218589` (P17.9 `e9b8de5` + docs `5a0a201`), plus this
-  P17.10 push's run.
-- Last verified commit: `c8c02c3` (run `39158143846`, docker-verification
-  green; lines copied: parser 49/49; **989 passed**; capture 60/60; storage
+- Position: **P17.11 in progress (Wave A)** — the re-check-with-evidence
+  rows are recorded in `docs/PHASE17_RECHECKS.md` (§A 27 → 28 → 29 → 32 →
+  35; see the queue line), and §A 33 (Unpaywall DOI route) is built (runner
+  DOI path + adapter parse + 4 tests; local 944 passed + 65
+  environment-only skips → expected CI 1009); pushed. P17.10
+  (`39159820872`) and the live cascade (`39159843080`) are still in flight.
+  **P17.3–P17.9 verified green.**
+- Next action: when this push's run is green, copy its evidence and flip
+  §A 33; when P17.10 and the live cascade finish, copy their evidence;
+  continue Wave A (next: SearXNG self-hosted container, CipherScan pinned
+  commit, Bron Vault offline parser).
+- In-flight CI: `39159820872` (P17.10), live cascade `39159843080`, plus
+  this push's run.
+- Last verified commit: `5a0a201` (run `39159218589`, docker-verification
+  green; lines copied: parser 49/49; **998 passed**; capture 60/60; storage
   6/6).
 - Owner-blocked (parked, never wait on): everything in `docs/USER_ACTIONS.md`.
 - Decision defaults in force: see "Adopted defaults" below.
@@ -153,7 +153,8 @@
       trail + hash-chained ledger; synthetic worlds, adversarial collisions,
       blocked/429 + budget + hard-depth failure injection, golden-digest
       determinism; 9 tests; local 933 passed + 65 skips → expected CI 998);
-      pushed `e9b8de5`; run verifying.
+      pushed `e9b8de5`; run `39159218589` **green** — evidence lines copied
+      to the Log (parser 49/49; 998 passed; capture 60/60; storage 6/6).
 - [ ] **P17.10** — fixture dry-run → local suite → CI → live cascade on
       `username:frost2233` (authorization on file). Owner confirmations and the
       first real calibration labels are owner-gated — park them.
@@ -184,6 +185,14 @@ activate when the key exists.
       32 (Google CSE), 35 (PublicWWW); §B Blackbird (license resolved first),
       Lullar, paste indexes, reverse-image free engines, people-search free
       tiers, face-search free engines, bulk/paste handling rules.
+      → Progress: the re-check-with-evidence items are recorded in
+      `docs/PHASE17_RECHECKS.md` (2026-10-18): 28 legacy host dead /
+      successor behind a USPTO account; 29 sandbox no-billing route exists
+      (build queued; owner token); 32 closed notice stands — Marginalia +
+      Common Crawl carry the class; 35 no free tier surfaced; 27 no public
+      SPARQL/RDF (NXDOMAIN + browser-only app). 33 (Unpaywall DOI route)
+      built: runner DOI path + adapter parse + 4 tests; local 944 passed +
+      65 skips → expected CI 1009; pushed; run verifying.
 - [ ] **Wave B — free-registration/keyed builds (skip paths recorded):** §A 1
       (OWASP SocialOSINTLM), 8 (Intelligence X), 9 (BreachDirectory), 10
       (Leak-Lookup), 17 (youtube-geofind), 19 (Betaface), 30 (EUIPO), 34
@@ -396,6 +405,29 @@ activate when the key exists.
   environment-only skips → expected CI 1005; pushed; run starting. Live
   dispatch for `username:frost2233` (Gate 2 assertion verbatim) happens when
   this run is green.
-- Next: on this push's run green copy P17.10 evidence + P17.9 verification
-  (watch `39159218589`) into the queue and CHANGELOG; dispatch the live
-  cascade for `username:frost2233`; then P17.11.
+- 2026-10-18 — P17.9 verification — commit `e9b8de5` — run `39159218589` —
+  docker-verification **green**. Copied from the downloaded artifact
+  `ci-artifacts-39159218589`:
+  - `PARSER PREFLIGHT: PASS — 49/49 adapters have parser coverage`
+  - pytest-summary.json: `"console_summary": "998 passed, 1 warning"`,
+    `"junit_total": 998`, `"skipped_in_ci": []`, `"ok": true`
+    (989 → 998: the 9 cascade engine tests, none skipped)
+  - docker-integration/capture.log: `DOCKER CAPTURE: PASS — 60/60 cases
+    captured`
+  - storage-conformance.json: `"passing": ["file", "postgres", "neo4j",
+    "elasticsearch", "minio", "redis"]`, `"unconfigured": []`,
+    `"required_all": true`, `"ok": true`
+- 2026-10-18 — P17.11 Wave A (part 1) — re-checks recorded in
+  `docs/PHASE17_RECHECKS.md` (#28 PatentsView: legacy host NXDOMAIN, USPTO
+  portal successor; #27 ERATV: NXDOMAIN + browser-only; #29 BigQuery
+  sandbox no-billing route; #32 Google CSE: closed notice stands; #35
+  PublicWWW: no free tier; #33 Unpaywall: DOI endpoint live, email
+  enforced). §A 33 built: `docker/academic_search/runner.py` gains the
+  DOI-keyed live path (`GET /v2/{doi}` with `UNPAYWALL_EMAIL`), the adapter
+  parses DOI records (`unpaywall_doi_record`), `UNPAYWALL_EMAIL` joins
+  `secret_env` and both live workflows, RATE_LIMITS.md re-annotated; 4 new
+  tests; local 944 passed + 65 environment-only skips → expected CI 1009;
+  pushed; run verifying.
+- Next: on this push's run green flip §A 33 + CHANGELOG (Unpaywall); on
+  P17.10's run (`39159820872`) green copy its evidence; copy the live
+  cascade evidence (`39159843080`) when it finishes; continue Wave A.

@@ -34,12 +34,25 @@ build review):
   developer account, `api.data.gov` (FOIA, SAM.gov).
 - **Crypto:** Etherscan, Chainabuse.
 - **Code / search / academic:** GitLab personal token, Debian Salsa (DCS key),
-  Marginalia email key, Semantic Scholar, CORE, EPO OPS (consumer key + secret).
+  Marginalia email key, Semantic Scholar, CORE, EPO OPS (consumer key + secret),
+  USPTO Open Data Portal key (PatentsView migration — free account with
+  identity fields; request via
+  <https://patentsview-support.atlassian.net/servicedesk/customer/portals> or
+  the data.uspto.gov portal; the legacy search.patentsview.org host no longer
+  resolves).
 - **Social / media / misc:** GitHub token, Mapillary, Copernicus Data Space,
   Betaface (key + secret), OWASP SocialOSINTLM platform keys (if its review
   requires them).
 - **Transport (Gate 6):** OpenSky (registration **plus written integration
   permission**), BarentsWatch, Network Rail, National Rail, Deutsche Bahn.
+
+Configuration values (no registration, still owner-provided):
+
+- [ ] **Unpaywall** — the documented DOI endpoint requires a contact email —
+  secret `UNPAYWALL_EMAIL` (see `PHASE17_RECHECKS.md` #33).
+- [ ] **Google Patents (BigQuery)** — sandbox queries need a Google-account
+  access token and project — secrets `GOOGLE_BIGQUERY_ACCESS_TOKEN` +
+  `GOOGLE_CLOUD_PROJECT` (the BigQuery sandbox requires no billing account).
 
 Notes: already-wired keyed adapters (Shodan, OpenCorporates, and similar) keep
 their recorded key states. HIBP direct email lookups stay out under nothing-paid.

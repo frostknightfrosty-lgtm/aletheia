@@ -69,15 +69,15 @@ below may be upgraded except from copied artifact lines.
 | 24 | Network Rail Open Data | 8 | Not built; Gate 6 | Build; free self-service key (REST/STOMP) | Owner: register |
 | 25 | National Rail Data (Darwin) | 8 | Not built; Gate 6 | Build; free developer token | Owner: register |
 | 26 | Deutsche Bahn Timetables | 8 | Not built; Gate 6 | Build; free client-id + secret | Owner: register |
-| 27 | ERATV | 8 | Documented non-querying drop (`transport_asset_registry`) | Re-review public SPARQL/RDF endpoint; build query path or record live-probe evidence | — |
-| 28 | PatentsView | 9 | Dropped: API host no longer resolves | Re-check official host; build if live; else record evidence | — |
-| 29 | Google Patents Public Datasets | 9 | Dropped: GCP service account + client library | Re-review BigQuery free-tier path (no-billing route); build or record | — |
+| 27 | ERATV | 8 | Documented non-querying drop (`transport_asset_registry`); re-checked 2026-10-18 — no public SPARQL/RDF endpoint (host NXDOMAIN; browser-only app). See [`PHASE17_RECHECKS.md`](PHASE17_RECHECKS.md) | Re-review public SPARQL/RDF endpoint; build query path or record live-probe evidence | — |
+| 28 | PatentsView | 9 | Dropped: API host no longer resolves; re-checked 2026-10-18 — legacy host dead (NXDOMAIN), successor behind a USPTO portal account. See [`PHASE17_RECHECKS.md`](PHASE17_RECHECKS.md) | Re-check official host; build if live; else record evidence | Owner: USPTO Open Data Portal key |
+| 29 | Google Patents Public Datasets | 9 | Dropped: GCP service account + client library; re-checked 2026-10-18 — BigQuery sandbox needs no billing account; build queued. See [`PHASE17_RECHECKS.md`](PHASE17_RECHECKS.md) | Re-review BigQuery free-tier path (no-billing route); build or record | Owner: Google sandbox token + project |
 | 30 | EUIPO eSearch plus | 9 | Dropped: account + sandbox/production approval | Build via free developer account once approved | Owner: register EUIPO dev account |
 | 31 | SearXNG | 10 | Dropped: self-hosted metasearch, not a public API | Build as a self-hosted container instance (JSON endpoint enabled) — free/open-source | — |
-| 32 | Google Custom Search JSON API | 10 | Dropped: closed to new customers; sunset 2027-01-01 | Re-check access at review; if unavailable, record evidence (Marginalia + Common Crawl carry the class) | — |
+| 32 | Google Custom Search JSON API | 10 | Dropped: closed to new customers; sunset 2027-01-01; re-checked 2026-10-18 — notice stands; Marginalia + Common Crawl (integrated) carry the class. See [`PHASE17_RECHECKS.md`](PHASE17_RECHECKS.md) | Re-check access at review; if unavailable, record evidence (Marginalia + Common Crawl carry the class) | — |
 | 33 | Unpaywall | 11 | Dropped: search endpoint retired (410 Gone) | Implement the live DOI-keyed endpoint (only live route) | — |
 | 34 | GitLab Search API | 12 | Dropped: every call requires authentication (probe 401) | Implement with a free GitLab account token; skip without key | Owner: free token |
-| 35 | PublicWWW | 12 | Dropped: vendor docs require a paid plan | Re-check free tier at review; if paid-only, stays out under nothing-paid with evidence | — |
+| 35 | PublicWWW | 12 | Dropped: vendor docs require a paid plan; re-checked 2026-10-18 — no free tier surfaced. See [`PHASE17_RECHECKS.md`](PHASE17_RECHECKS.md) | Re-check free tier at review; if paid-only, stays out under nothing-paid with evidence | — |
 | 36 | CipherScan | 14 | Dropped: no releases/tags, no pinnable artifact | Re-review: pin a specific commit SHA as the verifiable artifact; build if pinnable | — |
 
 ## B. Policy-permitted, not-yet-integrated sources
@@ -124,12 +124,18 @@ defaults.
   account (approval gate), `api.data.gov` (FOIA, SAM.gov).
 - **Crypto:** Etherscan, Chainabuse.
 - **Code / search / academic:** GitLab token, Debian Salsa (DCS key),
-  Marginalia email key, Semantic Scholar, CORE, EPO OPS.
+  Marginalia email key, Semantic Scholar, CORE, EPO OPS, USPTO Open Data
+  Portal key (PatentsView migration — free account with identity fields).
 - **Social / media:** Reddit, YouTube Data API, GitHub token, Mapillary,
   Copernicus Data Space, Betaface.
 - **Transport (with Gate 6 items):** OpenSky (registration + written
   integration permission), BarentsWatch, Network Rail, National Rail,
   Deutsche Bahn.
+
+Configuration secrets (no registration): `UNPAYWALL_EMAIL` (Unpaywall
+requires a contact email on its documented DOI endpoint) and
+`GOOGLE_BIGQUERY_ACCESS_TOKEN` + `GOOGLE_CLOUD_PROJECT` (BigQuery sandbox
+queries over the public patents datasets).
 - Already-wired keyed adapters (Shodan, OpenCorporates, HIBP, etc.) keep their
   recorded key states; HIBP direct email lookups remain out under nothing-paid.
 

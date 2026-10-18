@@ -1,5 +1,29 @@
 # Changelog
 
+## 2026-10-18 — P17.9: deterministic cascade engine + synthetic-world suites
+
+The pivot cascade's execution core: a deterministic engine over an injectable
+observer, with the falsification-first merge order and a replayable decision
+ledger. Every number below is copied from the downloaded artifact
+`ci-artifacts-39159218589` (run `39159218589`, commit `e9b8de5`).
+
+- `PARSER PREFLIGHT: PASS — 49/49 adapters have parser coverage` (no new
+  adapters in this step).
+- `"console_summary": "998 passed, 1 warning"` with `"junit_total": 998`,
+  `"skipped_in_ci": []`, `"ok": true` — 9 new tests over the previous 989,
+  none skipped in CI.
+- `DOCKER CAPTURE: PASS — 60/60 cases captured`.
+- storage-conformance.json: `"passing": ["file", "postgres", "neo4j",
+  "elasticsearch", "minio", "redis"]`, `"unconfigured": []`,
+  `"required_all": true`, `"ok": true`.
+- What landed: `cascade/engine.py` — claims → gated pivots → VOI scheduler →
+  evidence scoring and ACH → falsification-first confirmed merges; per-origin
+  claim independence; parent-linked trail hops with a SHA-256 digest;
+  hash-chained decision ledger; deterministic replay and resume; depth,
+  budget and failure injection (blocked adapters, 429 egress refusals,
+  hard-depth refusal) covered by synthetic-world, adversarial-collision and
+  golden-digest determinism suites.
+
 ## 2026-10-18 — P17.8: cascade CLI, trail/dossier/coverage artifacts, redaction, purge
 
 The cascade's review surface: CLI group, artifact builders, and the deletion
