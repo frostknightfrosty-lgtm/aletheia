@@ -44,6 +44,7 @@ FIXTURE_PATH = ROOT / EXPECTED_FIXTURE_PATH
 SUPPORTED_SOURCES = (
     "marginalia",
     "common-crawl-index",
+    "searxng",
 )
 
 FIXTURE_INPUT_VALUE = "SyntheticSearchQueryForFixture"
@@ -51,6 +52,7 @@ FIXTURE_INPUT_VALUE = "SyntheticSearchQueryForFixture"
 DOC_CONSTANTS = {
     "marginalia": "MARGINALIA_DOCS",
     "common-crawl-index": "COMMON_CRAWL_DOCS",
+    "searxng": "SEARXNG_DOCS",
 }
 
 
@@ -79,6 +81,8 @@ def _expected_endpoint(runner, source: str, value: str) -> str:
         return runner.MARGINALIA_API_URL + "?" + urllib.parse.urlencode({"query": value})
     if source == "common-crawl-index":
         return runner._common_crawl_endpoint(value)
+    if source == "searxng":
+        return runner._searxng_endpoint(value)
     raise AssertionError(source)
 
 
@@ -95,6 +99,11 @@ def test_extract_subject_common_crawl_index():
     assert _extract_subject(data, "common-crawl-index") == "CCINDEX:https://example.invalid/two"
 
 
+def test_extract_subject_searxng():
+    data = {"records": [{"record_id": "https://example.invalid/three", "detail": "r"}]}
+    assert _extract_subject(data, "searxng") == "SEARXNG:https://example.invalid/three"
+
+
 def test_extract_subject_without_a_record_falls_back_to_source():
     """A payload with no record never claims a record subject."""
     for source in SUPPORTED_SOURCES:
@@ -105,11 +114,11 @@ def test_extract_record_type():
     cases = [
         ("marginalia", "marginalia_search_result"),
         ("common-crawl-index", "common_crawl_index_record"),
-        ("searxng", None),
+        ("searxng", "searxng_search_result"),
         ("unknown-source", None),
     ]
     for source, expected in cases:
-        record = None if source in ("searxng", "unknown-source") else {"record_id": "x"}
+        record = None if source == "unknown-source" else {"record_id": "x"}
         data = {"records": [record] if record else []}
         result = _extract_record_type(data, source)
         assert result == expected, f"{source}: expected {expected}, got {result}"
@@ -207,6 +216,41 @@ def test_extract_details_common_crawl_index():
     assert result["filename"] == "crawl-data/x.warc.gz"
 
 
+def test_extract_details_searxng():
+    data = {
+        "api_source": "SearXNG (self-hosted instance, loopback only)",
+        "api_documentation": "https://docs.searxng.org/dev/search_api.html",
+        "instance": "http://127.0.0.1:8888",
+        "pinned_commit": "1c10abe2d3e4ab7ddcc4e9da1a7d07dc7ca7f8f4",
+        "engines_config": ["duckduckgo", "brave", "wikipedia"],
+        "engines_used": ["duckduckgo"],
+        "unresponsive_engines": ["brave: HTTP timeout"],
+        "number_of_results": 1,
+        "endpoint": "http://127.0.0.1:8888/search?q=x&format=json",
+        "query": FIXTURE_INPUT_VALUE,
+        "record_count": 1,
+        "truncated": False,
+        "records": [
+            {
+                "record_id": "https://example.invalid/one",
+                "detail": "SearXNG result One via duckduckgo",
+                "title": "One",
+                "url": "https://example.invalid/one",
+                "snippet": "A description",
+                "engine": "duckduckgo",
+            }
+        ],
+    }
+    result = _extract_details(data, "searxng")
+    assert result["instance"] == "http://127.0.0.1:8888"
+    assert result["pinned_commit"] == "1c10abe2d3e4ab7ddcc4e9da1a7d07dc7ca7f8f4"
+    assert result["engines_config"] == ["duckduckgo", "brave", "wikipedia"]
+    assert result["engines_used"] == ["duckduckgo"]
+    assert result["unresponsive_engines"] == ["brave: HTTP timeout"]
+    assert result["engine"] == "duckduckgo"
+    assert result["title"] == "One"
+
+
 # -- finding schema ------------------------------------------------------------
 
 
@@ -277,7 +321,7 @@ def test_fixture_dropped_candidates_are_skipped_with_their_exact_reason():
     fixture = load_fixture()
     runner = _load_runner()
     by_source = {s["source"]: s for s in fixture["sources"]}
-    assert set(UNSUPPORTED_SUB_SOURCES) == {"searxng", "google-custom-search"}
+    assert set(UNSUPPORTED_SUB_SOURCES) == {"google-custom-search"}
     for name, reason in UNSUPPORTED_SUB_SOURCES.items():
         entry = by_source[name]
         assert entry["skipped"] is True, name
@@ -372,16 +416,18 @@ def test_parse_success():
     assert crawl.attributes["details"]["crawl_id"] == "CC-MAIN-2026-39"
     assert crawl.attributes["details"]["crawl_id_source"] == "https://commoncrawl.org/get-started"
 
-    # Both dropped candidates are present as auditable skips carrying the exact
-    # documented reason; neither is reported as a successful record.
     searxng = by_source["searxng"]
-    assert searxng.value == "searxng:skipped"
-    assert searxng.record_type is None
-    assert searxng.attributes["details"] == {
-        "skipped": True,
-        "reason": UNSUPPORTED_SUB_SOURCES["searxng"],
-    }
+    assert searxng.value == "SEARXNG:https://example.invalid/synthetic-searxng-one"
+    assert searxng.record_type == "searxng_search_result"
+    assert searxng.url == "https://example.invalid/synthetic-searxng-one"
+    assert searxng.title == "Synthetic SearXNG Result One"
+    assert searxng.attributes["details"]["instance"] == "http://127.0.0.1:8888"
+    assert searxng.attributes["details"]["pinned_commit"] == "1c10abe2d3e4ab7ddcc4e9da1a7d07dc7ca7f8f4"
+    assert searxng.attributes["details"]["engines_used"] == ["duckduckgo"]
+    assert searxng.attributes["details"]["engine"] == "duckduckgo"
 
+    # The dropped candidate is present as an auditable skip carrying the exact
+    # documented reason; it is never reported as a successful record.
     gcs = by_source["google-custom-search"]
     assert gcs.value == "google-custom-search:skipped"
     assert gcs.record_type is None
@@ -600,9 +646,9 @@ def test_runner_health_check():
     kinds = {entry["source"]: entry["kind"] for entry in inventory["sub_sources"]}
     assert kinds["marginalia"] == "http_api"
     assert kinds["common-crawl-index"] == "http_api"
-    assert kinds["searxng"] == "dropped"
+    assert kinds["searxng"] == "self_hosted_instance"
     assert kinds["google-custom-search"] == "dropped"
-    assert inventory["dropped_sub_sources"] == ["google-custom-search", "searxng"]
+    assert inventory["dropped_sub_sources"] == ["google-custom-search"]
     for entry in inventory["sub_sources"]:
         assert isinstance(entry["key_configured"], bool), entry["source"]
 
@@ -628,7 +674,8 @@ def test_runner_reports_every_sub_source():
     for source in SUPPORTED_SOURCES:
         function = _runner_function(runner, source)
         assert callable(function)
-    # The dropped candidates have a dedicated non-querying function each.
+    # Every sub-source has a query function; the dropped candidate's function
+    # never queries and simply reports its documented skip.
     assert callable(runner.query_searxng)
     assert callable(runner.query_google_custom_search)
     result = runner.SourceResult("example")
@@ -674,6 +721,13 @@ def test_runner_supported_sources_cite_a_documented_endpoint():
     assert "*" not in runner.COMMON_CRAWL_CRAWL_ID
     assert runner.COMMON_CRAWL_CRAWL_ID_SOURCE == "https://commoncrawl.org/get-started"
     assert "COMMON_CRAWL_CRAWL_ID" in inspect.getsource(runner._common_crawl_endpoint)
+    # The self-hosted sub-source is queried strictly over loopback, from a
+    # documented endpoint, with the upstream commit pinned exactly.
+    assert runner.SEARXNG_SEARCH_URL.startswith("http://127.0.0.1:")
+    assert runner.SEARXNG_DOCS.startswith("https://docs.searxng.org/")
+    assert runner.SEARXNG_PINNED_COMMIT == "1c10abe2d3e4ab7ddcc4e9da1a7d07dc7ca7f8f4"
+    assert "SEARXNG_SEARCH_URL" in inspect.getsource(runner._searxng_endpoint)
+    assert "SEARXNG_PINNED_COMMIT" in inspect.getsource(runner.query_searxng)
 
 
 def test_runner_skips_dropped_candidates_without_network(monkeypatch):
@@ -684,10 +738,8 @@ def test_runner_skips_dropped_candidates_without_network(monkeypatch):
 
     monkeypatch.setattr(runner, "_fetch_json", _boom)
     monkeypatch.setattr(runner, "_fetch_text", _boom)
-
-    searxng = runner.query_searxng(FIXTURE_INPUT_VALUE)
-    assert searxng.skipped is True
-    assert searxng.skip_reason == UNSUPPORTED_SUB_SOURCES["searxng"]
+    monkeypatch.setattr(runner, "_fetch_json_local", _boom)
+    monkeypatch.setattr(runner, "_boot_searxng", _boom)
 
     gcs = runner.query_google_custom_search(FIXTURE_INPUT_VALUE)
     assert gcs.skipped is True
@@ -811,3 +863,152 @@ def test_runner_reports_an_empty_result_as_no_finding(monkeypatch):
     assert result.error is None
     assert result.data is None
     assert result.raw_hash is None
+
+
+def test_runner_searxng_boot_failure_is_recorded(monkeypatch):
+    runner = _load_runner()
+
+    def _boom(*args, **kwargs):  # pragma: no cover - must never be called
+        raise AssertionError("no query may be issued when the instance is down")
+
+    monkeypatch.setattr(runner, "_boot_searxng", lambda: (False, "boom"))
+    monkeypatch.setattr(runner, "_fetch_json_local", _boom)
+    result = runner.query_searxng(FIXTURE_INPUT_VALUE)
+    assert result.skipped is False
+    assert result.data is None
+    assert result.error is not None and "boom" in result.error
+
+
+def test_runner_parses_the_documented_searxng_shape(monkeypatch):
+    runner = _load_runner()
+    monkeypatch.setattr(runner, "_boot_searxng", lambda: (True, None))
+    captured = {}
+
+    def fake_fetch_local(url, timeout=None):
+        captured["url"] = url
+        return {
+            "query": FIXTURE_INPUT_VALUE,
+            "number_of_results": 1,
+            "results": [
+                {
+                    "url": "https://example.invalid/one",
+                    "title": "One",
+                    "content": "A description",
+                    "engine": "duckduckgo",
+                }
+            ],
+            "unresponsive_engines": [],
+        }, 200, None
+
+    monkeypatch.setattr(runner, "_fetch_json_local", fake_fetch_local)
+    result = runner.query_searxng(FIXTURE_INPUT_VALUE)
+
+    assert result.error is None
+    assert result.http_status == 200
+    assert captured["url"] == runner.SEARXNG_SEARCH_URL + "?" + urllib.parse.urlencode(
+        {"q": FIXTURE_INPUT_VALUE, "format": "json"}
+    )
+    assert result.data["instance"] == runner.SEARXNG_BASE_URL
+    assert result.data["pinned_commit"] == runner.SEARXNG_PINNED_COMMIT
+    assert result.data["engines_config"] == list(runner.SEARXNG_ENGINES)
+    assert result.data["engines_used"] == ["duckduckgo"]
+    assert result.data["records"][0]["record_id"] == "https://example.invalid/one"
+    assert result.data["records"][0]["snippet"] == "A description"
+    assert result.data["records"][0]["engine"] == "duckduckgo"
+
+
+def test_runner_searxng_no_results_with_unresponsive_engines_is_an_error(monkeypatch):
+    runner = _load_runner()
+    monkeypatch.setattr(runner, "_boot_searxng", lambda: (True, None))
+    monkeypatch.setattr(
+        runner,
+        "_fetch_json_local",
+        lambda *a, **k: (
+            {"results": [], "unresponsive_engines": [["duckduckgo", "HTTP timeout"]]},
+            200,
+            None,
+        ),
+    )
+    result = runner.query_searxng(FIXTURE_INPUT_VALUE)
+    assert result.data is None
+    assert result.error is not None and "duckduckgo" in result.error
+
+
+def test_runner_searxng_empty_result_is_no_finding(monkeypatch):
+    runner = _load_runner()
+    monkeypatch.setattr(runner, "_boot_searxng", lambda: (True, None))
+    monkeypatch.setattr(runner, "_fetch_json_local", lambda *a, **k: ({"results": []}, 200, None))
+    result = runner.query_searxng(FIXTURE_INPUT_VALUE)
+    assert result.error is None
+    assert result.data is None
+    assert result.raw_hash is None
+
+
+def test_runner_searxng_settings_follow_the_documented_mechanisms():
+    runner = _load_runner()
+    settings = runner._searxng_settings_dict(None)
+    assert settings["use_default_settings"] == {"engines": {"keep_only": list(runner.SEARXNG_ENGINES)}}
+    assert settings["search"]["formats"] == ["html", "json"]
+    assert settings["server"]["bind_address"] == "127.0.0.1"
+    assert settings["server"]["limiter"] is False
+    assert {entry["name"] for entry in settings["engines"]} == set(runner.SEARXNG_ENGINES)
+    for entry in settings["engines"]:
+        assert entry["disabled"] is False
+    assert "proxies" not in settings["outgoing"]
+
+    proxied = runner._searxng_settings_dict("http://proxy.example:8899")
+    assert proxied["outgoing"]["proxies"] == {"all://": ["http://proxy.example:8899"]}
+
+
+def test_runner_searxng_settings_file_is_written_as_parseable_json(tmp_path):
+    runner = _load_runner()
+    path = tmp_path / "settings.yml"
+    runner._write_searxng_settings(path, None)
+    parsed = json.loads(path.read_text(encoding="utf-8"))
+    assert parsed["server"]["bind_address"] == "127.0.0.1"
+    assert parsed["search"]["formats"] == ["html", "json"]
+
+
+def test_runner_selftest_mode_reports_the_pinned_commit(monkeypatch):
+    runner = _load_runner()
+    monkeypatch.setattr(runner, "_boot_searxng", lambda: (True, None))
+    monkeypatch.setattr(
+        runner,
+        "_fetch_json_local",
+        lambda *a, **k: (
+            {"results": [], "unresponsive_engines": [["duckduckgo", "unreachable"]]},
+            200,
+            None,
+        ),
+    )
+    old_argv = sys.argv
+    old_stdout = sys.stdout
+    try:
+        sys.argv = ["runner.py", "--selftest-searxng"]
+        sys.stdout = io.StringIO()
+        assert runner.main() == 0
+        report = json.loads(sys.stdout.getvalue())
+    finally:
+        sys.argv = old_argv
+        sys.stdout = old_stdout
+    assert report["searxng_selftest"] == "ok"
+    assert report["pinned_commit"] == runner.SEARXNG_PINNED_COMMIT
+    assert report["http_status"] == 200
+    assert report["results_returned"] == 0
+
+
+def test_runner_selftest_mode_fails_when_the_boot_fails(monkeypatch):
+    runner = _load_runner()
+    monkeypatch.setattr(runner, "_boot_searxng", lambda: (False, "boom"))
+    old_argv = sys.argv
+    old_stdout = sys.stdout
+    try:
+        sys.argv = ["runner.py", "--selftest-searxng"]
+        sys.stdout = io.StringIO()
+        assert runner.main() == 1
+        report = json.loads(sys.stdout.getvalue())
+    finally:
+        sys.argv = old_argv
+        sys.stdout = old_stdout
+    assert report["searxng_selftest"] == "failed"
+    assert "boom" in report["error"]

@@ -1,19 +1,29 @@
 """Search-engine and web-index batch runner.
 
-A composite batch whose sub-sources are the Marginalia Search API and the
-Common Crawl CDXJ/URL index, both public HTTPS APIs. Every endpoint, query
-parameter, authentication requirement, documented rate limit and documentation
-URL was read from the sub-source's own official documentation and is recorded in
-RATE_LIMITS.md next to this file. No endpoint, parameter or crawl id was
-inferred from an example response.
+A composite batch whose sub-sources are the Marginalia Search API, the
+Common Crawl CDXJ/URL index and a self-hosted SearXNG instance. The first two
+are public HTTPS APIs; the third is operated inside this image (loopback only,
+upstream pinned to an exact commit) because SearXNG is a self-hosted metasearch
+engine rather than a public API. Every endpoint, query parameter,
+authentication requirement, documented rate limit and pin was read from the
+sub-source's own official documentation and is recorded in RATE_LIMITS.md next
+to this file. No endpoint, parameter, crawl id or commit was inferred from an
+example response.
 
-Standard library only (urllib, json, hashlib, os, sys): the image installs no
-third-party Python package.
+The marginalia/common-crawl path is standard library only. The embedded
+SearXNG instance is the upstream project installed from the pinned commit
+(see RATE_LIMITS.md); this runner only writes its instance settings, boots the
+documented webapp on 127.0.0.1 and queries the documented /search?format=json
+endpoint over loopback.
 
 --health prints exactly "ok" on stdout and returns 0 without any network access:
 the sub-source inventory (kind, endpoint, whether a key is configured) is
 written to stderr as one JSON line, because the Docker integration smoke case
 asserts stdout.strip() == "ok". No secret value is ever printed or recorded.
+
+--selftest-searxng boots the embedded instance on loopback (no external
+network), issues one query and prints a small JSON report; it is the Docker
+integration case for the self-hosted sub-source.
 """
 
 from __future__ import annotations
@@ -21,35 +31,33 @@ from __future__ import annotations
 import hashlib
 import json
 import os
+import secrets
+import subprocess
 import sys
+import tempfile
+import time
 import urllib.error
 import urllib.parse
 import urllib.request
 from datetime import datetime, timezone
+from pathlib import Path
 from typing import Any
 
 # -- sub-sources ---------------------------------------------------------------
 
-# Implemented sub-sources. Both are HTTPS JSON APIs; each one is queried at most
+# Implemented sub-sources. Two are HTTPS JSON APIs; searxng is a loopback-only
+# self-hosted instance operated inside this image. Each one is queried at most
 # once per run.
 SUPPORTED_SUB_SOURCES = (
     "marginalia",
     "common-crawl-index",
+    "searxng",
 )
 
-# Dropped candidates. Neither can be queried from this runner: searxng is a
-# self-hosted metasearch engine whose JSON output is an instance-side setting,
-# and Google's Custom Search JSON API is closed to new customers. Each is
-# reported once per run as an auditable skip with that exact reason, and no
-# endpoint is invented for it.
+# Dropped candidates. Google's Custom Search JSON API is closed to new
+# customers, so it cannot be queried; it is reported once per run as an
+# auditable skip with that exact reason, and no endpoint is invented for it.
 UNSUPPORTED_SUB_SOURCES: dict[str, str] = {
-    "searxng": (
-        "SearXNG is a self-hosted metasearch engine, not a public API. Its JSON output is an "
-        "instance-side configuration (the search.formats setting documented at "
-        "https://docs.searxng.org/dev/search_api.html) that public instances typically disable, "
-        "and the brief forbids the runner from operating a self-hosted instance. No public "
-        "instance with verifiable structured output is used."
-    ),
     "google-custom-search": (
         'Google\'s own documentation states verbatim "The Custom Search JSON API is closed to new '
         'customers" and "This API is not available for new customers", with the service '
@@ -97,6 +105,45 @@ COMMON_CRAWL_CRAWL_ID_SOURCE = "https://commoncrawl.org/get-started"
 COMMON_CRAWL_INVOCATION = (
     "GET https://index.commoncrawl.org/<CC-MAIN-YYYY-NN>-index?url=<url>&output=json"
 )
+
+# SearXNG self-hosted instance (loopback only). SearXNG is a self-hosted
+# metasearch engine, not a public API: the resolved route for it is "build as
+# a self-hosted container instance (JSON endpoint enabled)". The upstream
+# project is installed from the exact commit below and the runner boots the
+# documented webapp locally. The JSON output format is an instance-side
+# setting: the search API documentation states that supported formats are
+# defined in settings.yml under `search:` and that "Requesting an unset format
+# will return a 403 Forbidden error", so this runner's generated settings
+# enable both html and json.
+SEARXNG_DOCS = "https://docs.searxng.org/dev/search_api.html"
+SEARXNG_INSTALL_DOCS = "https://docs.searxng.org/admin/installation-searxng.html"
+SEARXNG_SOURCE_URL = "https://github.com/searxng/searxng"
+# The exact upstream commit this image installs. It is the release the official
+# project documentation builds from ("SearXNG Documentation
+# (2026.10.17+1c10abe2d)") and its signature is verified in the upstream
+# repository; the value was read from the project's own pages, never guessed.
+SEARXNG_PINNED_COMMIT = "1c10abe2d3e4ab7ddcc4e9da1a7d07dc7ca7f8f4"
+SEARXNG_LICENSE = "AGPL-3.0-or-later (operated unmodified from the pinned upstream commit)"
+SEARXNG_INSTALL_DIR = "/opt/searxng"
+SEARXNG_BIND_ADDRESS = "127.0.0.1"
+SEARXNG_PORT = 8888
+SEARXNG_BASE_URL = "http://" + SEARXNG_BIND_ADDRESS + ":" + str(SEARXNG_PORT)
+SEARXNG_SEARCH_URL = SEARXNG_BASE_URL + "/search"
+SEARXNG_INVOCATION = (
+    "GET http://127.0.0.1:8888/search?q=<query>&format=json (loopback-only; "
+    "the instance fans out to its configured engines)"
+)
+# The engine set is kept to keyless engines that are enabled by default in the
+# pinned upstream settings; the instance-side keep_only mechanism documented at
+# https://docs.searxng.org/admin/settings/settings.html restricts the default
+# engine list to exactly these names.
+SEARXNG_ENGINES = (
+    "duckduckgo",
+    "brave",
+    "wikipedia",
+)
+SEARXNG_BOOT_TIMEOUT_SECONDS = 60
+SEARXNG_QUERY_TIMEOUT_SECONDS = 45
 
 USER_AGENT = "Aletheia/0.9.0 (search-engines)"
 
@@ -387,16 +434,294 @@ def query_common_crawl_index(value: str) -> SourceResult:
     return SourceResult("common-crawl-index", data=payload, http_status=status)
 
 
-# -- dropped candidates --------------------------------------------------------
+# -- SearXNG (self-hosted, loopback only) --------------------------------------
+
+
+# The generated instance settings. They rely on the documented
+# use_default_settings/keep_only mechanism so the instance runs exactly the
+# three keyless engines above and nothing else; secret_key is a placeholder --
+# the boot sets SEARXNG_SECRET to a random value, which the settings loader
+# uses to overwrite it, and no secret is ever printed or recorded.
+SEARXNG_SETTINGS_SECRET_PLACEHOLDER = "aletheia-ephemeral-overridden-by-SEARXNG_SECRET"
+
+
+def _searxng_settings_dict(proxy_url: str | None = None) -> dict[str, Any]:
+    settings: dict[str, Any] = {
+        "use_default_settings": {"engines": {"keep_only": list(SEARXNG_ENGINES)}},
+        "general": {"debug": False, "instance_name": "Aletheia local run instance"},
+        "search": {"safe_search": 0, "autocomplete": "", "formats": ["html", "json"]},
+        "server": {
+            "secret_key": SEARXNG_SETTINGS_SECRET_PLACEHOLDER,
+            "bind_address": SEARXNG_BIND_ADDRESS,
+            "port": SEARXNG_PORT,
+            "limiter": False,
+            "image_proxy": False,
+        },
+        "outgoing": {"request_timeout": 8.0, "max_request_timeout": 15.0},
+        "engines": [
+            {"name": "duckduckgo", "disabled": False},
+            {"name": "brave", "disabled": False},
+            {"name": "wikipedia", "disabled": False, "display_type": ["infobox", "list"]},
+        ],
+    }
+    if proxy_url:
+        # Documented in the pinned settings file: outgoing.proxies maps URL
+        # patterns to proxy URLs, so live runs route the instance's engine
+        # requests through the same egress proxy as every other sub-source.
+        settings["outgoing"]["proxies"] = {"all://": [proxy_url]}
+    return settings
+
+
+def _searxng_proxy_url() -> str | None:
+    for name in ("HTTPS_PROXY", "https_proxy", "HTTP_PROXY", "http_proxy"):
+        value = os.environ.get(name, "").strip()
+        if value:
+            return value
+    return None
+
+
+def _write_searxng_settings(settings_path: Path, proxy_url: str | None) -> None:
+    # JSON is a subset of YAML, so the settings loader parses this file with
+    # its usual yaml.safe_load; the runner needs no YAML emitter dependency.
+    settings_path.parent.mkdir(parents=True, exist_ok=True)
+    settings_path.write_text(
+        json.dumps(_searxng_settings_dict(proxy_url), indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
+
+
+_LOCAL_OPENER = urllib.request.build_opener(urllib.request.ProxyHandler({}))
+
+
+def _fetch_json_local(
+    url: str, timeout: int = SEARXNG_QUERY_TIMEOUT_SECONDS
+) -> tuple[Any, int, str | None]:
+    """Fetch JSON from the loopback instance without any proxy handling.
+
+    The instance's own outbound engine requests go through the generated
+    outgoing.proxies setting in live runs; the request to 127.0.0.1 must never
+    be proxied, so this opener disables proxy handling entirely.
+    """
+    request = urllib.request.Request(url, headers=_request_headers())
+    try:
+        with _LOCAL_OPENER.open(request, timeout=timeout) as response:
+            body = response.read(MAX_RESPONSE_BYTES + 1)
+            status = response.status
+            if len(body) > MAX_RESPONSE_BYTES:
+                return None, status, (
+                    "Response exceeded the " + str(MAX_RESPONSE_BYTES // (1024 * 1024)) + " MB safety limit"
+                )
+    except urllib.error.HTTPError as exc:
+        detail = exc.read().decode("utf-8", errors="replace") if exc.fp else ""
+        return None, exc.code, "HTTP " + str(exc.code) + ": " + detail[:500]
+    except (urllib.error.URLError, TimeoutError, OSError) as exc:
+        return None, 0, type(exc).__name__ + ": " + str(exc)
+    try:
+        return json.loads(body.decode("utf-8", errors="replace")), status, None
+    except json.JSONDecodeError as exc:
+        return None, status, "JSON decode error: " + str(exc)
+
+
+_SEARXNG_PROCESS: subprocess.Popen | None = None
+_SEARXNG_LOG_PATH: Path | None = None
+
+
+def _searxng_probe() -> int:
+    """Return the HTTP status of the loopback instance root, or 0 if down."""
+    request = urllib.request.Request(SEARXNG_BASE_URL + "/", headers=_request_headers())
+    try:
+        with _LOCAL_OPENER.open(request, timeout=2) as response:
+            response.read(1024)
+            return response.status
+    except urllib.error.HTTPError as exc:
+        return exc.code
+    except (urllib.error.URLError, TimeoutError, OSError):
+        return 0
+
+
+def _searxng_log_tail(limit: int = 400) -> str:
+    if _SEARXNG_LOG_PATH is None or not _SEARXNG_LOG_PATH.is_file():
+        return ""
+    try:
+        text = _SEARXNG_LOG_PATH.read_text(encoding="utf-8", errors="replace")
+    except OSError:
+        return ""
+    return text[-limit:].strip().replace("\n", " ")
+
+
+def _boot_searxng() -> tuple[bool, str | None]:
+    """Start the embedded instance if it is not already serving, and wait for it.
+
+    Returns (ok, error). Never raises for a failed boot: the caller records the
+    failure as this sub-source's error for the run.
+    """
+    global _SEARXNG_PROCESS, _SEARXNG_LOG_PATH
+    if _searxng_probe():
+        return True, None
+    if not Path(SEARXNG_INSTALL_DIR, "searx", "webapp.py").is_file():
+        return False, "the pinned SearXNG tree is missing at " + SEARXNG_INSTALL_DIR
+    env = dict(os.environ)
+    env["PYTHONDONTWRITEBYTECODE"] = "1"
+    env["SEARXNG_SECRET"] = secrets.token_hex(32)
+    log_dir = Path(tempfile.mkdtemp(prefix="aletheia-searxng-"))
+    settings_path = log_dir / "settings.yml"
+    _write_searxng_settings(settings_path, _searxng_proxy_url())
+    env["SEARXNG_SETTINGS_PATH"] = str(settings_path)
+    # The loopback request and the instance's own boot must never be sent to
+    # the egress proxy; engine requests are routed via the generated
+    # outgoing.proxies setting instead.
+    no_proxy = env.get("NO_PROXY") or env.get("no_proxy") or ""
+    env["NO_PROXY"] = ",".join(part for part in (no_proxy, "127.0.0.1,localhost") if part)
+    webapp_log = log_dir / "webapp.log"
+    _SEARXNG_LOG_PATH = webapp_log
+    with open(webapp_log, "wb") as handle:
+        try:
+            _SEARXNG_PROCESS = subprocess.Popen(
+                [sys.executable, "-m", "searx.webapp"],
+                cwd=SEARXNG_INSTALL_DIR,
+                env=env,
+                stdout=handle,
+                stderr=subprocess.STDOUT,
+            )
+        except OSError as exc:
+            return False, "the webapp could not be started: " + type(exc).__name__ + ": " + str(exc)
+    deadline = time.monotonic() + SEARXNG_BOOT_TIMEOUT_SECONDS
+    while time.monotonic() < deadline:
+        if _searxng_probe():
+            return True, None
+        if _SEARXNG_PROCESS.poll() is not None:
+            return False, "the webapp exited at boot: " + _searxng_log_tail()
+        time.sleep(0.5)
+    return False, (
+        "the webapp did not answer on loopback within "
+        + str(SEARXNG_BOOT_TIMEOUT_SECONDS)
+        + "s: "
+        + _searxng_log_tail()
+    )
+
+
+def _searxng_endpoint(value: str) -> str:
+    return SEARXNG_SEARCH_URL + "?" + urllib.parse.urlencode({"q": value, "format": "json"})
+
+
+def _searxng_unresponsive_names(data: dict) -> list[str]:
+    """Normalize the documented unresponsive_engines list to plain strings."""
+    unresponsive = data.get("unresponsive_engines")
+    names: list[str] = []
+    if isinstance(unresponsive, list):
+        for item in unresponsive:
+            if isinstance(item, (list, tuple)) and item:
+                engine = _clean(item[0])
+                reason = _clean(item[1]) if len(item) > 1 else ""
+                names.append(engine + (": " + reason if reason else ""))
+            elif isinstance(item, str):
+                names.append(item)
+    return names[:20]
 
 
 def query_searxng(value: str) -> SourceResult:
-    """Never queried: SearXNG is a self-hosted metasearch engine, not a public API.
+    """Query the embedded SearXNG instance over loopback (or record its error)."""
+    ok, boot_error = _boot_searxng()
+    if not ok:
+        return SourceResult(
+            "searxng", error="SearXNG instance did not start: " + (boot_error or "unknown error")
+        )
+    endpoint = _searxng_endpoint(value)
+    data, status, error = _fetch_json_local(endpoint)
+    if error:
+        return SourceResult("searxng", http_status=status, error=error)
+    if not isinstance(data, dict):
+        return SourceResult("searxng", http_status=status, error="Unexpected response shape from SearXNG")
 
-    The runner reports the documented reason so the candidate is an auditable
-    skip rather than a silent omission, and no endpoint is invented for it.
-    """
-    return _skip("searxng", UNSUPPORTED_SUB_SOURCES["searxng"])
+    results = data.get("results")
+    records: list[dict[str, Any]] = []
+    engines_used: list[str] = []
+    if isinstance(results, list):
+        for item in results[:MAX_RECORDS]:
+            if not isinstance(item, dict):
+                continue
+            url = _clean(item.get("url"))
+            if not url:
+                continue
+            engine = _clean(item.get("engine"))
+            if engine and engine not in engines_used:
+                engines_used.append(engine)
+            title = _clean(item.get("title"))
+            records.append(
+                {
+                    "record_id": url,
+                    "detail": "SearXNG result " + (title or url) + (" via " + engine if engine else ""),
+                    "title": item.get("title"),
+                    "url": item.get("url"),
+                    "snippet": item.get("content"),
+                    "engine": item.get("engine"),
+                }
+            )
+
+    unresponsive = _searxng_unresponsive_names(data)
+    if not records:
+        if unresponsive:
+            return SourceResult(
+                "searxng",
+                http_status=status,
+                error="SearXNG returned no results; unresponsive engines: " + "; ".join(unresponsive),
+            )
+        return SourceResult("searxng", http_status=status)
+
+    payload = _payload(
+        api_source="SearXNG (self-hosted instance, loopback only)",
+        api_documentation=SEARXNG_DOCS,
+        endpoint=endpoint,
+        invocation=SEARXNG_INVOCATION,
+        query=value,
+        records=records,
+        total=len(results) if isinstance(results, list) else len(records),
+        extra={
+            "instance": SEARXNG_BASE_URL,
+            "pinned_commit": SEARXNG_PINNED_COMMIT,
+            "engines_config": list(SEARXNG_ENGINES),
+            "engines_used": engines_used,
+            "unresponsive_engines": unresponsive,
+            "number_of_results": data.get("number_of_results"),
+        },
+    )
+    return SourceResult("searxng", data=payload, http_status=status)
+
+
+def _searxng_selftest() -> int:
+    """Boot the embedded instance on loopback, query once, report JSON."""
+    report: dict[str, Any] = {
+        "searxng_selftest": "failed",
+        "pinned_commit": SEARXNG_PINNED_COMMIT,
+        "instance": SEARXNG_BASE_URL,
+        "engine_set": list(SEARXNG_ENGINES),
+    }
+    ok, boot_error = _boot_searxng()
+    if not ok:
+        report["error"] = boot_error
+        print(json.dumps(report, sort_keys=True))
+        return 1
+    data, status, error = _fetch_json_local(_searxng_endpoint("aletheia docker integration selftest"))
+    report["http_status"] = status
+    if error:
+        report["error"] = error
+        print(json.dumps(report, sort_keys=True))
+        return 1
+    record_count = 0
+    if isinstance(data, dict) and isinstance(data.get("results"), list):
+        record_count = len(data["results"])
+    report.update(
+        {
+            "searxng_selftest": "ok",
+            "results_returned": record_count,
+            "unresponsive_engines": _searxng_unresponsive_names(data if isinstance(data, dict) else {}),
+        }
+    )
+    print(json.dumps(report, sort_keys=True))
+    return 0
+
+
+# -- dropped candidates --------------------------------------------------------
 
 
 def query_google_custom_search(value: str) -> SourceResult:
@@ -442,6 +767,21 @@ def _health_inventory() -> dict[str, Any]:
                 "reachability is not tested by --health; no network request is made"
             ),
         },
+        {
+            "source": "searxng",
+            "kind": "self_hosted_instance",
+            "usable": True,
+            "endpoint": SEARXNG_SEARCH_URL,
+            "key_env": None,
+            "key_configured": False,
+            "detail": (
+                "loopback-only instance embedded in this image; upstream pinned at "
+                + SEARXNG_PINNED_COMMIT
+                + "; engine set kept to "
+                + ", ".join(SEARXNG_ENGINES)
+                + "; reachability is not tested by --health; no network request is made"
+            ),
+        },
     ]
     for name in sorted(UNSUPPORTED_SUB_SOURCES):
         entries.append(
@@ -464,6 +804,9 @@ def _health_inventory() -> dict[str, Any]:
 
 
 def main() -> int:
+    if sys.argv[1:] == ["--selftest-searxng"]:
+        return _searxng_selftest()
+
     if sys.argv[1:] == ["--health"]:
         # stdout must stay exactly "ok" (the Docker integration case asserts
         # stdout.strip() == "ok"), so the inventory goes to stderr.

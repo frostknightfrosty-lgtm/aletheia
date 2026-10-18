@@ -16,27 +16,25 @@ from aletheia.core.models import (
     SeedType,
 )
 
-# Sub-sources implemented by docker/search_engines/runner.py. Both are public
+# Sub-sources implemented by docker/search_engines/runner.py. Two are public
 # HTTPS JSON APIs: Marginalia Search (API key in the API-Key header, defaulting
 # to the documented public key) and the Common Crawl CDXJ/URL index (no
-# authentication). The exact endpoint, header/credential, documented rate limit
-# and documentation URL of each are recorded in docker/search_engines/RATE_LIMITS.md.
+# authentication). The third, SearXNG, is a self-hosted metasearch engine: it
+# is not a public API, so it is operated as a loopback-only instance inside
+# this adapter's own container (upstream pinned by commit) and queried over
+# the documented JSON search endpoint. The exact endpoint, header/credential,
+# documented rate limit, pin and documentation URL of each are recorded in
+# docker/search_engines/RATE_LIMITS.md.
 SUPPORTED_SUB_SOURCES = (
     "marginalia",
     "common-crawl-index",
+    "searxng",
 )
 
 # Candidates that cannot be queried are never called. The runner reports each one
 # once per run as a skipped source carrying this exact reason; no endpoint,
 # parameter name or version is invented for it.
 UNSUPPORTED_SUB_SOURCES: dict[str, str] = {
-    "searxng": (
-        "SearXNG is a self-hosted metasearch engine, not a public API. Its JSON output is an "
-        "instance-side configuration (the search.formats setting documented at "
-        "https://docs.searxng.org/dev/search_api.html) that public instances typically disable, "
-        "and the brief forbids the runner from operating a self-hosted instance. No public "
-        "instance with verifiable structured output is used."
-    ),
     "google-custom-search": (
         'Google\'s own documentation states verbatim "The Custom Search JSON API is closed to new '
         'customers" and "This API is not available for new customers", with the service '
@@ -149,11 +147,13 @@ def _first_record(data: dict, source: str) -> dict[str, Any] | None:
 _SUBJECT_PREFIXES = {
     "marginalia": "MARGINALIA",
     "common-crawl-index": "CCINDEX",
+    "searxng": "SEARXNG",
 }
 
 _RECORD_TYPES = {
     "marginalia": "marginalia_search_result",
     "common-crawl-index": "common_crawl_index_record",
+    "searxng": "searxng_search_result",
 }
 
 
@@ -246,6 +246,18 @@ def _extract_details(data: dict, source: str) -> dict[str, Any] | None:
                 "key_source": data.get("key_source"),
             }
         )
+    elif source == "searxng":
+        details.update(
+            {
+                "instance": data.get("instance"),
+                "pinned_commit": data.get("pinned_commit"),
+                "engines_config": data.get("engines_config"),
+                "engines_used": data.get("engines_used"),
+                "unresponsive_engines": data.get("unresponsive_engines"),
+                "number_of_results": data.get("number_of_results"),
+                "engine": record.get("engine"),
+            }
+        )
     return details
 
 
@@ -254,28 +266,33 @@ class SearchEnginesAdapter(Adapter):
         name="search_engines",
         license=(
             "Composite adapter; sub-sources are the Marginalia Search API (content provided under "
-            "CC-BY-NC-SA 4.0, non-commercial) and the Common Crawl CDXJ/URL index "
-            "(crawl data free to access by anyone from anywhere)"
+            "CC-BY-NC-SA 4.0, non-commercial), the Common Crawl CDXJ/URL index (crawl data free "
+            "to access by anyone from anywhere) and a loopback-only SearXNG instance operated from "
+            "the pinned upstream commit (SearXNG itself is AGPL-3.0-or-later)"
         ),
         input_types=[SeedType.NAME],
         output_types=[EntityType.WEB_SEARCH_RESULT],
         legal_notes=[
-            "Composite adapter covering the two verified sub-sources of the search_engines batch: marginalia (the Marginalia Search API) and common-crawl-index (the Common Crawl CDXJ/URL index). The two other candidates, searxng and google-custom-search, are dropped and never queried; the runner reports each one once per run as a skipped source carrying the documented reason.",
-            "Every endpoint, query-parameter name, authentication requirement, documented rate limit and documentation URL was read from the provider's own official documentation (https://about.marginalia-search.com/article/api/ for marginalia and https://commoncrawl.org/get-started for common-crawl-index); none was inferred from an example response. All of them are recorded in docker/search_engines/RATE_LIMITS.md.",
+            "Composite adapter covering the three verified sub-sources of the search_engines batch: marginalia (the Marginalia Search API), common-crawl-index (the Common Crawl CDXJ/URL index) and searxng (a loopback-only self-hosted SearXNG instance built from the pinned upstream commit). The remaining candidate, google-custom-search, is dropped and never queried; the runner reports it once per run as a skipped source carrying the documented reason.",
+            "Every endpoint, query-parameter name, authentication requirement, documented rate limit and documentation URL of the public APIs was read from the provider's own official documentation (https://about.marginalia-search.com/article/api/ for marginalia, https://commoncrawl.org/get-started for common-crawl-index, https://docs.searxng.org/dev/search_api.html for searxng); none was inferred from an example response. All of them are recorded in docker/search_engines/RATE_LIMITS.md.",
+            "searxng is not a public API: it is the upstream SearXNG project installed in this adapter's own image from the exact commit pinned in docker/search_engines/RATE_LIMITS.md and operated as a loopback-only instance for the duration of a run. Its JSON output is an instance-side setting: the search API documentation states that supported formats are defined in settings.yml under search: and that requesting an unset format returns 403 Forbidden, so this adapter's generated instance settings enable json explicitly. The instance's engine set is kept (via the documented use_default_settings keep_only mechanism) to keyless engines enabled by default in the pinned release: duckduckgo, brave and wikipedia.",
+            "SearXNG is free/open-source software under AGPL-3.0-or-later; it is operated unmodified from the pinned upstream commit (this adapter ships configuration, not a modified distribution). Live runs route the instance's engine requests through the same egress proxy as every other sub-source, so they are rate-limited and audited like all other outbound requests.",
             "Marginalia carries the API key in the API-Key request header on every request. MARGINALIA_API_KEY is read when set; when it is unset the runner uses the documented public key public, which the API page states cannot create custom filters and often hits a rate limit. A free non-commercial key is available by emailing contact@marginalia-search.com. No key is ever printed or recorded.",
             "Marginalia content is provided under CC-BY-NC-SA 4.0, which is non-commercial: results must not be used commercially and are subject to the licence's attribution and share-alike terms. Common Crawl states that crawl data is free to access by anyone from anywhere.",
-            "Neither sub-source publishes a numeric rate limit, so both are recorded as not published rather than guessing a number; the runner issues at most one HTTP request per sub-source per run and never paginates. The Common Crawl crawl id is pinned to an explicit crawl (never a wildcard), recorded in docker/search_engines/RATE_LIMITS.md.",
+            "No sub-source publishes a numeric rate limit, so all three are recorded as not published rather than guessing a number; the runner issues at most one HTTP request per public-API sub-source per run plus one loopback query to the embedded instance, and never paginates. The Common Crawl crawl id is pinned to an explicit crawl (never a wildcard), recorded in docker/search_engines/RATE_LIMITS.md.",
             "A web-search hit or a web-index record is a source observation, not an authoritative record: a search result can be stale, biased, spam or misattributed. Every finding must be reviewed against the published page before it is relied on.",
-            "No sub-source is a locally installed tool: both are HTTPS APIs queried at most once per run. A run contacts third-party search and web-index services, so it needs authorisation and the assertion is required.",
+            "marginalia and common-crawl-index are HTTPS APIs queried at most once per run; searxng is a locally operated instance queried over loopback, whose configured engines make the only additional outbound requests (one query per engine per run, through the same egress proxy in live runs). A run contacts third-party search and web-index services, so it needs authorisation and the assertion is required.",
         ],
         rate_limit=(
-            "At most one HTTP request per sub-source per run (two requests total), no pagination, "
-            "records truncated at 25. Both sub-sources publish no numeric rate limit: the Marginalia "
-            "API page only states that the public key \"often hits a rate limit\", and Common Crawl "
-            "publishes none on https://commoncrawl.org/get-started, so both are recorded as not "
-            "published. See docker/search_engines/RATE_LIMITS.md"
+            "At most one HTTP request per public-API sub-source per run plus one loopback query to "
+            "the embedded SearXNG instance (which fans out to its three configured engines), no "
+            "pagination, records truncated at 25. No sub-source publishes a numeric rate limit: the "
+            "Marginalia API page only states that the public key \"often hits a rate limit\", Common "
+            "Crawl publishes none on https://commoncrawl.org/get-started, and the SearXNG search "
+            "API page publishes none, so all are recorded as not published. See "
+            "docker/search_engines/RATE_LIMITS.md"
         ),
-        invocation="HTTPS JSON search-engine and web-index APIs via dedicated Docker runner (aletheia/search-engines:v1)",
+        invocation="HTTPS JSON search-engine and web-index APIs plus a loopback-only self-hosted instance, via dedicated Docker runner (aletheia/search-engines:v1)",
         version_pin="1.0",
         upstream="https://github.com/frostknightfrosty-lgtm/aletheia/tree/main/docker/search_engines",
         network_required=True,

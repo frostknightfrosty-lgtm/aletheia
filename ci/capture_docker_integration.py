@@ -53,6 +53,7 @@ CASES = [
     ("phase9-email-auth", "aletheia/email-auth:v1", ["--health"]),
     ("phase9-code-search", "aletheia/code-search:v1", ["--health"]),
     ("phase9-search-engines", "aletheia/search-engines:v1", ["--health"]),
+    ("phase17-search-engines-searxng", "aletheia/search-engines:v1", ["--selftest-searxng"]),
     ("phase9-geolocation-image", "aletheia/geolocation-image:v1", ["--health"]),
     ("phase9-transport-asset-registry", "aletheia/transport-asset-registry:v1", ["--health"]),
     ("phase9-social-profile", "aletheia/social-profile:v1", ["--health"]),

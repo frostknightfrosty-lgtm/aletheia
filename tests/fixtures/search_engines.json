@@ -89,13 +89,46 @@
     },
     {
       "source": "searxng",
-      "skipped": true,
-      "skip_reason": "SearXNG is a self-hosted metasearch engine, not a public API. Its JSON output is an instance-side configuration (the search.formats setting documented at https://docs.searxng.org/dev/search_api.html) that public instances typically disable, and the brief forbids the runner from operating a self-hosted instance. No public instance with verifiable structured output is used.",
+      "skipped": false,
+      "skip_reason": null,
       "timestamp": "2026-10-16T09:00:03+00:00",
-      "http_status": 0,
+      "http_status": 200,
       "error": null,
-      "raw_hash": null,
-      "data": null
+      "raw_hash": "354c5b9abd2e1ac6858d8804fad678d5699b78ccb73477fa06d853edeaf517a1",
+      "data": {
+        "api_source": "SearXNG (self-hosted instance, loopback only)",
+        "api_documentation": "https://docs.searxng.org/dev/search_api.html",
+        "endpoint": "http://127.0.0.1:8888/search?q=SyntheticSearchQueryForFixture&format=json",
+        "invocation": "GET http://127.0.0.1:8888/search?q=<query>&format=json (loopback-only; the instance fans out to its configured engines)",
+        "query": "SyntheticSearchQueryForFixture",
+        "record_count": 1,
+        "truncated": false,
+        "instance": "http://127.0.0.1:8888",
+        "pinned_commit": "1c10abe2d3e4ab7ddcc4e9da1a7d07dc7ca7f8f4",
+        "engines_config": [
+          "duckduckgo",
+          "brave",
+          "wikipedia"
+        ],
+        "engines_used": [
+          "duckduckgo"
+        ],
+        "unresponsive_engines": [
+          "brave: HTTP timeout",
+          "wikipedia: HTTP timeout"
+        ],
+        "number_of_results": 1,
+        "records": [
+          {
+            "record_id": "https://example.invalid/synthetic-searxng-one",
+            "detail": "SearXNG result Synthetic SearXNG Result One via duckduckgo",
+            "title": "Synthetic SearXNG Result One",
+            "url": "https://example.invalid/synthetic-searxng-one",
+            "snippet": "A synthetic result used only by the fixture.",
+            "engine": "duckduckgo"
+          }
+        ]
+      }
     },
     {
       "source": "google-custom-search",
