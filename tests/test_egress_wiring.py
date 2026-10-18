@@ -124,10 +124,29 @@ def test_session_starts_network_then_detached_proxy(tmp_path):
     assert "-d" in calls[1]
     assert calls[1].count("--network") == 1
     assert "aletheia-egress-ssl-tls" in calls[1]
-    assert f"{tmp_path / 'egress'}:/var/log/aletheia" in calls[1]
+    assert f"{(tmp_path / 'egress').resolve()}:/var/log/aletheia" in calls[1]
+    assert "ALETHEIA_EGRESS_RATE=1.0" in calls[1]
+    assert "ALETHEIA_EGRESS_BURST=1.0" in calls[1]
     assert session.proxy_url == "http://aletheia-egress-ssl-tls:8888"
     assert session.network == "aletheia-egress-net-ssl-tls"
     assert session.log_path == tmp_path / "egress" / egress.LOG_FILENAME
+
+
+def test_session_forwards_operator_egress_limits(tmp_path):
+    """Run 39119306001 exposed that wide sweeps need more than 1 request/second.
+
+    The proxy answers 429 over the limit instead of queueing, so the operator's
+    ``--egress-rate``/``--egress-burst`` must reach the proxy environment.
+    """
+    calls, runner = _recorder()
+    session = egress.ProxySession(
+        "sherlock", tmp_path / "egress", rate=20.0, capacity=100.0, runner=runner
+    )
+
+    session.start()
+
+    assert "ALETHEIA_EGRESS_RATE=20.0" in calls[1]
+    assert "ALETHEIA_EGRESS_BURST=100.0" in calls[1]
 
 
 def test_session_context_manager_stops_proxy_and_network(tmp_path):
@@ -310,6 +329,52 @@ def test_orchestrator_can_disable_wiring_for_offline_replays(tmp_path, monkeypat
     assert request.network_name is None
 
 
+def test_orchestrator_forwards_egress_limits_to_the_session(tmp_path, monkeypatch):
+    """The operator's --egress-rate/--egress-burst reach the proxy session.
+
+    Run 39119306001 was the first live run; the default 1 request/second makes
+    wide sweeps collect 429s, so the limits must be selectable per run while
+    the default stays unchanged.
+    """
+    from aletheia.core.orchestrator import Orchestrator
+
+    recorded: list[dict] = []
+
+    class _RecordingSession:
+        def __init__(self, adapter, log_dir, **kwargs):
+            recorded.append(kwargs)
+
+        def start(self):
+            return self
+
+        @property
+        def proxy_url(self):
+            return "http://aletheia-egress-search_engines:8888"
+
+        @property
+        def network(self):
+            return "aletheia-egress-net-search_engines"
+
+        def read_entries(self):
+            return []
+
+        def stop(self):
+            pass
+
+    monkeypatch.setattr(egress, "ProxySession", _RecordingSession)
+    orchestrator = Orchestrator(tmp_path)
+    orchestrator.adapters = {"search_engines": _RecordingAdapter("search_engines")}
+
+    raised_run = orchestrator.create_run(Seed(type=SeedType.DOMAIN, value="example.com"))
+    orchestrator.resume(raised_run, egress_rate=20.0, egress_burst=100.0)
+    assert (recorded[0]["rate"], recorded[0]["capacity"]) == (20.0, 100.0)
+
+    recorded.clear()
+    default_run = orchestrator.create_run(Seed(type=SeedType.DOMAIN, value="example.org"))
+    orchestrator.resume(default_run)
+    assert (recorded[0]["rate"], recorded[0]["capacity"]) == (1.0, 1.0)
+
+
 # -- CI scenario ---------------------------------------------------------------
 
 
@@ -364,3 +429,45 @@ def test_cli_resume_passes_the_egress_decision_through(monkeypatch, tmp_path):
         )
         cli.main()
         assert calls[0]["wire_egress"] is expected, (extra, calls)
+
+
+def test_cli_resume_passes_the_egress_limits_through(monkeypatch, tmp_path):
+    """Run 39119306001: wide sweeps need a selectable per-adapter rate limit.
+
+    The proxy answers 429 over the limit, so the operator must be able to raise
+    it per run; the default stays the polite 1 request/second.
+    """
+    import sys
+
+    from aletheia.cli import main as cli
+
+    calls: list[dict] = []
+
+    class _FakeOrchestrator:
+        def __init__(self, data_dir):
+            self.data_dir = data_dir
+
+        def resume(self, run_id, **kwargs):
+            calls.append(kwargs)
+            return {}
+
+    monkeypatch.setattr(cli, "Orchestrator", _FakeOrchestrator)
+
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        ["aletheia", "resume", "--run-id", str(uuid4()), "--data-dir", str(tmp_path),
+         "--egress-rate", "20", "--egress-burst", "100"],
+    )
+    cli.main()
+    assert calls[0]["egress_rate"] == 20.0
+    assert calls[0]["egress_burst"] == 100.0
+
+    calls.clear()
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        ["aletheia", "resume", "--run-id", str(uuid4()), "--data-dir", str(tmp_path)],
+    )
+    cli.main()
+    assert (calls[0]["egress_rate"], calls[0]["egress_burst"]) == (1.0, 1.0)

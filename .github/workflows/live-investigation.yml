@@ -16,6 +16,16 @@ on:
         required: false
         default: 120
         type: number
+      egress_rate:
+        description: "Per-adapter egress proxy limit: sustained requests/second (default 1)"
+        required: false
+        default: 1
+        type: number
+      egress_burst:
+        description: "Per-adapter egress proxy limit: burst capacity (default 1)"
+        required: false
+        default: 1
+        type: number
 
 permissions:
   contents: read
@@ -56,6 +66,8 @@ jobs:
           ALETHEIA_SEED: ${{ inputs.seed }}
           ALETHEIA_AUTHORIZATION_ASSERTION: ${{ inputs.authorization_assertion }}
           ALETHEIA_TIMEOUT_SECONDS: ${{ inputs.timeout_seconds }}
+          ALETHEIA_EGRESS_RATE: ${{ inputs.egress_rate }}
+          ALETHEIA_EGRESS_BURST: ${{ inputs.egress_burst }}
           REDDIT_CLIENT_ID: ${{ secrets.REDDIT_CLIENT_ID }}
           REDDIT_CLIENT_SECRET: ${{ secrets.REDDIT_CLIENT_SECRET }}
           YOUTUBE_API_KEY: ${{ secrets.YOUTUBE_API_KEY }}
@@ -67,6 +79,8 @@ jobs:
             --legal-only \
             --data-dir ./data \
             --timeout "$ALETHEIA_TIMEOUT_SECONDS" \
+            --egress-rate "$ALETHEIA_EGRESS_RATE" \
+            --egress-burst "$ALETHEIA_EGRESS_BURST" \
             --authorization-assertion "$ALETHEIA_AUTHORIZATION_ASSERTION" \
             2>&1 | tee investigate.log
 

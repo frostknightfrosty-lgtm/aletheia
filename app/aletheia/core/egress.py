@@ -386,7 +386,11 @@ class EgressProxy:
         if self.kill_switch:
             command += ["-e", f"{KILL_SWITCH_ENV}=1"]
         command += [
-            "-v", f"{log_dir}:/var/log/aletheia",
+            # Run 39119306001: Docker treats a bind-mount source as a named volume
+            # unless it is an absolute path, so a relative --data-dir crashed the
+            # first live wiring ("includes invalid characters for a local volume
+            # name"). Resolve here, the single assembly point for this argv.
+            "-v", f"{Path(log_dir).resolve()}:/var/log/aletheia",
         ]
         if publish_port:
             command += ["-p", f"{self.port}:{self.port}"]
@@ -490,6 +494,8 @@ class ProxySession:
     image: str = DEFAULT_IMAGE
     port: int = DEFAULT_PORT
     kill_switch: bool = False
+    rate: float = 1.0
+    capacity: float = 1.0
     network: str | None = None
     runner: Callable[[list[str]], Any] = _default_runner
     _proxy: EgressProxy | None = field(default=None, init=False)
@@ -499,7 +505,8 @@ class ProxySession:
         if self.network is None:
             self.network = network_name(self.adapter)
         self._proxy = EgressProxy(
-            self.adapter, image=self.image, port=self.port, kill_switch=self.kill_switch
+            self.adapter, image=self.image, port=self.port, rate=self.rate,
+            capacity=self.capacity, kill_switch=self.kill_switch,
         )
 
     def _run(self, argv: list[str]) -> Any:

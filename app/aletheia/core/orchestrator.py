@@ -135,13 +135,17 @@ class Orchestrator:
         return run_id
 
     def resume(self, run_id: UUID, *, authorization_assertion: str | None = None, timeout_seconds: int = 120,
-               proxy_url: str | None = None, wire_egress: bool = True) -> dict:
+               proxy_url: str | None = None, wire_egress: bool = True,
+               egress_rate: float = 1.0, egress_burst: float = 1.0) -> dict:
         """Run the pending adapter/seed invocations, routing network egress through the proxy.
 
         ``wire_egress`` defaults to ``True``: an adapter whose descriptor declares
         ``network_required=True`` runs on an ``--internal`` network with the proxy
         as its only way out. Pass ``False`` for offline replays and tests that must
-        not touch Docker networking.
+        not touch Docker networking. ``egress_rate``/``egress_burst`` are the
+        per-adapter proxy limits; the default 1 request/second is deliberately
+        polite, and the proxy answers 429 rather than queueing, so raise them for
+        wide sweeps (site-enumeration tools make hundreds of requests).
 
         Every resume records the lawful-basis declaration in the audit trail;
         an empty declaration is recorded as such and never blocks the run. Skip
@@ -194,7 +198,9 @@ class Orchestrator:
                 if wire_egress and egress.is_wired(
                     adapter_name, network_required=adapter.descriptor.network_required
                 ):
-                    session = egress.ProxySession(adapter_name, workspace_dir / "egress")
+                    session = egress.ProxySession(
+                        adapter_name, workspace_dir / "egress", rate=egress_rate, capacity=egress_burst
+                    )
                     session.start()
                     adapter_proxy_url = session.proxy_url
                     adapter_network = session.network

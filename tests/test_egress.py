@@ -226,9 +226,22 @@ def test_proxy_run_command_sets_adapter_mounts_log_and_kill_switch(tmp_path):
     assert command[-1] == "--serve"
     assert "aletheia/egress-proxy:v1" in command
     assert "ALETHEIA_ADAPTER=rdap" in command
-    assert f"{tmp_path}:/var/log/aletheia" in command
+    assert f"{Path(tmp_path).resolve()}:/var/log/aletheia" in command
     assert f"{egress.KILL_SWITCH_ENV}=1" in command
     assert f"{egress.PORT_ENV}=8888" in command
+
+
+def test_proxy_run_command_resolves_relative_log_dir_for_docker(tmp_path, monkeypatch):
+    """Docker rejects a relative bind-mount source as an invalid volume name.
+
+    Run 39119306001 crashed the first live wiring with "includes invalid
+    characters for a local volume name" because the operator's ``--data-dir``
+    is relative by default. The argv builder must hand Docker an absolute path.
+    """
+    monkeypatch.chdir(tmp_path)
+    command = EgressProxy("rdap").run_command(log_dir=Path("data") / "runs" / "abc" / "rdap" / "egress")
+    expected = f"{(tmp_path / 'data' / 'runs' / 'abc' / 'rdap' / 'egress').resolve()}:/var/log/aletheia"
+    assert expected in command
 
 
 # -- audit-chain writer --------------------------------------------------------
