@@ -17,7 +17,7 @@ from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, Tabl
 
 from aletheia.core.graph import Graph
 from aletheia.core.models import EntityType, RelationshipType, Seed
-from aletheia.phase2.resolution import ResolutionCandidate
+from aletheia.phase2.resolution import ResolutionCandidate, seed_attribution
 
 
 SUPPORTED_STIX_TYPES = {
@@ -80,8 +80,13 @@ def _claim_confidence(evidence: list[dict[str, Any]]) -> float:
 
 
 def build_report_payload(*, run_id: UUID, seed: Seed, graph: Graph, manifest: dict[str, Any],
-                         candidates: list[ResolutionCandidate]) -> dict[str, Any]:
+                         candidates: list[ResolutionCandidate],
+                         adapters: list[dict[str, Any]] | None = None,
+                         warnings: list[Any] | None = None) -> dict[str, Any]:
     generated_at = datetime.now(timezone.utc)
+    seeds = [Seed.model_validate(raw) for raw in manifest.get("seeds", [seed.model_dump(mode="json")])]
+    attribution = seed_attribution(graph)
+    cross_seed_entity_count = sum(1 for indexes in attribution.values() if len(indexes) >= 2)
     claims: list[dict[str, Any]] = []
     for entity in sorted(graph.entities.values(), key=lambda e: (e.entity_type.value, e.canonical_value, str(e.entity_id))):
         evidence = _evidence_for_entity(graph, entity.entity_id)
@@ -105,6 +110,8 @@ def build_report_payload(*, run_id: UUID, seed: Seed, graph: Graph, manifest: di
         "objective": manifest.get("goal"),
         "legal_only": bool(manifest.get("legal_only", True)),
         "seed": seed.model_dump(mode="json"),
+        "seeds": [item.model_dump(mode="json") for item in seeds],
+        "context_filters": manifest.get("context_filters"),
         "checkpoint_hash": manifest.get("checkpoint_hash"),
         "tool_versions": manifest.get("tool_versions", {}),
         "statistics": {
@@ -112,7 +119,17 @@ def build_report_payload(*, run_id: UUID, seed: Seed, graph: Graph, manifest: di
             "edge_count": sum(1 for e in graph.edges.values() if e.relationship != RelationshipType.SAME_AS_CANDIDATE),
             "resolution_candidate_count": len(candidates),
             "tools_with_evidence": sorted({item["tool"] for claim in claims for item in claim["evidence"]}),
+            "seed_count": len(seeds),
+            "cross_seed_entity_count": cross_seed_entity_count,
         },
+        # Every matching adapter with its outcome, and the reason for each
+        # sub-source the adapter could not query (missing keys, retired
+        # endpoints, paid-only APIs). Skipped sources are recorded by the
+        # adapters themselves during ``resume``; nothing is inferred here.
+        "adapters": list(adapters or []),
+        "jurisdiction_warnings": [
+            item.to_dict() if hasattr(item, "to_dict") else dict(item) for item in (warnings or [])
+        ],
         "claims": claims,
         "resolution_candidates": [candidate.to_dict() for candidate in candidates],
         "court_use_note": (
@@ -258,6 +275,38 @@ def write_pdf_report(payload: dict[str, Any], path: Path) -> Path:
         f'resolution candidates: {payload["statistics"]["resolution_candidate_count"]}; '
         f'tools with evidence: {", ".join(payload["statistics"]["tools_with_evidence"]) or "none"}.',
         styles["BodyText"]))
+    if payload["statistics"].get("seed_count", 1) > 1:
+        story.append(Paragraph(
+            f'Multi-seed run: {payload["statistics"]["seed_count"]} seeds; entities corroborated by at least two '
+            f'seed trees: {payload["statistics"]["cross_seed_entity_count"]}; '
+            f'context filters: {json.dumps(payload["context_filters"] or {}, sort_keys=True)}.',
+            styles["BodyText"]))
+
+    story.append(Spacer(1, 4 * mm))
+    story.append(Paragraph("Adapter Runs", styles["Heading2"]))
+    adapter_rows = [["Adapter", "Status", "Skipped sources and reasons"]]
+    for entry in payload["adapters"]:
+        skip_notes = "; ".join(
+            f'{item.get("source", "unknown")}: {item.get("reason", "")}'
+            for item in entry.get("skipped_sources", [])
+        ) or "none"
+        if len(skip_notes) > 400:
+            skip_notes = skip_notes[:397] + "..."
+        adapter_rows.append([
+            str(entry.get("invocation") or entry.get("adapter")), str(entry.get("status")), skip_notes
+        ])
+    if len(adapter_rows) > 1:
+        at = Table(adapter_rows, colWidths=[42 * mm, 22 * mm, 116 * mm], repeatRows=1)
+        at.setStyle(TableStyle([
+            ("GRID", (0, 0), (-1, -1), 0.35, colors.grey),
+            ("BACKGROUND", (0, 0), (-1, 0), colors.lightgrey),
+            ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
+            ("FONTSIZE", (0, 0), (-1, -1), 7),
+            ("VALIGN", (0, 0), (-1, -1), "TOP"),
+        ]))
+        story.append(at)
+    else:
+        story.append(Paragraph("No adapter invocations have been recorded for this run.", styles["BodyText"]))
 
     story.append(Spacer(1, 4 * mm))
     story.append(Paragraph("Claims", styles["Heading2"]))
@@ -313,6 +362,18 @@ def write_pdf_report(payload: dict[str, Any], path: Path) -> Path:
     else:
         story.append(Paragraph("No fuzzy same-as candidates exceeded the configured threshold.", styles["BodyText"]))
 
+    story.append(Spacer(1, 6 * mm))
+    story.append(Paragraph("Jurisdiction Warnings (informational)", styles["Heading2"]))
+    if payload["jurisdiction_warnings"]:
+        story.append(Paragraph(
+            "Heuristic signals only; they do not gate the run and are not a legal determination.",
+            styles["Small"]))
+        for item in payload["jurisdiction_warnings"]:
+            line = f'{item.get("kind")}: {item.get("signal")} - {item.get("subject")}'
+            story.append(Paragraph(line.replace("&", "&amp;"), styles["Tiny"]))
+    else:
+        story.append(Paragraph("No jurisdiction-warning signals were matched.", styles["BodyText"]))
+
     story.append(Spacer(1, 8 * mm))
     story.append(Paragraph("Chain of Custody / Integrity", styles["Heading2"]))
     story.append(Paragraph(
@@ -325,9 +386,12 @@ def write_pdf_report(payload: dict[str, Any], path: Path) -> Path:
 
 
 def generate_all_reports(*, run_id: UUID, seed: Seed, graph: Graph, manifest: dict[str, Any],
-                         candidates: list[ResolutionCandidate], out_dir: Path) -> dict[str, str]:
+                         candidates: list[ResolutionCandidate], out_dir: Path,
+                         adapters: list[dict[str, Any]] | None = None,
+                         warnings: list[Any] | None = None) -> dict[str, str]:
     out_dir.mkdir(parents=True, exist_ok=True)
-    payload = build_report_payload(run_id=run_id, seed=seed, graph=graph, manifest=manifest, candidates=candidates)
+    payload = build_report_payload(run_id=run_id, seed=seed, graph=graph, manifest=manifest, candidates=candidates,
+                                   adapters=adapters, warnings=warnings)
     json_path = write_json_report(payload, out_dir / "report.json")
     graphml_path = write_graphml(graph, out_dir / "graph.graphml", report_hash=payload["content_hash_sha256"])
     stix_path = write_stix2(payload, out_dir / "report.stix2.json")

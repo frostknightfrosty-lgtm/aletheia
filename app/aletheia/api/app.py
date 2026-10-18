@@ -6,17 +6,25 @@ from uuid import UUID
 
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import HTMLResponse
-from pydantic import BaseModel
+from pydantic import BaseModel, model_validator
 
-from aletheia.core.models import Seed
+from aletheia.core.models import ContextFilters, Seed
 from aletheia.core.orchestrator import Orchestrator
 from aletheia.phase2.service import Phase2Service
 from aletheia.phase7.benchmark import BenchmarkStore
 from aletheia.phase7.ui import page
 
 class InvestigationStartRequest(BaseModel):
-    seed: Seed
+    seed: Seed | None = None
+    seeds: list[Seed] | None = None
     authorization_assertion: str | None = None
+    context_filters: ContextFilters | None = None
+
+    @model_validator(mode="after")
+    def _require_seeds(self) -> "InvestigationStartRequest":
+        if self.seed is None and not self.seeds:
+            raise ValueError("provide seed or seeds")
+        return self
 
 
 app = FastAPI(title="Aletheia", version="0.7.0")
@@ -33,7 +41,12 @@ def healthz() -> dict[str, str]:
 
 @app.post("/v1/investigations")
 def start_investigation(request: InvestigationStartRequest) -> dict[str, str]:
-    run_id = orch.create_run(request.seed, legal_only=True, authorization_assertion=request.authorization_assertion)
+    run_id = orch.create_run(
+        request.seeds or request.seed,
+        legal_only=True,
+        authorization_assertion=request.authorization_assertion,
+        context_filters=request.context_filters,
+    )
     return {"run_id": str(run_id), "status": "created"}
 
 

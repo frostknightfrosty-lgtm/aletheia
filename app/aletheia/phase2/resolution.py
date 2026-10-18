@@ -3,7 +3,7 @@ from __future__ import annotations
 import ipaddress
 import re
 from dataclasses import dataclass, asdict
-from datetime import datetime, timezone
+from datetime import date, datetime, timezone
 from urllib.parse import urlsplit, urlunsplit
 from uuid import UUID
 
@@ -11,7 +11,7 @@ from rapidfuzz.distance import JaroWinkler, Levenshtein
 
 from aletheia.core.calibration import Calibrator
 from aletheia.core.graph import Graph
-from aletheia.core.models import Entity, EntityType, RelationshipType, Provenance
+from aletheia.core.models import ContextFilters, Entity, EntityType, RelationshipType, Provenance
 
 
 @dataclass(frozen=True)
@@ -168,6 +168,128 @@ def _score(left: str, right: str) -> tuple[float, float, float]:
     return round(jw, 6), round(lev, 6), composite
 
 
+def seed_attribution(graph: Graph) -> dict[UUID, set[int]]:
+    """Map each entity to the seed-tree indexes its evidence came from.
+
+    ``Graph.ingest`` points a DERIVED_FROM edge from a per-finding node at the
+    observed entity and ``merge_entities`` redirects those edges to the kept
+    entity, so edge provenance is the durable record of which seed expansion
+    produced the evidence. The resolver's own SAME_AS_CANDIDATE edges carry no
+    seed index and are ignored. Single-seed runs leave the index unset, so they
+    yield an empty attribution and behave exactly as before.
+    """
+    attribution: dict[UUID, set[int]] = {}
+    for edge in graph.edges.values():
+        seed_index = edge.provenance.seed_index
+        if seed_index is None:
+            continue
+        attribution.setdefault(edge.target_entity_id, set()).add(seed_index)
+    return attribution
+
+
+_COUNTRY_ATTRS = ("country", "country_code", "address_country", "jurisdiction")
+_LANGUAGE_ATTRS = ("language", "languages", "lang")
+_TIMEZONE_ATTRS = ("timezone", "time_zone", "tz")
+_AGE_ATTRS = ("age",)
+_BIRTH_YEAR_ATTRS = ("birth_year",)
+_BIRTHDATE_ATTRS = ("birthdate", "birth_date", "dob")
+
+
+def _attr_values(entity: Entity, keys: tuple[str, ...]) -> list[str]:
+    lowered = {str(key).casefold(): value for key, value in entity.attributes.items()}
+    values: list[str] = []
+    for key in keys:
+        value = lowered.get(key)
+        if value is None:
+            continue
+        if isinstance(value, (list, tuple, set)):
+            values.extend(str(item) for item in value)
+        else:
+            values.append(str(value))
+    return values
+
+
+def _token_match(filter_value: str, attr_value: str) -> bool:
+    """Case-insensitive token match; a longer filter may also match as substring."""
+    needle = filter_value.casefold().strip()
+    haystack = attr_value.casefold().strip()
+    if not needle or not haystack:
+        return False
+    tokens = {token for token in re.split(r"[^a-z0-9]+", haystack) if token}
+    if needle in tokens:
+        return True
+    return len(needle) > 3 and needle in haystack
+
+
+def _substring_match(filter_value: str, attr_value: str) -> bool:
+    needle = filter_value.casefold().strip()
+    haystack = attr_value.casefold().strip()
+    if not needle or not haystack:
+        return False
+    return needle in haystack or haystack in needle
+
+
+def _compute_age(entity: Entity) -> int | None:
+    lowered = {str(key).casefold(): value for key, value in entity.attributes.items()}
+    for key in _AGE_ATTRS:
+        try:
+            age = int(lowered[key])
+        except (KeyError, TypeError, ValueError):
+            continue
+        if 0 <= age <= 130:
+            return age
+    today = datetime.now(timezone.utc).date()
+    for key in _BIRTH_YEAR_ATTRS:
+        try:
+            birth_year = int(lowered[key])
+        except (KeyError, TypeError, ValueError):
+            continue
+        if 1900 <= birth_year <= today.year:
+            return today.year - birth_year
+    for key in _BIRTHDATE_ATTRS:
+        raw = lowered.get(key)
+        if not isinstance(raw, str):
+            continue
+        try:
+            parsed = date.fromisoformat(raw[:10])
+        except ValueError:
+            continue
+        age = today.year - parsed.year - ((today.month, today.day) < (parsed.month, parsed.day))
+        if 0 <= age <= 130:
+            return age
+    return None
+
+
+def _filter_mismatch(entity: Entity, filters: ContextFilters | None) -> str | None:
+    """Return a human-readable mismatch, or ``None`` when the entity is compatible.
+
+    Only positive mismatches count: an entity that records nothing for a
+    filtered attribute cannot be excluded by that filter.
+    """
+    if filters is None or filters.is_empty():
+        return None
+    if filters.country:
+        values = _attr_values(entity, _COUNTRY_ATTRS)
+        if values and not any(_token_match(filters.country, value) for value in values):
+            return f"country filter '{filters.country}' does not match recorded {values}"
+    if filters.language:
+        values = _attr_values(entity, _LANGUAGE_ATTRS)
+        if values and not any(_token_match(filters.language, value) for value in values):
+            return f"language filter '{filters.language}' does not match recorded {values}"
+    if filters.timezone:
+        values = _attr_values(entity, _TIMEZONE_ATTRS)
+        if values and not any(_substring_match(filters.timezone, value) for value in values):
+            return f"timezone filter '{filters.timezone}' does not match recorded {values}"
+    if filters.age_min is not None or filters.age_max is not None:
+        age = _compute_age(entity)
+        if age is not None:
+            if filters.age_min is not None and age < filters.age_min:
+                return f"computed age {age} is below age_min {filters.age_min}"
+            if filters.age_max is not None and age > filters.age_max:
+                return f"computed age {age} is above age_max {filters.age_max}"
+    return None
+
+
 class EntityResolver:
     """Conservative, explainable resolver.
 
@@ -183,7 +305,7 @@ class EntityResolver:
         # absent or untrained, candidates are reported as ``calibrated: false``.
         self.calibrator = calibrator
 
-    def resolve(self, graph: Graph) -> list[ResolutionCandidate]:
+    def resolve(self, graph: Graph, *, context_filters: ContextFilters | None = None) -> list[ResolutionCandidate]:
         # First pass: canonicalize and exact-merge within an entity type.
         by_canonical: dict[tuple[EntityType, str], Entity] = {}
         candidates: list[ResolutionCandidate] = []
@@ -211,6 +333,9 @@ class EntityResolver:
             graph.merge_entities(existing.entity_id, entity.entity_id, reason="exact_canonical_match")
 
         # Second pass: fuzzy candidate generation over surviving entities of same type.
+        # Seed-tree attribution is read after the exact merges so shared evidence
+        # survives on the kept entity.
+        attribution = seed_attribution(graph)
         survivors = list(graph.entities.values())
         grouped: dict[EntityType, list[Entity]] = {}
         for entity in survivors:
@@ -241,6 +366,7 @@ class EntityResolver:
                         jw, lev, score = _score(left.canonical_value, right.canonical_value)
                         if score < self.candidate_threshold:
                             continue
+                        raw_score = score
                         decision = "candidate"
                         explanation = [
                             f"same_entity_type={entity_type.value}",
@@ -248,9 +374,24 @@ class EntityResolver:
                             f"levenshtein={lev:.6f}",
                             "no automatic merge because fuzzy similarity is not source evidence",
                         ]
+                        # Intersection pass: an entity corroborated by more than one
+                        # seed tree gets a documented, bounded score boost. The boost
+                        # never creates a candidate (the raw threshold is applied first)
+                        # and never feeds the calibrator, which was trained on raw
+                        # similarity scores.
+                        trees = sorted(
+                            attribution.get(left.entity_id, set()) | attribution.get(right.entity_id, set())
+                        )
+                        if len(trees) >= 2:
+                            score = min(1.0, round(raw_score * (1 + 0.05 * (len(trees) - 1)), 6))
+                            explanation.append("cross_seed_trees=" + ",".join(str(index) for index in trees))
+                            explanation.append(f"cross_seed_boost={raw_score:.6f}->{score:.6f}")
+                            explanation.append(
+                                "boost is a documented heuristic prior (5% per additional tree), not calibrator output"
+                            )
                         calibrated = self.calibrator is not None and self.calibrator.trained
                         probability = (
-                            round(self.calibrator.predict(score), 6)
+                            round(self.calibrator.predict(raw_score), 6)
                             if calibrated and self.calibrator is not None
                             else None
                         )
@@ -260,9 +401,16 @@ class EntityResolver:
                         else:
                             explanation.append("calibrated=false")
                             explanation.append("no_trained_calibrator_score_is_similarity_not_probability")
-                        if score >= self.auto_merge_threshold:
+                        if raw_score >= self.auto_merge_threshold:
                             # Still require exact canonical equality for merge; threshold alone cannot authorize it.
                             explanation.append("auto_merge_blocked_by_policy_exact_match_only")
+                        if context_filters is not None and not context_filters.is_empty():
+                            mismatch = _filter_mismatch(left, context_filters) or _filter_mismatch(right, context_filters)
+                            if mismatch:
+                                decision = "filtered_out"
+                                explanation.append(f"context_filter_mismatch={mismatch}")
+                            else:
+                                explanation.append("context_filters=no_conflict")
                         candidates.append(ResolutionCandidate(
                             left.entity_id, right.entity_id, entity_type,
                             left.canonical_value, right.canonical_value,

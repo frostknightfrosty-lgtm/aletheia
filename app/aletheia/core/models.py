@@ -5,7 +5,7 @@ from enum import StrEnum
 from typing import Any
 from uuid import UUID, uuid4
 
-from pydantic import BaseModel, ConfigDict, Field, field_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 
 def utc_now() -> datetime:
@@ -109,6 +109,50 @@ class Seed(BaseModel):
         return value.strip()
 
 
+class ContextFilters(BaseModel):
+    """Optional constraint filters for a multi-seed investigation.
+
+    A filter narrows an investigation without blocking it: the values are carried
+    through the run (manifest, adapter requests, resolution, reporting) and are
+    enforced only where an attribute they name can actually be compared. An
+    entity that carries no value for a filtered attribute is never excluded on
+    that basis, because absence of evidence is not a mismatch.
+
+    Matching is deliberately dependency-free and documented per field:
+
+    - ``country``: token match against attribute values (case-insensitive). A
+      value matches when the filter equals one of the value's alphanumeric
+      tokens ("US" matches "United States (US)") or, for filters longer than
+      three characters, when the filter appears as a substring. No ISO-3166
+      dataset is bundled, so "US" does not expand to "United States".
+    - ``age_min``/``age_max``: compared against an ``age`` attribute or an age
+      derived from ``birth_year``/``birthdate``/``birth_date``/``dob`` at the
+      current UTC year. Only entities whose age is computable are filtered.
+    - ``language``: token match like ``country`` ("en" matches "en-US").
+    - ``timezone``: case-insensitive equality or substring match against an IANA
+      timezone string ("America/New_York").
+    """
+
+    model_config = ConfigDict(extra="forbid")
+    country: str | None = None
+    age_min: int | None = Field(default=None, ge=0, le=120)
+    age_max: int | None = Field(default=None, ge=0, le=120)
+    language: str | None = None
+    timezone: str | None = None
+
+    @model_validator(mode="after")
+    def _age_range_is_ordered(self) -> "ContextFilters":
+        if self.age_min is not None and self.age_max is not None and self.age_min > self.age_max:
+            raise ValueError("age_min must be <= age_max")
+        return self
+
+    def is_empty(self) -> bool:
+        return all(
+            value is None
+            for value in (self.country, self.age_min, self.age_max, self.language, self.timezone)
+        )
+
+
 class Provenance(BaseModel):
     tool: str
     source_url: str | None = None
@@ -117,6 +161,11 @@ class Provenance(BaseModel):
     raw_evidence_sha256: str | None = None
     adapter_version: str
     notes: list[str] = Field(default_factory=list)
+    # Multi-seed runs tag each finding with the index of the seed whose
+    # expansion produced it (0-based position in ``manifest["seeds"]``). The
+    # value stays ``None`` for single-seed runs so their artifacts keep the
+    # pre-multi-seed shape.
+    seed_index: int | None = None
 
 
 class Finding(BaseModel):
@@ -179,6 +228,14 @@ class AdapterRunRequest(BaseModel):
     timeout_seconds: int = Field(default=120, ge=1, le=3600)
     proxy_url: str | None = None
     network_name: str | None = None
+    # Position of ``seed`` in a multi-seed run (0 for single-seed runs). Adapters
+    # may include it in their own audit metadata; the orchestrator uses it to
+    # tag findings and to keep per-seed workspaces separate.
+    seed_index: int = Field(default=0, ge=0)
+    # Constraint filters carried from the run manifest. Adapters may use them as
+    # query hints; enforcement happens in entity resolution and reporting, and
+    # the filters never block a run.
+    context_filters: ContextFilters | None = None
 
 
 class AdapterRunResult(BaseModel):

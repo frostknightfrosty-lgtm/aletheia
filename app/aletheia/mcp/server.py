@@ -5,7 +5,7 @@ import sys
 from pathlib import Path
 from uuid import UUID
 
-from aletheia.core.models import Seed
+from aletheia.core.models import ContextFilters, Seed
 from aletheia.core.orchestrator import Orchestrator
 from aletheia.phase7.benchmark import BenchmarkStore
 
@@ -19,7 +19,7 @@ class MCPServer:
 
     def tools(self) -> list[dict]:
         return [
-            {"name":"investigate","description":"Create and run a legal-only Aletheia investigation. Target-adjacent/personal-identifier adapters require an authorization assertion.","inputSchema":{"type":"object","required":["seed"],"properties":{"seed":{"type":"string"},"authorization_assertion":{"type":"string"},"timeout_seconds":{"type":"integer","minimum":1,"maximum":3600}}}},
+            {"name":"investigate","description":"Create and run a legal-only Aletheia investigation. Pass seed for a single-seed run or seeds (a list of type:value strings) for a multi-seed investigation; context_filters narrow resolution where filtered attributes are recorded. Target-adjacent/personal-identifier adapters require an authorization assertion.","inputSchema":{"type":"object","properties":{"seed":{"type":"string"},"seeds":{"type":"array","items":{"type":"string"}},"authorization_assertion":{"type":"string"},"context_filters":{"type":"object","properties":{"country":{"type":"string"},"age_min":{"type":"integer","minimum":0,"maximum":120},"age_max":{"type":"integer","minimum":0,"maximum":120},"language":{"type":"string"},"timezone":{"type":"string"}}},"timeout_seconds":{"type":"integer","minimum":1,"maximum":3600}}}},
             {"name":"resume","description":"Resume a checkpointed Aletheia investigation.","inputSchema":{"type":"object","required":["run_id"],"properties":{"run_id":{"type":"string"},"authorization_assertion":{"type":"string"},"timeout_seconds":{"type":"integer","minimum":1,"maximum":3600}}}},
             {"name":"manifest","description":"Read an investigation checkpoint manifest.","inputSchema":{"type":"object","required":["run_id"],"properties":{"run_id":{"type":"string"}}}},
             {"name":"graph","description":"Read the persisted investigation graph.","inputSchema":{"type":"object","required":["run_id"],"properties":{"run_id":{"type":"string"}}}},
@@ -28,8 +28,16 @@ class MCPServer:
 
     def call(self, name: str, args: dict) -> object:
         if name == "investigate":
-            raw_seed=args["seed"]; kind,value=raw_seed.split(":",1); seed=Seed(type=kind,value=value)
-            run_id=self.orch.create_run(seed,legal_only=True,authorization_assertion=args.get("authorization_assertion"))
+            raw_seeds = args.get("seeds") or [args.get("seed")]
+            if not raw_seeds or raw_seeds == [None]:
+                raise ValueError("investigate requires seed or seeds")
+            seeds = []
+            for raw_seed in raw_seeds:
+                kind, value = str(raw_seed).split(":", 1)
+                seeds.append(Seed(type=kind, value=value))
+            raw_filters = args.get("context_filters")
+            context_filters = ContextFilters.model_validate(raw_filters) if raw_filters else None
+            run_id=self.orch.create_run(seeds,legal_only=True,authorization_assertion=args.get("authorization_assertion"),context_filters=context_filters)
             self.orch.resume(run_id,authorization_assertion=args.get("authorization_assertion"),timeout_seconds=int(args.get("timeout_seconds",120)))
             return {"run_id":str(run_id),"status":"completed"}
         if name == "resume":

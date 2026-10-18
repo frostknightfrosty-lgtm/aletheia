@@ -1,5 +1,8 @@
 from __future__ import annotations
 
+from functools import lru_cache
+from pathlib import Path
+
 from aletheia.adapters.exiftool import ExifToolAdapter
 from aletheia.adapters.identity import (
     H8mailAdapter, HIBPAdapter, HoleheAdapter, LibPhoneNumberAdapter, MaigretAdapter,
@@ -12,6 +15,7 @@ from aletheia.adapters.infra import (
     FierceAdapter, MassdnsAdapter, ShodanAdapter, SubfinderAdapter, CrtshAdapter,
 )
 from aletheia.core.adapters import Adapter
+from aletheia.core.project_manifest import enforce_adapter_tier_policy, load_project_manifest
 from aletheia.adapters.corporate_records import (SECEdgarAdapter, GLEIFAdapter, OpenCorporatesAdapter, OpenSanctionsAdapter, CourtListenerAdapter)
 from aletheia.adapters.social_geo_image import (
     DeepFaceAdapter, InsightFaceAdapter, InstaloaderAdapter,
@@ -76,6 +80,15 @@ def phase6_adapters() -> dict[str, Adapter]:
     return {a.descriptor.name: a for a in adapters}
 
 
+MANIFEST_PATH = Path(__file__).resolve().parents[3] / "PROJECT_MANIFEST.json"
+
+
+@lru_cache(maxsize=1)
+def _manifest_entries() -> dict:
+    """The repository manifest, validated once per process."""
+    return load_project_manifest(MANIFEST_PATH)
+
+
 def phase7_adapters() -> dict[str, Adapter]:
     # Phase 7 adds control-plane capabilities; external collectors remain the Phase 6 registry.
     adapters = phase6_adapters()
@@ -97,4 +110,7 @@ def phase7_adapters() -> dict[str, Adapter]:
     adapters[SocialProfileAdapter.descriptor.name] = SocialProfileAdapter()
     adapters[SocialUsernameAdapter.descriptor.name] = SocialUsernameAdapter()
     adapters[LeakCheckersAdapter.descriptor.name] = LeakCheckersAdapter()
+    # Construction-time Tier 5 rejection: every adapter must have a manifest
+    # entry, and an entry declaring legal_tier=5 refuses construction.
+    enforce_adapter_tier_policy(adapters.keys(), manifest=_manifest_entries())
     return adapters

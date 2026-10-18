@@ -7,7 +7,7 @@ from pathlib import Path
 from uuid import UUID
 
 from aletheia.core import chain
-from aletheia.core.models import Seed, SeedType
+from aletheia.core.models import ContextFilters, Seed, SeedType
 from aletheia.core.orchestrator import Orchestrator
 
 
@@ -15,13 +15,18 @@ def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="aletheia")
     sub = parser.add_subparsers(dest="cmd", required=True)
     inv = sub.add_parser("investigate")
-    inv.add_argument("--seed", required=True, help="type:value, e.g. username:alice, email:alice@example.com, phone:+14155552671, domain:example.com, url:https://example.com/profile, or name:Acme Corporation")
+    inv.add_argument("--seed", required=True, action="append", help="type:value, e.g. username:alice, email:alice@example.com, phone:+14155552671, domain:example.com, url:https://example.com/profile, or name:Acme Corporation. Repeat --seed for a multi-seed investigation.")
     inv.add_argument("--legal-only", action="store_true", default=True)
     inv.add_argument("--data-dir", default=os.getenv("ALETHEIA_DATA_DIR", "./data"))
     inv.add_argument("--timeout", type=int, default=120)
     inv.add_argument("--proxy", default=os.getenv("ALETHEIA_HTTP_PROXY") or None)
     inv.add_argument("--no-egress-proxy", action="store_true", help="run network adapters without the egress proxy (offline replays only)")
     inv.add_argument("--authorization-assertion", default=None, help="Explicit authorization statement required for target-adjacent or personal-identifier lookups")
+    inv.add_argument("--filter-country", default=None, help="constraint filter: match recorded country/jurisdiction attributes (token match)")
+    inv.add_argument("--filter-age-min", type=int, default=None, help="constraint filter: minimum age (compared where an age is computable)")
+    inv.add_argument("--filter-age-max", type=int, default=None, help="constraint filter: maximum age (compared where an age is computable)")
+    inv.add_argument("--filter-language", default=None, help="constraint filter: match recorded language attributes (token match)")
+    inv.add_argument("--filter-timezone", default=None, help="constraint filter: match recorded IANA timezone attributes")
     phase2 = sub.add_parser("phase2", help="resolve entities and emit Phase 2 reports")
     phase2.add_argument("--run-id", required=True)
     phase2.add_argument("--data-dir", default=os.getenv("ALETHEIA_DATA_DIR", "./data"))
@@ -100,8 +105,15 @@ def main() -> None:
             raise SystemExit(1)
     elif args.cmd == "investigate":
         orch = Orchestrator(Path(args.data_dir))
-        seed = parse_seed(args.seed)
-        run_id = orch.create_run(seed, legal_only=True, authorization_assertion=args.authorization_assertion)
+        seeds = [parse_seed(raw) for raw in args.seed]
+        filters = None
+        if any(value is not None for value in (args.filter_country, args.filter_age_min, args.filter_age_max,
+                                               args.filter_language, args.filter_timezone)):
+            filters = ContextFilters(country=args.filter_country, age_min=args.filter_age_min,
+                                     age_max=args.filter_age_max, language=args.filter_language,
+                                     timezone=args.filter_timezone)
+        run_id = orch.create_run(seeds, legal_only=True, authorization_assertion=args.authorization_assertion,
+                                 context_filters=filters)
         print(run_id)
         orch.resume(run_id, authorization_assertion=args.authorization_assertion, timeout_seconds=args.timeout,
                     proxy_url=args.proxy, wire_egress=not args.no_egress_proxy)
