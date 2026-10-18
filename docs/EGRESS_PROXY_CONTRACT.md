@@ -1,9 +1,11 @@
 # Egress proxy contract
 
-Status: **implemented and wired into a representative subset** (2026-10-17).
-`search_engines`, `ssl_tls`, and `ip_intelligence` route their egress through the
-proxy; the remaining 46 adapters are deferred (see "Wiring pattern"). This
-document is the design/contract record for the component.
+Status: **implemented, and wired for every network-requiring adapter** (2026-10-18).
+Coverage is a policy, not an allowlist: an adapter's egress is routed through the
+proxy whenever its descriptor declares `network_required=True` (Phase 15). The
+Phase 12 hand-wired subset (`search_engines`, `ssl_tls`, `ip_intelligence`) is now
+a strict subset of that coverage. This document is the design/contract record for
+the component.
 
 ## Purpose
 
@@ -65,12 +67,19 @@ adapter run:
 
 `ProxySession` implements steps 1, 2, and 5; `AdapterRunRequest.proxy_url` /
 `network_name` and `run_docker(..., network_name=...)` carry step 3; and the
-orchestrator performs step 4. Only `EGRESS_WIRED_ADAPTERS` (`search_engines`,
-`ssl_tls`, `ip_intelligence`) are wired in Phase 12 — the remaining 46 adapters
-are deferred and keep their previous network behaviour. The end-to-end shape is
-exercised by `ci/egress_scenario.py` (real Docker, an `--internal` network, a
-local origin, and the adapter image) and by the `phase12-*` Docker integration
-tests.
+orchestrator performs step 4. The decision for step 3 is a policy, not a list:
+`egress.is_wired(name, network_required=descriptor.network_required)` is true for
+every adapter that declares `network_required=True`, and `EGRESS_EXEMPT_ADAPTERS`
+is the (empty) list of documented exceptions. `Orchestrator.resume` therefore wires
+by default; offline replays pass `wire_egress=False`, and the CLI exposes
+`--no-egress-proxy`.
+
+Coverage is verified from the registry, not asserted: a unit test checks the
+policy against all 49 adapters, and `ci/egress_scenario.py` reports a
+`phase15-egress-policy-covers-registry` check plus a real-container check that
+`crtsh` — an adapter outside the Phase 12 allowlist — has its egress attempt
+logged by the proxy. The `phase12-*` and `phase15-*` Docker integration tests
+assert those checks.
 
 ## Request log schema
 
@@ -133,9 +142,17 @@ the append instead of recording on top of the tampered chain.
   TLS session.
 - The forwarding loop is exercised only in Docker/CI. Only the pure helpers and
   the request-log schema are unit-tested locally.
-- Only three of the 49 adapters (`search_engines`, `ssl_tls`, `ip_intelligence`)
-  are wired through the proxy in Phase 12; the remaining 46 still run without a
-  proxied path.
+- Coverage is complete by policy, not by proof of every adapter's runtime
+  behaviour: all 49 adapters are classified from their descriptors, and the
+  proxied path is exercised end to end for `search_engines`, `ssl_tls`,
+  `ip_intelligence` and `crtsh`. An adapter whose binary ignores
+  `HTTP_PROXY`/`HTTPS_PROXY` (or speaks a non-HTTP protocol) would fail closed on
+  the `--internal` network rather than egress unproxied, but that failure mode is
+  not separately demonstrated per adapter.
+- Some adapters wrap third-party CLIs (`sherlock`, `theharvester`, `amass`, …)
+  that may use their own resolvers or proxy handling; the policy routes them
+  through the proxy at the network level, and a client that ignores the proxy
+  variables has no route out — fail-closed, not logged.
 
 ## Verification
 

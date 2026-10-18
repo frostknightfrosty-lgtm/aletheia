@@ -45,7 +45,14 @@ class Orchestrator:
         return run_id
 
     def resume(self, run_id: UUID, *, authorization_assertion: str | None = None, timeout_seconds: int = 120,
-               proxy_url: str | None = None, wire_egress: bool = False) -> dict:
+               proxy_url: str | None = None, wire_egress: bool = True) -> dict:
+        """Run the pending adapters, routing network egress through the proxy.
+
+        ``wire_egress`` defaults to ``True``: an adapter whose descriptor declares
+        ``network_required=True`` runs on an ``--internal`` network with the proxy
+        as its only way out. Pass ``False`` for offline replays and tests that must
+        not touch Docker networking.
+        """
         manifest = self.checkpoints.load(run_id)
         if manifest is None:
             raise FileNotFoundError(f"unknown run {run_id}")
@@ -68,7 +75,9 @@ class Orchestrator:
             session = None
             adapter_proxy_url = proxy_url
             adapter_network = None
-            if wire_egress and egress.is_wired(adapter_name):
+            if wire_egress and egress.is_wired(
+                adapter_name, network_required=adapter.descriptor.network_required
+            ):
                 session = egress.ProxySession(
                     adapter_name, self.checkpoints.run_dir(run_id) / adapter_name / "egress"
                 )

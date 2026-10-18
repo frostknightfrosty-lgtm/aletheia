@@ -20,6 +20,7 @@ def build_parser() -> argparse.ArgumentParser:
     inv.add_argument("--data-dir", default=os.getenv("ALETHEIA_DATA_DIR", "./data"))
     inv.add_argument("--timeout", type=int, default=120)
     inv.add_argument("--proxy", default=os.getenv("ALETHEIA_HTTP_PROXY") or None)
+    inv.add_argument("--no-egress-proxy", action="store_true", help="run network adapters without the egress proxy (offline replays only)")
     inv.add_argument("--authorization-assertion", default=None, help="Explicit authorization statement required for target-adjacent or personal-identifier lookups")
     phase2 = sub.add_parser("phase2", help="resolve entities and emit Phase 2 reports")
     phase2.add_argument("--run-id", required=True)
@@ -47,6 +48,7 @@ def build_parser() -> argparse.ArgumentParser:
     resume.add_argument("--data-dir", default=os.getenv("ALETHEIA_DATA_DIR", "./data"))
     resume.add_argument("--timeout", type=int, default=120)
     resume.add_argument("--proxy", default=os.getenv("ALETHEIA_HTTP_PROXY") or None)
+    resume.add_argument("--no-egress-proxy", action="store_true", help="run network adapters without the egress proxy (offline replays only)")
     resume.add_argument("--authorization-assertion", default=None, help="Explicit authorization statement; stored with the run for exact resumability")
     verify_chain = sub.add_parser("verify-chain", help="verify a run's hash-chained audit log")
     verify_chain.add_argument("run_id", type=UUID)
@@ -101,7 +103,8 @@ def main() -> None:
         seed = parse_seed(args.seed)
         run_id = orch.create_run(seed, legal_only=True, authorization_assertion=args.authorization_assertion)
         print(run_id)
-        orch.resume(run_id, authorization_assertion=args.authorization_assertion, timeout_seconds=args.timeout, proxy_url=args.proxy)
+        orch.resume(run_id, authorization_assertion=args.authorization_assertion, timeout_seconds=args.timeout,
+                    proxy_url=args.proxy, wire_egress=not args.no_egress_proxy)
         print(f"completed: {run_id}")
     elif args.cmd == "phase2":
         from aletheia.phase2.service import Phase2Service
@@ -125,7 +128,9 @@ def main() -> None:
         serve(Path(args.data_dir))
     elif args.cmd == "resume":
         orch = Orchestrator(Path(args.data_dir))
-        orch.resume(UUID(args.run_id), authorization_assertion=args.authorization_assertion, timeout_seconds=args.timeout, proxy_url=args.proxy)
+        orch.resume(UUID(args.run_id), authorization_assertion=args.authorization_assertion,
+                    timeout_seconds=args.timeout, proxy_url=args.proxy,
+                    wire_egress=not args.no_egress_proxy)
         print(f"resumed: {args.run_id}")
     elif args.cmd == "storage":
         from aletheia import storage as storage_mod

@@ -44,16 +44,43 @@ def _recorder(returncode: int = 0):
     return calls, runner
 
 
-# -- the wired set -------------------------------------------------------------
+# -- the wiring policy ---------------------------------------------------------
 
 
-def test_only_the_representative_subset_is_wired():
-    assert egress.EGRESS_WIRED_ADAPTERS == ("search_engines", "ssl_tls", "ip_intelligence")
-    for name in egress.EGRESS_WIRED_ADAPTERS:
-        assert egress.is_wired(name)
-    # A representative unwired adapter is untouched.
-    assert not egress.is_wired("rdap")
-    assert not egress.is_wired("leak_checkers")
+def test_every_network_adapter_is_wired_and_no_other_is():
+    """Phase 15: coverage is a policy, not an allowlist.
+
+    Every adapter whose descriptor declares ``network_required=True`` must be
+    wired; an adapter that declares it does not need the network must not be,
+    because wiring it would build an ``--internal`` network for a container that
+    never egresses. This runs against the real registry, so an adapter added in a
+    later phase is covered the moment it declares its network need.
+    """
+    from aletheia.adapters.registry import phase7_adapters
+
+    adapters = phase7_adapters()
+    assert len(adapters) == 49, "registry size is the denominator for coverage"
+
+    wired = {
+        name
+        for name, adapter in adapters.items()
+        if egress.is_wired(name, network_required=adapter.descriptor.network_required)
+    }
+    expected = {name for name, adapter in adapters.items() if adapter.descriptor.network_required}
+
+    assert wired == expected
+    # The three adapters Phase 12 hand-wired are now a strict subset of coverage.
+    assert {"search_engines", "ssl_tls", "ip_intelligence"} <= wired
+    assert len(wired) > 3, "Phase 15 must cover more than the Phase 12 subset"
+
+
+def test_the_exempt_list_is_empty_and_actually_excludes(monkeypatch):
+    assert egress.EGRESS_EXEMPT_ADAPTERS == ()
+    # Proving the exemption has an effect, not just that the tuple is empty:
+    # an exclusion is a recorded decision that must change the outcome.
+    monkeypatch.setattr(egress, "EGRESS_EXEMPT_ADAPTERS", ("search_engines",))
+    assert egress.is_wired("search_engines", network_required=True) is False
+    assert egress.is_wired("ssl_tls", network_required=True) is True
 
 
 def test_network_and_container_names_are_dns_safe():
@@ -157,7 +184,7 @@ def test_run_docker_joins_named_network(monkeypatch, tmp_path):
 
 
 class _RecordingAdapter(Adapter):
-    def __init__(self, name: str) -> None:
+    def __init__(self, name: str, *, network_required: bool = True) -> None:
         self.descriptor = AdapterDescriptor(
             name=name,
             license="project-internal",
@@ -168,7 +195,7 @@ class _RecordingAdapter(Adapter):
             invocation="test",
             version_pin="v1",
             upstream="https://example.invalid",
-            network_required=True,
+            network_required=network_required,
             docker_image="aletheia/test:v1",
         )
         self.requests: list[AdapterRunRequest] = []
@@ -225,7 +252,8 @@ def _fake_sessions(monkeypatch):
     return events
 
 
-def test_orchestrator_wires_a_wired_adapter(tmp_path, monkeypatch):
+def test_orchestrator_wires_a_network_adapter_by_default(tmp_path, monkeypatch):
+    """No flag needed: a network-requiring adapter is wired by default."""
     from aletheia.core.orchestrator import Orchestrator
 
     events = _fake_sessions(monkeypatch)
@@ -234,7 +262,7 @@ def test_orchestrator_wires_a_wired_adapter(tmp_path, monkeypatch):
     orchestrator.adapters = {"search_engines": adapter}
     run_id = orchestrator.create_run(Seed(type=SeedType.DOMAIN, value="example.com"))
 
-    orchestrator.resume(run_id, wire_egress=True)
+    orchestrator.resume(run_id)
 
     assert events == ["init:search_engines", "start:search_engines", "stop:search_engines"]
     request = adapter.requests[0]
@@ -242,18 +270,73 @@ def test_orchestrator_wires_a_wired_adapter(tmp_path, monkeypatch):
     assert request.network_name == "aletheia-egress-net-search_engines"
 
 
-def test_orchestrator_leaves_an_unwired_adapter_alone(tmp_path, monkeypatch):
+def test_orchestrator_leaves_a_network_free_adapter_alone(tmp_path, monkeypatch):
+    """An adapter that needs no network gets no proxy and no internal network."""
     from aletheia.core.orchestrator import Orchestrator
 
     events = _fake_sessions(monkeypatch)
     orchestrator = Orchestrator(tmp_path)
-    adapter = _RecordingAdapter("rdap")
-    orchestrator.adapters = {"rdap": adapter}
+    adapter = _RecordingAdapter("local_only", network_required=False)
+    orchestrator.adapters = {"local_only": adapter}
     run_id = orchestrator.create_run(Seed(type=SeedType.DOMAIN, value="example.com"))
 
-    orchestrator.resume(run_id, wire_egress=True)
+    orchestrator.resume(run_id)
 
     assert events == []
     request = adapter.requests[0]
     assert request.proxy_url is None
     assert request.network_name is None
+
+
+def test_orchestrator_can_disable_wiring_for_offline_replays(tmp_path, monkeypatch):
+    """``wire_egress=False`` keeps a network adapter off Docker networking.
+
+    The offline replay paths use this so a machine without Docker, or a run that
+    must not create containers, still works.
+    """
+    from aletheia.core.orchestrator import Orchestrator
+
+    events = _fake_sessions(monkeypatch)
+    orchestrator = Orchestrator(tmp_path)
+    adapter = _RecordingAdapter("search_engines")
+    orchestrator.adapters = {"search_engines": adapter}
+    run_id = orchestrator.create_run(Seed(type=SeedType.DOMAIN, value="example.com"))
+
+    orchestrator.resume(run_id, wire_egress=False)
+
+    assert events == []
+    request = adapter.requests[0]
+    assert request.proxy_url is None
+    assert request.network_name is None
+
+
+# -- CLI -----------------------------------------------------------------------
+
+
+def test_cli_resume_passes_the_egress_decision_through(monkeypatch, tmp_path):
+    """``--no-egress-proxy`` is the operator's only way to opt out."""
+    import sys
+
+    from aletheia.cli import main as cli
+
+    calls: list[dict] = []
+
+    class _FakeOrchestrator:
+        def __init__(self, data_dir):
+            self.data_dir = data_dir
+
+        def resume(self, run_id, **kwargs):
+            calls.append(kwargs)
+            return {}
+
+    monkeypatch.setattr(cli, "Orchestrator", _FakeOrchestrator)
+
+    for extra, expected in (([], True), (["--no-egress-proxy"], False)):
+        calls.clear()
+        monkeypatch.setattr(
+            sys,
+            "argv",
+            ["aletheia", "resume", "--run-id", str(uuid4()), "--data-dir", str(tmp_path), *extra],
+        )
+        cli.main()
+        assert calls[0]["wire_egress"] is expected, (extra, calls)

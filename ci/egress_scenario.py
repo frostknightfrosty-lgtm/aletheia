@@ -4,12 +4,18 @@
 This exercises the wiring pattern end to end on a custom ``--internal`` Docker
 network (no default egress):
 
+  * ``policy``         every registered adapter whose descriptor declares
+                       ``network_required=True`` is covered by the wiring policy
+                       (Phase 15 replaced the Phase 12 three-name allowlist);
   * ``forward``        a client container (built from the adapter image) reaches a
                        local origin through the egress proxy; the proxy logs the
                        request with a status the reader validates, and the log is
                        appended to a run's hash-chained audit log;
   * ``adapter-proxied`` the real ``search_engines`` runner image is run under the
                        proxy and its outbound requests appear in the proxy log;
+  * ``previously-unwired`` the real ``crtsh`` runner — not in the Phase 12
+                       allowlist — is run under the proxy; its HTTPS attempt is
+                       logged by the proxy (and fails closed, as it must);
   * ``fail-closed``    on the internal network a container cannot reach the
                        internet directly, and cannot reach it through the proxy
                        once the proxy is stopped.
@@ -118,7 +124,29 @@ def _wait_for_proxy(script_dir: Path, network: str, proxy_url: str, url: str) ->
     return False
 
 
-def _run_checks(script_dir: Path, network: str, proxy_name: str, proxy_url: str) -> dict:
+def _policy_check() -> dict:
+    """Every network-requiring adapter in the real registry must be wired.
+
+    This is the Phase 15 coverage claim checked against the registry itself, so
+    an adapter added later is covered the moment it declares ``network_required``.
+    """
+    from aletheia.adapters.registry import phase7_adapters
+
+    adapters = phase7_adapters()
+    expected = {name for name, adapter in adapters.items() if adapter.descriptor.network_required}
+    wired = {
+        name
+        for name, adapter in adapters.items()
+        if egress.is_wired(name, network_required=adapter.descriptor.network_required)
+    }
+    return {
+        "name": "phase15-egress-policy-covers-registry",
+        "ok": wired == expected and len(adapters) == 49 and len(expected) > 3,
+        "detail": f"adapters={len(adapters)} network_required={len(expected)} wired={len(wired)}",
+    }
+
+
+def _run_checks(script_dir: Path, network: str, proxy_name: str, proxy_url: str, log_path: Path) -> dict:
     checks: list[dict] = []
     origin_host = "origin"
 
@@ -145,6 +173,27 @@ def _run_checks(script_dir: Path, network: str, proxy_name: str, proxy_url: str)
         "name": "phase12-egress-adapter-proxied",
         "ok": runner.returncode == 0,
         "detail": "search_engines runner completed rc=" + str(runner.returncode) + " through the proxy",
+    })
+
+    # -- Phase 15: an adapter outside the old allowlist is proxied as well -----
+    # crtsh was NOT wired in Phase 12. On the internal network its upstream is
+    # unreachable, so the runner must fail; what this proves is that the attempt
+    # went through the proxy and was logged (the proxy records a 502 upstream
+    # failure for the CONNECT before closing the tunnel).
+    crtsh = _docker([
+        "docker", "run", "--rm",
+        "--network", network,
+        "--entrypoint", "python",
+        "-e", f"HTTP_PROXY={proxy_url}",
+        "-e", f"HTTPS_PROXY={proxy_url}",
+        "-e", "NO_PROXY=localhost,127.0.0.1",
+        "aletheia/crtsh:public-json", "/opt/runner.py", "aletheia-egress-scenario.invalid",
+    ])
+    crt_entries = [entry for entry in egress.read_log(log_path) if "crt.sh" in entry.host]
+    checks.append({
+        "name": "phase15-egress-previously-unwired-adapter",
+        "ok": bool(crt_entries) and crtsh.returncode != 0,
+        "detail": "crtsh rc=" + str(crtsh.returncode) + " crt.sh log entries=" + str(len(crt_entries)),
     })
 
     # -- fail-closed: no direct internet, and no path once the proxy is stopped -
@@ -225,7 +274,8 @@ def main(argv: list[str] | None = None) -> int:
         ])
         _docker_or_raise(proxy.run_command(log_dir=log_dir, network=network, detached=True, publish_port=False))
 
-        summary.update(_run_checks(script_dir, network, proxy_name, proxy.proxy_url))
+        summary["checks"].append(_policy_check())
+        summary.update(_run_checks(script_dir, network, proxy_name, proxy.proxy_url, log_dir / egress.LOG_FILENAME))
         summary["chain"] = _append_log_to_chain(log_dir / egress.LOG_FILENAME, data_root)
 
         got = summary["chain"]

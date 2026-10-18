@@ -419,7 +419,7 @@ def append_log_to_chain(
     return count
 
 
-# -- wiring the proxy into adapters (Phase 12) ---------------------------------
+# -- wiring the proxy into adapters (Phase 12, coverage completed in Phase 15) --
 #
 # The wiring pattern (docs/EGRESS_PROXY_CONTRACT.md, "Wiring pattern"):
 #   1. create one ``--internal`` network per adapter run: containers on it have
@@ -430,17 +430,29 @@ def append_log_to_chain(
 #   4. append the proxy's request log to the run's audit chain;
 #   5. stop the proxy and delete the network.
 #
-# Only the adapters in ``EGRESS_WIRED_ADAPTERS`` are wired in this phase; wiring
-# the remaining 46 adapters is deliberately deferred.
+# Phase 12 wired three adapters through a hardcoded allowlist. Phase 15 replaced
+# the allowlist with a policy: an adapter's egress goes through the proxy whenever
+# its descriptor declares ``network_required=True``, which is every adapter whose
+# container can reach the internet at all. Below is the (deliberately empty) list
+# of documented exceptions, so an exclusion is a recorded decision rather than a
+# name removed from an inclusion list.
 
-EGRESS_WIRED_ADAPTERS: tuple[str, ...] = ("search_engines", "ssl_tls", "ip_intelligence")
+EGRESS_EXEMPT_ADAPTERS: tuple[str, ...] = ()
 
 NETWORK_PREFIX = "aletheia-egress"
 
 
-def is_wired(adapter: str) -> bool:
-    """True when this phase routes the adapter's egress through the proxy."""
-    return adapter in EGRESS_WIRED_ADAPTERS
+def is_wired(adapter: str, *, network_required: bool) -> bool:
+    """True when this adapter's egress must be routed through the proxy.
+
+    ``network_required`` is the adapter descriptor's own declaration; passing it
+    in keeps this module independent of the adapter registry. The rule is the
+    policy, not a list: full coverage is verified for every registered adapter by
+    ``tests/test_egress_wiring.py`` and by ``ci/egress_scenario.py``.
+    """
+    if adapter in EGRESS_EXEMPT_ADAPTERS:
+        return False
+    return bool(network_required)
 
 
 def network_name(adapter: str) -> str:

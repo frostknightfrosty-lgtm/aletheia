@@ -132,7 +132,8 @@ def test_completed_orchestrator_run_publishes_verified_chain_tip(tmp_path, monke
     orchestrator.adapters = {"rdap": adapter}
     run_id = orchestrator.create_run(Seed(type=SeedType.DOMAIN, value="example.com"))
 
-    manifest = orchestrator.resume(run_id)
+    # Offline replay: no egress wiring, so this test needs no Docker daemon.
+    manifest = orchestrator.resume(run_id, wire_egress=False)
 
     assert manifest["chain_tip"] == chain.tip(run_id, data_root=tmp_path)
     assert chain.verify(run_id, data_root=tmp_path)["valid"] is True

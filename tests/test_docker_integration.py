@@ -257,3 +257,16 @@ def test_phase12_egress_adapter_proxied():
 def test_phase12_egress_fail_closed():
     check = _scenario_check("phase12-egress-fail-closed")
     assert check["ok"], check["detail"]
+
+
+# -- Phase 15: wiring coverage is a policy, not an allowlist -------------------
+
+
+def test_phase15_egress_policy_covers_every_network_adapter():
+    check = _scenario_check("phase15-egress-policy-covers-registry")
+    assert check["ok"], check["detail"]
+
+
+def test_phase15_egress_previously_unwired_adapter_is_proxied():
+    check = _scenario_check("phase15-egress-previously-unwired-adapter")
+    assert check["ok"], check["detail"]
