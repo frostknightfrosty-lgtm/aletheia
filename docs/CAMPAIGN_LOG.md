@@ -14,16 +14,18 @@
 ## NOW (edited in place — this is the current position)
 
 - Campaign: **ACTIVE** — owner mandate received and executing.
-- Position: **P17.6 pushed as `341f055`** (VOI scheduler + adaptive budgets +
-  stop policy + resume checkpoints + hash-chained decision ledger; 22 new
-  tests; local 879 passed + 65 environment-only skips → expected CI 944).
-  Verification run starting. **P17.3 verified green**; **P17.4 verified
-  green** (run `39155284979` on `db5f03e`, 896 passed); P17.5
-  (`39156241115`) still watching.
-- Next action: start **P17.7** (case memory + cache/TTL + re-audit diffs)
+- Position: **P17.7 pushed as `60bb0e6`** (case memory: subject-centric case
+  store with snapshots/timeline and re-audit diffs, cross-run source cache
+  with per-source TTLs, confirmation label store feeding the calibrator,
+  blind-spot registry; 24 new tests; local 903 passed + 65 environment-only
+  skips → expected CI 968). **P17.3, P17.4 verified green**; P17.5
+  (`39156241115`) and P17.6 (`39156855944`) runs still watching.
+- Next action: start **P17.8** (CLI + trail/dossier/coverage outputs +
+  next-actions checklist + redaction/purge; parser preflight stays 49/49)
   locally while CI runs; copy evidence when the watches notify.
 - In-flight CI: `39156241115` (P17.5 code `d561c9c` + docs `051625c`),
-  `341f055`'s run starting.
+  `39156855944` (P17.6 code `341f055` + docs `86c68b6`), `60bb0e6`'s run
+  starting.
 - Last verified commit: `db5f03e` (run `39155284979`, docker-verification
   green; lines copied: parser 49/49; **896 passed**; capture 60/60; storage
   6/6).
@@ -126,6 +128,10 @@
       → Implemented locally-green (22 tests; local 879 passed + 65 skips →
       expected CI 944); pushed `341f055`; run verifying.
 - [ ] **P17.7** — case memory + cache/TTL + re-audit diffs.
+      → Implemented locally-green (case store with snapshots/timeline/diffs,
+      source cache with TTL classes and scheduler-parity freshness, label
+      store feeding the calibrator, blind-spot registry; 24 tests; local 903
+      passed + 65 skips → expected CI 968); pushed `60bb0e6`; run verifying.
 - [ ] **P17.8** — CLI + trail/dossier/coverage outputs + next-actions checklist +
       redaction/purge (no new adapters in this step).
 - [ ] **P17.9** — synthetic worlds + adversarial + failure-injection suites in CI.
@@ -262,6 +268,19 @@ activate when the key exists.
   resume checkpoints, hash-chained decision ledger; 22 tests; local 879 passed
   + 65 environment-only skips → expected CI 944) and pushed as `341f055`.
   Verification run starting.
-- Next: start P17.7 (case memory + cache/TTL + re-audit diffs) locally; on
-  `39156241115` green copy P17.5 evidence; on `341f055`'s run green copy P17.6
-  evidence.
+- 2026-10-18 — P17.7 implemented (subject-centric case store with snapshots,
+  timeline, and re-audit diffs; cross-run source cache with per-source TTLs —
+  30d profiles / 7d DNS adopted, 7d configuration provisional — and
+  scheduler-parity freshness; confirmation label store whose training pairs
+  feed `core/calibration.py` (unsure and scoreless labels excluded);
+  blind-spot registry with cited curated limits and an observed-limits store;
+  24 tests; local 903 passed + 65 environment-only skips → expected CI 968)
+  and pushed as `60bb0e6`.
+  Observation (pre-existing, not P17.7 scope): the Phase-13 Platt fit
+  diverges on a perfectly separable small sample (decision boundary lands far
+  left of the data; every prediction saturates at 1.0). Real calibration data
+  overlaps, where the fit converges — noted for future calibration work.
+- Next: start P17.8 (CLI + trail/dossier/coverage outputs + next-actions
+  checklist + redaction/purge) locally; on `39156241115` green copy P17.5
+  evidence; on `39156855944` green copy P17.6 evidence; on `60bb0e6`'s run
+  green copy P17.7 evidence.
