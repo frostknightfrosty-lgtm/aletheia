@@ -15,19 +15,19 @@
 
 - Campaign: **ACTIVE** — owner mandate received and executing.
 - Position: **P17.10 CI green** (run `39159820872`; parser 49/49; 1005
-  passed; capture 60/60; storage 6/6 — lines copied to the Log). First live
-  cascade dispatch (run `39159843080`) failed on an egress-session Docker
-  network collision and is **repaired** (one session per adapter per run +
-  recorded start failures; local 946 passed + 65 environment-only skips →
-  expected CI 1011); re-dispatch on the repair's green. **P17.11 Wave A in
-  progress** — re-checks recorded; §A 33 (Unpaywall DOI route) run
-  `39160798771` watching (expected 1009). **P17.3–P17.9 verified green.**
-- Next action: on the repair's run green re-dispatch the live cascade for
-  `username:frost2233`; on Unpaywall's run green flip §A 33; continue
-  Wave A (next: SearXNG self-hosted container, CipherScan pinned commit,
-  Bron Vault offline parser).
-- In-flight CI: Unpaywall run `39160798771` (expected 1009), plus this
-  repair's run (expected 1011).
+  passed; capture 60/60; storage 6/6 — lines copied to the Log); the first
+  live dispatch (run `39159843080`) failed on an egress-session Docker
+  network collision, **repaired** (`708ad27`; local 946 + 65 → expected CI
+  1011) and **re-dispatched** (run `39161463451`, in flight). **P17.11
+  Wave A**: re-checks recorded; §A 33 (Unpaywall DOI route) **CI-verified**
+  (run `39160798771`; parser 49/49; 1009 passed; capture 60/60; storage ok)
+  and flipped. **P17.3–P17.9 verified green.**
+- Next action: copy the live-cascade evidence when `39161463451` finishes;
+  on the repair's run green copy its evidence; continue Wave A (next:
+  SearXNG self-hosted container, CipherScan pinned commit, Bron Vault
+  offline parser).
+- In-flight CI: live cascade `39161463451`, repair run `39161437568`
+  (expected 1011), plus this docs push's run.
 - Last verified commit: `39680b0` (run `39159820872`, docker-verification
   green; lines copied: parser 49/49; **1005 passed**; capture 60/60; storage
   6/6).
@@ -194,8 +194,8 @@ activate when the key exists.
       (build queued; owner token); 32 closed notice stands — Marginalia +
       Common Crawl carry the class; 35 no free tier surfaced; 27 no public
       SPARQL/RDF (NXDOMAIN + browser-only app). 33 (Unpaywall DOI route)
-      built: runner DOI path + adapter parse + 4 tests; local 944 passed +
-      65 skips → expected CI 1009; pushed; run verifying.
+      **CI-verified**: run `39160798771` — parser 49/49; 1009 passed; capture
+      60/60; storage ok (lines in the Log); §A 33 flipped.
 - [ ] **Wave B — free-registration/keyed builds (skip paths recorded):** §A 1
       (OWASP SocialOSINTLM), 8 (Intelligence X), 9 (BreachDirectory), 10
       (Leak-Lookup), 17 (youtube-geofind), 19 (Betaface), 30 (EUIPO), 34
@@ -459,6 +459,17 @@ activate when the key exists.
   adapter per run + incremental chaining + recorded start failures +
   `close()` teardown; 2 regression tests; local `946 passed + 65 skips →
   expected CI 1011`.
+- 2026-10-18 — P17.11 Unpaywall verification — commit `dfd8f0a` (docs
+  `139d141`) — run `39160798771` — docker-verification **green**. Copied
+  from the downloaded artifact `ci-artifacts-39160798771`:
+  - `PARSER PREFLIGHT: PASS — 49/49 adapters have parser coverage`
+  - pytest-summary.json: `"console_summary": "1009 passed, 1 warning"`,
+    `"junit_total": 1009`, `"skipped_in_ci": []`, `"ok": true` (1005 → 1009:
+    the 4 Unpaywall tests, none skipped)
+  - docker-integration/capture.log: `DOCKER CAPTURE: PASS — 60/60 cases
+    captured`; storage-conformance.json: `"required_all": true`,
+    `"ok": true`, `"unconfigured": []`
+  §A 33 flipped in `SOURCE_COMPLETENESS.md`.
 - Next: on this repair's run green (expected 1011) re-dispatch the live
   cascade for `username:frost2233`; on Unpaywall's run (`39160798771`) green
   flip §A 33 + CHANGELOG; continue Wave A.

@@ -1,5 +1,27 @@
 # Changelog
 
+## 2026-10-18 — P17.11: Unpaywall DOI-keyed live path (source #33)
+
+Completes the first Wave-A build of the source-completeness directive. Every
+number below is copied from the downloaded artifact `ci-artifacts-39160798771`
+(run `39160798771`, commit `139d141`).
+
+- `PARSER PREFLIGHT: PASS — 49/49 adapters have parser coverage` (no new
+  adapter — the DOI route extends `academic_search`).
+- `"console_summary": "1009 passed, 1 warning"` with `"junit_total": 1009`,
+  `"skipped_in_ci": []`, `"ok": true` — 4 new tests (DOI extraction, the live
+  DOI call, the missing-email skip, the DOI-record parse), none skipped in CI.
+- `DOCKER CAPTURE: PASS — 60/60 cases captured`; storage-conformance.json
+  `"required_all": true`, `"ok": true`, `"unconfigured": []`.
+- What landed: `docker/academic_search/runner.py` queries the documented DOI
+  endpoint (`GET /v2/:doi`, contact email required) only for DOI-shaped inputs
+  (`10.<registrant>/<suffix>`, optionally behind a `doi:` prefix or a doi.org
+  URL), keeping the full vendor response as raw evidence; the adapter parses
+  DOI records as `unpaywall_doi_record`; `UNPAYWALL_EMAIL` joined `secret_env`
+  and both live workflows; RATE_LIMITS.md carries the verbatim contract and
+  the 2026-10-18 probe (HTTP 422 refuses a placeholder address). Name-based
+  inputs keep the documented skip reason and build no URL.
+
 ## 2026-10-18 — P17.10: live cascade runner + first live dispatch (repair)
 
 The runner that executes one audited cascade run against the live adapters,
