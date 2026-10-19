@@ -630,7 +630,7 @@
       "network": "required",
       "last_audited": "2026-10-18T00:00:00Z",
       "verification_status": "verified-fixture",
-      "note": "Fixture parser coverage passes; fixture provenance: synthetic; fixture file: tests/fixtures/tiktok_hashtag.json. No live container run has occurred.",
+      "note": "Fixture parser coverage passes; fixture provenance: synthetic; fixture file: tests/fixtures/tiktok_hashtag.json. No live container run has occurred. Verified in Docker Verification run 39174382751 on commit fedfd6412f3633c7e56a4efef7607ba48e37eea4 (https://github.com/frostknightfrosty-lgtm/aletheia/actions/runs/39174382751): PARSER PREFLIGHT: PASS — 51/51 adapters have parser coverage; 1058 passed, 1 warning; DOCKER CAPTURE: PASS — 67/67 cases captured (including the phase17-tiktok-hashtag-health and phase17-tiktok-hashtag-selftest offline cases); storage-conformance: 6/6 backends passing.",
       "fixture_provenance": "synthetic",
       "legal_tier": 2,
       "enabled_by_default": true,

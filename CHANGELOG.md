@@ -1,5 +1,34 @@
 # Changelog
 
+## 2026-10-18 — P17.11: tiktok-hashtag-analysis adapter (source #4)
+
+Every number below is copied from the downloaded artifact
+`ci-artifacts-39174382751` (run `39174382751`, commit `fedfd64`).
+
+- `PARSER PREFLIGHT: PASS — 51/51 adapters have parser coverage` (50 → 51: the
+  second Phase 17 registry addition).
+- `"console_summary": "1058 passed, 1 warning"` with `"junit_total": 1058`,
+  `"skipped_in_ci": []`, `"ok": true` — 12 new tests (the 10 driver/parser
+  tests, the container health test, and one manifest-driven parametrization),
+  none skipped in CI (1046 → 1058).
+- `DOCKER CAPTURE: PASS — 67/67 cases captured`, including the two new cases
+  `phase17-tiktok-hashtag-health` and `phase17-tiktok-hashtag-selftest`
+  (return code 0 under `--network none`; the selftest ran 7/7 checks including
+  the pinned-checkout import); results.json: 67 entries, 0 nonzero return
+  codes; storage-conformance.json: `"required_all": true`, `"ok": true`,
+  `"unconfigured": []` (6/6 backends passing).
+- What landed: `docker/tiktok_hashtag/` gained a driver and image that run the
+  pinned Bellingcat library (commit
+  `2a4af674efc4af7c7d592053ec3f475555f37694`) headless-only, calling
+  `_fetch_hashtag_data(..., headed=False)` directly so the upstream headed
+  retry is structurally unreachable. The dependency's unconditional stealth
+  patching is neutralized with a no-op before any session is created (fail
+  closed; decision recorded in `docs/PHASE17_RECHECKS.md`), and TikTok
+  bot-detection responses are recorded honestly as `blocked` — no retry loop,
+  no cookies, no challenge handling. `TiktokHashtagAdapter` adds the
+  `SeedType.HASHTAG` input path; the earlier `social_profile` drop note stands
+  and now points to the standalone adapter entry.
+
 ## 2026-10-18 — P17.11: Zehef email adapter (source #2)
 
 Every number below is copied from the downloaded artifact

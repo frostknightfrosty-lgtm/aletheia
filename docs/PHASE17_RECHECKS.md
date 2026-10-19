@@ -162,3 +162,19 @@ unverified, and re-opens only on a vendor change.
   (`SeedType.HASHTAG`) is the next Wave A unit. Live success is expected to be
   limited by TikTok's bot detection; live coverage stays subject to the
   standing live-run policy (Gate 2) and is not claimed.
+
+### Live-orchestration addendum (2026-10-18, post-verification)
+
+- The standalone adapter is CI-verified (run `39174382751`, capture 67/67,
+  including `phase17-tiktok-hashtag-health` and
+  `phase17-tiktok-hashtag-selftest` under `--network none`).
+- Egress reality for orchestrated live runs: the orchestrator passes
+  `HTTP_PROXY`/`HTTPS_PROXY`/`NO_PROXY` to adapter containers, but headless
+  Chromium does not honor those environment variables (the session's API
+  fetches execute inside the browser), and the pinned `_fetch_hashtag_data`
+  call path passes no proxy option. On the orchestrator's `--internal`
+  network a live run therefore **fails closed** (the browser simply has no
+  egress) rather than bypassing the proxy; the Phase 15 policy still counts
+  the adapter as wired (`network_required=True`). An explicit proxy-capable
+  launch path is a recorded decision item, not claimed. Same record:
+  `docker/tiktok_hashtag/RATE_LIMITS.md`. Not owner-gated.

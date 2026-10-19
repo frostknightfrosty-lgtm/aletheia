@@ -34,9 +34,9 @@ Build sequencing: Phase 17 items **P17.11–P17.12** in
 
 ## A. The 111 accepted candidates — remaining gaps
 
-Already implemented and wired: **76 of 111** (the 50 registered adapters and
+Already implemented and wired: **77 of 111** (the 51 registered adapters and
 their sub-sources; some are key-gated — their skip reasons are recorded).
-**35 of 111 remain.** Of these, one is externally blocked (FollowTheMoney),
+**34 of 111 remain.** Of these, one is externally blocked (FollowTheMoney),
 several have owner-action prerequisites, and a few carry factual re-checks that
 may resolve to a recorded blocker if the free path no longer exists. No status
 below may be upgraded except from copied artifact lines.
@@ -46,7 +46,7 @@ below may be upgraded except from copied artifact lines.
 | 1 | OWASP SocialOSINTLM | 1 | Disabled sub-source (`social_username`): external platform + LLM credentials | Re-review: free platform keys; free-tier or local LLM path; document what the LLM adds | Owner: platform dev keys |
 | 2 | Zehef | 1 | **Wired (CI-verified)**: standalone email-input adapter running the 17 pinned upstream account modules (Zehef 2.2.1, commit `5b0c120efe846eae944dfea9410f925ca3036103`; paste-dump, HudsonRock and email-gen modules never invoked) — run `39171286556`, 1046 passed. See `docker/zehef/RATE_LIMITS.md` | Re-review: email→registered-accounts CLI; wrap in container if scoped | — |
 | 3 | scrawler | 1 | Dropped: Windows-only .NET GUI; re-checked 2026-10-18 — upstream FAQ: no CLI will be added; site retrieval needs user cookies/OAuth. See [`PHASE17_RECHECKS.md`](PHASE17_RECHECKS.md) | Recorded as interface blocker 2026-10-18; re-open only on a vendor interface change | — |
-| 4 | tiktok-hashtag-analysis | 1 | Documented drop (`social_profile`) | Bellingcat PyPI library; re-review and implement (hashtag input) | — |
+| 4 | tiktok-hashtag-analysis | 1 | **Wired (CI-verified)**: standalone hashtag-input adapter (`SeedType.HASHTAG`) running the pinned Bellingcat library (commit `2a4af674efc4af7c7d592053ec3f475555f37694`; headless-only direct `_fetch_hashtag_data(..., headed=False)` call path, dependency stealth patching neutralized as a no-op, bot-detection responses recorded as `blocked`) — run `39174382751`, 1058 passed. See `docker/tiktok_hashtag/RATE_LIMITS.md` | Bellingcat PyPI library; re-review and implement (hashtag input) | — |
 | 5 | OnionSearch | 2 | Not built; `darkweb_search` deferred (Gate 6) | Build in `darkweb_search` behind container-level Tor; per-engine notes (Ahmia/Torch/Candle; ToS risk recorded) | Tor setup |
 | 6 | TorBot | 2 | Not built; Gate 6 | Build; crawler semantics (titles, links, emails) documented | Tor setup |
 | 7 | Piano (darknet-crawler) | 2 | Not built; Gate 6 | Build; published single-engine search invocation; PyPI pin | Tor setup |

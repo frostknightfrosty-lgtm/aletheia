@@ -23,17 +23,18 @@
   recorded; §A 33 (Unpaywall) CI-verified and flipped; §A 31 (SearXNG)
   CI-verified and flipped; §A 36 (CipherScan) CI-verified and flipped; §A 11
   (Bron Vault) CI-verified and flipped; §A 2 (Zehef) CI-verified and flipped;
-  §A 3 (scrawler) recorded as an interface blocker (Windows-only GUI; no CLI
-  per the upstream FAQ).
+  §A 4 (tiktok-hashtag-analysis) CI-verified and flipped; §A 3 (scrawler)
+  recorded as an interface blocker (Windows-only GUI; no CLI per the upstream
+  FAQ).
   **P17.3–P17.10 verified green.**
-- Next action: continue Wave A — tiktok-hashtag-analysis (#4) scoped review
-  recorded + implementation in progress; then VENOM, PicImageSearch,
-  tracelines, ShadowFinder, pybdshadow, GeoLocator, crypttrace CLI wrap,
-  ERATV, BigQuery; then Waves B–E.
-- In-flight CI: this docs/state push (Zehef flip + scrawler record + state);
+- Next action: continue Wave A — VENOM (#12) unit in progress locally (driver,
+  image and adapter written; manifest entry, fixture, tests and count bumps
+  next); then PicImageSearch, tracelines, ShadowFinder, pybdshadow, GeoLocator,
+  crypttrace CLI wrap, ERATV, BigQuery; then Waves B–E.
+- In-flight CI: this docs/state push (tiktok-hashtag-analysis flip + state);
   its run id and evidence lines are appended in the Log when green.
-- Last verified commit: `22d3ddc` (run `39171286556`; parser 50/50;
-  **1046 passed**; capture 65/65; storage 6/6).
+- Last verified commit: `fedfd64` (run `39174382751`; parser 51/51;
+  **1058 passed**; capture 67/67; storage 6/6).
 - Owner-blocked (parked, never wait on): everything in `docs/USER_ACTIONS.md`.
 - Decision defaults in force: see "Adopted defaults" below.
 
@@ -615,10 +616,27 @@ activate when the key exists.
   §A 2 flipped in `SOURCE_COMPLETENESS.md`; the `zehef` manifest entry cites
   the run; the `social_profile` drop note stands and points to the standalone
   adapter.
-- Next: tiktok-hashtag-analysis (§A 4): scoped review + standalone
-  hashtag-input adapter — `SeedType.HASHTAG`, headless-only driver calling
-  `_fetch_hashtag_data` directly (the upstream headed retry is never
-  reachable), and the dependency's stealth patching neutralized per
-  `docs/LEGAL_MODEL.md` (decision recorded in `docs/PHASE17_RECHECKS.md`);
-  then VENOM, PicImageSearch, tracelines, ShadowFinder, pybdshadow,
-  GeoLocator, crypttrace, ERATV, BigQuery.
+- 2026-10-18 — P17.11 tiktok-hashtag-analysis verification (§A 4) — commit
+  `fedfd64` — run `39174382751` — docker-verification **green**. Copied from
+  the downloaded artifact `ci-artifacts-39174382751`:
+  - `PARSER PREFLIGHT: PASS — 51/51 adapters have parser coverage` (50 → 51)
+  - pytest-summary.json: `"console_summary": "1058 passed, 1 warning"`,
+    `"junit_total": 1058`, `"skipped_in_ci": []`, `"ok": true` (1046 → 1058:
+    the 10 tiktok driver/parser tests, the container health test, and one
+    manifest-driven parametrization; none skipped)
+  - `DOCKER CAPTURE: PASS — 67/67 cases captured` (new cases
+    `phase17-tiktok-hashtag-health` and `phase17-tiktok-hashtag-selftest`,
+    return code 0 under `--network none`; the selftest ran 7/7 checks
+    including the pinned-checkout import); results.json: 67 entries, 0 nonzero
+    return codes; storage-conformance.json: `"required_all": true`,
+    `"ok": true`, `"unconfigured": []` (6/6 backends passing)
+  §A 4 flipped in `SOURCE_COMPLETENESS.md`; the `tiktok-hashtag-analysis`
+  manifest entry cites the run; the live-orchestration caveat (headless
+  Chromium ignores the environment proxy, so orchestrated live runs fail
+  closed) is recorded in the #4 review's addendum and in
+  `docker/tiktok_hashtag/RATE_LIMITS.md`.
+- Next: VENOM (§A 12) — standalone one-off over the pinned upstream (scoped
+  review locked: 29 upstream classes / 30 driver bindings; keyed services,
+  scraping and TLS-relaxation paths excluded with recorded reasons); then
+  PicImageSearch, tracelines, ShadowFinder, pybdshadow, GeoLocator, crypttrace
+  CLI wrap, ERATV, BigQuery; then Waves B–E.
