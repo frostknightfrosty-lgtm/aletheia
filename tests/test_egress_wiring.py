@@ -59,7 +59,7 @@ def test_every_network_adapter_is_wired_and_no_other_is():
     from aletheia.adapters.registry import phase7_adapters
 
     adapters = phase7_adapters()
-    assert len(adapters) == 51, "registry size is the denominator for coverage"
+    assert len(adapters) == 52, "registry size is the denominator for coverage"
 
     wired = {
         name

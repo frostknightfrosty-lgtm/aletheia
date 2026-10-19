@@ -6,7 +6,7 @@ from pathlib import Path
 from aletheia.adapters.exiftool import ExifToolAdapter
 from aletheia.adapters.identity import (
     H8mailAdapter, HIBPAdapter, HoleheAdapter, LibPhoneNumberAdapter, MaigretAdapter,
-    PhoneInfogaAdapter, XposedOrNotAdapter, ZehefAdapter,
+    PhoneInfogaAdapter, VenomAdapter, XposedOrNotAdapter, ZehefAdapter,
 )
 from aletheia.adapters.sherlock import SherlockAdapter
 from aletheia.adapters.theharvester import TheHarvesterAdapter
@@ -113,6 +113,7 @@ def phase7_adapters() -> dict[str, Adapter]:
     adapters[LeakCheckersAdapter.descriptor.name] = LeakCheckersAdapter()
     adapters[ZehefAdapter.descriptor.name] = ZehefAdapter()
     adapters[TiktokHashtagAdapter.descriptor.name] = TiktokHashtagAdapter()
+    adapters[VenomAdapter.descriptor.name] = VenomAdapter()
     # Construction-time Tier 5 rejection: every adapter must have a manifest
     # entry, and an entry declaring legal_tier=5 refuses construction.
     enforce_adapter_tier_policy(adapters.keys(), manifest=_manifest_entries())

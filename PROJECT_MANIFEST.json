@@ -464,6 +464,29 @@
       "key_cost": "free personal low-volume"
     },
     {
+      "name": "venom",
+      "upstream": "https://github.com/ghostport-sudo/VENOM",
+      "license": "MIT",
+      "version_pin": "7.0 (commit 6fa3a483abc9cb0a1d96567e33b2919be59522c6)",
+      "invocation": "Docker / CLI",
+      "input_types": [
+        "email",
+        "username",
+        "domain"
+      ],
+      "output_schema": "social-account observations (platform handles and public profile URLs), public GitHub/GitLab/npm/PyPI/Keybase/X/Telegram/Steam profile data, emails from public commit metadata and profiles, certificate-transparency and passive-DNS domains, resolved IPs, paste-index hits for the exact target string, and provider threat/risk assessment summaries",
+      "legal_notes": "Runs only the reviewed keyless module set of the pinned checkout (5 email / 12 username / 13 domain modules, one query each): no API keys, no accounts, no registration. Keyed services (HIBP, BreachDirectory, LeakCheck, OSINTLeak, IntelX, Phonebook, Hunter, NumLookup), the borrowed-key Leak-Lookup module, the Dehashed scrape, raw-socket SSL/RBL checks, the Holehe/Google login-form probes, the DuckDuckGo scrape, the AI agent, and the web UI are never imported. Two documented fail-closed deviations: rotating browser user agents are replaced with a fixed honest Aletheia user agent, and upstream's hardcoded ssl=False is overridden by a session that forces certificate verification. Explicit authorization is required for the target; see docker/venom/RATE_LIMITS.md.",
+      "network": "required",
+      "last_audited": "2026-10-19T00:00:00Z",
+      "verification_status": "verified-fixture",
+      "note": "Fixture parser coverage passes; fixture provenance: synthetic; fixture file: tests/fixtures/venom.json. No live container run has occurred.",
+      "fixture_provenance": "synthetic",
+      "legal_tier": 2,
+      "enabled_by_default": true,
+      "disabled_reason": null,
+      "batch_grouping": "leak_checkers"
+    },
+    {
       "name": "gravatar",
       "upstream": "https://docs.gravatar.com/sdk/profiles/",
       "license": "Gravatar Public API terms; no client library bundled",
