@@ -1,5 +1,38 @@
 # Changelog
 
+## 2026-10-19 — P17.11: VENOM adapter (source #12)
+
+Every number below is copied from the downloaded artifact
+`ci-artifacts-39196608448` (run `39196608448`, commit `0015ea4`).
+
+- `PARSER PREFLIGHT: PASS — 52/52 adapters have parser coverage` (51 → 52: the
+  third Phase 17 registry addition).
+- `"console_summary": "1073 passed, 1 warning"` with `"junit_total": 1073`,
+  `"skipped_in_ci": []`, `"ok": true` — 15 new tests (the 13 driver/parser
+  tests, the container health test, and one manifest-driven parametrization),
+  none skipped in CI (1058 → 1073).
+- `DOCKER CAPTURE: PASS — 69/69 cases captured`, including the two new cases
+  `phase17-venom-health` and `phase17-venom-selftest` (return code 0 under
+  `--network none`; the selftest ran 7/7 checks); results.json: 69 entries,
+  0 nonzero return codes; the egress scenario reported
+  `adapters=52 network_required=47 wired=47`; storage-conformance.json:
+  `"required_all": true`, `"ok": true`, `"unconfigured": []` (6/6 backends
+  passing).
+- What landed: `docker/venom/` gained a driver and image that run only the
+  reviewed keyless module set of the pinned checkout (commit
+  `6fa3a483abc9cb0a1d96567e33b2919be59522c6`; 29 upstream classes / 30 driver
+  bindings — 5 email / 12 username / 13 domain modules, one query each).
+  Keyed services (HIBP, BreachDirectory, LeakCheck, OSINTLeak, IntelX,
+  Phonebook, Hunter, NumLookup), the borrowed-key Leak-Lookup module, the
+  Dehashed scrape, the Holehe/Google login-form probes, the raw-socket
+  SSL/RBL checks, the plain-HTTP ip-api path, the DuckDuckGo scrape, the AI
+  agent, dorks/export/render, and the web UI are never imported; reasons are
+  in `docker/venom/RATE_LIMITS.md`. `VenomAdapter` adds email, username, and
+  domain input paths. Two documented fail-closed deviations: rotating browser
+  user agents are replaced with the fixed honest `Aletheia/0.9.0 (venom)`
+  agent on every module object, and upstream's hardcoded `ssl=False` is
+  overridden by a session class that forces certificate verification.
+
 ## 2026-10-18 — P17.11: tiktok-hashtag-analysis adapter (source #4)
 
 Every number below is copied from the downloaded artifact

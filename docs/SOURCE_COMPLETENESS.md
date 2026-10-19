@@ -34,9 +34,9 @@ Build sequencing: Phase 17 items **P17.11–P17.12** in
 
 ## A. The 111 accepted candidates — remaining gaps
 
-Already implemented and wired: **77 of 111** (the 51 registered adapters and
+Already implemented and wired: **78 of 111** (the 52 registered adapters and
 their sub-sources; some are key-gated — their skip reasons are recorded).
-**34 of 111 remain.** Of these, one is externally blocked (FollowTheMoney),
+**33 of 111 remain.** Of these, one is externally blocked (FollowTheMoney),
 several have owner-action prerequisites, and a few carry factual re-checks that
 may resolve to a recorded blocker if the free path no longer exists. No status
 below may be upgraded except from copied artifact lines.
@@ -54,7 +54,7 @@ below may be upgraded except from copied artifact lines.
 | 9 | BreachDirectory | 3 | Wired as documented skip (`leak_checkers`) | Implement live call path (RapidAPI); skip without key | Owner: free RapidAPI key |
 | 10 | Leak-Lookup | 3 | Wired as documented skip (`leak_checkers`) | Implement live call path (`/api/search`, breach names only) | Owner: free registration key |
 | 11 | Bron Vault | 3 | **Wired (CI-verified)**: loopback-only sub-source of `leak_checkers` for the operator's own self-hosted instance (contract pinned to release v1.4.0 commit `6bfdcc0196ac90ed38a35a1099697497680c1666`; non-loopback URLs refused before any socket; off-host redirects refused; proxies bypassed; skips unless `BRON_VAULT_URL`/`BRON_VAULT_API_KEY` set) — run `39168364470`, 1034 passed. See `docker/leak_checkers/RATE_LIMITS.md` | Build offline local-log parser adapter (no egress) | — |
-| 12 | VENOM | 3 | Not built (one-off) | Build one-off; review and constrain its 25+-service request set | — |
+| 12 | VENOM | 3 | **Wired (CI-verified)**: standalone one-off adapter over the pinned checkout (commit `6fa3a483abc9cb0a1d96567e33b2919be59522c6`; 29 upstream classes / 30 driver bindings — keyed services, scraping, and TLS-relaxation paths excluded with recorded reasons; honest-agent and forced-TLS deviations) — run `39196608448`, 1073 passed. See `docker/venom/RATE_LIMITS.md` | Build one-off; review and constrain its 25+-service request set | — |
 | 13 | PicImageSearch | 4 | Not built (among `geolocation_image` drops) | Build reverse-image step, free engines only (SauceNAO/IqDB/Ascii2d; Google/Yandex/Bing per-engine terms review) | — |
 | 14 | tracelines | 4 | Not built (`geolocation_image` drop) | Build offline (street-view coverage lines) | — |
 | 15 | ShadowFinder Web | 4 | Not built (one-off) | Build offline shadow/solar geolocation analysis | — |

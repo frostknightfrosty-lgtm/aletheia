@@ -640,3 +640,33 @@ activate when the key exists.
   scraping and TLS-relaxation paths excluded with recorded reasons); then
   PicImageSearch, tracelines, ShadowFinder, pybdshadow, GeoLocator, crypttrace
   CLI wrap, ERATV, BigQuery; then Waves B–E.
+- 2026-10-19 — tiktok-hashtag-analysis docs/state push — commits `1d8bec7`
+  (docs) and `de1a51e` (state) — run `39195856352` — docker-verification
+  **green**. Copied from the downloaded artifact `ci-artifacts-39195856352`:
+  - `PARSER PREFLIGHT: PASS — 51/51 adapters have parser coverage`
+  - pytest-summary.json: `"console_summary": "1058 passed, 1 warning"`,
+    `"junit_total": 1058`, `"skipped_in_ci": []`, `"ok": true`
+  - `DOCKER CAPTURE: PASS — 67/67 cases captured`; results.json: 67 entries,
+    0 nonzero return codes; storage-conformance.json: `"required_all": true`,
+    `"ok": true`, `"unconfigured": []` (6/6 backends passing)
+- 2026-10-19 — P17.11 VENOM verification (§A 12) — commit `0015ea4` — run
+  `39196608448` — docker-verification **green**. Copied from the downloaded
+  artifact `ci-artifacts-39196608448`:
+  - `PARSER PREFLIGHT: PASS — 52/52 adapters have parser coverage` (51 → 52)
+  - pytest-summary.json: `"console_summary": "1073 passed, 1 warning"`,
+    `"junit_total": 1073`, `"skipped_in_ci": []`, `"ok": true` (1058 → 1073:
+    15 new tests; none skipped)
+  - `DOCKER CAPTURE: PASS — 69/69 cases captured` (new cases
+    `phase17-venom-health` and `phase17-venom-selftest`, return code 0 under
+    `--network none`; the selftest ran 7/7 checks); results.json: 69 entries,
+    0 nonzero return codes; egress scenario:
+    `adapters=52 network_required=47 wired=47`; storage-conformance.json:
+    `"required_all": true`, `"ok": true`, `"unconfigured": []` (6/6 backends
+    passing)
+  §A 12 flipped in `SOURCE_COMPLETENESS.md`; the `venom` manifest entry cites
+  the run. Optional owner item recorded: a NumLookupAPI key would be needed
+  before the excluded `phone` input could be re-reviewed (USER_ACTIONS.md §1).
+- Next: continue Wave A — PicImageSearch (§A 13) scoped review locked (free
+  engines only: IQDB/3D IQDB, Ascii2D colour search, TraceMoe, AnimeTrace;
+  optional SauceNAO key); then tracelines, ShadowFinder, pybdshadow,
+  GeoLocator, crypttrace CLI wrap, ERATV, BigQuery; then Waves B–E.

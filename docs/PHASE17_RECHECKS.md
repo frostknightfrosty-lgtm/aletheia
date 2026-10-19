@@ -178,3 +178,27 @@ unverified, and re-opens only on a vendor change.
   the adapter as wired (`network_required=True`). An explicit proxy-capable
   launch path is a recorded decision item, not claimed. Same record:
   `docker/tiktok_hashtag/RATE_LIMITS.md`. Not owner-gated.
+
+## #12 VENOM — scoped review outcome (2026-10-19)
+
+- License: MIT (upstream `LICENSE`, ghostport-sudo/VENOM). The project
+  publishes no releases or tags; the checkout pins commit
+  `6fa3a483abc9cb0a1d96567e33b2919be59522c6` (main, 2026-06-28, version 7.0).
+- Reviewed and locked in `docker/venom/RATE_LIMITS.md`: 29 upstream classes /
+  30 driver bindings across email, username, and domain seeds — 5 email /
+  12 username / 13 domain modules, one query each. Excluded with recorded
+  reasons: every keyed service (HIBP, BreachDirectory, LeakCheck, OSINTLeak,
+  IntelX, Phonebook, Hunter, NumLookup), the borrowed-key Leak-Lookup module,
+  the Dehashed scrape, the Holehe/Google login-form probes, the raw-socket
+  SSL/RBL checks, the plain-HTTP ip-api path, the DuckDuckGo scrape, the AI
+  agent, dorks/export/render, and the web UI.
+- Two documented fail-closed deviations: the rotating browser user agents are
+  replaced with the fixed honest `Aletheia/0.9.0 (venom)` agent on every
+  module object, and upstream's hardcoded `ssl=False` is overridden by a
+  session class that forces certificate verification.
+- **Outcome:** built and CI-verified — run `39196608448` (parser preflight
+  52/52; 1073 passed; capture 69/69, including `phase17-venom-health` and
+  `phase17-venom-selftest` under `--network none`; selftest 7/7 checks). The
+  dropped `phone` input type depends on a NumLookupAPI key and is recorded as
+  an optional owner item; nothing else in VENOM's reviewed surface is
+  owner-gated.

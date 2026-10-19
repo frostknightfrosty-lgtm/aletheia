@@ -45,6 +45,10 @@ build review):
   requires them).
 - **Transport (Gate 6):** OpenSky (registration **plus written integration
   permission**), BarentsWatch, Network Rail, National Rail, Deutsche Bahn.
+- **Telephony (optional):** NumLookupAPI (`numlookupapi.com`) — would enable
+  the `phone` path the `venom` adapter intentionally drops (its pinned
+  `modules/phone.py` requires a NumLookupAPI key); the signup URL and secret
+  name will be recorded at that re-review touch (not guessed here).
 
 Configuration values (no registration, still owner-provided):
 
