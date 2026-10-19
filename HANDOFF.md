@@ -1,6 +1,6 @@
 # Aletheia Handoff — Phase 17 staged (pivot cascade + source completeness; autonomous campaign)
 
-Last updated: 2026-10-19T03:40:46Z
+Last updated: 2026-10-19T21:07:48Z
 
 ## Project boundaries
 
@@ -13,25 +13,28 @@ prerequisites are met. A tier classification is project policy, not a legal conc
 
 ## Repository and CI state
 
-- Latest CI-verified commit: `fedfd64` (tiktok-hashtag-analysis adapter; docker
-  verification run **39174382751** green — parser 51/51; **1058 passed**;
-  capture 67/67; storage 6/6). Earlier: `22d3ddc` (Zehef email adapter; run
-  **39171286556**, 1046 passed, capture 65/65); `d3e7d16` (Broń Vault; run
+- Latest CI-verified commit: `0015ea4` (VENOM adapter; docker verification run
+  **39196608448** green — parser 52/52; **1073 passed**; capture 69/69;
+  egress 47/47 wired; storage 6/6). Earlier: `fedfd64` (tiktok-hashtag adapter;
+  run **39174382751**, 1058 passed, capture 67/67; its docs/state push
+  `de1a51e` ran **39195856352**, also green); `22d3ddc` (Zehef email adapter;
+  run **39171286556**, 1046 passed, capture 65/65); `d3e7d16` (Broń Vault; run
   **39168364470**, 1034 passed, capture 63/63); `f785aa7` (CipherScan; run
   **39167510546**, 1030 passed, capture 62/62); `1c18b80` (SearXNG; run
-  **39166656036**, 1021 passed, capture 61/61); plus the docs/state pushes
-  `b7a7ba1` (run **39170080461**) and `513ac7c` (run **39169543833**), both green.
+  **39166656036**, 1021 passed, capture 61/61).
 - The authorized live run **39141366670** ran on tree `8939517` and is green (37m19s) —
   see the live-audit section below.
-- Newest artifact check (run **39174382751**, commit `fedfd64`): lines copied from the
-  downloaded artifact (`ci-artifacts-39174382751`), not typed —
-  `PARSER PREFLIGHT: PASS — 51/51 adapters have parser coverage`; `1058 passed,
-  1 warning`; `DOCKER CAPTURE: PASS — 67/67 cases captured` (including the new
-  `phase17-tiktok-hashtag-health` and `phase17-tiktok-hashtag-selftest` offline
-  cases); `storage-conformance.json`: `passing` = file, postgres, neo4j, elasticsearch,
-  minio, redis, `unconfigured` = [], `required_all` = `true`; `pytest-summary.json`:
-  `junit_total` 1058, `skipped_in_ci` [], `ok` `true`; `results.json`: 67 entries,
-  0 nonzero return codes.
+- Newest artifact check (run **39196608448**, commit `0015ea4`): lines copied from the
+  downloaded artifact (`ci-artifacts-39196608448`), not typed —
+  `PARSER PREFLIGHT: PASS — 52/52 adapters have parser coverage`; `1073 passed,
+  1 warning`; `DOCKER CAPTURE: PASS — 69/69 cases captured` (including the new
+  `phase17-venom-health` and `phase17-venom-selftest` offline cases; the venom
+  selftest ran 7/7 checks); `egress-scenario.json`: `adapters=52
+  network_required=47 wired=47`; `storage-conformance.json`: `passing` = file,
+  postgres, neo4j, elasticsearch, minio, redis, `unconfigured` = [],
+  `required_all` = `true`; `pytest-summary.json`: `junit_total` 1073,
+  `skipped_in_ci` [], `ok` `true`; `results.json`: 69 entries, 0 nonzero return
+  codes.
 - Evidence lines copied from the downloaded artifact of run `39141365915`
   (`ci-artifacts-39141365915`), not typed:
   - `PARSER PREFLIGHT: PASS — 49/49 adapters have parser coverage`
@@ -43,16 +46,16 @@ prerequisites are met. A tier classification is project policy, not a legal conc
   7 = `egress_events` 7; `phase15-egress-policy-covers-registry` = `adapters=49
   network_required=44 wired=44`; the crtsh check returned `new CONNECT crt.sh entries=1
   status=200` this run; the four `phase12-*` checks pass.
-- Local consistency at the tiktok-verified tree: **991 passed + 67 skipped = 1058**,
-  which equals the CI passed count exactly. The 67 skips are 62
+- Local consistency at the venom-verified tree: **1005 passed + 68 skipped = 1073**,
+  which equals the CI passed count exactly. The 68 skips are 63
   `tests/test_docker_integration.py` (no Docker on this machine) and 5
   `tests/test_storage_services.py` (no `ALETHEIA_STORAGE_*` service configured); both groups
   execute in CI, and CI now *fails* if either group skips — see `docs/SKIPPED_IN_CI.md`.
-- 51 registered adapters, all `verified-fixture` in `PROJECT_MANIFEST.json`; this round did
+- 52 registered adapters, all `verified-fixture` in `PROJECT_MANIFEST.json`; this round did
   not change any `verification_status`. One infrastructure component (`egress_proxy`),
   `verified-fixture`. Six storage backends, all conformance-verified against real services
-  in CI. 46 of the 51 adapters declare `network_required=True`, and the egress policy wires
-  all 46.
+  in CI. 47 of the 52 adapters declare `network_required=True`, and the egress policy wires
+  all 47.
 
 ## Phase 17 — pivot cascade + source completeness (staged 2026-10-18; autonomous campaign)
 
@@ -64,7 +67,7 @@ any seed (seed list / raw text / screenshot) → evidence-gated adapter→adapte
 → tiered identity map to exhaustion, every step evidence-gated. Owner directive of
 2026-10-18: everything in the 111 accepted candidates and every policy-permitted
 not-yet-integrated source becomes fully integrated, wired and working — tracked
-item-by-item in `docs/SOURCE_COMPLETENESS.md` (77 of 111 already built; 34 gaps in §A;
+item-by-item in `docs/SOURCE_COMPLETENESS.md` (78 of 111 already built; 33 gaps in §A;
 §B policy-permitted set; §C owner actions; §D recorded blockers).
 
 Both were recorded in docs commits `61cd60d` → `b6ad26d` → `c4faa40` (each
