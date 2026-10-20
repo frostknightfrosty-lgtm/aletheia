@@ -1,6 +1,6 @@
 # Aletheia Handoff — Phase 17 staged (pivot cascade + source completeness; autonomous campaign)
 
-Last updated: 2026-10-20T21:17:58Z
+Last updated: 2026-10-20T22:02:00Z
 
 ## Project boundaries
 
@@ -13,9 +13,14 @@ prerequisites are met. A tier classification is project policy, not a legal conc
 
 ## Repository and CI state
 
-- **Newest CI-verified commit: `9c9cd9c`** (minecraft adapter; docker
-  verification run **39495727637** green — parser 62/62; **1175 passed**;
-  capture 96/96; egress 62/55/55 wired; storage 6/6). Immediately prior:
+- **Newest CI-verified close-out: `c1f8cde`** (final docs/state tree; docker
+  verification run **39499810107** green — parser 62/62; **1175 passed**;
+  capture 96/96; egress 62/55/55 wired; storage 6/6; 96 results, 0 nonzero).
+  No live source run occurred. The final report is
+  `docs/FINAL_REPORT_PHASE17.md`.
+- **Newest CI-verified code commit: `9c9cd9c`** (minecraft adapter; run
+  **39495727637** green — parser 62/62; 1175 passed; capture 96/96; egress
+  62/55/55 wired; storage 6/6). Immediately prior:
   `82a4049` (pgp_keys; run **39494804791** — parser 61/61; 1167 passed;
   capture 93/93; egress 61/54/54; storage 6/6), `58aa354` (github_identity;
   run **39493701837** — parser 60/60; 1158 passed; capture 90/90; egress

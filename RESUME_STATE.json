@@ -1,13 +1,13 @@
 {
   "session_id": "2ba610de-14d2-4fab-925f-52a87db7e537",
-  "last_updated": "2026-10-20T21:21:49Z",
-  "last_commit": "f0351e8",
-  "last_ci_verified_commit": "9c9cd9caaae93b6e316d1f05ef058d11de2ba5bf",
-  "last_ci_run": "39495727637",
+  "last_updated": "2026-10-20T21:50:12Z",
+  "last_commit": "c1f8cde158424042b49f3e5b04d1a259373661f0",
+  "last_ci_verified_commit": "c1f8cde158424042b49f3e5b04d1a259373661f0",
+  "last_ci_run": "39499810107",
   "last_ci_status": "green",
   "current_phase": "Phase 17 pivot cascade, autonomous campaign COMPLETE for P17.11/P17.12/P17.13 (2026-10-20): P17.1-P17.10 complete; P17.11 Wave A through crypttrace #20 verified and flipped; P17.12 completeness audit recorded in docs/COMPLETENESS_AUDIT.md. 83 of 111 sources wired, 62 registered adapters, 65 manifest entries, 28 remaining - all recorded as owner-gated (Gate 3/Gate 6/Gate 7) or documented drops/blockers. P17.13 is complete for all adoptable free/public sources: researcher_ids, weather, github_identity, pgp_keys and minecraft are verified-fixture; NameMC, social-graph list ingestion and news_search are written exclusions in docs/NOT_INTEGRATED.md. No free adapter work remains. Only owner-gated Waves B-D and optional live promotions remain. Final report: docs/FINAL_REPORT_PHASE17.md.",
-  "current_task": "Final state push after docs commit f0351e8. Code evidence: minecraft 9c9cd9c (run 39495727637: parser 62/62; 1175 passed; capture 96/96; egress 62/55/55; storage 6/6); pgp_keys 82a4049 (run 39494804791: 61/61; 1167; 93/93; 61/54/54; 6/6); github_identity 58aa354 (run 39493701837: 60/60; 1158; 90/90; 60/53/53; 6/6); weather 503b431 (run 39487437707: 59/59; 1149; 87/87; 59/52/52; 6/6); researcher_ids ceaf595 (run 39484536317: 58/58; 1141; 84/84; 58/51/51; 6/6). All five are fixture-only; no live source lookup occurred. This state commit is the last step before the final report.",
-  "current_status": "final_state_commit_ci_pending",
+  "current_task": "Final close-out verified and state recorded. Commit c1f8cde (docs + state tree) passed Docker Verification run 39499810107: parser 62/62; 1175 passed, 1 warning; capture 96/96; egress 62/55/55; storage 6/6; 96 results, 0 nonzero. Code evidence: minecraft 9c9cd9c (run 39495727637), pgp_keys 82a4049 (run 39494804791), github_identity 58aa354 (run 39493701837), weather 503b431 (run 39487437707), researcher_ids ceaf595 (run 39484536317). All five units are fixture-only. This metadata-only push records the verified state; no code or docs changed.",
+  "current_status": "complete",
   "completed_phases": [
     "Original Phases 1–7 baseline (subject to audit gaps documented in HANDOFF.md)",
     "State refresh CI verified: run 38264456202 on commit 89c513e139b275b3554a0909251156d9d6bfa439 (parser preflight 32/32; 119 passed, 1 warning; Docker capture 33/33)",
@@ -78,12 +78,12 @@
     "P17.13 github_identity (profile, repositories, gists, public events, API SSH keys, .keys) implemented and CI-verified as verified-fixture: code 58aa354, run 39493701837 (parser 60/60; 1158 passed; capture 90/90; egress 60/53/53; storage 6/6; 90 results, 0 nonzero). Fixture-only; profile email dropped and SSH keys reduced to fingerprints.",
     "P17.13 pgp_keys (OpenPGP WKD advanced + DNS-failure direct fallback) implemented and CI-verified as verified-fixture: code 82a4049, run 39494804791 (parser 61/61; 1167 passed; capture 93/93; egress 61/54/54; storage 6/6; 93 results, 0 nonzero). Fixture-only; official WKD sample key; no key material retained.",
     "P17.13 minecraft (Mojang public current profile + session textures) implemented and CI-verified as verified-fixture: code 9c9cd9c, run 39495727637 (parser 62/62; 1175 passed; capture 96/96; egress 62/55/55; storage 6/6; 96 results, 0 nonzero). Fixture-only; NameMC and name history excluded.",
-    "P17.13 horizon close-out: keyservers closed by github_identity (.keys) and pgp_keys (WKD); GitHub endpoint expansion closed by github_identity; Open-Meteo/historical weather closed by weather; Mojang current profile closed by minecraft. NameMC, social-graph list ingestion and news_search recorded as written exclusions in docs/NOT_INTEGRATED.md. Docs commit f0351e8; final report docs/FINAL_REPORT_PHASE17.md. No adoptable free P17.13 item remains."
+    "P17.13 horizon close-out: keyservers closed by github_identity (.keys) and pgp_keys (WKD); GitHub endpoint expansion closed by github_identity; Open-Meteo/historical weather closed by weather; Mojang current profile closed by minecraft. NameMC, social-graph list ingestion and news_search recorded as written exclusions in docs/NOT_INTEGRATED.md. Docs commit f0351e8; final report docs/FINAL_REPORT_PHASE17.md. No adoptable free P17.13 item remains.",
+    "P17.13 close-out verified: commit c1f8cde (docs + state tree) passed Docker Verification run 39499810107 (parser 62/62; 1175 passed, 1 warning; capture 96/96; egress 62/55/55; storage 6/6; 96 results, 0 nonzero). The final report is docs/FINAL_REPORT_PHASE17.md. No live source run occurred."
   ],
   "pending_phases": [
-    "Owner-gated Waves B-D: Wave B free-registration/keyed sources (Gate 3), Wave C darkweb engines behind container-level Tor (Gate 6), Wave D transport_movement APIs (Gate 6). See docs/USER_ACTIONS.md.",
-    "Optional owner confirmations: P17.10 identity-cluster confirmation; verified-live promotion of adapters exercised by authorized runs; optional NumLookupAPI, Mapillary and SauceNAO registrations.",
-    "Final state CI verification after this commit; report already written in docs/FINAL_REPORT_PHASE17.md. No free adapter remains."
+    "No free adapter work remains. Owner-gated Waves B-D: Wave B free-registration/keyed sources (Gate 3), Wave C darkweb engines behind container-level Tor (Gate 6), Wave D transport_movement APIs (Gate 6). See docs/USER_ACTIONS.md.",
+    "Optional owner confirmations: P17.10 identity-cluster confirmation; verified-live promotion of adapters exercised by authorized runs; optional NumLookupAPI, Mapillary and SauceNAO registrations."
   ],
   "open_gates": [
     "Gate 2 - satisfied for the single self-owned target username:frost2233 on 2026-10-18 (owner assertion recorded verbatim in the run MANIFEST.json); a fresh assertion is required for any other target. Campaign rule: live runs only for targets already on file; everything else parks in docs/USER_ACTIONS.md.",
@@ -94,12 +94,12 @@
     "Gate 6 — MinIO server verification — deferred pending a usable image or endpoint. minio/minio returns 404 on Docker Hub and quay.io/minio/minio refuses anonymous pulls, so the S3 code path is verified against adobe/s3mock:5.2.3 instead. Resume if a MinIO image or an S3-compatible endpoint with credentials becomes available.",
     "Gate 7 - FollowTheMoney documented exclusion (no published request contract; OpenSecrets API discontinued 2025-04-15; commercial only). Re-open only on vendor change."
   ],
-  "next_action": "Stop after verifying the final state CI is green. No free adapter work remains. Owner actions are limited to Gate 3 key registrations, Gate 6 Tor/transport prerequisites, and optional live promotions/identity-cluster confirmation in docs/USER_ACTIONS.md. Live authorization remains username:frost2233 only.",
+  "next_action": "Stop. The campaign is complete and the final state is CI-verified. Remaining work is owner-gated only: Gate 3 key registrations, Gate 6 Tor/transport prerequisites, and optional live promotions/identity-cluster confirmation in docs/USER_ACTIONS.md. Live authorization remains username:frost2233 only.",
   "files_in_flight": [
     "No unverified unit remains in the tree; all 62 adapters are verified-fixture.",
     "docs/FINAL_REPORT_PHASE17.md is the standalone close-out report.",
     "untracked ci-live-cascade-39159843080/ and ci-live-cascade-39161463451/ are point-in-time live artifacts; never commit them.",
     "untracked ci-artifacts-* directories are downloaded CI evidence; never commit them."
   ],
-  "notes_for_next_session": "CAMPAIGN COMPLETE for P17.11/P17.12/P17.13 on 2026-10-20: 83 of 111 sources wired, 62 registered adapters, 65 manifest entries, 28 remaining - all owner-gated (Gate 3/6/7) or recorded drops/blockers. Latest code 9c9cd9c (minecraft; run 39495727637: parser 62/62; 1175 passed; capture 96/96; egress 62/55/55; storage 6/6). Latest docs f0351e8. P17.13 free/public horizon closed with researcher_ids, weather, github_identity, pgp_keys and minecraft; NameMC/social-graph/news_search are written exclusions. No live run beyond username:frost2233. Evidence only from downloaded artifacts (Gate 5); RESUME_STATE.json LF-only, no BOM; state commits separate; point-in-time ci-* directories never committed. Final report: docs/FINAL_REPORT_PHASE17.md."
+  "notes_for_next_session": "CAMPAIGN COMPLETE for P17.11/P17.12/P17.13 on 2026-10-20: 83 of 111 sources wired, 62 registered adapters, 65 manifest entries, 28 remaining - all owner-gated (Gate 3/6/7) or recorded drops/blockers. Final close-out c1f8cde is verified by run 39499810107 (parser 62/62; 1175 passed; capture 96/96; egress 62/55/55; storage 6/6). Latest code 9c9cd9c (minecraft; run 39495727637). P17.13 free/public horizon closed with researcher_ids, weather, github_identity, pgp_keys and minecraft; NameMC/social-graph/news_search are written exclusions. No live run beyond username:frost2233. Evidence only from downloaded artifacts (Gate 5); RESUME_STATE.json LF-only, no BOM; state commits separate; point-in-time ci-* directories never committed. Final report: docs/FINAL_REPORT_PHASE17.md."
 }
