@@ -258,6 +258,154 @@ class TiktokHashtagAdapter(Phase5Adapter):
         return _result(request,self.descriptor,started,findings,stdout,stderr,exit_code)
 
 
+def _picimagesearch_item_urls(engine_name: str, item: dict) -> list[tuple[str, str]]:
+    """(https URL, note) pairs carried by one normalized engine item."""
+    if engine_name in ("iqdb", "iqdb3d"):
+        note = f"Reverse-image match page reported by {engine_name}."
+        candidates = [item.get("page_url")]
+        for source in item.get("other_sources") if isinstance(item.get("other_sources"), list) else []:
+            if isinstance(source, dict):
+                candidates.append(source.get("url"))
+    elif engine_name == "ascii2d":
+        note = "Reverse-image match page reported by ascii2d."
+        candidates = [item.get("page_url")]
+        for related in item.get("urls") if isinstance(item.get("urls"), list) else []:
+            if isinstance(related, dict):
+                candidates.append(related.get("href"))
+    elif engine_name == "tracemoe":
+        note = "TraceMoe scene-match preview media."
+        candidates = [item.get("image"), item.get("video")]
+    elif engine_name == "sauce_nao":
+        note = "SauceNAO match page or external source link."
+        candidates = [item.get("page_url")]
+        ext_urls = item.get("ext_urls")
+        if isinstance(ext_urls, list):
+            candidates.extend(ext_urls)
+    else:
+        return []
+    urls: list[tuple[str, str]] = []
+    for candidate in candidates:
+        if isinstance(candidate, str) and candidate.startswith("https://") and all(candidate != seen for seen, _ in urls):
+            urls.append((candidate, note))
+    return urls
+
+
+def _picimagesearch_item_attributes(engine_name: str, item: dict) -> dict:
+    """JSON-safe attribute subset for one normalized engine item."""
+    attributes: dict = {}
+    for key in ("size", "title", "author", "author_url", "source", "match_list", "index_name", "filename", "format", "hash"):
+        value = item.get(key)
+        if isinstance(value, str) and value:
+            attributes[key] = value
+    for key in ("similarity", "episode", "from", "to"):
+        value = item.get(key)
+        if isinstance(value, (int, float)) and not isinstance(value, bool):
+            attributes[key] = value
+    for key in ("title_romaji", "title_english", "title_native"):
+        value = item.get(key)
+        if isinstance(value, str) and value:
+            attributes[key] = value
+    if item.get("is_adult") is True:
+        attributes["is_adult"] = True
+    return attributes
+
+
+class PicImageSearchAdapter(Phase5Adapter):
+    descriptor = AdapterDescriptor(
+        name="picimagesearch", license="MIT",
+        input_types=[SeedType.IMAGE, SeedType.FILE_PATH, SeedType.URL],
+        output_types=[EntityType.URL, EntityType.UNKNOWN],
+        legal_notes=[
+            "Keyless public reverse-image-search endpoints only (IQDB, 3D IQDB, Ascii2D colour search, TraceMoe, AnimeTrace), one request each, plus the official SauceNAO JSON API when SAUCENAO_API_KEY is set (recorded skip otherwise); no pagination and no retries. The consumer-web scrapers (Google, Google Lens, Yandex, Bing, Baidu), the token-refresh Copyseeker scraper, the Turnstile-blocked Lenso client, the TinEye web-app scrape, and the adult-gallery EHentai engine are never imported; see docker/picimagesearch/RATE_LIMITS.md.",
+            "The package's hardcoded browser user agent is replaced with an honest Aletheia agent and TLS verification is never disabled; the driver re-checks both before every run and fails closed.",
+            "Explicit authorization is required for every target image: it (or its URL) is transmitted to up to five third-party engines.",
+        ],
+        rate_limit="One image per container invocation; five keyless engine requests plus one optional SauceNAO request; no pagination or retries.",
+        invocation="Docker / CLI", version_pin="commit 784713e546273a09aae4b247a8b6f798825efafa (httpx2 2.13.1; lxml 6.1.3; pyquery 2.1.0)",
+        upstream="https://github.com/kitUIN/PicImageSearch", network_required=True,
+        docker_image="aletheia/picimagesearch:v1",
+        output_schema={"engines": "object", "status": "string"},
+        health_check="--health", requires_authorization_assertion=True,
+    )
+
+    def supports(self, seed_type: SeedType) -> bool:
+        return seed_type in {SeedType.IMAGE, SeedType.FILE_PATH, SeedType.URL}
+
+    def build_command(self, request: AdapterRunRequest, workspace: Path) -> list[str]:
+        if request.seed.type == SeedType.URL:
+            return ["--url", request.seed.value]
+        image = _stage_image(request, workspace)
+        return ["--file", f"/work/{image.name}"]
+
+    def parse(self, request: AdapterRunRequest, workspace: Path, stdout: str, stderr: str, exit_code: int) -> AdapterRunResult:
+        started = datetime.now(timezone.utc); raw = stdout.encode(); findings = []
+        try: payload = json.loads(stdout) if stdout.strip() else {}
+        except json.JSONDecodeError: payload = {}
+        if not isinstance(payload, dict):
+            payload = {}
+        target = request.seed.value
+        engines = payload.get("engines") if isinstance(payload.get("engines"), dict) else {}
+        for engine_name in sorted(engines):
+            entry = engines[engine_name] if isinstance(engines[engine_name], dict) else {}
+            status = entry.get("status") if isinstance(entry.get("status"), str) else "error"
+            count = entry.get("count") if isinstance(entry.get("count"), int) and not isinstance(entry.get("count"), bool) else 0
+            result_url = entry.get("result_url") if isinstance(entry.get("result_url"), str) else ""
+            if status == "ok":
+                items = entry.get("items") if isinstance(entry.get("items"), list) else []
+                for item in items:
+                    if not isinstance(item, dict):
+                        continue
+                    for url, note in _picimagesearch_item_urls(engine_name, item):
+                        attributes = {"engine": engine_name, "target": target}
+                        attributes.update(_picimagesearch_item_attributes(engine_name, item))
+                        findings.append(Finding(
+                            entity_type=EntityType.URL, value=url, attributes=attributes,
+                            provenance=_prov(self.descriptor, source_url=result_url or self.descriptor.upstream, confidence=0.6, raw=raw,
+                                             notes=[note]),
+                        ))
+                    if engine_name == "animetrace":
+                        characters = item.get("characters") if isinstance(item.get("characters"), list) else []
+                        for character in characters:
+                            if not isinstance(character, dict):
+                                continue
+                            name = character.get("name") if isinstance(character.get("name"), str) else ""
+                            work = character.get("work") if isinstance(character.get("work"), str) else ""
+                            if not name and not work:
+                                continue
+                            label = f"{name} [{work}]" if work else name
+                            findings.append(Finding(
+                                entity_type=EntityType.UNKNOWN, value=f"{self.descriptor.name}:animetrace:character:{label}",
+                                attributes={"engine": "animetrace", "work": work, "target": target},
+                                provenance=_prov(self.descriptor, source_url=result_url or self.descriptor.upstream, confidence=0.5, raw=raw,
+                                                 notes=["AnimeTrace character identification; a scene match, not an identity claim."]),
+                            ))
+            else:
+                reason = entry.get("reason") if isinstance(entry.get("reason"), str) else entry.get("error")
+                if not isinstance(reason, str) or not reason:
+                    reason = status
+                attributes = {"source": self.descriptor.name, "engine": engine_name, "status": status, "target": target, "reason": reason}
+                if count:
+                    attributes["count"] = count
+                findings.append(Finding(
+                    entity_type=EntityType.UNKNOWN, value=f"{self.descriptor.name}:{engine_name}:{status}",
+                    attributes=attributes,
+                    provenance=_prov(self.descriptor, source_url=self.descriptor.upstream, confidence=0.3, raw=raw,
+                                     notes=[f"Driver recorded engine status '{status}'; nothing was retried or fabricated."]),
+                ))
+        run_status = payload.get("status") if isinstance(payload.get("status"), str) else ""
+        if payload.get("deadline_exceeded") is True:
+            run_status = "deadline_exceeded"
+        if run_status in {"invalid_target", "blocked", "error", "deadline_exceeded"}:
+            reason = payload.get("error") if isinstance(payload.get("error"), str) else run_status
+            findings.append(Finding(
+                entity_type=EntityType.UNKNOWN, value=f"{self.descriptor.name}:run:{run_status}",
+                attributes={"status": run_status, "target": target, "reason": reason},
+                provenance=_prov(self.descriptor, source_url=self.descriptor.upstream, confidence=0.3, raw=raw,
+                                 notes=[f"Driver recorded run status '{run_status}'; nothing was retried or fabricated."]),
+            ))
+        return _result(request, self.descriptor, started, findings, stdout, stderr, exit_code)
+
+
 class OverpassAdapter(Phase5Adapter):
     descriptor=AdapterDescriptor(
         name="overpass", license="OpenStreetMap data / ODbL; Overpass API service", input_types=[SeedType.GEOLOCATION], output_types=[EntityType.PLACE, EntityType.GEOLOCATION, EntityType.UNKNOWN],

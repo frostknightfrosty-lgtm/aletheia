@@ -55,4 +55,5 @@ docker build -f docker/leak_checkers/Dockerfile -t aletheia/leak-checkers:v1 doc
 docker build -f docker/zehef/Dockerfile -t aletheia/zehef:v1 docker/zehef
 docker build -f docker/tiktok_hashtag/Dockerfile -t aletheia/tiktok-hashtag:v1 docker/tiktok_hashtag
 docker build -f docker/venom/Dockerfile -t aletheia/venom:v1 docker/venom
+docker build -f docker/picimagesearch/Dockerfile -t aletheia/picimagesearch:v1 docker/picimagesearch
 docker build -f docker/egress_proxy/Dockerfile -t aletheia/egress-proxy:v1 docker/egress_proxy

@@ -1,0 +1,119 @@
+{
+  "source": "PicImageSearch",
+  "sub_source": "reverse-image-search",
+  "pinned_commit": "784713e546273a09aae4b247a8b6f798825efafa",
+  "checkout_version": "3.12.11",
+  "user_agent": "Aletheia/0.9.0 (picimagesearch)",
+  "tls_verified": true,
+  "target": "C:\\evidence\\synthetic\\frame.jpg",
+  "target_kind": "file",
+  "requested_engines": ["iqdb", "iqdb3d", "ascii2d", "tracemoe", "animetrace"],
+  "reported_engines": ["animetrace", "ascii2d", "iqdb", "iqdb3d", "sauce_nao", "tracemoe"],
+  "status": "ok",
+  "engines": {
+    "iqdb": {
+      "status": "ok",
+      "error": "",
+      "result_url": "https://iqdb.org/",
+      "count": 2,
+      "items": [
+        {
+          "match_list": "primary",
+          "content": "Best match",
+          "page_url": "https://danbooru.donmai.us/posts/1",
+          "source": "Danbooru",
+          "other_sources": [{"source": "yandex", "url": "https://yandex.com/images/2"}],
+          "thumbnail": "https://iqdb.org/thumb/1.jpg",
+          "size": "1234x567",
+          "similarity": 91.2
+        },
+        {
+          "match_list": "more",
+          "content": "Possible match",
+          "page_url": "https://konachan.com/post/3",
+          "source": "Konachan",
+          "other_sources": [],
+          "thumbnail": "",
+          "size": "",
+          "similarity": 80.0
+        }
+      ]
+    },
+    "iqdb3d": {
+      "status": "empty",
+      "error": "",
+      "result_url": "https://3d.iqdb.org/",
+      "count": 0,
+      "items": []
+    },
+    "ascii2d": {
+      "status": "ok",
+      "error": "",
+      "result_url": "https://ascii2d.net/search/4",
+      "count": 1,
+      "items": [
+        {
+          "page_url": "https://ascii2d.net/search/4",
+          "hash": "abc123",
+          "detail": "Color search",
+          "thumbnail": "",
+          "title": "Example title",
+          "author": "Example Artist",
+          "author_url": "https://twitter.com/example_artist",
+          "urls": [{"href": "https://www.pixiv.net/artworks/5", "text": "pixiv"}]
+        }
+      ]
+    },
+    "tracemoe": {
+      "status": "ok",
+      "error": "",
+      "result_url": "https://api.trace.moe/search",
+      "count": 1,
+      "items": [
+        {
+          "filename": "ep01.mkv",
+          "episode": 1,
+          "from": 12.5,
+          "to": 14.0,
+          "similarity": 95.5,
+          "video": "https://api.trace.moe/video/6",
+          "image": "https://api.trace.moe/image/6",
+          "anilist_id": 7,
+          "title_romaji": "Example Anime",
+          "title_english": "Example Anime (EN)",
+          "title_native": "Example Native",
+          "is_adult": false,
+          "format": "TV"
+        }
+      ],
+      "frame_count": 1,
+      "api_error": ""
+    },
+    "animetrace": {
+      "status": "ok",
+      "error": "",
+      "result_url": "https://api.animetrace.com/v1/search",
+      "count": 1,
+      "items": [
+        {
+          "box": [1.0, 2.0, 3.0, 4.0],
+          "box_id": "box-1",
+          "characters": [
+            {"name": "Example Character", "work": "Example Work"},
+            {"name": "Second Character", "work": ""}
+          ]
+        }
+      ],
+      "code": 0,
+      "ai": false,
+      "trace_id": "trace-1"
+    },
+    "sauce_nao": {
+      "status": "skipped",
+      "reason": "no api key (set SAUCENAO_API_KEY to enable)",
+      "result_url": "",
+      "count": 0,
+      "items": []
+    }
+  }
+}

@@ -487,6 +487,29 @@
       "batch_grouping": "leak_checkers"
     },
     {
+      "name": "picimagesearch",
+      "upstream": "https://github.com/kitUIN/PicImageSearch",
+      "license": "MIT",
+      "version_pin": "commit 784713e546273a09aae4b247a8b6f798825efafa (httpx2 2.13.1; lxml 6.1.3; pyquery 2.1.0)",
+      "invocation": "Docker / CLI",
+      "input_types": [
+        "image",
+        "file_path",
+        "url"
+      ],
+      "output_schema": "reverse-image-search hits (match page URLs, external source links and TraceMoe scene-match preview media) plus UNKNOWN markers for per-engine statuses and AnimeTrace character identifications",
+      "legal_notes": "Runs only the reviewed keyless engines of the pinned checkout (IQDB, 3D IQDB, Ascii2D colour search, TraceMoe, AnimeTrace — one request each) plus the official SauceNAO JSON API when SAUCENAO_API_KEY is set (recorded skip otherwise): no accounts, no registration, no pagination, no retries. The consumer-web scrapers (Google, Google Lens, Yandex, Bing, Baidu), the token-refresh Copyseeker scraper, the Turnstile-blocked Lenso client, the TinEye web-app scrape, and the adult-gallery EHentai engine are never imported. Two documented fail-closed deviations: the package's hardcoded browser user agent is replaced with a fixed honest Aletheia user agent (re-checked against each engine's client before every run), and TLS verification is never disabled. Explicit authorization is required for every target image, which is transmitted to up to five third-party engines; see docker/picimagesearch/RATE_LIMITS.md.",
+      "network": "required",
+      "last_audited": "2026-10-19T00:00:00Z",
+      "verification_status": "verified-fixture",
+      "note": "Fixture parser coverage passes; fixture provenance: synthetic; fixture file: tests/fixtures/picimagesearch.json. No live container run has occurred.",
+      "fixture_provenance": "synthetic",
+      "legal_tier": 3,
+      "enabled_by_default": true,
+      "disabled_reason": null,
+      "batch_grouping": "geolocation_image"
+    },
+    {
       "name": "gravatar",
       "upstream": "https://docs.gravatar.com/sdk/profiles/",
       "license": "Gravatar Public API terms; no client library bundled",
