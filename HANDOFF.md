@@ -64,6 +64,24 @@ prerequisites are met. A tier classification is project policy, not a legal conc
   `results.json`: 78 entries, 0 nonzero return codes. The docs commit `b5bc16c`
   repeated the same numbers in run **39460496509** (parser 56/56; 1122 passed;
   capture 78/78; egress 56/49/49; storage 6/6).
+- Newest artifact check (run **39466252253**, commit `446ccab`): lines copied
+  from the downloaded artifact (`ci-artifacts-39466252253`), not typed —
+  `PARSER PREFLIGHT: PASS — 57/57 adapters have parser coverage`; `1132 passed,
+  1 warning`; `DOCKER CAPTURE: PASS — 81/81 cases captured` (including
+  `phase17-crypttrace-health` — stdout `ok`, `pin_file: true`, package `0.22.0`
+  — `phase17-crypttrace-selftest`, 8/8 checks including Bitcoin address
+  validation and report normalization, and the offline
+  `phase17-crypttrace-normalize` case under `--network none`);
+  `egress-scenario.json`: `adapters=57 network_required=50 wired=50`;
+  `storage-conformance.json`: `passing` = file, postgres, neo4j, elasticsearch,
+  minio, redis, `required_all` = `true`; `pytest-summary.json`: `junit_total`
+  1132, `skipped_in_ci` [], `ok` `true`; `results.json`: 81 entries, 0 nonzero
+  return codes. The docs commit `1df7750` repeated the same numbers in run
+  **39468982807** (parser 57/57; 1132 passed; capture 81/81; egress 57/50/50;
+  storage 6/6).
+- P17.12 audit: `docs/COMPLETENESS_AUDIT.md`, committed as `aa99eaa` and
+  verified by run **39472065798** (documents-only; same 57/57, 1132 passed,
+  81/81, 57/50/50, 6/6).
 - **tracelines unit verified:** commit `0ac22ed` (the unit's first code commit
   `89c6400` plus the Python-3.12 image fix). Local evidence before commit:
   parser preflight 54/54; suite 1030 passed + 70 environment-only skips = 1100;
@@ -86,17 +104,23 @@ prerequisites are met. A tier classification is project policy, not a legal conc
   JSON input, tier 1, no network. Local: parser 56/56; suite 1050 passed + 72
   skipped = 1122; the CI container run confirms `pin_file: true`, 8/8 selftest
   checks and a real synthetic shadow computation. Manifest `verified-fixture`;
-  docs `b5bc16c` verified by run **39460496509**; the state push is the last
-  step. GeoLocator (#18) was recorded in the same docs commit as an
-  upstream-withdrawal blocker: the official TIBHannover/GeoEstimation repository
-  removed all source and model weights, the checkpoint URLs return HTTP 404,
-  and no code was built.
-- **In progress locally (not committed):** crypttrace (#20) — Bitcoin-only
-  fund-flow adapter over the pinned crypttrace 0.22.0 (MIT, commit `cf60a88`);
-  calls `report.generate` at depth 2 / branching 3 with no API key; manifest
-  60 entries / 57 adapters, image, fixture, tests and three capture cases
-  prepared. Local parser 57/57; suite 1059 passed + 73 skipped = 1132; driver
-  health and 8/8 selftest checks pass in an isolated venv.
+  docs `b5bc16c` verified by run **39460496509**; state `c217cf5` verified by
+  run **39463410774**; unit complete. GeoLocator (#18) was recorded in the same
+  docs commit as an upstream-withdrawal blocker: the official
+  TIBHannover/GeoEstimation repository removed all source and model weights,
+  the checkpoint URLs return HTTP 404, and no code was built.
+- **crypttrace unit verified:** commit `446ccab` — Bitcoin-only fund-flow
+  adapter over crypttrace 0.22.0 (MIT, commit `cf60a88`),
+  `SeedType.CRYPTO_ADDRESS`, depth 2 / branching 3, no API key; manifest 60
+  entries / 57 adapters. Local: parser 57/57; suite 1059 passed + 73 skipped =
+  1132; driver health and 8/8 selftest checks pass against the pinned package
+  in an isolated venv. Manifest `verified-fixture`; docs `1df7750` verified by
+  run **39468982807**; the final state push is the last step.
+- **P17.11/P17.12 closed:** 83 of 111 sources wired; 28 remain with written
+  gate/owner/blocker reasons (audit `docs/COMPLETENESS_AUDIT.md`, run
+  **39472065798**). P17.13 horizon is recorded and partially covered (Wayback
+  CDX and WhatsMyName-style lists are already covered); the remaining horizon
+  items are the next free queue. No unverified unit remains.
 - Evidence lines copied from the downloaded artifact of run `39141365915`
   (`ci-artifacts-39141365915`), not typed:
   - `PARSER PREFLIGHT: PASS — 49/49 adapters have parser coverage`
@@ -108,20 +132,22 @@ prerequisites are met. A tier classification is project policy, not a legal conc
   7 = `egress_events` 7; `phase15-egress-policy-covers-registry` = `adapters=49
   network_required=44 wired=44`; the crtsh check returned `new CONNECT crt.sh entries=1
   status=200` this run; the four `phase12-*` checks pass.
-- Local consistency at the pybdshadow-verified tree: **1050 passed + 72 skipped = 1122**,
-  which equals the CI passed count exactly. The 72 skips are 67 Docker-dependent
-  tests (no Docker on this machine, including the pybdshadow container-health
-  case) and 5 `tests/test_storage_services.py` (no `ALETHEIA_STORAGE_*` service
-  configured); both groups execute in CI, and CI now *fails* if either group
-  skips — see `docs/SKIPPED_IN_CI.md`.
-- 56 registered adapters; all 56 are `verified-fixture` in
+- Local consistency at the crypttrace-verified tree: **1059 passed + 73 skipped = 1132**,
+  which equals the CI passed count exactly. The 73 skips are 68 Docker-dependent
+  tests (no Docker on this machine, including the crypttrace and pybdshadow
+  container-health cases) and 5 `tests/test_storage_services.py` (no
+  `ALETHEIA_STORAGE_*` service configured); both groups execute in CI, and CI
+  now *fails* if either group skips — see `docs/SKIPPED_IN_CI.md`.
+- 57 registered adapters; all 57 are `verified-fixture` in
   `PROJECT_MANIFEST.json`. One infrastructure component (`egress_proxy`),
   `verified-fixture`. Six storage backends, all conformance-verified against
-  real services in CI. 49 of the 56 adapters declare `network_required=True`,
-  and the egress policy wires all 49.
-- The working tree additionally contains the uncommitted crypttrace #20 unit
-  (57th adapter, one network host pair, 1059 passed + 73 skipped = 1132); it is
-  not part of the verified counts above.
+  real services in CI. 50 of the 57 adapters declare `network_required=True`,
+  and the egress policy wires all 50.
+- Tracker: 83 of 111 sources wired, 28 remaining — all owner-gated
+  (Gate 3/Gate 6/Gate 7) or recorded drops/blockers. See
+  `docs/COMPLETENESS_AUDIT.md`.
+- No unverified unit remains in the working tree. The next free queue is P17.13
+  horizon completion; Waves B–D are owner-gated.
 
 ## Phase 17 — pivot cascade + source completeness (staged 2026-10-18; autonomous campaign)
 
@@ -133,7 +159,7 @@ any seed (seed list / raw text / screenshot) → evidence-gated adapter→adapte
 → tiered identity map to exhaustion, every step evidence-gated. Owner directive of
 2026-10-18: everything in the 111 accepted candidates and every policy-permitted
 not-yet-integrated source becomes fully integrated, wired and working — tracked
-item-by-item in `docs/SOURCE_COMPLETENESS.md` (80 of 111 already built; 31 gaps in §A;
+item-by-item in `docs/SOURCE_COMPLETENESS.md` (83 of 111 already built; 28 gaps;
 §B policy-permitted set; §C owner actions; §D recorded blockers).
 
 Both were recorded in docs commits `61cd60d` → `b6ad26d` → `c4faa40` (each
