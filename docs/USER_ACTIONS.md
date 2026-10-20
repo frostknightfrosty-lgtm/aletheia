@@ -42,7 +42,8 @@ build review):
   resolves).
 - **Social / media / misc:** GitHub token, Mapillary, Copernicus Data Space,
   Betaface (key + secret), OWASP SocialOSINTLM platform keys (if its review
-  requires them).
+  requires them), SauceNAO (`SAUCENAO_API_KEY`; optional — the keyless
+  PicImageSearch engines work without it).
 - **Transport (Gate 6):** OpenSky (registration **plus written integration
   permission**), BarentsWatch, Network Rail, National Rail, Deutsche Bahn.
 - **Telephony (optional):** NumLookupAPI (`numlookupapi.com`) — would enable

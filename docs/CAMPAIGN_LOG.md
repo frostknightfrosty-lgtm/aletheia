@@ -670,3 +670,42 @@ activate when the key exists.
   engines only: IQDB/3D IQDB, Ascii2D colour search, TraceMoe, AnimeTrace;
   optional SauceNAO key); then tracelines, ShadowFinder, pybdshadow,
   GeoLocator, crypttrace CLI wrap, ERATV, BigQuery; then Waves B–E.
+- 2026-10-19 — VENOM docs/state push — commits `b0b696d` (docs) and `da0283f`
+  (state) — run `39325135904` — docker-verification **green** (after four
+  attempts: three aborted in the image-build step on transient
+  `sum.golang.org` module-verification stream errors; the same commit passed
+  unchanged on the fourth). Copied from the downloaded artifact
+  `ci-artifacts-39325135904`:
+  - `PARSER PREFLIGHT: PASS — 52/52 adapters have parser coverage`
+  - pytest-summary.json: `"console_summary": "1073 passed, 1 warning"`,
+    `"junit_total": 1073`, `"skipped_in_ci": []`, `"ok": true`
+  - `DOCKER CAPTURE: PASS — 69/69 cases captured`; results.json: 69 entries,
+    0 nonzero return codes; egress scenario:
+    `adapters=52 network_required=47 wired=47`; storage-conformance.json:
+    `"required_all": true`, `"ok": true`, `"unconfigured": []` (6/6 backends
+    passing)
+- 2026-10-20 — P17.11 PicImageSearch verification (§A 13) — commit `19db818` —
+  run `39404418732` — docker-verification **green**. Copied from the
+  downloaded artifact `ci-artifacts-39404418732`:
+  - `PARSER PREFLIGHT: PASS — 53/53 adapters have parser coverage` (52 → 53)
+  - pytest-summary.json: `"console_summary": "1089 passed, 1 warning"`,
+    `"junit_total": 1089`, `"skipped_in_ci": []`, `"ok": true` (1073 → 1089:
+    16 new tests; none skipped)
+  - `DOCKER CAPTURE: PASS — 71/71 cases captured` (new cases
+    `phase17-picimagesearch-health` and `phase17-picimagesearch-selftest`,
+    return code 0 under `--network none`; health stdout `ok` with
+    `engine_bindings: 5`, `ua_honest: true`, `tls_verified: true`, pinned
+    checkout `3.12.11`; the selftest ran 9/9 checks); results.json: 71
+    entries, 0 nonzero return codes; egress scenario:
+    `adapters=53 network_required=48 wired=48`; storage-conformance.json:
+    `"required_all": true`, `"ok": true`, `"unconfigured": []` (6/6 backends
+    passing)
+  §A 13 flipped in `SOURCE_COMPLETENESS.md`; the `picimagesearch` manifest
+  entry cites the run. Fixture-only by design: no authorized live image target
+  exists, so no live requests were made. Optional owner item recorded: a
+  SauceNAO API key would enable that engine (`USER_ACTIONS.md`).
+- Next: continue Wave A — tracelines (§A 14) scoped review locked (Mapillary
+  tile and keyless KartaView sequence providers only; the Google/streetlevel
+  path is structurally excluded; free `MAPILLARY_TOKEN` optional); then
+  ShadowFinder, pybdshadow, GeoLocator, crypttrace CLI wrap, ERATV, BigQuery;
+  then Waves B–E.

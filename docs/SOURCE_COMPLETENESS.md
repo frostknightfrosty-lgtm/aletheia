@@ -34,9 +34,9 @@ Build sequencing: Phase 17 items **P17.11–P17.12** in
 
 ## A. The 111 accepted candidates — remaining gaps
 
-Already implemented and wired: **78 of 111** (the 52 registered adapters and
+Already implemented and wired: **79 of 111** (the 53 registered adapters and
 their sub-sources; some are key-gated — their skip reasons are recorded).
-**33 of 111 remain.** Of these, one is externally blocked (FollowTheMoney),
+**32 of 111 remain.** Of these, one is externally blocked (FollowTheMoney),
 several have owner-action prerequisites, and a few carry factual re-checks that
 may resolve to a recorded blocker if the free path no longer exists. No status
 below may be upgraded except from copied artifact lines.
@@ -55,7 +55,7 @@ below may be upgraded except from copied artifact lines.
 | 10 | Leak-Lookup | 3 | Wired as documented skip (`leak_checkers`) | Implement live call path (`/api/search`, breach names only) | Owner: free registration key |
 | 11 | Bron Vault | 3 | **Wired (CI-verified)**: loopback-only sub-source of `leak_checkers` for the operator's own self-hosted instance (contract pinned to release v1.4.0 commit `6bfdcc0196ac90ed38a35a1099697497680c1666`; non-loopback URLs refused before any socket; off-host redirects refused; proxies bypassed; skips unless `BRON_VAULT_URL`/`BRON_VAULT_API_KEY` set) — run `39168364470`, 1034 passed. See `docker/leak_checkers/RATE_LIMITS.md` | Build offline local-log parser adapter (no egress) | — |
 | 12 | VENOM | 3 | **Wired (CI-verified)**: standalone one-off adapter over the pinned checkout (commit `6fa3a483abc9cb0a1d96567e33b2919be59522c6`; 29 upstream classes / 30 driver bindings — keyed services, scraping, and TLS-relaxation paths excluded with recorded reasons; honest-agent and forced-TLS deviations) — run `39196608448`, 1073 passed. See `docker/venom/RATE_LIMITS.md` | Build one-off; review and constrain its 25+-service request set | — |
-| 13 | PicImageSearch | 4 | Not built (among `geolocation_image` drops) | Build reverse-image step, free engines only (SauceNAO/IqDB/Ascii2d; Google/Yandex/Bing per-engine terms review) | — |
+| 13 | PicImageSearch | 4 | **Wired (CI-verified)**: standalone image-input adapter over the pinned upstream (commit `784713e546273a09aae4b247a8b6f798825efafa`; self-reported 3.12.11; MIT), running five keyless engines (IQDB, 3D IQDB, Ascii2D colour search, TraceMoe, AnimeTrace) plus the official SauceNAO API when `SAUCENAO_API_KEY` is set; consumer-web scrapers, Copyseeker, Lenso, TinEye and EHentai are never imported — run `39404418732`, 1089 passed. Fixture-only: no authorized live image target, so no live requests. See `docker/picimagesearch/RATE_LIMITS.md` | — |
 | 14 | tracelines | 4 | Not built (`geolocation_image` drop) | Build offline (street-view coverage lines) | — |
 | 15 | ShadowFinder Web | 4 | Not built (one-off) | Build offline shadow/solar geolocation analysis | — |
 | 16 | pybdshadow | 4 | Not built (one-off) | Build offline building-shadow geometry | — |
@@ -99,7 +99,7 @@ scoped review first, then implementation.
 | 9 | People-search free tiers (TruePeopleSearch, Whitepages free, PeekYou) | Build free paths; politeness limits; firewall | Paid-only products rejected; coverage limits recorded |
 | 10 | Face-search free paths | Build free-path services only (e.g. Betaface eval tier) | Corroboration only, never sole basis; paid products (PimEyes, FaceCheck.ID, Search4Faces, Lenso.ai programmatic) stay out under nothing-paid |
 | 11 | Paste indexes (psbdmp-class, LeakCheck OSINT-Hub) | Build | Flag-only storage: existence, date, source name; never dump contents beyond evidence hashes |
-| 12 | Reverse-image-search automation | Build free engines only (overlaps PicImageSearch #13 above) | Per-engine terms review; local pHash + archived captures remain the fallback |
+| 12 | Reverse-image-search automation | Built as the standalone `picimagesearch` adapter (#13 in §A above): free engines only (IQDB, 3D IQDB, Ascii2D colour search, TraceMoe, AnimeTrace; optional SauceNAO) | Per-engine terms review; local pHash + archived captures remain the fallback |
 | 13 | Dark-web engines (Ahmia, Torch, OnionLand, DarkSearch) | Wire through the darkweb_search composite / OnionSearch-class tooling | Ahmia and similar prohibit scraping — recorded ToS risk under the Florida posture; OnionLand/DarkSearch interface review; Tor container setup |
 | 14 | Bulk/paste data processing | Policy capability; no separate adapter | Retention and flag rules apply |
 

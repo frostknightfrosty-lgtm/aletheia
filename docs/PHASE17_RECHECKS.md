@@ -202,3 +202,30 @@ unverified, and re-opens only on a vendor change.
   dropped `phone` input type depends on a NumLookupAPI key and is recorded as
   an optional owner item; nothing else in VENOM's reviewed surface is
   owner-gated.
+
+## #13 PicImageSearch — scoped review outcome (2026-10-20)
+
+- License: MIT (upstream `LICENSE`, kitUIN/PicImageSearch). The last release
+  tag (`v3.9.7`, 2023-12-12) predates the current network layer and engine
+  set, so the checkout pins commit
+  `784713e546273a09aae4b247a8b6f798825efafa` (main, 2026-10-10; self-reported
+  version `3.12.11`).
+- Reviewed and locked in `docker/picimagesearch/RATE_LIMITS.md`: five keyless
+  engines — IQDB, 3D IQDB, Ascii2D colour search, TraceMoe, AnimeTrace — one
+  request each, plus the official SauceNAO JSON API only when
+  `SAUCENAO_API_KEY` is set (recorded skip otherwise). Excluded with recorded
+  reasons: the consumer-web scrapers (Google, Google Lens, Yandex, Bing,
+  Baidu), the token-refresh Copyseeker scraper, the Turnstile-blocked Lenso
+  client, the TinEye web-app scrape, the adult-gallery EHentai engine, and the
+  demos/tooling/composite methods.
+- Two documented fail-closed deviations: the package's hardcoded browser user
+  agent is replaced with the fixed honest `Aletheia/0.9.0 (picimagesearch)`
+  agent (re-checked against each engine's client before every run), and TLS
+  verification is never disabled.
+- **Outcome:** built and CI-verified — run `39404418732` (parser preflight
+  53/53; 1089 passed; capture 71/71, including
+  `phase17-picimagesearch-health` and `phase17-picimagesearch-selftest` under
+  `--network none`; the health reported five engine bindings with the honest
+  UA and TLS verification, and the selftest ran 9/9 checks). Fixture-verified
+  only: no authorized live image target exists, so no live requests were
+  made. The optional SauceNAO key is recorded as an owner item.

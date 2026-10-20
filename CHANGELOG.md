@@ -1,5 +1,45 @@
 # Changelog
 
+## 2026-10-20 — P17.11: PicImageSearch adapter (source #13)
+
+Every number below is copied from the downloaded artifact
+`ci-artifacts-39404418732` (run `39404418732`, commit `19db818`).
+
+- `PARSER PREFLIGHT: PASS — 53/53 adapters have parser coverage` (52 → 53: the
+  fourth Phase 17 registry addition).
+- `"console_summary": "1089 passed, 1 warning"` with `"junit_total": 1089`,
+  `"skipped_in_ci": []`, `"ok": true` — 16 new tests (the 14 driver/parser
+  tests, the container health test, and one manifest-driven parametrization),
+  none skipped in CI (1073 → 1089).
+- `DOCKER CAPTURE: PASS — 71/71 cases captured`, including the two new cases
+  `phase17-picimagesearch-health` and `phase17-picimagesearch-selftest`
+  (return code 0 under `--network none`; health stdout `ok` with
+  `engine_bindings: 5`, `ua_honest: true`, `tls_verified: true`, pinned
+  checkout `3.12.11`; the selftest ran 9/9 checks); results.json: 71 entries,
+  0 nonzero return codes; the egress scenario reported
+  `adapters=53 network_required=48 wired=48`; storage-conformance.json:
+  `"required_all": true`, `"ok": true`, `"unconfigured": []` (6/6 backends
+  passing).
+- What landed: `docker/picimagesearch/` gained a driver and image that run only
+  the reviewed keyless engines of the pinned upstream (commit
+  `784713e546273a09aae4b247a8b6f798825efafa`; self-reported version 3.12.11;
+  MIT): IQDB, 3D IQDB, Ascii2D colour search, TraceMoe, and AnimeTrace — one
+  request each — plus the official SauceNAO JSON API only when
+  `SAUCENAO_API_KEY` is set (recorded skip otherwise). The consumer-web
+  scrapers (Google, Google Lens, Yandex, Bing, Baidu), the token-refresh
+  Copyseeker scraper, the Turnstile-blocked Lenso client, the TinEye web-app
+  scrape, and the adult-gallery EHentai engine are never imported; reasons are
+  in `docker/picimagesearch/RATE_LIMITS.md`. Two fail-closed deviations: the
+  package's hardcoded browser user agent is replaced with the fixed honest
+  `Aletheia/0.9.0 (picimagesearch)` agent (re-checked per engine before every
+  run), and TLS verification is never disabled. No authorized live image
+  target exists, so the adapter ships **fixture-verified only** — no live
+  requests were made. Explicit authorization is required per target image.
+- Docs/state: §A 13 flipped in `SOURCE_COMPLETENESS.md` (79 of 111 wired; 53
+  adapters; 32 remain); the `picimagesearch` manifest entry cites the run;
+  optional owner item recorded — a SauceNAO API key would enable that engine
+  (`docs/USER_ACTIONS.md`).
+
 ## 2026-10-19 — P17.11: VENOM adapter (source #12)
 
 Every number below is copied from the downloaded artifact
