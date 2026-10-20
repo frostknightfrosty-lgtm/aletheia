@@ -1839,6 +1839,60 @@
       "note": "Synthetic fixture and Docker health/selftest/normalize cases verified in Docker Verification run 39487437707 on commit 503b4311e9c513697a1b26b3d5d2ccf362a09146 (https://github.com/frostknightfrosty-lgtm/aletheia/actions/runs/39487437707). Raw artifact evidence: PARSER PREFLIGHT: PASS — 59/59 adapters have parser coverage; 1149 passed, 1 warning; DOCKER CAPTURE: PASS — 87/87 cases captured. results.json contains 87 entries with 0 nonzero return codes; egress adapters=59 network_required=52 wired=52; storage 6/6. fixture file: tests/fixtures/weather.json. No live source lookups occurred; the phase17-weather health, selftest and normalize cases returned 0 under --network none."
     },
     {
+      "name": "github_identity",
+      "upstream": "https://github.com/frostknightfrosty-lgtm/aletheia/tree/main/docker/github_identity",
+      "license": "Public GitHub data, used through the documented REST API under GitHub's Terms of Service and API Terms; no third-party code.",
+      "version_pin": "1.0 (GitHub REST API 2022-11-28; reviewed 2026-10-20)",
+      "invocation": "Bounded public GitHub REST reads plus the public .keys endpoint via dedicated Docker runner (aletheia/github-identity:v1)",
+      "input_types": [
+        "username"
+      ],
+      "output_schema": "SocialAccountFinding[] + TechnicalFinding[]",
+      "legal_notes": "Six unauthenticated public requests per run: profile, latest repositories, gists, public events, API public keys, and the public .keys endpoint. Unauthenticated REST quota is 60 requests/hour per source IP; no token, retries, pagination, or proxy rotation. Profile email is deliberately dropped; avatars, follower lists, and event payloads are not fetched; SSH keys are reduced to OpenSSH SHA-256 fingerprints and key types, never key material. A handle is a same-handle lead, not identity proof. See docker/github_identity/RATE_LIMITS.md.",
+      "network": "required",
+      "last_audited": "2026-10-20T00:00:00Z",
+      "verification_status": "unknown",
+      "fixture_provenance": "synthetic",
+      "legal_tier": 1,
+      "enabled_by_default": true,
+      "disabled_reason": null,
+      "batch_grouping": "github_identity",
+      "requires_key": false,
+      "sub_sources": [
+        {
+          "name": "github-profile",
+          "requires_key": false,
+          "enabled_by_default": true
+        },
+        {
+          "name": "github-repos",
+          "requires_key": false,
+          "enabled_by_default": true
+        },
+        {
+          "name": "github-gists",
+          "requires_key": false,
+          "enabled_by_default": true
+        },
+        {
+          "name": "github-events",
+          "requires_key": false,
+          "enabled_by_default": true
+        },
+        {
+          "name": "github-keys",
+          "requires_key": false,
+          "enabled_by_default": true
+        },
+        {
+          "name": "github-dotkeys",
+          "requires_key": false,
+          "enabled_by_default": true
+        }
+      ],
+      "note": "Pending CI verification. fixture file: tests/fixtures/github_identity.json. No live source lookups occurred; the runner and parser use synthetic documents only."
+    },
+    {
       "name": "egress_proxy",
       "upstream": "https://github.com/frostknightfrosty-lgtm/aletheia/tree/main/docker/egress_proxy",
       "license": "Project-internal infrastructure component (Aletheia repository); no third-party code bundled.",

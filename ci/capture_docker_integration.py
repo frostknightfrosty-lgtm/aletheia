@@ -85,6 +85,9 @@ CASES = [
     ("phase17-weather-health", "aletheia/weather:v1", ["--health"]),
     ("phase17-weather-selftest", "aletheia/weather:v1", ["--selftest"]),
     ("phase17-weather-normalize", "aletheia/weather:v1", ["--normalize", "/work/response.json"]),
+    ("phase17-github-identity-health", "aletheia/github-identity:v1", ["--health"]),
+    ("phase17-github-identity-selftest", "aletheia/github-identity:v1", ["--selftest"]),
+    ("phase17-github-identity-normalize", "aletheia/github-identity:v1", ["--normalize", "/work/combined.json"]),
     ("phase11-egress-proxy", "aletheia/egress-proxy:v1", ["--health"]),
 ]
 
@@ -195,6 +198,11 @@ def main() -> int:
                         "temperature_2m": 12.0, "precipitation": 0.0,
                         "weather_code": 3, "wind_speed_10m": 10.8},
         }), encoding="utf-8")
+        github_identity_combined = Path(td) / "github_identity.json"
+        github_identity_combined.write_text(
+            Path("tests/fixtures/github_identity.json").read_text(encoding="utf-8"),
+            encoding="utf-8",
+        )
         for name, image, args in CASES:
             cmd = ["docker", "run", "--rm", "--network", "none"]
             if name == "phase1-exiftool":
@@ -207,6 +215,8 @@ def main() -> int:
                 cmd += ["-v", f"{researcher_ids_combined}:/work/combined.json:ro"]
             if name == "phase17-weather-normalize":
                 cmd += ["-v", f"{weather_response}:/work/response.json:ro"]
+            if name == "phase17-github-identity-normalize":
+                cmd += ["-v", f"{github_identity_combined}:/work/combined.json:ro"]
             if name == "phase7-core-import":
                 cmd += ["--entrypoint", "python"]
             if name == "phase4-holehe":

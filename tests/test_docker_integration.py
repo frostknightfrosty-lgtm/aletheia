@@ -369,3 +369,9 @@ def test_phase17_weather_container_health():
               "aletheia/weather:v1", "--health"])
     assert r.returncode == 0, r.stdout + r.stderr
     assert r.stdout.strip() == "ok", r.stdout + r.stderr
+
+def test_phase17_github_identity_container_health():
+    r = _run(["docker", "run", "--rm", "--network", "none",
+              "aletheia/github-identity:v1", "--health"])
+    assert r.returncode == 0, r.stdout + r.stderr
+    assert r.stdout.strip() == "ok", r.stdout + r.stderr

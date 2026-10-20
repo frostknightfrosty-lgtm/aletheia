@@ -62,4 +62,5 @@ docker build -f docker/pybdshadow/Dockerfile -t aletheia/pybdshadow:v1 docker/py
 docker build -f docker/crypttrace/Dockerfile -t aletheia/crypttrace:v1 docker/crypttrace
 docker build -f docker/researcher_ids/Dockerfile -t aletheia/researcher-ids:v1 docker/researcher_ids
 docker build -f docker/weather/Dockerfile -t aletheia/weather:v1 docker/weather
+docker build -f docker/github_identity/Dockerfile -t aletheia/github-identity:v1 docker/github_identity
 docker build -f docker/egress_proxy/Dockerfile -t aletheia/egress-proxy:v1 docker/egress_proxy
