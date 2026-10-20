@@ -1,0 +1,64 @@
+{
+  "source": "crypttrace",
+  "status": "ok",
+  "subject": "bc1qar0srrr7xfkvy5l643lydnw9re59gtzzwf5mdq",
+  "chain": "btc",
+  "traced_asset": "BTC",
+  "trace_depth": 2,
+  "trace_branching": 3,
+  "data_source": "mempool.space",
+  "summary": {
+    "balance_native": 0.125,
+    "native_symbol": "BTC",
+    "transfers_analysed": 4,
+    "first_seen": "2026-01-01 10:00",
+    "last_seen": "2026-01-01 11:00",
+    "label": null,
+    "type": "unknown",
+    "risk_score": 0
+  },
+  "assessment": {
+    "assessment": "No labelled entities were reached within the traced depth.",
+    "risk": 0,
+    "confidence": "low"
+  },
+  "key_findings": [
+    {
+      "address": "bc1qar0srrr7xfkvy5l643lydnw9re59gtzzwf5mdq",
+      "label": "Example exchange",
+      "type": "exchange",
+      "risk": 70,
+      "value_reached": 0.01,
+      "symbol": "BTC",
+      "usd_reached": 1000.0,
+      "memo": null
+    },
+    {
+      "address": "1BoatSLRHtKNngkdXEeobR76b53LETtpyT",
+      "label": null,
+      "type": "unknown",
+      "risk": 0,
+      "value_reached": 0.002,
+      "symbol": "BTC",
+      "usd_reached": 200.0,
+      "memo": null
+    }
+  ],
+  "top_counterparties": [
+    {
+      "address": "bc1qar0srrr7xfkvy5l643lydnw9re59gtzzwf5mdq",
+      "label": "Example exchange",
+      "in": 0.0,
+      "out": 0.01,
+      "txs": 1
+    },
+    {
+      "address": "3J98t1WpEZ73CNmQviecrnyiWrnqRhWNLy",
+      "label": null,
+      "in": 0.002,
+      "out": 0.0,
+      "txs": 2
+    }
+  ],
+  "errors": []
+}

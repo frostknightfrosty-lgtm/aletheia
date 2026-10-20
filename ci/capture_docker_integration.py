@@ -76,6 +76,9 @@ CASES = [
     ("phase17-pybdshadow-health", "aletheia/pybdshadow:v1", ["--health"]),
     ("phase17-pybdshadow-selftest", "aletheia/pybdshadow:v1", ["--selftest"]),
     ("phase17-pybdshadow-run", "aletheia/pybdshadow:v1", ["/work/input.json"]),
+    ("phase17-crypttrace-health", "aletheia/crypttrace:v1", ["--health"]),
+    ("phase17-crypttrace-selftest", "aletheia/crypttrace:v1", ["--selftest"]),
+    ("phase17-crypttrace-normalize", "aletheia/crypttrace:v1", ["--normalize", "/work/report.json"]),
     ("phase11-egress-proxy", "aletheia/egress-proxy:v1", ["--health"]),
 ]
 
@@ -139,12 +142,46 @@ def main() -> int:
                 }],
             },
         }), encoding="utf-8")
+        crypttrace_report = Path(td) / "report.json"
+        crypttrace_report.write_text(json.dumps({
+            "tool": "crypttrace v0.22.0",
+            "generated": "2026-01-01 12:00 UTC",
+            "subject": "bc1qar0srrr7xfkvy5l643lydnw9re59gtzzwf5mdq",
+            "chain": "btc",
+            "traced_asset": "BTC",
+            "trace_depth": 2,
+            "trace_branching": 3,
+            "data_source": "mempool.space",
+            "summary": {
+                "balance_native": 0.125, "native_symbol": "BTC",
+                "transfers_analysed": 4, "first_seen": "2026-01-01 10:00",
+                "last_seen": "2026-01-01 11:00", "label": None,
+                "type": "unknown", "risk_score": 0,
+            },
+            "assessment": {
+                "assessment": "No labelled entities were reached within the traced depth.",
+                "risk": 0, "confidence": "low",
+            },
+            "key_findings": [{
+                "address": "bc1qar0srrr7xfkvy5l643lydnw9re59gtzzwf5mdq",
+                "label": "Example exchange", "type": "exchange", "risk": 70,
+                "value_reached": 0.01, "symbol": "BTC", "usd_reached": 1000.0,
+                "memo": None,
+            }],
+            "top_counterparties": [{
+                "address": "bc1qar0srrr7xfkvy5l643lydnw9re59gtzzwf5mdq",
+                "label": "Example exchange", "in": 0.0, "out": 0.01, "txs": 1,
+            }],
+            "errors": [],
+        }), encoding="utf-8")
         for name, image, args in CASES:
             cmd = ["docker", "run", "--rm", "--network", "none"]
             if name == "phase1-exiftool":
                 cmd += ["-v", f"{sample}:/work/sample.txt:ro"]
             if name == "phase17-pybdshadow-run":
                 cmd += ["-v", f"{pybdshadow_input}:/work/input.json:ro"]
+            if name == "phase17-crypttrace-normalize":
+                cmd += ["-v", f"{crypttrace_report}:/work/report.json:ro"]
             if name == "phase7-core-import":
                 cmd += ["--entrypoint", "python"]
             if name == "phase4-holehe":

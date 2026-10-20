@@ -33,11 +33,10 @@ SUPPORTED_SUB_SOURCES = (
 # no endpoint, import or version is invented for it.
 UNSUPPORTED_SUB_SOURCES: dict[str, str] = {
     "crypttrace": (
-        "crypttrace publishes no documented importable API: its own PyPI page and GitHub README "
-        "(https://pypi.org/project/crypttrace/ and https://github.com/bobslayerX/crypttrace) document only "
-        'a terminal CLI (pipx install "crypttrace[web]" then the crypttrace command) and a local web app. '
-        "Neither page publishes a library import example or any documented Python API surface, so no "
-        "importable API can be verified from its own project page."
+        "crypttrace is covered by the separate crypttrace adapter (source #20, "
+        "Bitcoin-only); this composite adapter does not query it. It is reported "
+        "once per run as a documented skip so the composite source list stays "
+        "stable."
     ),
 }
 

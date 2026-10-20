@@ -573,6 +573,27 @@
       "batch_grouping": "geoint"
     },
     {
+      "name": "crypttrace",
+      "upstream": "https://github.com/bobslayerX/crypttrace",
+      "license": "MIT",
+      "version_pin": "0.22.0 (commit cf60a88b8be43581186965d160114fdaf3022c62)",
+      "invocation": "Docker / CLI",
+      "input_types": [
+        "crypto_address"
+      ],
+      "output_schema": "Bitcoin fund-flow trace: bounded run summary, upstream-labelled key findings and top counterparties (JSON)",
+      "legal_notes": "Bitcoin-only fund-flow trace through the pinned crypttrace 0.22.0 library (MIT, commit cf60a88). The seed address is sent to mempool.space and an optional BTC/USD price is requested from CoinGecko; no API key is used and no credential is stored. Upstream labels, risk scores and exchange classifications are heuristics and lead generators, not proof of ownership, identity or wrongdoing; a public-blockchain address is pseudonymous. The upstream fetcher spaces mempool.space calls, caches in an ephemeral container-local SQLite file and retries 429s with backoff; the adapter never retries or caches. No live target is on file; verification is fixture-based. See docker/crypttrace/RATE_LIMITS.md.",
+      "network": "required",
+      "last_audited": "2026-10-20T00:00:00Z",
+      "verification_status": "unknown",
+      "note": "Fixtures and tests are prepared; fixture file: tests/fixtures/crypttrace.json. No live trace has occurred; no CI run yet.",
+      "fixture_provenance": "synthetic",
+      "legal_tier": 1,
+      "enabled_by_default": true,
+      "disabled_reason": null,
+      "batch_grouping": "crypto_blockchain"
+    },
+    {
       "name": "gravatar",
       "upstream": "https://docs.gravatar.com/sdk/profiles/",
       "license": "Gravatar Public API terms; no client library bundled",
@@ -1318,7 +1339,7 @@
         "crypto_address"
       ],
       "output_schema": "CryptoBlockchainFinding[]",
-      "legal_notes": "Composite adapter covering the six verified sub-sources of the crypto_blockchain batch: mempool-space, blockstream-esplora, blockchair, etherscan-v2, blockcypher and chainabuse. The seventh candidate, crypttrace, is dropped and never queried; the runner reports it once per run as a skipped source with that exact reason. Every endpoint, query-parameter name, authentication requirement, documented rate limit and documentation URL was read from the provider's own official documentation and is recorded in docker/crypto_blockchain/RATE_LIMITS.md; none was inferred from an example response. The runner classifies the seed as a Bitcoin or Ethereum address and queries only the sub-sources whose documentation accepts that chain; a chain mismatch is a documented skip. etherscan-v2 and chainabuse require free keys and are skipped with a documented reason when their environment variable is unset; blockchair and blockcypher keys are optional. No credential is stored in this repository and no key is printed or recorded in runner output. A Chainabuse report is a user or partner submission, not a court finding, and an on-chain address summary is not attributable to a person or organisation without further evidence. Every run contacts third-party explorers and a screening provider, so it requires authorization and the adapter requires the assertion.",
+      "legal_notes": "Composite adapter covering the six verified sub-sources of the crypto_blockchain batch: mempool-space, blockstream-esplora, blockchair, etherscan-v2, blockcypher and chainabuse. The seventh candidate, crypttrace, is covered by the separate crypttrace adapter (source #20, Bitcoin-only); this composite does not query it and reports it once per run as a skipped source with that exact reason. Every endpoint, query-parameter name, authentication requirement, documented rate limit and documentation URL was read from the provider's own official documentation and is recorded in docker/crypto_blockchain/RATE_LIMITS.md; none was inferred from an example response. The runner classifies the seed as a Bitcoin or Ethereum address and queries only the sub-sources whose documentation accepts that chain; a chain mismatch is a documented skip. etherscan-v2 and chainabuse require free keys and are skipped with a documented reason when their environment variable is unset; blockchair and blockcypher keys are optional. No credential is stored in this repository and no key is printed or recorded in runner output. A Chainabuse report is a user or partner submission, not a court finding, and an on-chain address summary is not attributable to a person or organisation without further evidence. Every run contacts third-party explorers and a screening provider, so it requires authorization and the adapter requires the assertion.",
       "network": "required",
       "last_audited": "2026-10-16T00:00:00Z",
       "verification_status": "verified-fixture",
