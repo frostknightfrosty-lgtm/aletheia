@@ -474,15 +474,20 @@ def _selftest() -> int:
     check("observation_parsing", observations)
     check("candidate_binning", binning)
     check("computation", computation)
-    check(
-        "target_validation",
-        lambda: (
-            _parse_args(["--observation", "height=10;shadow=5;datetime=2024-06-01T12:00:00Z"])
-            is not None
-            and _parse_args(["--observation", "bad"]) is None,
-            "",
-        ),
-    )
+    def observation_arguments() -> tuple[bool, str]:
+        good = _parse_args(
+            ["--observation", "height=10;shadow=5;datetime=2024-06-01T12:00:00Z"]
+        )
+        bad = _parse_args(["--observation", "bad"])
+        ok = (
+            good is not None
+            and _parse_observation(good["observation"]) is not None
+            and bad is not None
+            and _parse_observation(bad["observation"]) is None
+        )
+        return ok, "syntax accepted; semantics enforced by the driver"
+
+    check("observation_validation", observation_arguments)
     ok = all(item["ok"] for item in checks)
     print(json.dumps({"shadowfinder_selftest": "ok" if ok else "fail", "checks": checks}, indent=2))
     return 0 if ok else 1

@@ -277,3 +277,20 @@ def test_shadowfinder_driver_args():
         ["--health"],
     ):
         assert driver._parse_args(bad) is None, bad
+
+
+def test_shadowfinder_driver_argument_and_semantic_validation():
+    """The parser is syntactic; the observation validator is the semantic gate.
+
+    This mirrors the container selftest: ``_parse_args`` accepts the flag/value
+    shape, and ``_parse_observation`` rejects a malformed value. ``main`` calls
+    both in that order.
+    """
+    driver = _load_driver()
+    good = driver._parse_args(["--observation", OBSERVATION])
+    assert good is not None
+    assert driver._parse_observation(good["observation"]) is not None
+
+    bad = driver._parse_args(["--observation", "bad"])
+    assert bad is not None
+    assert driver._parse_observation(bad["observation"]) is None
