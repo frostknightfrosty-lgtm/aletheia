@@ -1,4 +1,4 @@
-FROM python:3.11-slim-bookworm
+FROM python:3.12-slim-bookworm
 
 # The pinned checkout is installed without its `streetlevel` dependency on
 # purpose: the Google provider walks undocumented internal endpoints and is
