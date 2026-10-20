@@ -467,3 +467,109 @@ unverified, and re-opens only on a vendor change.
   capture 87/87; egress adapters=59 network_required=52 wired=52; results 87
   entries, 0 nonzero; storage 6/6). The three `phase17-weather-*` cases returned
   0 under `--network none`; no live source lookup occurred.
+
+## #23 github_identity — scoped review outcome (2026-10-20)
+
+- **Licence / terms:** public GitHub data accessed through the documented REST
+  API under GitHub's Terms of Service and API Terms; no third-party code. The
+  `.keys` read is the public text endpoint at `github.com/<user>.keys`. The
+  reviewed contract is REST API version `2022-11-28` as documented on
+  2026-10-20; see `docker/github_identity/RATE_LIMITS.md`.
+- **Scope:** one `username` seed and six sequential public GETs — profile,
+  latest five repositories, five gists, five public events, the API public-key
+  list, and the public `.keys` text. No token, account, login, or Authorization
+  header. The unauthenticated REST quota is 60 requests/hour per source IP;
+  six requests per run means at most ten runs/hour from one IP. A 403 is a
+  bounded partial error; no retry, sleep, proxy rotation, or secondary token.
+- **Data minimisation:** profile login, display name, company, blog, location,
+  bio, public Twitter handle, public counts, timestamps, and HTML URL. The
+  profile `email` field is explicitly dropped, as are avatars, Gravatars,
+  follower/following lists, and authorization fields. Repositories/gists/events
+  are capped at five each; event payloads and gist contents are not fetched.
+  SSH keys are reduced to the OpenSSH `SHA256:` fingerprint and key type; key
+  material and comments are discarded and the two endpoints are deduplicated.
+- **Interpretation:** a GitHub handle is a same-handle lead, not identity proof.
+  Usernames can be renamed or transferred; public keys can be shared, rotated,
+  or stale. Repositories and events corroborate a handle but do not establish
+  that it belongs to the person under investigation. The `.keys` half of the
+  P17.13 keyserver item is covered here; WKD is the separate `pgp_keys` adapter.
+- **No live target is on file** for a GitHub username. Verification is
+  fixture-based: `tests/fixtures/github_identity.json`, parser/driver tests,
+  an offline 9-check selftest (including email exclusion and fingerprinting),
+  and Docker health/normalize cases under `--network none`.
+- **Outcome:** built and CI-verified — run `39493701837` on commit
+  `58aa354f506f5e25e008bf04035a0b87c15b370b` (parser 60/60; 1158 passed;
+  capture 90/90; egress adapters=60 network_required=53 wired=53; results 90
+  entries, 0 nonzero; storage 6/6). The three `phase17-github-identity-*` cases
+  returned 0 under `--network none`; no live source lookup occurred.
+
+## #24 pgp_keys — scoped review outcome (2026-10-20)
+
+- **Licence / terms:** OpenPGP Web Key Directory, reviewed against
+  `draft-koch-openpgp-webkey-service-22` (2026-10-20). The data is the
+  domain-published public key; the parser is standard-library only with no
+  third-party code. See `docker/pgp_keys/RATE_LIMITS.md`.
+- **Scope:** one `email` seed. The driver computes
+  `z-base-32(SHA-1(ASCII-lowercased local-part))`, tries the advanced method at
+  `openpgpkey.<domain>`, and falls back to the direct method only when that
+  sub-domain does not resolve, as the specification requires. One GET, or two
+  on the DNS fallback; 30-second timeout; 2 MB cap; no Authorization header,
+  token, retry, pagination, proxy rotation, or DANE lookup. An HTTP 404 is a
+  negative result, not a fallback trigger.
+- **Data minimisation:** the requested email, method/URL, HTTP status, response
+  SHA-256/length, and for each matching primary key the fingerprint, key ID,
+  version, public algorithm, creation time, matching User IDs, and count of
+  non-matching User IDs. All non-matching User IDs are dropped. Key material,
+  signatures, subkeys, revocation state, and private data are never emitted or
+  imported. Only v4 primary keys are parsed; partial/indeterminate packet
+  lengths and unsupported versions become bounded errors.
+- **Interpretation:** a WKD response shows that a domain publishes a key for an
+  email address. It does not prove that the key is valid, unrevoked, unexpired,
+  or controlled by a particular person; the adapter does not verify signatures
+  or revocation. This is the WKD half of the P17.13 keyserver item; GitHub
+  `.keys` is covered by `github_identity`.
+- **No live target is on file** for an email. Verification is fixture-based:
+  `tests/fixtures/pgp_keys.json` mirrors a normalized response; the offline
+  8-check selftest parses the official specification's sample key and checks
+  fingerprint `B21DEAB4F875FB3DA42F1D1D139563682A020D0A`, EdDSA, and the
+  matching User ID. Docker health/normalize cases run under `--network none`.
+- **Outcome:** built and CI-verified — run `39494804791` on commit
+  `82a4049f0c1f01bb24b793c3845e76d98043ccc0` (parser 61/61; 1167 passed;
+  capture 93/93; egress adapters=61 network_required=54 wired=54; results 93
+  entries, 0 nonzero; storage 6/6). The three `phase17-pgp-keys-*` cases
+  returned 0 under `--network none`; no live source lookup occurred.
+
+## #25 minecraft — scoped review outcome (2026-10-20)
+
+- **Licence / terms:** the public Mojang Minecraft profile API, used without an
+  account or token; no third-party code. NameMC is **not** used: it has no
+  public API and its site terms do not authorize scraping. The removed Mojang
+  name-history endpoint was checked and returns `404 NOT_FOUND`; it is not
+  called. See `docker/minecraft/RATE_LIMITS.md`.
+- **Scope:** one current Java `username`, at most two unauthenticated GETs —
+  `api.mojang.com/users/profiles/minecraft/{username}` and
+  `sessionserver.mojang.com/session/minecraft/profile/{uuid}`. Both are
+  sequential; 30-second timeout; 1 MB cap; no retry, pagination, token, or proxy
+  rotation. The `x-minecraft-rate-limit-result` header is recorded; 204/404 is
+  a normal `not_found`, while 401/403/429 is a bounded error/partial.
+- **Data minimisation:** current username, compact and dashed UUID, session
+  name, public skin/cape URLs, skin model, and the rate-limit header. The raw
+  texture property, its signature, texture timestamp, profile actions, and all
+  image bytes are discarded. Texture URLs are accepted only from
+  `https://textures.minecraft.net/texture/`; other hosts are dropped.
+- **Interpretation:** a Minecraft handle is a same-handle lead, not identity
+  proof. Usernames can be changed or transferred and Mojang exposes only the
+  current name. A UUID identifies the account, not a person. NameMC history is
+  deliberately out of scope, so this adapter does not claim a previous-name
+  trail. The P17.13 Mojang/NameMC item is therefore **partially built**:
+  Mojang current profile is implemented, NameMC is a written exclusion.
+- **No live target is on file** for a Minecraft username. Verification is
+  fixture-based: `tests/fixtures/minecraft.json`, parser/driver tests, a
+  7-check offline selftest (username/UUID grammar, texture decode, host
+  allowlist, normalization), and Docker health/normalize cases under
+  `--network none`.
+- **Outcome:** built and CI-verified — run `39495727637` on commit
+  `9c9cd9caaae93b6e316d1f05ef058d11de2ba5bf` (parser 62/62; 1175 passed;
+  capture 96/96; egress adapters=62 network_required=55 wired=55; results 96
+  entries, 0 nonzero; storage 6/6). The three `phase17-minecraft-*` cases
+  returned 0 under `--network none`; no live source lookup occurred.

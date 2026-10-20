@@ -121,6 +121,27 @@ $ python -c "from pypdf import PdfReader; t=''.join(p.extract_text() or '' for p
 95679 [0, 0, 0, 0]
 ```
 
+## P17.13 horizon exclusions (2026-10-20)
+
+These are written exclusions, not silent omissions. None is owner-gated; each was
+reviewed and rejected or recorded as already covered.
+
+- **NameMC** — no public API is documented, and its site terms do not authorize
+  scraping. The free Mojang current-profile API is implemented as `minecraft`;
+  NameMC name history is deliberately not fetched, so only the current handle is
+  reported. Re-adding would require a licensed API or explicit permission.
+- **Social-graph list ingestion** — the horizon item is already covered in
+  substance by the pinned maigret/sherlock site enumeration used by
+  `social_username`; a second list adapter would duplicate the same public site
+  metadata without adding a source. No new adapter is justified.
+- **news_search** — GDELT's DOC endpoint rejects the descriptive `Aletheia/0.1`
+  User-Agent with its rate-limit message even after waiting, so it is not a
+  usable contract under the no-workaround rule. Public Google News and Bing News
+  RSS endpoints are reachable, but neither documents an automated-search API or
+  grants that permission in its terms; keyed news APIs are Gate 3 owner
+  registrations. The item is parked with this reason, not implemented by
+  impersonating another User-Agent or scraping a news page.
+
 ## Future re-addition
 
 The three removed integrations are absent from the current default registry. Any proposal to re-add one requires a new review of current pricing, terms, secrets handling, license, and default behavior. This note does not authorize an implementation.

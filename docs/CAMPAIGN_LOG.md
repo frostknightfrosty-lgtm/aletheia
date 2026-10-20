@@ -24,20 +24,23 @@
   (scrawler) is an interface blocker, §A 18 (GeoLocator) an
   upstream-withdrawal blocker, and the remaining rows are owner-gated/Gate 6–7
   or recorded drops. The P17.12 audit is `docs/COMPLETENESS_AUDIT.md`:
-  **83 of 111 wired, 59 adapters, 28 remaining**, every one with a written
-  reason. **P17.13 is in progress:** `researcher_ids` (Wikidata + ORCID) and
-  `weather` (Open-Meteo forecast + historical archive) are built and
-  CI-verified; keyservers, GitHub endpoint expansion, Mojang/NameMC,
-  social-graph lists, news_search and the remaining Phase 9 residuals are the
-  next free queue.
-- Last verified commit: `503b431` (weather code; run `39487437707`: parser
-  59/59, **1149 passed**, capture 87/87, egress 59/52/52, storage 6/6); prior
-  code `ceaf595` (researcher_ids; run `39484536317`: parser 58/58, 1141
-  passed, capture 84/84, egress 58/51/51).
-- Next action: continue P17.13 horizon items (keyservers, GitHub endpoint
-  expansion, Mojang/NameMC, social-graph lists, news_search, historical
-  residuals) — each gets its own scoped review and full unit; Waves B–D stay
-  owner-gated; final close-out.
+  **83 of 111 wired, 62 adapters / 65 manifest entries, 28 remaining**, every
+  one with a written reason. **P17.13 is complete:** `researcher_ids`
+  (Wikidata + ORCID), `weather` (Open-Meteo forecast + historical archive),
+  `github_identity` (GitHub endpoints + `.keys`), `pgp_keys` (WKD), and
+  `minecraft` (Mojang current profile) are built and CI-verified. NameMC,
+  social-graph list ingestion, and news_search are written exclusions in
+  `docs/NOT_INTEGRATED.md`; no adoptable free P17.13 item remains.
+- Last verified commit: `9c9cd9c` (minecraft code; run `39495727637`: parser
+  62/62, **1175 passed**, capture 96/96, egress 62/55/55, storage 6/6); prior
+  code `82a4049` (pgp_keys; run `39494804791`: 61/61, 1167, 93/93, 61/54/54),
+  `58aa354` (github_identity; run `39493701837`: 60/60, 1158, 90/90,
+  60/53/53), `503b431` (weather; run `39487437707`: 59/59, 1149, 87/87,
+  59/52/52), and `ceaf595` (researcher_ids; run `39484536317`: 58/58, 1141,
+  84/84, 58/51/51).
+- Next action: final docs/state commit and standalone close-out report. No free
+  P17.13 adapter remains; Waves B–D stay owner-gated. The single live
+  authorization remains `username:frost2233`.
 - Owner-blocked (parked, never wait on): everything in `docs/USER_ACTIONS.md`
   except §0, which is now resolved.
 - Decision defaults in force: see "Adopted defaults" below.
@@ -245,19 +248,20 @@ activate when the key exists.
 ### Track 3 — Horizon completion
 - [x] Recorded as **P17.13** in `docs/PIVOT_CASCADE.md` §15 item 13 (2026-10-18,
       campaign); adopted defaults recorded in §17 the same day.
-- [ ] Build, interleaved with Track 2 whenever no completeness item is locally
+- [x] Build, interleaved with Track 2 whenever no completeness item is locally
       unblocked: Wayback CDX; Wikidata/ORCID; keyservers (WKD / GitHub `.keys`);
       GitHub endpoints expansion; Mojang/NameMC; WhatsMyName; social-graph
       lists; Phase 9 residuals (news_search, Open-Meteo, historical).
-      Status 2026-10-20: Wayback CDX is already covered by the identity
-      adapter's `wayback` module, and WhatsMyName-style site lists are covered
-      by the pinned maigret/sherlock enumeration. **Wikidata/ORCID is built as
-      `researcher_ids`** (run `39484536317`; parser 58/58; 1141 passed; capture
-      84/84) and **Open-Meteo + historical weather is built as `weather`** (run
-      `39487437707`; parser 59/59; 1149 passed; capture 87/87). Remaining:
-      keyservers, GitHub endpoint expansion, Mojang/NameMC, social-graph lists,
-      news_search and historical Phase 9 residuals. Each needs its own scoped
-      review and full unit; none is owner-gated, so this is the next free queue.
+      Status 2026-10-20: **complete.** Wayback CDX is already covered by the
+      identity adapter's `wayback` module, and WhatsMyName-style site lists are
+      covered by the pinned maigret/sherlock enumeration. Wikidata/ORCID is
+      `researcher_ids` (run `39484536317`); Open-Meteo + historical weather is
+      `weather` (run `39487437707`); GitHub endpoint expansion plus `.keys` is
+      `github_identity` (run `39493701837`); WKD is `pgp_keys` (run
+      `39494804791`); Mojang current profile is `minecraft` (run
+      `39495727637`). NameMC, social-graph list ingestion, and news_search are
+      written exclusions in `docs/NOT_INTEGRATED.md`; no adoptable free P17.13
+      item remains.
 
 ### Track 4 — Close-out
 - [ ] Final full verification pass on the final tree; copy all evidence lines.
@@ -857,4 +861,13 @@ activate when the key exists.
   - egress-scenario.json: `adapters=59 network_required=52 wired=52`
   - storage-conformance.json: `"passing": ["file", "postgres", "neo4j", "elasticsearch", "minio", "redis"]`, `"required_all": true`, `"ok": true`
   - docker-integration/results.json: 87 entries, 0 nonzero return codes
-erified-fixture; live only username:frost2233. P17.13 partially covered; remaining horizon items are the next free queue. Next: final state and close-out report.
+
+- 2026-10-20 — P17.13 researcher_ids + weather docs — commit `590414a` — run `39491992247` — docker-verification **green**. Copied from the downloaded artifact `ci-artifacts-39491992247`: parser 59/59; 1149 passed, 1 warning; capture 87/87; egress 59/52/52; storage 6/6; 87 results, 0 nonzero.
+
+- 2026-10-20 — P17.13 github_identity adapter (GitHub profile/repos/gists/events/API keys/`.keys`) — commit `58aa354f506f5e25e008bf04035a0b87c15b370b` — run `39493701837` — docker-verification **green**. Copied from `ci-artifacts-39493701837`: parser 60/60; 1158 passed, 1 warning; capture 90/90; egress 60/53/53; storage 6/6; 90 results, 0 nonzero. The three `phase17-github-identity-*` cases returned 0 under `--network none`; no live lookup.
+
+- 2026-10-20 — P17.13 pgp_keys adapter (WKD) — commit `82a4049f0c1f01bb24b793c3845e76d98043ccc0` — run `39494804791` — docker-verification **green**. Copied from `ci-artifacts-39494804791`: parser 61/61; 1167 passed, 1 warning; capture 93/93; egress 61/54/54; storage 6/6; 93 results, 0 nonzero. The three `phase17-pgp-keys-*` cases returned 0 under `--network none`; no live lookup.
+
+- 2026-10-20 — P17.13 minecraft adapter (Mojang current profile) — commit `9c9cd9caaae93b6e316d1f05ef058d11de2ba5bf` — run `39495727637` — docker-verification **green**. Copied from `ci-artifacts-39495727637`: parser 62/62; 1175 passed, 1 warning; capture 96/96; egress 62/55/55; storage 6/6; 96 results, 0 nonzero. The three `phase17-minecraft-*` cases returned 0 under `--network none`; no live lookup.
+
+- 2026-10-20 — P17.13 horizon close-out — keyservers closed by `github_identity` (`.keys`) and `pgp_keys` (WKD); GitHub endpoint expansion closed by `github_identity`; Open-Meteo/historical closed by `weather`; Mojang current profile closed by `minecraft`; NameMC, social-graph list ingestion and news_search recorded as written exclusions in `docs/NOT_INTEGRATED.md`. No adoptable free P17.13 item remains. Next: final docs/state verification and standalone report.

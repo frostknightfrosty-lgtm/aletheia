@@ -1,5 +1,73 @@
 # Changelog
 
+## 2026-10-20 — P17.13: minecraft adapter (Mojang current profile)
+
+Every number below is copied from the downloaded artifact
+`ci-artifacts-39495727637` (run `39495727637`, commit `9c9cd9c`).
+
+- `PARSER PREFLIGHT: PASS — 62/62 adapters have parser coverage` (61 → 62).
+- `"console_summary": "1175 passed, 1 warning"` with `"junit_total": 1175`,
+  `"skipped_in_ci": []`, `"ok": true`.
+- `DOCKER CAPTURE: PASS — 96/96 cases captured`, including
+  `phase17-minecraft-health` (stdout `ok`), `phase17-minecraft-selftest` (7/7
+  offline checks) and `phase17-minecraft-normalize` under `--network none`; no
+  live Mojang lookup was run.
+- `egress-scenario.json`: `adapters=62 network_required=55 wired=55`.
+- `storage-conformance.json`: 6/6 backends, `required_all: true`.
+- `results.json`: 96 entries, 0 nonzero return codes.
+- New source contract: current Java username lookup plus public session
+  profile; two unauthenticated GETs; no retry; current handle/UUID and public
+  skin/cape metadata only; texture signatures, raw property, profile actions,
+  and images discarded. NameMC and the removed name-history endpoint are
+  documented exclusions. See `docker/minecraft/RATE_LIMITS.md`,
+  `docs/PHASE17_RECHECKS.md` #25, and `docs/NOT_INTEGRATED.md`.
+
+## 2026-10-20 — P17.13: pgp_keys adapter (OpenPGP Web Key Directory)
+
+Every number below is copied from the downloaded artifact
+`ci-artifacts-39494804791` (run `39494804791`, commit `82a4049`).
+
+- `PARSER PREFLIGHT: PASS — 61/61 adapters have parser coverage` (60 → 61).
+- `"console_summary": "1167 passed, 1 warning"` with `"junit_total": 1167`,
+  `"skipped_in_ci": []`, `"ok": true`.
+- `DOCKER CAPTURE: PASS — 93/93 cases captured`, including
+  `phase17-pgp-keys-health` (stdout `ok`), `phase17-pgp-keys-selftest` (8/8
+  checks, including the WKD specification sample-key fingerprint) and
+  `phase17-pgp-keys-normalize` under `--network none`; no live WKD lookup was
+  run.
+- `egress-scenario.json`: `adapters=61 network_required=54 wired=54`.
+- `storage-conformance.json`: 6/6 backends, `required_all: true`.
+- `results.json`: 93 entries, 0 nonzero return codes.
+- New source contract: one email lookup; advanced method first, direct only on
+  a DNS failure; no Authorization header or key material; only matching User
+  IDs retained; keys reduced to fingerprints/public metadata. See
+  `docker/pgp_keys/RATE_LIMITS.md` and `docs/PHASE17_RECHECKS.md` #24. This
+  covers the WKD half of the keyserver item.
+
+## 2026-10-20 — P17.13: github_identity adapter (public GitHub endpoints + `.keys`)
+
+Every number below is copied from the downloaded artifact
+`ci-artifacts-39493701837` (run `39493701837`, commit `58aa354`).
+
+- `PARSER PREFLIGHT: PASS — 60/60 adapters have parser coverage` (59 → 60).
+- `"console_summary": "1158 passed, 1 warning"` with `"junit_total": 1158`,
+  `"skipped_in_ci": []`, `"ok": true`.
+- `DOCKER CAPTURE: PASS — 90/90 cases captured`, including
+  `phase17-github-identity-health` (stdout `ok`),
+  `phase17-github-identity-selftest` (9/9 offline checks) and
+  `phase17-github-identity-normalize` under `--network none`; no live GitHub
+  lookup was run.
+- `egress-scenario.json`: `adapters=60 network_required=53 wired=53`.
+- `storage-conformance.json`: 6/6 backends, `required_all: true`.
+- `results.json`: 90 entries, 0 nonzero return codes.
+- New source contract: six unauthenticated public GETs per run (profile,
+  repositories, gists, events, API keys, `.keys`); 60 requests/hour per IP;
+  profile email dropped; event payloads/gist contents not fetched; SSH keys
+  reduced to OpenSSH SHA-256 fingerprints. See
+  `docker/github_identity/RATE_LIMITS.md` and `docs/PHASE17_RECHECKS.md` #23.
+  This covers the GitHub half of the keyserver item and the GitHub endpoint
+  expansion.
+
 ## 2026-10-20 — P17.13: weather adapter (Open-Meteo forecast + historical archive)
 
 Every number below is copied from the downloaded artifact

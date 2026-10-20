@@ -1851,7 +1851,7 @@
       "legal_notes": "Six unauthenticated public requests per run: profile, latest repositories, gists, public events, API public keys, and the public .keys endpoint. Unauthenticated REST quota is 60 requests/hour per source IP; no token, retries, pagination, or proxy rotation. Profile email is deliberately dropped; avatars, follower lists, and event payloads are not fetched; SSH keys are reduced to OpenSSH SHA-256 fingerprints and key types, never key material. A handle is a same-handle lead, not identity proof. See docker/github_identity/RATE_LIMITS.md.",
       "network": "required",
       "last_audited": "2026-10-20T00:00:00Z",
-      "verification_status": "unknown",
+      "verification_status": "verified-fixture",
       "fixture_provenance": "synthetic",
       "legal_tier": 1,
       "enabled_by_default": true,
@@ -1890,7 +1890,7 @@
           "enabled_by_default": true
         }
       ],
-      "note": "Pending CI verification. fixture file: tests/fixtures/github_identity.json. No live source lookups occurred; the runner and parser use synthetic documents only."
+      "note": "Synthetic fixture and Docker health/selftest/normalize cases verified in Docker Verification run 39493701837 on commit 58aa354f506f5e25e008bf04035a0b87c15b370b (https://github.com/frostknightfrosty-lgtm/aletheia/actions/runs/39493701837). Raw artifact evidence: PARSER PREFLIGHT: PASS — 60/60 adapters have parser coverage; 1158 passed, 1 warning; DOCKER CAPTURE: PASS — 90/90 cases captured. results.json contains 90 entries with 0 nonzero return codes; egress adapters=60 network_required=53 wired=53; storage 6/6. fixture file: tests/fixtures/github_identity.json. No live source lookups occurred; the phase17-github-identity health, selftest and normalize cases returned 0 under --network none."
     },
     {
       "name": "pgp_keys",
@@ -1905,7 +1905,7 @@
       "legal_notes": "One WKD lookup per email: advanced method, then direct only on DNS failure as the specification requires. No Authorization header, token, retry, proxy rotation, or DANE lookup. Only primary-key fingerprint, key ID, public metadata, and User IDs containing the requested email are emitted; all other User IDs are dropped and key material is never stored. A published key is not proof of identity, validity, or revocation state. See docker/pgp_keys/RATE_LIMITS.md.",
       "network": "required",
       "last_audited": "2026-10-20T00:00:00Z",
-      "verification_status": "unknown",
+      "verification_status": "verified-fixture",
       "fixture_provenance": "synthetic",
       "legal_tier": 1,
       "enabled_by_default": true,
@@ -1924,7 +1924,7 @@
           "enabled_by_default": true
         }
       ],
-      "note": "Pending CI verification. fixture file: tests/fixtures/pgp_keys.json. No live source lookups occurred; the runner and parser use synthetic documents and the WKD specification's sample key only."
+      "note": "Synthetic fixture and Docker health/selftest/normalize cases verified in Docker Verification run 39494804791 on commit 82a4049f0c1f01bb24b793c3845e76d98043ccc0 (https://github.com/frostknightfrosty-lgtm/aletheia/actions/runs/39494804791). Raw artifact evidence: PARSER PREFLIGHT: PASS — 61/61 adapters have parser coverage; 1167 passed, 1 warning; DOCKER CAPTURE: PASS — 93/93 cases captured. results.json contains 93 entries with 0 nonzero return codes; egress adapters=61 network_required=54 wired=54; storage 6/6. fixture file: tests/fixtures/pgp_keys.json. No live source lookups occurred; the phase17-pgp-keys health, selftest and normalize cases returned 0 under --network none."
     },
     {
       "name": "minecraft",
@@ -1939,7 +1939,7 @@
       "legal_notes": "At most two unauthenticated public GETs per run: current Java username lookup and public session profile. No credentials, retry, pagination, or proxy rotation. Emits current handle, UUID, session name, and public skin/cape URLs/model only; texture signatures, raw property, profile actions, and images are discarded. NameMC and the removed name-history endpoint are not used. A handle is a same-handle lead, not identity proof. See docker/minecraft/RATE_LIMITS.md.",
       "network": "required",
       "last_audited": "2026-10-20T00:00:00Z",
-      "verification_status": "unknown",
+      "verification_status": "verified-fixture",
       "fixture_provenance": "synthetic",
       "legal_tier": 1,
       "enabled_by_default": true,
@@ -1958,7 +1958,7 @@
           "enabled_by_default": true
         }
       ],
-      "note": "Pending CI verification. fixture file: tests/fixtures/minecraft.json. No live source lookups occurred; the runner and parser use a synthetic document only. NameMC is a documented exclusion."
+      "note": "Synthetic fixture and Docker health/selftest/normalize cases verified in Docker Verification run 39495727637 on commit 9c9cd9caaae93b6e316d1f05ef058d11de2ba5bf (https://github.com/frostknightfrosty-lgtm/aletheia/actions/runs/39495727637). Raw artifact evidence: PARSER PREFLIGHT: PASS — 62/62 adapters have parser coverage; 1175 passed, 1 warning; DOCKER CAPTURE: PASS — 96/96 cases captured. results.json contains 96 entries with 0 nonzero return codes; egress adapters=62 network_required=55 wired=55; storage 6/6. fixture file: tests/fixtures/minecraft.json. No live source lookups occurred; the phase17-minecraft health, selftest and normalize cases returned 0 under --network none."
     },
     {
       "name": "egress_proxy",

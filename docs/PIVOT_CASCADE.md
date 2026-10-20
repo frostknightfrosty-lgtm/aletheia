@@ -510,11 +510,14 @@ below is pending or in flight.
     still gets its own scoped review first, and the registry, Dockerfile,
     parser, fixture, capture-case, and manifest counts grow exactly with it.
     Status 2026-10-20: Wikidata/ORCID is built as `researcher_ids` (run
-    `39484536317`) and Open-Meteo plus historical weather is built as
-    `weather` (run `39487437707`); keyservers, GitHub endpoint expansion,
-    Mojang/NameMC, social-graph lists, news_search and the remaining historical
-    residuals are still queued. Both new adapters are verified-fixture only;
-    no live target is on file.
+    `39484536317`); Open-Meteo plus historical weather is built as `weather`
+    (run `39487437707`); GitHub endpoint expansion plus `.keys` is built as
+    `github_identity` (run `39493701837`); WKD is built as `pgp_keys` (run
+    `39494804791`); Mojang current profile is built as `minecraft` (run
+    `39495727637`). All five are verified-fixture only; no live target is on
+    file. NameMC, social-graph list ingestion, and news_search are written
+    exclusions in `docs/NOT_INTEGRATED.md`; Wayback CDX and WhatsMyName-style
+    lists were already covered. No adoptable free P17.13 item remains.
 
 ## 16. Honest ceilings
 

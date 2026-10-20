@@ -24,8 +24,8 @@ number below is copied from a downloaded CI artifact, not typed from memory.
 - `tool_inventory` at audit time: 60 entries — 57 Docker adapters,
   `egress_proxy`, and two Python libraries (`rapidfuzz`, `reportlab`) recorded
   as `verified-source-read`.
-- All 57 adapters audited here were `verified-fixture`; the two P17.13
-  additions below bring the current tree to 59, with no `unknown` or `pending`
+- All 57 adapters audited here were `verified-fixture`; the five P17.13
+  additions below bring the current tree to 62, with no `unknown` or `pending`
   adapter.
 - Every adapter has a fixture file named in its note and a synthetic
   provenance marker; the fixture files exist in `tests/fixtures/`.
@@ -89,23 +89,43 @@ count. Current status:
     `39487437707` on commit `503b431`: parser 59/59; 1149 passed; capture
     87/87; egress `adapters=59 network_required=52 wired=52`; storage 6/6; 87
     results, 0 nonzero. Fixture-only; no live source lookup.
-- **Current manifest after those additions:** 62 entries — 59 Docker adapters,
+  - `github_identity` (profile/repos/gists/events/API keys/`.keys`), verified
+    in run `39493701837` on commit `58aa354`: parser 60/60; 1158 passed;
+    capture 90/90; egress `adapters=60 network_required=53 wired=53`; storage
+    6/6; 90 results, 0 nonzero. Fixture-only; no live source lookup.
+  - `pgp_keys` (WKD advanced + DNS-fallback direct), verified in run
+    `39494804791` on commit `82a4049`: parser 61/61; 1167 passed; capture
+    93/93; egress `adapters=61 network_required=54 wired=54`; storage 6/6; 93
+    results, 0 nonzero. Fixture-only, using the specification's sample key.
+  - `minecraft` (Mojang current profile), verified in run `39495727637` on
+    commit `9c9cd9c`: parser 62/62; 1175 passed; capture 96/96; egress
+    `adapters=62 network_required=55 wired=55`; storage 6/6; 96 results, 0
+    nonzero. Fixture-only; no live source lookup.
+- **Current manifest after those additions:** 65 entries — 62 Docker adapters,
   `egress_proxy`, and the two Python libraries (`rapidfuzz`, `reportlab`)
-  recorded as `verified-source-read`. All 59 adapters are `verified-fixture`;
+  recorded as `verified-source-read`. All 62 adapters are `verified-fixture`;
   there is no `unknown` or `pending` adapter in the tree.
-- **Remaining:** keyservers (WKD / GitHub `.keys`), GitHub endpoint expansion,
-  Mojang/NameMC, social-graph list ingestion, news_search, and the remaining
-  historical Phase 9 residuals. Each is a free/public source with no owner
-  registration, but each needs its own scoped review, image, parser, fixture,
-  capture case, manifest entry, and CI run before it can be counted.
-- P17.13 is therefore **in progress, not blocked**; it is the next free build
-  queue after this audit. No adapter or count is claimed for an unbuilt item.
+- **P17.13 disposition:** keyservers are closed by `github_identity` (GitHub
+  `.keys`) and `pgp_keys` (WKD); GitHub endpoint expansion is closed by
+  `github_identity`; Open-Meteo and historical weather are closed by `weather`;
+  Mojang current profile is closed by `minecraft`, while NameMC is a written
+  exclusion (no public API; scraping not authorized); social-graph list
+  ingestion is covered in substance by the pinned maigret/sherlock enumeration
+  in `social_username`; news_search is parked with a written reason in
+  `docs/NOT_INTEGRATED.md` (GDELT rejects the descriptive User-Agent; public RSS
+  endpoints have no automated-search contract; keyed news APIs are Gate 3).
+  Wayback CDX and WhatsMyName-style lists were already covered. **No free
+  P17.13 adapter remains unbuilt.**
+- P17.13 is therefore **complete for all adoptable free sources**, with the
+  three exclusions recorded above. No adapter or count is claimed for an
+  unbuilt item.
 
 ## Conclusion
 
 P17.11 (source completeness) and P17.12 (per-source evidence verification) are
 complete for the 111-source directive: 83 wired, 28 remaining with a written
-gate/owner/blocker reason, 59 registered adapters all `verified-fixture` after
-the two P17.13 additions, and no live claim beyond the single authorized
-username. Waves B–D need owner registrations/keys; P17.13 remains the free
-implementation queue.
+gate/owner/blocker reason, 62 registered adapters all `verified-fixture` after
+the five P17.13 additions (65 manifest entries including `egress_proxy` and two
+libraries), and no live claim beyond the single authorized username. P17.13's
+free/public horizon is complete with the documented exclusions above. Waves
+B–D remain owner-gated.
