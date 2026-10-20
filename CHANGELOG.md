@@ -1,5 +1,49 @@
 # Changelog
 
+## 2026-10-20 — P17.13: weather adapter (Open-Meteo forecast + historical archive)
+
+Every number below is copied from the downloaded artifact
+`ci-artifacts-39487437707` (run `39487437707`, commit `503b431`).
+
+- `PARSER PREFLIGHT: PASS — 59/59 adapters have parser coverage` (58 → 59).
+- `"console_summary": "1149 passed, 1 warning"` with `"junit_total": 1149`,
+  `"skipped_in_ci": []`, `"ok": true`.
+- `DOCKER CAPTURE: PASS — 87/87 cases captured`, including
+  `phase17-weather-health` (stdout `ok`), `phase17-weather-selftest` (9/9
+  offline checks) and `phase17-weather-normalize`, which parses a synthetic
+  saved response under `--network none`; no live weather lookup was run.
+- `egress-scenario.json`: `adapters=59 network_required=52 wired=52`.
+- `storage-conformance.json`: 6/6 backends, `required_all: true`.
+- `results.json`: 87 entries, 0 nonzero return codes.
+- New source contract: no key; free API is non-commercial only (600/minute,
+  5,000/hour, 10,000/day); CC-BY 4.0 attribution is carried on every finding;
+  one request per run. See `docker/weather/RATE_LIMITS.md` and
+  `docs/PHASE17_RECHECKS.md` #22. This covers both the Open-Meteo and
+  historical-weather horizon items.
+
+## 2026-10-20 — P17.13: researcher_ids adapter (Wikidata + ORCID)
+
+Every number below is copied from the downloaded artifact
+`ci-artifacts-39484536317` (run `39484536317`, commit `ceaf595`).
+
+- `PARSER PREFLIGHT: PASS — 58/58 adapters have parser coverage` (57 → 58).
+- `"console_summary": "1141 passed, 1 warning"` with `"junit_total": 1141`,
+  `"skipped_in_ci": []`, `"ok": true`.
+- `DOCKER CAPTURE: PASS — 84/84 cases captured`, including
+  `phase17-researcher-ids-health` (stdout `ok`),
+  `phase17-researcher-ids-selftest` (8/8 offline checks, including the test
+  that ORCID email arrays are discarded) and
+  `phase17-researcher-ids-normalize`, which parses a synthetic combined
+  document under `--network none`; no live source lookup was run.
+- `egress-scenario.json`: `adapters=58 network_required=51 wired=51`.
+- `storage-conformance.json`: 6/6 backends, `required_all: true`.
+- `results.json`: 84 entries, 0 nonzero return codes.
+- New source contract: Wikidata CC0 + ORCID public CC0, both keyless; one
+  bounded query per source (max 5 results per source); ORCID email arrays are
+  discarded; name matches are lead-only. See
+  `docker/researcher_ids/RATE_LIMITS.md` and
+  `docs/PHASE17_RECHECKS.md` #21.
+
 ## 2026-10-20 — P17.11: crypttrace adapter (source #20)
 
 Every number below is copied from the downloaded artifact

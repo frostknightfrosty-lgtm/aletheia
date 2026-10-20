@@ -21,10 +21,12 @@ number below is copied from a downloaded CI artifact, not typed from memory.
 
 ## Manifest audit
 
-- `tool_inventory`: 60 entries — 57 Docker adapters, `egress_proxy`, and two
-  Python libraries (`rapidfuzz`, `reportlab`) recorded as `verified-source-read`.
-- All 57 adapters are `verified-fixture`; there is no `unknown` or `pending`
-  adapter in the tree.
+- `tool_inventory` at audit time: 60 entries — 57 Docker adapters,
+  `egress_proxy`, and two Python libraries (`rapidfuzz`, `reportlab`) recorded
+  as `verified-source-read`.
+- All 57 adapters audited here were `verified-fixture`; the two P17.13
+  additions below bring the current tree to 59, with no `unknown` or `pending`
+  adapter.
 - Every adapter has a fixture file named in its note and a synthetic
   provenance marker; the fixture files exist in `tests/fixtures/`.
 - Wave A entries cite their own run and commit. Earlier batch entries cite
@@ -78,20 +80,32 @@ count. Current status:
   `wayback` module), and WhatsMyName-style username-site lists (the pinned
   maigret/sherlock paths already enumerate those sites; a separate list
   adapter would duplicate them).
-- **Not yet built:** Wikidata/ORCID, keyservers (WKD / GitHub `.keys`), GitHub
-  endpoint expansion, Mojang/NameMC, social-graph list ingestion, news_search,
-  Open-Meteo, and the historical Phase 9 residuals. Each is a free/public
-  source with no owner registration, but each needs its own scoped review,
-  image, parser, fixture, capture case, manifest entry, and CI run before it
-  can be counted.
-- P17.13 is therefore **scheduled, not blocked**; it is the next free build
-  queue after this audit. No adapter or count is claimed for it here.
+- **Built since the audit (post-baseline, outside the 111):**
+  - `researcher_ids` (Wikidata + ORCID), verified in run `39484536317` on
+    commit `ceaf595`: parser 58/58; 1141 passed; capture 84/84; egress
+    `adapters=58 network_required=51 wired=51`; storage 6/6; 84 results, 0
+    nonzero. Fixture-only; no live source lookup.
+  - `weather` (Open-Meteo forecast + historical archive), verified in run
+    `39487437707` on commit `503b431`: parser 59/59; 1149 passed; capture
+    87/87; egress `adapters=59 network_required=52 wired=52`; storage 6/6; 87
+    results, 0 nonzero. Fixture-only; no live source lookup.
+- **Current manifest after those additions:** 62 entries — 59 Docker adapters,
+  `egress_proxy`, and the two Python libraries (`rapidfuzz`, `reportlab`)
+  recorded as `verified-source-read`. All 59 adapters are `verified-fixture`;
+  there is no `unknown` or `pending` adapter in the tree.
+- **Remaining:** keyservers (WKD / GitHub `.keys`), GitHub endpoint expansion,
+  Mojang/NameMC, social-graph list ingestion, news_search, and the remaining
+  historical Phase 9 residuals. Each is a free/public source with no owner
+  registration, but each needs its own scoped review, image, parser, fixture,
+  capture case, manifest entry, and CI run before it can be counted.
+- P17.13 is therefore **in progress, not blocked**; it is the next free build
+  queue after this audit. No adapter or count is claimed for an unbuilt item.
 
 ## Conclusion
 
 P17.11 (source completeness) and P17.12 (per-source evidence verification) are
 complete for the 111-source directive: 83 wired, 28 remaining with a written
-gate/owner/blocker reason, 57 registered adapters all `verified-fixture`, and
-no live claim beyond the single authorized username. Waves B–D and the P17.13
-horizon expansion remain; the former need owner registrations/keys, the latter
-is the next free implementation queue.
+gate/owner/blocker reason, 59 registered adapters all `verified-fixture` after
+the two P17.13 additions, and no live claim beyond the single authorized
+username. Waves B–D need owner registrations/keys; P17.13 remains the free
+implementation queue.

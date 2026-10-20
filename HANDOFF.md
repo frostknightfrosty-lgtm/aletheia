@@ -1,6 +1,6 @@
 # Aletheia Handoff — Phase 17 staged (pivot cascade + source completeness; autonomous campaign)
 
-Last updated: 2026-10-20T16:02:51Z
+Last updated: 2026-10-20T20:25:18Z
 
 ## Project boundaries
 
@@ -13,7 +13,13 @@ prerequisites are met. A tier classification is project policy, not a legal conc
 
 ## Repository and CI state
 
-- Latest CI-verified commit: `5ddf240` (ShadowFinder adapter; docker
+- **Newest CI-verified commit: `503b431`** (weather adapter; docker
+  verification run **39487437707** green — parser 59/59; **1149 passed**;
+  capture 87/87; egress 59/52/52 wired; storage 6/6). Immediately prior:
+  `ceaf595` (researcher_ids; run **39484536317** — parser 58/58; 1141 passed;
+  capture 84/84; egress 58/51/51; storage 6/6). Both are fixture-only; no live
+  source lookup occurred.
+- Latest CI-verified commit before those: `5ddf240` (ShadowFinder adapter; docker
   verification run **39448325747** green — parser 55/55; **1112 passed**;
   capture 75/75; egress 55/49/49 wired; storage 6/6; docs `c169b1e` verified by
   run **39451409086** with the same numbers; state verification pending).
@@ -79,6 +85,16 @@ prerequisites are met. A tier classification is project policy, not a legal conc
   return codes. The docs commit `1df7750` repeated the same numbers in run
   **39468982807** (parser 57/57; 1132 passed; capture 81/81; egress 57/50/50;
   storage 6/6).
+- **researcher_ids unit verified:** commit `ceaf595` — keyless Wikidata +
+  ORCID public-researcher adapter, one bounded name query per source (max 5
+  results each), ORCID email arrays discarded, lead-only confidence. Manifest
+  `verified-fixture`; run **39484536317** (parser 58/58; 1141 passed; capture
+  84/84; egress 58/51/51; storage 6/6; 84 results, 0 nonzero). No live target.
+- **weather unit verified:** commit `503b431` — Open-Meteo forecast and
+  historical-archive adapter, one coordinate/date per run, non-commercial free
+  tier, CC-BY 4.0 attribution on every finding. Manifest `verified-fixture`;
+  run **39487437707** (parser 59/59; 1149 passed; capture 87/87; egress
+  59/52/52; storage 6/6; 87 results, 0 nonzero). No live target.
 - P17.12 audit: `docs/COMPLETENESS_AUDIT.md`, committed as `aa99eaa` and
   verified by run **39472065798** (documents-only; same 57/57, 1132 passed,
   81/81, 57/50/50, 6/6).
@@ -118,9 +134,11 @@ prerequisites are met. A tier classification is project policy, not a legal conc
   run **39468982807**; the final state push is the last step.
 - **P17.11/P17.12 closed:** 83 of 111 sources wired; 28 remain with written
   gate/owner/blocker reasons (audit `docs/COMPLETENESS_AUDIT.md`, run
-  **39472065798**). P17.13 horizon is recorded and partially covered (Wayback
-  CDX and WhatsMyName-style lists are already covered); the remaining horizon
-  items are the next free queue. No unverified unit remains.
+  **39472065798**). **P17.13 is in progress:** `researcher_ids` (Wikidata +
+  ORCID) and `weather` (Open-Meteo + historical archive) are CI-verified and
+  `verified-fixture`; keyservers, GitHub endpoint expansion, Mojang/NameMC,
+  social-graph lists, news_search and the remaining historical residuals are
+  the next free queue. No unverified unit remains.
 - Evidence lines copied from the downloaded artifact of run `39141365915`
   (`ci-artifacts-39141365915`), not typed:
   - `PARSER PREFLIGHT: PASS — 49/49 adapters have parser coverage`
@@ -138,16 +156,22 @@ prerequisites are met. A tier classification is project policy, not a legal conc
   container-health cases) and 5 `tests/test_storage_services.py` (no
   `ALETHEIA_STORAGE_*` service configured); both groups execute in CI, and CI
   now *fails* if either group skips — see `docs/SKIPPED_IN_CI.md`.
-- 57 registered adapters; all 57 are `verified-fixture` in
+- Local consistency at the weather-verified tree: **1074 passed + 75 skipped =
+  1149**, which equals the CI passed count exactly. The 75 skips are 70
+  Docker-dependent tests (including the researcher_ids and weather health
+  cases) and the same 5 storage-service tests; all execute in CI.
+- 59 registered adapters; all 59 are `verified-fixture` in
   `PROJECT_MANIFEST.json`. One infrastructure component (`egress_proxy`),
   `verified-fixture`. Six storage backends, all conformance-verified against
-  real services in CI. 50 of the 57 adapters declare `network_required=True`,
-  and the egress policy wires all 50.
+  real services in CI. 52 of the 59 adapters declare `network_required=True`,
+  and the egress policy wires all 52.
 - Tracker: 83 of 111 sources wired, 28 remaining — all owner-gated
   (Gate 3/Gate 6/Gate 7) or recorded drops/blockers. See
   `docs/COMPLETENESS_AUDIT.md`.
-- No unverified unit remains in the working tree. The next free queue is P17.13
-  horizon completion; Waves B–D are owner-gated.
+- No unverified unit remains in the working tree. The next free queue is the
+  rest of P17.13 (keyservers, GitHub endpoint expansion, Mojang/NameMC,
+  social-graph lists, news_search, historical residuals); Waves B–D are
+  owner-gated.
 
 ## Phase 17 — pivot cascade + source completeness (staged 2026-10-18; autonomous campaign)
 

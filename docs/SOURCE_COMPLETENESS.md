@@ -34,9 +34,10 @@ Build sequencing: Phase 17 items **P17.11–P17.12** in
 
 ## A. The 111 accepted candidates — remaining gaps
 
-Already implemented and wired: **83 of 111** (the 57 CI-verified registered
-adapters and their sub-sources; some are key-gated — their skip reasons are
-recorded). **28 of 111 remain.** Of these, two are
+Already implemented and wired: **83 of 111** (the 57 CI-verified adapters for
+accepted sources; the tree also has two P17.13 horizon adapters, for 59
+registered total; some are key-gated — their skip reasons are recorded).
+**28 of 111 remain.** Of these, two are
 externally blocked (FollowTheMoney, GeoLocator),
 several have owner-action prerequisites, and a few carry factual re-checks that
 may resolve to a recorded blocker if the free path no longer exists. No status

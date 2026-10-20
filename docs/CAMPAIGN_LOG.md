@@ -24,16 +24,20 @@
   (scrawler) is an interface blocker, §A 18 (GeoLocator) an
   upstream-withdrawal blocker, and the remaining rows are owner-gated/Gate 6–7
   or recorded drops. The P17.12 audit is `docs/COMPLETENESS_AUDIT.md`:
-  **83 of 111 wired, 57 adapters, 28 remaining**, every one with a written
-  reason. P17.13 is recorded and partially covered; its remaining horizon
-  items are the next free queue.
-- Last verified commit: `446ccab` (crypttrace code; run `39466252253`: parser
-  57/57, **1132 passed**, capture 81/81, egress 57/50/50, storage 6/6); docs
-  `1df7750` (run `39468982807`, same numbers).
-- Next action: P17.13 horizon items (Wikidata/ORCID, keyservers, GitHub
-  endpoint expansion, Mojang/NameMC, social-graph lists, news_search,
-  Open-Meteo, historical) — each gets its own scoped review and full unit;
-  Waves B–D stay owner-gated; final close-out.
+  **83 of 111 wired, 59 adapters, 28 remaining**, every one with a written
+  reason. **P17.13 is in progress:** `researcher_ids` (Wikidata + ORCID) and
+  `weather` (Open-Meteo forecast + historical archive) are built and
+  CI-verified; keyservers, GitHub endpoint expansion, Mojang/NameMC,
+  social-graph lists, news_search and the remaining Phase 9 residuals are the
+  next free queue.
+- Last verified commit: `503b431` (weather code; run `39487437707`: parser
+  59/59, **1149 passed**, capture 87/87, egress 59/52/52, storage 6/6); prior
+  code `ceaf595` (researcher_ids; run `39484536317`: parser 58/58, 1141
+  passed, capture 84/84, egress 58/51/51).
+- Next action: continue P17.13 horizon items (keyservers, GitHub endpoint
+  expansion, Mojang/NameMC, social-graph lists, news_search, historical
+  residuals) — each gets its own scoped review and full unit; Waves B–D stay
+  owner-gated; final close-out.
 - Owner-blocked (parked, never wait on): everything in `docs/USER_ACTIONS.md`
   except §0, which is now resolved.
 - Decision defaults in force: see "Adopted defaults" below.
@@ -247,10 +251,13 @@ activate when the key exists.
       lists; Phase 9 residuals (news_search, Open-Meteo, historical).
       Status 2026-10-20: Wayback CDX is already covered by the identity
       adapter's `wayback` module, and WhatsMyName-style site lists are covered
-      by the pinned maigret/sherlock enumeration; Wikidata/ORCID, keyservers,
-      GitHub endpoint expansion, Mojang/NameMC, social-graph lists and the
-      Phase 9 residuals remain. Each needs its own scoped review and full unit;
-      none is owner-gated, so this is the next free queue.
+      by the pinned maigret/sherlock enumeration. **Wikidata/ORCID is built as
+      `researcher_ids`** (run `39484536317`; parser 58/58; 1141 passed; capture
+      84/84) and **Open-Meteo + historical weather is built as `weather`** (run
+      `39487437707`; parser 59/59; 1149 passed; capture 87/87). Remaining:
+      keyservers, GitHub endpoint expansion, Mojang/NameMC, social-graph lists,
+      news_search and historical Phase 9 residuals. Each needs its own scoped
+      review and full unit; none is owner-gated, so this is the next free queue.
 
 ### Track 4 — Close-out
 - [ ] Final full verification pass on the final tree; copy all evidence lines.
@@ -833,4 +840,21 @@ activate when the key exists.
     "elasticsearch", "minio", "redis"]`, `"required_all": true`, `"ok": true`
   - docker-integration/results.json: 81 entries, 0 nonzero return codes
 
-- 2026-10-20 — P17.11/P17.12 completeness audit — docs/COMPLETENESS_AUDIT.md — crypttrace docs tree 1df7750 verified by run 39468982807 (parser 57/57; 1132 passed; capture 81/81; egress 57/50/50; storage 6/6). Audit result: 83/111 wired; 28 remaining with written gate/owner/blocker reasons; 57 adapters erified-fixture; live only username:frost2233. P17.13 partially covered; remaining horizon items are the next free queue. Next: final state and close-out report.
+- 2026-10-20 — P17.11/P17.12 completeness audit — docs/COMPLETENESS_AUDIT.md — crypttrace docs tree 1df7750 verified by run 39468982807 (parser 57/57; 1132 passed; capture 81/81; egress 57/50/50; storage 6/6). Audit result: 83/111 wired; 28 remaining with written gate/owner/blocker reasons; 57 adapters verified-fixture; live only username:frost2233. P17.13 partially covered; remaining horizon items are the next free queue. Next: final state and close-out report.
+
+- 2026-10-20 — P17.13 researcher_ids adapter (Wikidata + ORCID) — commit `ceaf595a6edc8bee46964ed5ccf273cb06f2b9c6` — run `39484536317` — docker-verification **green**. Copied from the downloaded artifact `ci-artifacts-39484536317`:
+  - `PARSER PREFLIGHT: PASS — 58/58 adapters have parser coverage`
+  - pytest-summary.json: `"console_summary": "1141 passed, 1 warning"`, `"junit_total": 1141`, `"skipped_in_ci": []`, `"ok": true`
+  - docker-integration/capture.log: `DOCKER CAPTURE: PASS — 84/84 cases captured`, including `phase17-researcher-ids-health` (stdout `ok`), `phase17-researcher-ids-selftest` (8/8 checks, including ORCID email exclusion) and `phase17-researcher-ids-normalize` under `--network none`; no live lookup
+  - egress-scenario.json: `adapters=58 network_required=51 wired=51`
+  - storage-conformance.json: `"passing": ["file", "postgres", "neo4j", "elasticsearch", "minio", "redis"]`, `"required_all": true`, `"ok": true`
+  - docker-integration/results.json: 84 entries, 0 nonzero return codes
+
+- 2026-10-20 — P17.13 weather adapter (Open-Meteo forecast + historical archive) — commit `503b4311e9c513697a1b26b3d5d2ccf362a09146` — run `39487437707` — docker-verification **green**. Copied from the downloaded artifact `ci-artifacts-39487437707`:
+  - `PARSER PREFLIGHT: PASS — 59/59 adapters have parser coverage`
+  - pytest-summary.json: `"console_summary": "1149 passed, 1 warning"`, `"junit_total": 1149`, `"skipped_in_ci": []`, `"ok": true`
+  - docker-integration/capture.log: `DOCKER CAPTURE: PASS — 87/87 cases captured`, including `phase17-weather-health` (stdout `ok`), `phase17-weather-selftest` (9/9 checks) and `phase17-weather-normalize` under `--network none`; no live lookup
+  - egress-scenario.json: `adapters=59 network_required=52 wired=52`
+  - storage-conformance.json: `"passing": ["file", "postgres", "neo4j", "elasticsearch", "minio", "redis"]`, `"required_all": true`, `"ok": true`
+  - docker-integration/results.json: 87 entries, 0 nonzero return codes
+erified-fixture; live only username:frost2233. P17.13 partially covered; remaining horizon items are the next free queue. Next: final state and close-out report.

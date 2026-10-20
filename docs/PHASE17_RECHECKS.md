@@ -393,3 +393,77 @@ unverified, and re-opens only on a vendor change.
   `phase17-crypttrace-normalize` under `--network none`). Driver health and
   selftest were also validated locally against the exact package version in an
   isolated venv.
+
+## #21 researcher_ids — scoped review outcome (2026-10-20)
+
+- **Licence / terms:** both sub-sources are public and keyless. Wikidata data is
+  CC0 1.0, accessed through the MediaWiki Action API under the Wikimedia API
+  etiquette (descriptive User-Agent, bounded requests, `maxlag`). ORCID public
+  data is CC0 1.0, accessed through the public API v3.0; no client credential is
+  required. The reviewed contracts were read from the official API
+  documentation on 2026-10-20; see `docker/researcher_ids/RATE_LIMITS.md`.
+- **Scope:** one `person_name` seed. Wikidata gets one `wbsearchentities` search
+  (`language=en`, `type=item`, `limit=5`) plus at most two `wbgetentities` reads
+  (the five hits and at most 40 referenced IDs). ORCID gets one
+  `expanded-search` request (`rows=5`). A two-token name uses
+  `given-names:"<first>" AND family-name:"<last>"`; a one-token name uses
+  `text:"<name>"`. Middle names are not guessed into the ORCID query.
+- **Data minimisation:** only public fields are normalized — Wikidata QID,
+  label, description, aliases, instance-of, occupation, birth date/place,
+  citizenship, gender, given/family name, public ORCID/VIAF/ISNI/GND
+  identifiers, official website and public Twitter handle; ORCID iD,
+  given/family/credit name, other names and public institution names. ORCID
+  responses can contain an `email` array; the runner deliberately discards it.
+  No credential, account, email address, or private profile field is accepted
+  or emitted.
+- **Interpretation:** a name search is a lead, not identity proof. Common names
+  collide, both services rank by their own relevance, and neither asserts that
+  a result is the person the operator meant. Findings carry lead-only
+  confidence (0.4 for a human Wikidata hit, 0.25 for other Wikidata hits, 0.4
+  for ORCID, 0.2 for the run summary). The adapter never merges a Wikidata QID
+  with an ORCID iD automatically.
+- **Bounds:** 30-second timeout, 8 MB response cap, no retries, pagination,
+  cache, or proxy rotation. A source failure is non-fatal and produces a
+  `partial` document with the other source's results and a bounded error list.
+- **No live target is on file** for a person name. Verification is
+  fixture-based: `tests/fixtures/researcher_ids.json`, parser/driver tests, an
+  offline 8-check selftest, and Docker health/normalize cases under
+  `--network none`.
+- **Outcome:** built and CI-verified — run `39484536317` on commit
+  `ceaf595a6edc8bee46964ed5ccf273cb06f2b9c6` (parser 58/58; 1141 passed;
+  capture 84/84; egress adapters=58 network_required=51 wired=51; results 84
+  entries, 0 nonzero; storage 6/6). The three `phase17-researcher-ids-*` cases
+  returned 0 under `--network none`; no live source lookup occurred.
+
+## #22 weather — scoped review outcome (2026-10-20)
+
+- **Licence / terms:** Open-Meteo's free API is keyless but **non-commercial**,
+  with published limits of 600 calls/minute, 5,000/hour and 10,000/day per
+  IP/application; its data is CC-BY 4.0. Aletheia is a free/open-source,
+  non-commercial project. A downstream commercial deployment must use
+  Open-Meteo's paid API; the adapter does not provide that path. Every document
+  and finding carries `Weather data by Open-Meteo.com (CC-BY 4.0)`. Terms and
+  endpoints were read from the official site on 2026-10-20; see
+  `docker/weather/RATE_LIMITS.md`.
+- **Scope:** one `geolocation` seed, either `latitude,longitude` for current
+  conditions or `latitude,longitude,YYYY-MM-DD` for one day. Past dates use the
+  historical archive endpoint; today/future dates use the forecast daily
+  endpoint. One HTTP request per run; 30-second timeout; 4 MB response cap; no
+  retries, pagination, cache, or proxy rotation.
+- **Data minimisation:** only coordinates and a date are sent. No seed identity,
+  account, credential, or personal data is included, and no secret exists to
+  leak. The normalized document records the requested point, the returned model
+  grid point and elevation, units, and at most 31 daily values per field.
+- **Interpretation:** weather at the nearest grid point is environmental
+  context. It can corroborate or contradict an image's claimed time/place but
+  cannot prove that an image was taken there or then; grid resolution, elevation
+  differences and forecast error matter. The adapter reports context only.
+- **No live target is on file** for a coordinate. Verification is fixture-based:
+  `tests/fixtures/weather.json`, parser/driver tests for forecast and archive
+  normalization, an offline 9-check selftest, and Docker health/normalize cases
+  under `--network none`.
+- **Outcome:** built and CI-verified — run `39487437707` on commit
+  `503b4311e9c513697a1b26b3d5d2ccf362a09146` (parser 59/59; 1149 passed;
+  capture 87/87; egress adapters=59 network_required=52 wired=52; results 87
+  entries, 0 nonzero; storage 6/6). The three `phase17-weather-*` cases returned
+  0 under `--network none`; no live source lookup occurred.

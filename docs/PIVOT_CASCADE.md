@@ -509,6 +509,12 @@ below is pending or in flight.
     Track 2 whenever no completeness item is locally unblocked; every source
     still gets its own scoped review first, and the registry, Dockerfile,
     parser, fixture, capture-case, and manifest counts grow exactly with it.
+    Status 2026-10-20: Wikidata/ORCID is built as `researcher_ids` (run
+    `39484536317`) and Open-Meteo plus historical weather is built as
+    `weather` (run `39487437707`); keyservers, GitHub endpoint expansion,
+    Mojang/NameMC, social-graph lists, news_search and the remaining historical
+    residuals are still queued. Both new adapters are verified-fixture only;
+    no live target is on file.
 
 ## 16. Honest ceilings
 
