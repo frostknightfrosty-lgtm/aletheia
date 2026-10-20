@@ -510,6 +510,27 @@
       "batch_grouping": "geolocation_image"
     },
     {
+      "name": "tracelines",
+      "upstream": "https://github.com/Prekzursil/tracelines",
+      "license": "AGPL-3.0-or-later",
+      "version_pin": "0.2.0 (commit 99257f0519b30ce7d890db25252f6cf440fa102e)",
+      "invocation": "Docker / CLI",
+      "input_types": [
+        "geolocation"
+      ],
+      "output_schema": "street-level coverage summaries per provider (segment count, length, point count, centroid/endpoints, capture date) with Mapillary/KartaView CC-BY-SA 4.0 attribution, plus per-provider status markers",
+      "legal_notes": "Runs only the pinned package's documented providers — Mapillary (free MAPILLARY_TOKEN; recorded skip without it) and keyless KartaView — over a small bbox derived from one point seed (max 300 m radius); no retries and no disk cache. The Google provider (undocumented internal streetlevel endpoints) is excluded structurally: streetlevel is never installed and the driver refuses to run if it is present; see docker/tracelines/RATE_LIMITS.md. Coverage data is summarized in memory (segment length, point count, centroid, endpoints) with Mapillary/KartaView CC-BY-SA 4.0 attribution; no coverage geometry is written or redistributed. Explicit authorization is required for the queried point: it (and the derived bbox) is transmitted to Mapillary and KartaView.",
+      "network": "required",
+      "last_audited": "2026-10-19T00:00:00Z",
+      "verification_status": "verified-fixture",
+      "note": "Fixture parser coverage passes; fixture provenance: synthetic; fixture file: tests/fixtures/tracelines.json. No live container run has occurred.",
+      "fixture_provenance": "synthetic",
+      "legal_tier": 3,
+      "enabled_by_default": true,
+      "disabled_reason": null,
+      "batch_grouping": "geolocation_image"
+    },
+    {
       "name": "gravatar",
       "upstream": "https://docs.gravatar.com/sdk/profiles/",
       "license": "Gravatar Public API terms; no client library bundled",

@@ -69,6 +69,8 @@ CASES = [
     ("phase17-venom-selftest", "aletheia/venom:v1", ["--selftest"]),
     ("phase17-picimagesearch-health", "aletheia/picimagesearch:v1", ["--health"]),
     ("phase17-picimagesearch-selftest", "aletheia/picimagesearch:v1", ["--selftest"]),
+    ("phase17-tracelines-health", "aletheia/tracelines:v1", ["--health"]),
+    ("phase17-tracelines-selftest", "aletheia/tracelines:v1", ["--selftest"]),
     ("phase11-egress-proxy", "aletheia/egress-proxy:v1", ["--health"]),
 ]
 

@@ -1,0 +1,56 @@
+{
+  "source": "tracelines",
+  "sub_source": "street_view_coverage",
+  "pinned_commit": "99257f0519b30ce7d890db25252f6cf440fa102e",
+  "package_version": "0.2.0",
+  "user_agent": "Aletheia/0.9.0 (tracelines)",
+  "target": "44.4400,26.1000",
+  "bbox": [26.09613, 44.437306, 26.10387, 44.442694],
+  "radius_m": 300.0,
+  "requested_sources": ["mapillary", "kartaview"],
+  "status": "ok",
+  "fused_count": 2,
+  "sources": {
+    "kartaview": {
+      "status": "ok",
+      "reason": "",
+      "stats": {"host": "api.openstreetcam.org", "sequences": 1},
+      "segments": [
+        {
+          "id": "kv-101",
+          "source": "kartaview",
+          "length_m": 212.4,
+          "n_points": 4,
+          "capture_date": "2024-05-01T00:00:00Z",
+          "is_pano": null,
+          "centroid": [26.1, 44.44],
+          "start": [26.099, 44.4398],
+          "end": [26.101, 44.4402],
+          "attribution": "\u00a9 KartaView contributors, CC-BY-SA 4.0"
+        },
+        {
+          "id": "kv-102",
+          "source": "kartaview",
+          "length_m": 88.0,
+          "n_points": 2,
+          "capture_date": null,
+          "is_pano": null,
+          "centroid": [26.1015, 44.4405],
+          "start": [26.101, 44.4405],
+          "end": [26.102, 44.4405],
+          "attribution": "\u00a9 KartaView contributors, CC-BY-SA 4.0"
+        }
+      ],
+      "segments_total": 2,
+      "segments_truncated": false
+    },
+    "mapillary": {
+      "status": "skipped",
+      "reason": "no MAPILLARY_TOKEN in env",
+      "stats": {"skipped": "no MAPILLARY_TOKEN in env"},
+      "segments": [],
+      "segments_total": 0,
+      "segments_truncated": false
+    }
+  }
+}
