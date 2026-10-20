@@ -531,6 +531,27 @@
       "batch_grouping": "geolocation_image"
     },
     {
+      "name": "shadowfinder",
+      "upstream": "https://github.com/bellingcat/ShadowFinder",
+      "license": "MIT",
+      "version_pin": "0.7.1 (commit 215485abd5a46a9b98c4ba0fbfce7df6b6bb1be8)",
+      "invocation": "Docker / CLI",
+      "input_types": [
+        "shadow_observation"
+      ],
+      "output_schema": "ranked coarse possibility regions (bbox, centroid, best cell, relative difference, cell count) from one shadow observation on the shipped 0.5-degree solar grid; offline only",
+      "legal_notes": "Offline solar-geometry analysis: the pinned ShadowFinder package runs locally over its shipped timezone grid; no coordinate, measurement or query is transmitted. Inputs are object height, shadow length and a UTC datetime supplied by the seed; outputs are coarse possibility regions (1-degree summary bins), not a confirmed location or a probability. MIT-licensed upstream, operated unmodified in its own image; see docker/shadowfinder/RATE_LIMITS.md.",
+      "network": "none",
+      "last_audited": "2026-10-20T00:00:00Z",
+      "verification_status": "unknown",
+      "note": "Fixture parser coverage passes; fixture provenance: synthetic; fixture file: tests/fixtures/shadowfinder.json. No live container run has occurred. Verification pending the unit's CI run.",
+      "fixture_provenance": "synthetic",
+      "legal_tier": 1,
+      "enabled_by_default": true,
+      "disabled_reason": null,
+      "batch_grouping": "geoint"
+    },
+    {
       "name": "gravatar",
       "upstream": "https://docs.gravatar.com/sdk/profiles/",
       "license": "Gravatar Public API terms; no client library bundled",

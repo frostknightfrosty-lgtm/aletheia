@@ -73,6 +73,7 @@ def _sample_request(seed_type: SeedType, tmp_path: Path) -> AdapterRunRequest:
         SeedType.CRYPTO_ADDRESS: "12dRugNcdxK39288NjcDV4GX7rMsKCGn6B",
         SeedType.INTELLECTUAL_PROPERTY: "US1234567",
         SeedType.HASHTAG: "osint",
+        SeedType.SHADOW_OBSERVATION: "height=10;shadow=5;datetime=2024-06-01T12:00:00Z",
     }
     return AdapterRunRequest(
         run_id=uuid.uuid4(),

@@ -48,7 +48,7 @@ def test_real_manifest_validates_and_registry_builds_through_enforcement():
     manifest = json.loads((REPO_ROOT / "PROJECT_MANIFEST.json").read_text(encoding="utf-8"))
     validate_project_manifest(manifest, repo_root=REPO_ROOT)
     adapters = phase7_adapters()
-    assert len(adapters) == 54
+    assert len(adapters) == 55
     entries = {entry["name"].strip().casefold(): entry for entry in manifest["tool_inventory"]}
     for name in adapters:
         assert entries[name.strip().casefold()]["legal_tier"] in {1, 2, 3, 4}

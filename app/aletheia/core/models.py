@@ -33,6 +33,10 @@ class SeedType(StrEnum):
     # case-insensitive). Added for the tiktok-hashtag-analysis adapter; no
     # existing SeedType covered a topic tag as a query unit.
     HASHTAG = "hashtag"
+    # Shadow-observation seed: an object height (m), shadow length (m), and a
+    # UTC datetime, encoded as key=value pairs in the seed value. Added for the
+    # ShadowFinder adapter; no existing SeedType covered a measurement payload.
+    SHADOW_OBSERVATION = "shadow_observation"
     # Composite IP seed: a patent number, a trademark serial/registration number,
     # an assignee/inventor name, or a free-text patent/trademark query. Added for
     # the patents_trademarks batch adapter; no existing SeedType covered it.

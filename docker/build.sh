@@ -57,4 +57,5 @@ docker build -f docker/tiktok_hashtag/Dockerfile -t aletheia/tiktok-hashtag:v1 d
 docker build -f docker/venom/Dockerfile -t aletheia/venom:v1 docker/venom
 docker build -f docker/picimagesearch/Dockerfile -t aletheia/picimagesearch:v1 docker/picimagesearch
 docker build -f docker/tracelines/Dockerfile -t aletheia/tracelines:v1 docker/tracelines
+docker build -f docker/shadowfinder/Dockerfile -t aletheia/shadowfinder:v1 docker/shadowfinder
 docker build -f docker/egress_proxy/Dockerfile -t aletheia/egress-proxy:v1 docker/egress_proxy

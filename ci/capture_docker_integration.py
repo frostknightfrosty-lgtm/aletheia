@@ -71,6 +71,8 @@ CASES = [
     ("phase17-picimagesearch-selftest", "aletheia/picimagesearch:v1", ["--selftest"]),
     ("phase17-tracelines-health", "aletheia/tracelines:v1", ["--health"]),
     ("phase17-tracelines-selftest", "aletheia/tracelines:v1", ["--selftest"]),
+    ("phase17-shadowfinder-health", "aletheia/shadowfinder:v1", ["--health"]),
+    ("phase17-shadowfinder-selftest", "aletheia/shadowfinder:v1", ["--selftest"]),
     ("phase11-egress-proxy", "aletheia/egress-proxy:v1", ["--health"]),
 ]
 

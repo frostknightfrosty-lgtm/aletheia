@@ -1,0 +1,53 @@
+{
+  "source": "shadowfinder",
+  "version": "0.7.1",
+  "pinned_commit": "215485abd5a46a9b98c4ba0fbfce7df6b6bb1be8",
+  "status": "ok",
+  "observation": {
+    "height_m": 10.0,
+    "shadow_length_m": 5.0,
+    "datetime_utc": "2024-06-01T12:00:00Z"
+  },
+  "grid": {
+    "angular_resolution_deg": 0.5,
+    "cells_total": 208800,
+    "cells_sampled": 208800,
+    "cells_evaluated": 160000,
+    "cells_matching": 10,
+    "sampling_step": 1
+  },
+  "thresholds": {
+    "tolerance": 0.1,
+    "bin_deg": 1.0,
+    "max_regions": 20
+  },
+  "candidates": [
+    {
+      "rank": 1,
+      "bbox": [0.0, -30.0, 1.0, -29.0],
+      "centroid": [0.5, -29.5],
+      "best_cell": {
+        "lat": 0.5,
+        "lon": -29.5,
+        "relative_difference": -0.002
+      },
+      "cell_count": 6
+    },
+    {
+      "rank": 2,
+      "bbox": [10.0, 20.0, 11.0, 21.0],
+      "centroid": [10.5, 20.5],
+      "best_cell": {
+        "lat": 10.5,
+        "lon": 20.5,
+        "relative_difference": 0.04
+      },
+      "cell_count": 4
+    }
+  ],
+  "regions_total": 2,
+  "truncated": false,
+  "attribution": "ShadowFinder (Bellingcat), MIT; solar position via suncalc; timezone grid shipped with the pinned checkout.",
+  "network": false,
+  "elapsed_seconds": 1.234
+}
