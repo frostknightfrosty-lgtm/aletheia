@@ -1,6 +1,6 @@
 # Aletheia Handoff — Phase 17 staged (pivot cascade + source completeness; autonomous campaign)
 
-Last updated: 2026-10-20T11:52:38Z
+Last updated: 2026-10-20T12:16:00Z
 
 ## Project boundaries
 
@@ -15,7 +15,9 @@ prerequisites are met. A tier classification is project policy, not a legal conc
 
 - Latest CI-verified commit: `0ac22ed` (tracelines adapter; docker
   verification run **39416003189** green — parser 54/54; **1100 passed**;
-  capture 73/73; egress 49/49 wired; storage 6/6). Earlier: `19db818`
+  capture 73/73; egress 49/49 wired; storage 6/6; docs `e02c181` verified by
+  run **39418791588** with the same numbers; state verification pending).
+  Earlier: `19db818`
   (PicImageSearch; run **39404418732**: parser 53/53, 1089 passed, capture
   71/71, egress 48/48 wired, storage 6/6; docs `6d2a049` and state `0bb8dbc`
   verified by runs **39407226773** and **39410068828**); `0015ea4` (VENOM;
@@ -44,12 +46,21 @@ prerequisites are met. A tier classification is project policy, not a legal conc
   `passing` = file, postgres, neo4j, elasticsearch, minio, redis,
   `unconfigured` = [], `required_all` = `true`; `pytest-summary.json`:
   `junit_total` 1100, `skipped_in_ci` [], `ok` `true`; `results.json`: 73
-  entries, 0 nonzero return codes.
+  entries, 0 nonzero return codes. The docs commit `e02c181` repeated the same
+  numbers in run **39418791588** (parser 54/54; 1100 passed; capture 73/73;
+  egress 54/49/49; storage 6/6).
 - **tracelines unit verified:** commit `0ac22ed` (the unit's first code commit
   `89c6400` plus the Python-3.12 image fix). Local evidence before commit:
   parser preflight 54/54; suite 1030 passed + 70 environment-only skips = 1100;
   the CI container run confirms `pin_file: true` and 10/10 selftest checks. The
-  manifest entry is `verified-fixture` with the run citation.
+  manifest entry is `verified-fixture` with the run citation; docs `e02c181`
+  verified by run **39418791588**; the state push is the last step.
+- **In progress locally (not committed):** ShadowFinder (#15) — offline
+  solar-geometry adapter over the pinned Bellingcat package (MIT, tag v0.7.1,
+  commit `215485a`), new `SeedType.SHADOW_OBSERVATION`, tier 1, no network.
+  Local: parser preflight 55/55; suite 1040 passed + 71 skipped = 1111; the
+  adapter, fixture, image, health/selftest cases and manifest entry are ready.
+  It will be committed only after this state push verifies.
 - Evidence lines copied from the downloaded artifact of run `39141365915`
   (`ci-artifacts-39141365915`), not typed:
   - `PARSER PREFLIGHT: PASS — 49/49 adapters have parser coverage`
