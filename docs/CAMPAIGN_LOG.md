@@ -19,16 +19,17 @@
   image defect, and passed after the fix.
 - Position: **P17.11 Wave A**: §A 33 (Unpaywall), 31 (SearXNG), 36 (CipherScan),
   11 (Broń Vault), 2 (Zehef), 4 (tiktok-hashtag-analysis), 12 (VENOM), 13
-  (PicImageSearch), 14 (tracelines), 15 (ShadowFinder) and 16 (pybdshadow) are
-  **CI-verified and flipped**; §A 3 (scrawler) is recorded as an interface
-  blocker and §A 18 (GeoLocator) as an **upstream-withdrawal blocker** (all
-  GeoEstimation code and weights removed; the app's checkpoint URLs return
-  HTTP 404). Next: crypttrace (#20), ERATV (#27), BigQuery (#29).
-- Last verified commit: `4505ae5` (pybdshadow code; run `39457146650`: parser 56/56,
-  **1122 passed**, capture 78/78, egress 56/49/49, storage 6/6). The pybdshadow
-  docs flip + GeoLocator blocker record are unverified until this docs run reports.
-- Next action: continue Wave A — crypttrace CLI wrap, ERATV, BigQuery; then
-  Waves B–E; P17.12/P17.13; close-out.
+  (PicImageSearch), 14 (tracelines), 15 (ShadowFinder), 16 (pybdshadow) and 20
+  (crypttrace) are **CI-verified and flipped**; §A 3 (scrawler) is recorded as
+  an interface blocker and §A 18 (GeoLocator) as an upstream-withdrawal
+  blocker (all GeoEstimation code and weights removed; the app's checkpoint URLs
+  return HTTP 404). Next: ERATV (#27), PatentsView (#28), BigQuery (#29), EUIPO
+  (#30), GitLab (#34), youtube-geofind (#17), Betaface (#19).
+- Last verified commit: `446ccab` (crypttrace code; run `39466252253`: parser 57/57,
+  **1132 passed**, capture 81/81, egress 57/50/50, storage 6/6). The crypttrace
+  docs flip is unverified until its own run reports.
+- Next action: continue Wave A — ERATV, BigQuery, then Waves B–E;
+  P17.12/P17.13; close-out.
 - Owner-blocked (parked, never wait on): everything in `docs/USER_ACTIONS.md`
   except §0, which is now resolved.
 - Decision defaults in force: see "Adopted defaults" below.
@@ -803,3 +804,18 @@ activate when the key exists.
   `samhita-alla/GeoEstimation` fork is not used because it would contradict the
   authors' withdrawal. No owner action is required. See
   `docs/PHASE17_RECHECKS.md` #18.
+
+- 2026-10-20 — P17.11 crypttrace adapter (#20) — commit `446ccab2b9c819066dc67638f16b867bc074bd94` — run
+  `39466252253` — docker-verification **green**. Copied from the downloaded artifact
+  `ci-artifacts-39466252253`:
+  - `PARSER PREFLIGHT: PASS — 57/57 adapters have parser coverage`
+  - pytest-summary.json: `"console_summary": "1132 passed, 1 warning"`,
+    `"junit_total": 1132`, `"skipped_in_ci": []`, `"ok": true`
+  - docker-integration/capture.log: `DOCKER CAPTURE: PASS — 81/81 cases
+    captured`, including `phase17-crypttrace-health` (stdout `ok`),
+    `phase17-crypttrace-selftest` (8/8 checks) and the offline
+    `phase17-crypttrace-normalize` case under `--network none`; no live trace
+  - egress-scenario.json: `adapters=57 network_required=50 wired=50`
+  - storage-conformance.json: `"passing": ["file", "postgres", "neo4j",
+    "elasticsearch", "minio", "redis"]`, `"required_all": true`, `"ok": true`
+  - docker-integration/results.json: 81 entries, 0 nonzero return codes

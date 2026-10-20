@@ -1,5 +1,39 @@
 # Changelog
 
+## 2026-10-20 — P17.11: crypttrace adapter (source #20)
+
+Every number below is copied from the downloaded artifact
+`ci-artifacts-39466252253` (run `39466252253`, commit `446ccab`).
+
+- `PARSER PREFLIGHT: PASS — 57/57 adapters have parser coverage` (56 → 57).
+- `"console_summary": "1132 passed, 1 warning"` with `"junit_total": 1132`,
+  `"skipped_in_ci": []`, `"ok": true` — 10 new tests (eight adapter/driver
+  tests, the container health test and the manifest parametrization), none
+  skipped in CI (1122 → 1132).
+- `DOCKER CAPTURE: PASS — 81/81 cases captured`, including the three new
+  cases `phase17-crypttrace-health` (stdout `ok`, pin file true, package
+  `0.22.0`), `phase17-crypttrace-selftest` (8/8 checks: package import, Bitcoin
+  address validation, report API, normalization and bounds) and
+  `phase17-crypttrace-normalize`, which parses a synthetic report under
+  `--network none`; no live trace was run.
+- `egress-scenario.json`: `adapters=57 network_required=50 wired=50` (the new
+  adapter declares `network_required=True` and is policy-wired).
+- `storage-conformance.json`: `"passing": ["file", "postgres", "neo4j",
+  "elasticsearch", "minio", "redis"]`, `"required_all": true`, `"ok": true`.
+- `results.json`: 81 entries, 0 nonzero return codes.
+- Scope: `SeedType.CRYPTO_ADDRESS`, Bitcoin only, no API key. The driver calls
+  the pinned library's `crypttrace.report.generate(address, "btc", depth=2,
+  branching=3)` and reduces its JSON to a run summary, at most 25 labelled
+  key findings and 25 top counterparties. Hosts are mempool.space (history)
+  and CoinGecko (optional BTC/USD price). Labels, risk scores and exchange
+  classifications are upstream heuristics and leads, not proof of ownership or
+  wrongdoing; the upstream fetcher caches in an ephemeral container-local
+  SQLite file and retries 429s with backoff, while the adapter never retries
+  or caches. See `docker/crypttrace/RATE_LIMITS.md`.
+- `§A 20` flipped; manifest `crypttrace` is `verified-fixture`; counts are now
+  **83 of 111** wired and **57 registered adapters**, with **28 remaining**.
+  No live target exists for this source, so the evidence is fixture-based.
+
 ## 2026-10-20 — P17.11: pybdshadow adapter (source #16)
 
 Every number below is copied from the downloaded artifact

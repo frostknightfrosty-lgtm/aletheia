@@ -34,9 +34,9 @@ Build sequencing: Phase 17 items **P17.11–P17.12** in
 
 ## A. The 111 accepted candidates — remaining gaps
 
-Already implemented and wired: **82 of 111** (the 56 CI-verified registered
+Already implemented and wired: **83 of 111** (the 57 CI-verified registered
 adapters and their sub-sources; some are key-gated — their skip reasons are
-recorded). **29 of 111 remain.** Of these, two are
+recorded). **28 of 111 remain.** Of these, two are
 externally blocked (FollowTheMoney, GeoLocator),
 several have owner-action prerequisites, and a few carry factual re-checks that
 may resolve to a recorded blocker if the free path no longer exists. No status
@@ -63,7 +63,7 @@ below may be upgraded except from copied artifact lines.
 | 17 | youtube-geofind | 4 | Not built (one-off) | Build with YouTube Data API free quota | Owner: YT key |
 | 18 | GeoLocator | 4 | **Blocked (upstream withdrawal)**: the MIT demo app depends on the GeoEstimation pre-trained ResNet; the official `TIBHannover/GeoEstimation` repository removed all source code and model weights, retains the repository for documentation only, and explicitly refrains from further public release (README "Important Notice", re-checked 2026-10-20); the checkpoint and hparams URLs used by the app return HTTP 404. The retained fork is not used because it would contradict the authors' withdrawal. See `docs/PHASE17_RECHECKS.md` #18 | — |
 | 19 | Betaface | 4 | Not built (one-off) | Build with free evaluation tier (≤500 images/day); corroboration-only role; never sole basis | Owner: free key + secret |
-| 20 | crypttrace | 5 | Dropped (`crypto_blockchain`): no importable API | Re-review: wrap pinned CLI in container if output is parseable; else record blocker | — |
+| 20 | crypttrace | 5 | **Wired (CI-verified)**: standalone Bitcoin-only fund-flow adapter over the pinned crypttrace 0.22.0 library (MIT, commit `cf60a88b8be43581186965d160114fdaf3022c62`); the seed address is traced through mempool.space at depth 2 / branching 3 and the report JSON is reduced to bounded run, entity and counterparty records; labels are upstream leads, not attribution. Run `39466252253`, 1132 passed; no live target, fixture-verified. See `docker/crypttrace/RATE_LIMITS.md` | — |
 | 21 | FollowTheMoney | 6 | Not built; **Gate 7 documented exclusion** | **Externally blocked**: no published request contract; parent OpenSecrets discontinued public API 2025-04-15; commercial route only. Re-open only on vendor change | — |
 | 22 | OpenSky Network API | 8 | Not built; `transport_movement` deferred (Gate 6) | Build; free key (~4,000 req/day); written integration permission | Owner: register + written permission |
 | 23 | BarentsWatch AIS | 8 | Not built; Gate 6 | Build; free OAuth 2.0 client credentials | Owner: register |

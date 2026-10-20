@@ -356,3 +356,40 @@ unverified, and re-opens only on a vendor change.
   action is required; an owner who wants this capability would have to obtain
   explicit permission from the GeoEstimation authors, which this campaign does
   not do. The source remains one of the 29 not-yet-wired rows.
+
+## #20 crypttrace — scoped review outcome (2026-10-20)
+
+- License: MIT (upstream `LICENSE`), version 0.22.0, pinned at commit
+  `cf60a88b8be43581186965d160114fdaf3022c62` (2026-10-17). The package is
+  installed unmodified in its own image; the Aletheia driver is separate.
+- **Premise corrected:** the earlier drop said "no importable API". The pinned
+  package does expose `crypttrace.report.generate` / `report.collect` and the
+  report writer emits a JSON sibling, so the re-review's condition (parseable
+  output) is met without scraping the CLI's rich tables. The driver calls the
+  library directly.
+- Scope: **Bitcoin only**. `mempool.space` needs no key; the EVM path would
+  require an Etherscan key and is out of scope. The optional USD column uses
+  CoinGecko's keyless price endpoint. The seed is one base58/bech32 address,
+  validated with `crypttrace.addresses.validate(address, "btc")`; a rejected
+  address is a documented `invalid_target` and is never sent upstream.
+- Bounds: depth 2, branching 3; at most 25 key findings and 25 top
+  counterparties emitted; report `tree_text`, HTML and Markdown are discarded.
+  The upstream fetcher spaces mempool.space calls by 0.25 s, caches in an
+  ephemeral container-local SQLite file and retries 429s with backoff; the
+  adapter itself never retries or caches. See
+  `docker/crypttrace/RATE_LIMITS.md`.
+- Interpretation: upstream labels, risk scores and exchange classifications
+  are heuristics and lead generators, not proof of ownership, identity or
+  wrongdoing. A public-blockchain address is pseudonymous; reaching a labelled
+  address is not attribution. The adapter requires an authorization assertion
+  for a real trace.
+- **No live target is on file** for a crypto address, so Gate 2 cannot authorize
+  a live trace. The CI evidence is fixture-based: health, an offline 8-check
+  selftest (package import, address validation, report API, normalization,
+  bounds), and a synthetic report parsed under `--network none`.
+- **Outcome:** built and CI-verified — run `39466252253` on commit `446ccab2b9c819066dc67638f16b867bc074bd94`
+  (parser 57/57; 1132 passed; capture 81/81, including
+  `phase17-crypttrace-health` (`ok`), `phase17-crypttrace-selftest` (8/8) and
+  `phase17-crypttrace-normalize` under `--network none`). Driver health and
+  selftest were also validated locally against the exact package version in an
+  isolated venv.
