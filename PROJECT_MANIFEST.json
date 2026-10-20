@@ -1893,6 +1893,40 @@
       "note": "Pending CI verification. fixture file: tests/fixtures/github_identity.json. No live source lookups occurred; the runner and parser use synthetic documents only."
     },
     {
+      "name": "pgp_keys",
+      "upstream": "https://github.com/frostknightfrosty-lgtm/aletheia/tree/main/docker/pgp_keys",
+      "license": "OpenPGP Web Key Directory public keys (IETF draft-koch-openpgp-webkey-service); standard-library parsing only, no third-party code.",
+      "version_pin": "1.0 (WKD draft-koch-openpgp-webkey-service-22; reviewed 2026-10-20)",
+      "invocation": "Bounded Web Key Directory lookup via dedicated Docker runner (aletheia/pgp-keys:v1)",
+      "input_types": [
+        "email"
+      ],
+      "output_schema": "TechnicalFinding[]",
+      "legal_notes": "One WKD lookup per email: advanced method, then direct only on DNS failure as the specification requires. No Authorization header, token, retry, proxy rotation, or DANE lookup. Only primary-key fingerprint, key ID, public metadata, and User IDs containing the requested email are emitted; all other User IDs are dropped and key material is never stored. A published key is not proof of identity, validity, or revocation state. See docker/pgp_keys/RATE_LIMITS.md.",
+      "network": "required",
+      "last_audited": "2026-10-20T00:00:00Z",
+      "verification_status": "unknown",
+      "fixture_provenance": "synthetic",
+      "legal_tier": 1,
+      "enabled_by_default": true,
+      "disabled_reason": null,
+      "batch_grouping": "pgp_keys",
+      "requires_key": false,
+      "sub_sources": [
+        {
+          "name": "wkd-advanced",
+          "requires_key": false,
+          "enabled_by_default": true
+        },
+        {
+          "name": "wkd-direct-dns-fallback",
+          "requires_key": false,
+          "enabled_by_default": true
+        }
+      ],
+      "note": "Pending CI verification. fixture file: tests/fixtures/pgp_keys.json. No live source lookups occurred; the runner and parser use synthetic documents and the WKD specification's sample key only."
+    },
+    {
       "name": "egress_proxy",
       "upstream": "https://github.com/frostknightfrosty-lgtm/aletheia/tree/main/docker/egress_proxy",
       "license": "Project-internal infrastructure component (Aletheia repository); no third-party code bundled.",

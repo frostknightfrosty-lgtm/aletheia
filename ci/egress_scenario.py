@@ -167,7 +167,7 @@ def _policy_check() -> dict:
     }
     return {
         "name": "phase15-egress-policy-covers-registry",
-        "ok": wired == expected and len(adapters) == 60 and len(expected) > 3,
+        "ok": wired == expected and len(adapters) == 61 and len(expected) > 3,
         "detail": f"adapters={len(adapters)} network_required={len(expected)} wired={len(wired)}",
     }
 

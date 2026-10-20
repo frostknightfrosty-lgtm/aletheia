@@ -1,0 +1,25 @@
+{
+  "source": "pgp_keys",
+  "status": "ok",
+  "email": "patrice.lumumba@example.net",
+  "method": "advanced",
+  "url": "https://openpgpkey.example.net/.well-known/openpgpkey/example.net/hu/gzfxrwe6o9qrddujrwnjran6nh41hfex?l=patrice.lumumba",
+  "http_status": 200,
+  "key_block_sha256": "ccb92ac86aa5c2661deeb3c07c3b4e43db964ddfb4469b6d3acdd2e0c92dedac",
+  "key_block_bytes": 362,
+  "keys": [
+    {
+      "fingerprint": "B21DEAB4F875FB3DA42F1D1D139563682A020D0A",
+      "key_id": "139563682A020D0A",
+      "version": 4,
+      "algorithm": 22,
+      "algorithm_name": "EdDSA",
+      "created_at": "2016-06-22T07:25:17Z",
+      "user_ids": [
+        "patrice.lumumba@example.net"
+      ],
+      "other_uid_count": 0
+    }
+  ],
+  "errors": []
+}

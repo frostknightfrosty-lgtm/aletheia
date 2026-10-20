@@ -88,6 +88,9 @@ CASES = [
     ("phase17-github-identity-health", "aletheia/github-identity:v1", ["--health"]),
     ("phase17-github-identity-selftest", "aletheia/github-identity:v1", ["--selftest"]),
     ("phase17-github-identity-normalize", "aletheia/github-identity:v1", ["--normalize", "/work/combined.json"]),
+    ("phase17-pgp-keys-health", "aletheia/pgp-keys:v1", ["--health"]),
+    ("phase17-pgp-keys-selftest", "aletheia/pgp-keys:v1", ["--selftest"]),
+    ("phase17-pgp-keys-normalize", "aletheia/pgp-keys:v1", ["--normalize", "/work/combined.json"]),
     ("phase11-egress-proxy", "aletheia/egress-proxy:v1", ["--health"]),
 ]
 
@@ -203,6 +206,11 @@ def main() -> int:
             Path("tests/fixtures/github_identity.json").read_text(encoding="utf-8"),
             encoding="utf-8",
         )
+        pgp_keys_combined = Path(td) / "pgp_keys.json"
+        pgp_keys_combined.write_text(
+            Path("tests/fixtures/pgp_keys.json").read_text(encoding="utf-8"),
+            encoding="utf-8",
+        )
         for name, image, args in CASES:
             cmd = ["docker", "run", "--rm", "--network", "none"]
             if name == "phase1-exiftool":
@@ -217,6 +225,8 @@ def main() -> int:
                 cmd += ["-v", f"{weather_response}:/work/response.json:ro"]
             if name == "phase17-github-identity-normalize":
                 cmd += ["-v", f"{github_identity_combined}:/work/combined.json:ro"]
+            if name == "phase17-pgp-keys-normalize":
+                cmd += ["-v", f"{pgp_keys_combined}:/work/combined.json:ro"]
             if name == "phase7-core-import":
                 cmd += ["--entrypoint", "python"]
             if name == "phase4-holehe":
