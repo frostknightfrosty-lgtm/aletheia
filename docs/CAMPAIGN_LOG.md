@@ -17,19 +17,23 @@
   repository was made public (standard runners are free for public
   repositories); the blocked tracelines run then executed, exposed one real
   image defect, and passed after the fix.
-- Position: **P17.11 Wave A**: §A 33 (Unpaywall), 31 (SearXNG), 36 (CipherScan),
-  11 (Broń Vault), 2 (Zehef), 4 (tiktok-hashtag-analysis), 12 (VENOM), 13
-  (PicImageSearch), 14 (tracelines), 15 (ShadowFinder), 16 (pybdshadow) and 20
-  (crypttrace) are **CI-verified and flipped**; §A 3 (scrawler) is recorded as
-  an interface blocker and §A 18 (GeoLocator) as an upstream-withdrawal
-  blocker (all GeoEstimation code and weights removed; the app's checkpoint URLs
-  return HTTP 404). Next: ERATV (#27), PatentsView (#28), BigQuery (#29), EUIPO
-  (#30), GitLab (#34), youtube-geofind (#17), Betaface (#19).
-- Last verified commit: `446ccab` (crypttrace code; run `39466252253`: parser 57/57,
-  **1132 passed**, capture 81/81, egress 57/50/50, storage 6/6). The crypttrace
-  docs flip is unverified until its own run reports.
-- Next action: continue Wave A — ERATV, BigQuery, then Waves B–E;
-  P17.12/P17.13; close-out.
+- Position: **P17.11 and P17.12 complete**: §A 33 (Unpaywall), 31 (SearXNG), 36
+  (CipherScan), 11 (Broń Vault), 2 (Zehef), 4 (tiktok-hashtag-analysis), 12
+  (VENOM), 13 (PicImageSearch), 14 (tracelines), 15 (ShadowFinder), 16
+  (pybdshadow) and 20 (crypttrace) are **CI-verified and flipped**; §A 3
+  (scrawler) is an interface blocker, §A 18 (GeoLocator) an
+  upstream-withdrawal blocker, and the remaining rows are owner-gated/Gate 6–7
+  or recorded drops. The P17.12 audit is `docs/COMPLETENESS_AUDIT.md`:
+  **83 of 111 wired, 57 adapters, 28 remaining**, every one with a written
+  reason. P17.13 is recorded and partially covered; its remaining horizon
+  items are the next free queue.
+- Last verified commit: `446ccab` (crypttrace code; run `39466252253`: parser
+  57/57, **1132 passed**, capture 81/81, egress 57/50/50, storage 6/6); docs
+  `1df7750` (run `39468982807`, same numbers).
+- Next action: P17.13 horizon items (Wikidata/ORCID, keyservers, GitHub
+  endpoint expansion, Mojang/NameMC, social-graph lists, news_search,
+  Open-Meteo, historical) — each gets its own scoped review and full unit;
+  Waves B–D stay owner-gated; final close-out.
 - Owner-blocked (parked, never wait on): everything in `docs/USER_ACTIONS.md`
   except §0, which is now resolved.
 - Decision defaults in force: see "Adopted defaults" below.
@@ -227,9 +231,12 @@ activate when the key exists.
       per-engine notes; recorded ToS risk posture).
 - [ ] **Wave D — transport_movement:** §A 22 (OpenSky), 23 (BarentsWatch), 24
       (Network Rail), 25 (National Rail), 26 (Deutsche Bahn).
-- [ ] **Wave E — P17.12 completeness verification:** per-source evidence from
-      artifacts; live coverage only where gates permit. §A 21 (FollowTheMoney)
-      stays blocked at Gate 7.
+- [x] **Wave E — P17.12 completeness verification:** audit recorded in
+      `docs/COMPLETENESS_AUDIT.md` (2026-10-20). Every adapter is
+      `verified-fixture`; parser 57/57; 1132 passed; capture 81/81; egress
+      57/50/50; storage 6/6. 83/111 wired, 28 remaining, all with a written
+      gate/owner/blocker reason; live coverage only `username:frost2233`.
+      §A 21 (FollowTheMoney) stays blocked at Gate 7.
 
 ### Track 3 — Horizon completion
 - [x] Recorded as **P17.13** in `docs/PIVOT_CASCADE.md` §15 item 13 (2026-10-18,
@@ -238,6 +245,12 @@ activate when the key exists.
       unblocked: Wayback CDX; Wikidata/ORCID; keyservers (WKD / GitHub `.keys`);
       GitHub endpoints expansion; Mojang/NameMC; WhatsMyName; social-graph
       lists; Phase 9 residuals (news_search, Open-Meteo, historical).
+      Status 2026-10-20: Wayback CDX is already covered by the identity
+      adapter's `wayback` module, and WhatsMyName-style site lists are covered
+      by the pinned maigret/sherlock enumeration; Wikidata/ORCID, keyservers,
+      GitHub endpoint expansion, Mojang/NameMC, social-graph lists and the
+      Phase 9 residuals remain. Each needs its own scoped review and full unit;
+      none is owner-gated, so this is the next free queue.
 
 ### Track 4 — Close-out
 - [ ] Final full verification pass on the final tree; copy all evidence lines.
@@ -819,3 +832,5 @@ activate when the key exists.
   - storage-conformance.json: `"passing": ["file", "postgres", "neo4j",
     "elasticsearch", "minio", "redis"]`, `"required_all": true`, `"ok": true`
   - docker-integration/results.json: 81 entries, 0 nonzero return codes
+
+- 2026-10-20 — P17.11/P17.12 completeness audit — docs/COMPLETENESS_AUDIT.md — crypttrace docs tree 1df7750 verified by run 39468982807 (parser 57/57; 1132 passed; capture 81/81; egress 57/50/50; storage 6/6). Audit result: 83/111 wired; 28 remaining with written gate/owner/blocker reasons; 57 adapters erified-fixture; live only username:frost2233. P17.13 partially covered; remaining horizon items are the next free queue. Next: final state and close-out report.
