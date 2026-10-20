@@ -1,6 +1,6 @@
 # Aletheia Handoff — Phase 17 staged (pivot cascade + source completeness; autonomous campaign)
 
-Last updated: 2026-10-20T10:43:55Z
+Last updated: 2026-10-20T11:11:57Z
 
 ## Project boundaries
 
@@ -16,11 +16,19 @@ prerequisites are met. A tier classification is project policy, not a legal conc
 - Latest CI-verified commit: `19db818` (PicImageSearch adapter; docker
   verification run **39404418732** green — parser 53/53; **1089 passed**;
   capture 71/71; egress 48/48 wired; storage 6/6; docs `6d2a049` verified by
-  run **39407226773**). Earlier: `0015ea4` (VENOM adapter; run **39196608448**,
+  run **39407226773**; state `0bb8dbc` verified by run **39410068828**). Earlier: `0015ea4` (VENOM adapter; run **39196608448**,
   1073 passed, capture 69/69; its docs/state push `da0283f` ran **39325135904**,
   green after three transient Go module-verification failures); `fedfd64`
   (tiktok-hashtag adapter; run **39174382751**, 1058 passed, capture 67/67; its
   docs/state push `de1a51e` ran **39195856352**, also green).
+- **CI capacity blocker (2026-10-20):** the private repository's included
+  GitHub Actions minutes are exhausted. October's successful runs alone total
+  **2,003 wall-minutes** (139 runs) from the API, before failed attempts; the
+  tracelines run `39412502739` (commit `89c6400`) failed twice at start-up with
+  `runner_id` 0 and zero steps in under three seconds, while GitHub reported all
+  systems operational. No code defect is involved. Free resolutions — make the
+  repository public (unlimited standard runners) or wait for the monthly reset —
+  are recorded in `docs/USER_ACTIONS.md` §0; the parked remainder is §6.
 - The authorized live run **39141366670** ran on tree `8939517` and is green (37m19s) —
   see the live-audit section below.
 - Newest artifact check (run **39404418732**, commit `19db818`): lines copied from the
@@ -35,6 +43,11 @@ prerequisites are met. A tier classification is project policy, not a legal conc
   `junit_total` 1089, `skipped_in_ci` [], `ok` `true`; `results.json`: 71
   entries, 0 nonzero return codes. The docs push `6d2a049` repeated the same
   numbers in run **39407226773**.
+- **Committed but not verified:** `89c6400` (tracelines adapter). It was pushed
+  after the state push above was green; its verification run could not start
+  (blocker above). Local evidence before commit: parser preflight 54/54; suite
+  1030 passed + 70 environment-only skips = 1100; driver health/selftest green
+  in the pinned venv. Its manifest entry is `unknown`, not `verified-fixture`.
 - Evidence lines copied from the downloaded artifact of run `39141365915`
   (`ci-artifacts-39141365915`), not typed:
   - `PARSER PREFLIGHT: PASS — 49/49 adapters have parser coverage`
@@ -53,11 +66,12 @@ prerequisites are met. A tier classification is project policy, not a legal conc
   execute in CI, and CI now *fails* if either group skips — see `docs/SKIPPED_IN_CI.md`.
   The working tree additionally carries the prepared tracelines unit (uncommitted),
   taking the local suite to 1030 passed + 70 skipped = 1100.
-- 53 registered adapters, all `verified-fixture` in `PROJECT_MANIFEST.json`; this round did
-  not change any `verification_status`. One infrastructure component (`egress_proxy`),
-  `verified-fixture`. Six storage backends, all conformance-verified against real services
-  in CI. 48 of the 53 adapters declare `network_required=True`, and the egress policy wires
-  all 48.
+- 54 registered adapters; 53 were `verified-fixture` in `PROJECT_MANIFEST.json`
+  before the CI block, and the newly committed tracelines entry is `unknown`
+  (its verification run could not start — see the CI capacity blocker above).
+  One infrastructure component (`egress_proxy`), `verified-fixture`. Six storage
+  backends, all conformance-verified against real services in CI. 49 of the 54
+  adapters declare `network_required=True`, and the egress policy wires all 49.
 
 ## Phase 17 — pivot cascade + source completeness (staged 2026-10-18; autonomous campaign)
 
