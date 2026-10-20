@@ -1,6 +1,6 @@
 # Aletheia Handoff — Phase 17 staged (pivot cascade + source completeness; autonomous campaign)
 
-Last updated: 2026-10-20T12:16:00Z
+Last updated: 2026-10-20T16:02:51Z
 
 ## Project boundaries
 
@@ -13,11 +13,14 @@ prerequisites are met. A tier classification is project policy, not a legal conc
 
 ## Repository and CI state
 
-- Latest CI-verified commit: `0ac22ed` (tracelines adapter; docker
-  verification run **39416003189** green — parser 54/54; **1100 passed**;
-  capture 73/73; egress 49/49 wired; storage 6/6; docs `e02c181` verified by
-  run **39418791588** with the same numbers; state verification pending).
-  Earlier: `19db818`
+- Latest CI-verified commit: `5ddf240` (ShadowFinder adapter; docker
+  verification run **39448325747** green — parser 55/55; **1112 passed**;
+  capture 75/75; egress 55/49/49 wired; storage 6/6; docs `c169b1e` verified by
+  run **39451409086** with the same numbers; state verification pending).
+  Earlier: `0ac22ed` (tracelines; run **39416003189**: parser 54/54, 1100
+  passed, capture 73/73, egress 54/49/49, storage 6/6; docs `e02c181` and state
+  `8df6901` verified by runs **39418791588** and **39421156802**, the latter on
+  a second attempt after a transient crtsh egress flake); `19db818`
   (PicImageSearch; run **39404418732**: parser 53/53, 1089 passed, capture
   71/71, egress 48/48 wired, storage 6/6; docs `6d2a049` and state `0bb8dbc`
   verified by runs **39407226773** and **39410068828**); `0015ea4` (VENOM;
@@ -33,34 +36,41 @@ prerequisites are met. A tier classification is project policy, not a legal conc
   `docs/USER_ACTIONS.md` §0 as resolved; the parked queue (§6) was removed.
 - The authorized live run **39141366670** ran on tree `8939517` and is green (37m19s) —
   see the live-audit section below.
-- Newest artifact check (run **39416003189**, commit `0ac22ed`): lines copied from the
-  downloaded artifact (`ci-artifacts-39416003189`), not typed —
-  `PARSER PREFLIGHT: PASS — 54/54 adapters have parser coverage`; `1100 passed,
-  1 warning`; `DOCKER CAPTURE: PASS — 73/73 cases captured` (including the new
-  `phase17-tracelines-health` and `phase17-tracelines-selftest` offline cases;
-  health stdout `ok` with `pin_file: true`, pinned checkout `0.2.0`, honest UA,
-  `max_retries: 1`, `cache_enabled: false`, `streetlevel_installed: false`,
-  `tls_static: true`, provider bindings `kartaview`/`mapillary`; the selftest
-  ran 10/10 checks); `egress-scenario.json`:
-  `adapters=54 network_required=49 wired=49`; `storage-conformance.json`:
-  `passing` = file, postgres, neo4j, elasticsearch, minio, redis,
-  `unconfigured` = [], `required_all` = `true`; `pytest-summary.json`:
-  `junit_total` 1100, `skipped_in_ci` [], `ok` `true`; `results.json`: 73
-  entries, 0 nonzero return codes. The docs commit `e02c181` repeated the same
-  numbers in run **39418791588** (parser 54/54; 1100 passed; capture 73/73;
-  egress 54/49/49; storage 6/6).
+- Newest artifact check (run **39448325747**, commit `5ddf240`): lines copied
+  from the downloaded artifact (`ci-artifacts-39448325747`), not typed —
+  `PARSER PREFLIGHT: PASS — 55/55 adapters have parser coverage`; `1112 passed,
+  1 warning`; `DOCKER CAPTURE: PASS — 75/75 cases captured` (including
+  `phase17-shadowfinder-health` — stdout `ok`, `pin_file: true`,
+  `grid_resolution_deg: 0.5`, `grid_cells: 208800`, `network_imports: []` — and
+  `phase17-shadowfinder-selftest`, 9/9 checks including a real 3×3 solar
+  computation); `egress-scenario.json`: `adapters=55 network_required=49
+  wired=49`; `storage-conformance.json`: `passing` = file, postgres, neo4j,
+  elasticsearch, minio, redis, `unconfigured` = [], `required_all` = `true`;
+  `pytest-summary.json`: `junit_total` 1112, `skipped_in_ci` [], `ok` `true`;
+  `results.json`: 75 entries, 0 nonzero return codes. The docs commit `c169b1e`
+  repeated the same numbers in run **39451409086** (parser 55/55; 1112 passed;
+  capture 75/75; egress 55/49/49; storage 6/6).
 - **tracelines unit verified:** commit `0ac22ed` (the unit's first code commit
   `89c6400` plus the Python-3.12 image fix). Local evidence before commit:
   parser preflight 54/54; suite 1030 passed + 70 environment-only skips = 1100;
   the CI container run confirms `pin_file: true` and 10/10 selftest checks. The
-  manifest entry is `verified-fixture` with the run citation; docs `e02c181`
-  verified by run **39418791588**; the state push is the last step.
-- **In progress locally (not committed):** ShadowFinder (#15) — offline
-  solar-geometry adapter over the pinned Bellingcat package (MIT, tag v0.7.1,
-  commit `215485a`), new `SeedType.SHADOW_OBSERVATION`, tier 1, no network.
-  Local: parser preflight 55/55; suite 1040 passed + 71 skipped = 1111; the
-  adapter, fixture, image, health/selftest cases and manifest entry are ready.
-  It will be committed only after this state push verifies.
+  manifest entry is `verified-fixture` with the run citation; docs `e02c181` and
+  state `8df6901` were verified by runs **39418791588** and **39421156802**
+  (the latter on a second attempt after a transient crtsh egress flake).
+- **ShadowFinder unit verified:** commit `5ddf240` (the unit's first code
+  commit `0eca2b4` plus the selftest-contract fix) — offline solar-geometry
+  adapter over the pinned Bellingcat package (MIT, tag v0.7.1, commit
+  `215485a`), new `SeedType.SHADOW_OBSERVATION`, tier 1, no network. Local:
+  parser preflight 55/55; suite 1041 passed + 71 skipped = 1112. The first run
+  (`0eca2b4`, run `39444978518`) passed the image build, health, parser and
+  suite but failed the selftest's `target_validation` assertion; the fixed
+  check exercises `_parse_args` + `_parse_observation`, and a regression test
+  pins it. Manifest `verified-fixture`; docs `c169b1e` verified by run
+  **39451409086**; the state push is the last step.
+- **In progress locally (not committed):** pybdshadow (#16) — offline
+  building-shadow adapter over pybdshadow 0.3.5 (BSD-3-Clause, commit
+  `e2665ee`), file-seed JSON input, tier 1, no network; manifest 59 entries /
+  56 adapters, image, fixture, tests and three capture cases prepared.
 - Evidence lines copied from the downloaded artifact of run `39141365915`
   (`ci-artifacts-39141365915`), not typed:
   - `PARSER PREFLIGHT: PASS — 49/49 adapters have parser coverage`
@@ -72,16 +82,16 @@ prerequisites are met. A tier classification is project policy, not a legal conc
   7 = `egress_events` 7; `phase15-egress-policy-covers-registry` = `adapters=49
   network_required=44 wired=44`; the crtsh check returned `new CONNECT crt.sh entries=1
   status=200` this run; the four `phase12-*` checks pass.
-- Local consistency at the tracelines-verified tree: **1030 passed + 70 skipped = 1100**,
-  which equals the CI passed count exactly. The 70 skips are 65 Docker-dependent
-  tests (no Docker on this machine, including the new tracelines container-health
+- Local consistency at the ShadowFinder-verified tree: **1041 passed + 71 skipped = 1112**,
+  which equals the CI passed count exactly. The 71 skips are 66 Docker-dependent
+  tests (no Docker on this machine, including the ShadowFinder container-health
   case) and 5 `tests/test_storage_services.py` (no `ALETHEIA_STORAGE_*` service
   configured); both groups execute in CI, and CI now *fails* if either group
   skips — see `docs/SKIPPED_IN_CI.md`.
-- 54 registered adapters; all 54 are `verified-fixture` in
+- 55 registered adapters; all 55 are `verified-fixture` in
   `PROJECT_MANIFEST.json`. One infrastructure component (`egress_proxy`),
   `verified-fixture`. Six storage backends, all conformance-verified against
-  real services in CI. 49 of the 54 adapters declare `network_required=True`,
+  real services in CI. 49 of the 55 adapters declare `network_required=True`,
   and the egress policy wires all 49.
 
 ## Phase 17 — pivot cascade + source completeness (staged 2026-10-18; autonomous campaign)
