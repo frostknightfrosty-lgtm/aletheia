@@ -91,6 +91,9 @@ CASES = [
     ("phase17-pgp-keys-health", "aletheia/pgp-keys:v1", ["--health"]),
     ("phase17-pgp-keys-selftest", "aletheia/pgp-keys:v1", ["--selftest"]),
     ("phase17-pgp-keys-normalize", "aletheia/pgp-keys:v1", ["--normalize", "/work/combined.json"]),
+    ("phase17-minecraft-health", "aletheia/minecraft:v1", ["--health"]),
+    ("phase17-minecraft-selftest", "aletheia/minecraft:v1", ["--selftest"]),
+    ("phase17-minecraft-normalize", "aletheia/minecraft:v1", ["--normalize", "/work/profile.json"]),
     ("phase11-egress-proxy", "aletheia/egress-proxy:v1", ["--health"]),
 ]
 
@@ -211,6 +214,11 @@ def main() -> int:
             Path("tests/fixtures/pgp_keys.json").read_text(encoding="utf-8"),
             encoding="utf-8",
         )
+        minecraft_profile = Path(td) / "minecraft.json"
+        minecraft_profile.write_text(
+            Path("tests/fixtures/minecraft.json").read_text(encoding="utf-8"),
+            encoding="utf-8",
+        )
         for name, image, args in CASES:
             cmd = ["docker", "run", "--rm", "--network", "none"]
             if name == "phase1-exiftool":
@@ -227,6 +235,8 @@ def main() -> int:
                 cmd += ["-v", f"{github_identity_combined}:/work/combined.json:ro"]
             if name == "phase17-pgp-keys-normalize":
                 cmd += ["-v", f"{pgp_keys_combined}:/work/combined.json:ro"]
+            if name == "phase17-minecraft-normalize":
+                cmd += ["-v", f"{minecraft_profile}:/work/profile.json:ro"]
             if name == "phase7-core-import":
                 cmd += ["--entrypoint", "python"]
             if name == "phase4-holehe":

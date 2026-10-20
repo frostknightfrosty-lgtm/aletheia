@@ -381,3 +381,9 @@ def test_phase17_pgp_keys_container_health():
               "aletheia/pgp-keys:v1", "--health"])
     assert r.returncode == 0, r.stdout + r.stderr
     assert r.stdout.strip() == "ok", r.stdout + r.stderr
+
+def test_phase17_minecraft_container_health():
+    r = _run(["docker", "run", "--rm", "--network", "none",
+              "aletheia/minecraft:v1", "--health"])
+    assert r.returncode == 0, r.stdout + r.stderr
+    assert r.stdout.strip() == "ok", r.stdout + r.stderr

@@ -1927,6 +1927,40 @@
       "note": "Pending CI verification. fixture file: tests/fixtures/pgp_keys.json. No live source lookups occurred; the runner and parser use synthetic documents and the WKD specification's sample key only."
     },
     {
+      "name": "minecraft",
+      "upstream": "https://github.com/frostknightfrosty-lgtm/aletheia/tree/main/docker/minecraft",
+      "license": "Public Mojang Minecraft profile API; no third-party code. NameMC is not used because it has no public API and does not authorize scraping.",
+      "version_pin": "1.0 (Mojang public profile API; reviewed 2026-10-20)",
+      "invocation": "Bounded public Mojang profile lookup via dedicated Docker runner (aletheia/minecraft:v1)",
+      "input_types": [
+        "username"
+      ],
+      "output_schema": "SocialAccountFinding[] + TechnicalFinding[]",
+      "legal_notes": "At most two unauthenticated public GETs per run: current Java username lookup and public session profile. No credentials, retry, pagination, or proxy rotation. Emits current handle, UUID, session name, and public skin/cape URLs/model only; texture signatures, raw property, profile actions, and images are discarded. NameMC and the removed name-history endpoint are not used. A handle is a same-handle lead, not identity proof. See docker/minecraft/RATE_LIMITS.md.",
+      "network": "required",
+      "last_audited": "2026-10-20T00:00:00Z",
+      "verification_status": "unknown",
+      "fixture_provenance": "synthetic",
+      "legal_tier": 1,
+      "enabled_by_default": true,
+      "disabled_reason": null,
+      "batch_grouping": "minecraft",
+      "requires_key": false,
+      "sub_sources": [
+        {
+          "name": "mojang-profile",
+          "requires_key": false,
+          "enabled_by_default": true
+        },
+        {
+          "name": "mojang-session-textures",
+          "requires_key": false,
+          "enabled_by_default": true
+        }
+      ],
+      "note": "Pending CI verification. fixture file: tests/fixtures/minecraft.json. No live source lookups occurred; the runner and parser use a synthetic document only. NameMC is a documented exclusion."
+    },
+    {
       "name": "egress_proxy",
       "upstream": "https://github.com/frostknightfrosty-lgtm/aletheia/tree/main/docker/egress_proxy",
       "license": "Project-internal infrastructure component (Aletheia repository); no third-party code bundled.",

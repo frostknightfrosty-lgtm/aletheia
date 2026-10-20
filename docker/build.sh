@@ -64,4 +64,5 @@ docker build -f docker/researcher_ids/Dockerfile -t aletheia/researcher-ids:v1 d
 docker build -f docker/weather/Dockerfile -t aletheia/weather:v1 docker/weather
 docker build -f docker/github_identity/Dockerfile -t aletheia/github-identity:v1 docker/github_identity
 docker build -f docker/pgp_keys/Dockerfile -t aletheia/pgp-keys:v1 docker/pgp_keys
+docker build -f docker/minecraft/Dockerfile -t aletheia/minecraft:v1 docker/minecraft
 docker build -f docker/egress_proxy/Dockerfile -t aletheia/egress-proxy:v1 docker/egress_proxy

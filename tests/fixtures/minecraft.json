@@ -1,0 +1,13 @@
+{
+  "source": "minecraft",
+  "status": "ok",
+  "username": "Notch",
+  "uuid": "069a79f444e94726a5befca90e38aaf5",
+  "uuid_dashed": "069a79f4-44e9-4726-a5be-fca90e38aaf5",
+  "session_name": "Notch",
+  "skin_url": "https://textures.minecraft.net/texture/2920091a4925b58f02c77dadc3ecef07ea4c7472f64e0fd432ce5522489362680",
+  "cape_url": null,
+  "skin_model": "slim",
+  "rate_limit_result": "UNDER_LIMIT",
+  "errors": []
+}
