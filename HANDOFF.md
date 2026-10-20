@@ -50,6 +50,20 @@ prerequisites are met. A tier classification is project policy, not a legal conc
   `results.json`: 75 entries, 0 nonzero return codes. The docs commit `c169b1e`
   repeated the same numbers in run **39451409086** (parser 55/55; 1112 passed;
   capture 75/75; egress 55/49/49; storage 6/6).
+- Newest artifact check (run **39457146650**, commit `4505ae5`): lines copied
+  from the downloaded artifact (`ci-artifacts-39457146650`), not typed —
+  `PARSER PREFLIGHT: PASS — 56/56 adapters have parser coverage`; `1122 passed,
+  1 warning`; `DOCKER CAPTURE: PASS — 78/78 cases captured` (including
+  `phase17-pybdshadow-health` — stdout `ok`, `pin_file: true`, package `0.3.5`,
+  geopandas `1.2.0`, pyproj `3.8.0`, shapely `2.2.0` — and
+  `phase17-pybdshadow-selftest`, 8/8 checks including a real synthetic shadow
+  computation); `egress-scenario.json`: `adapters=56 network_required=49
+  wired=49`; `storage-conformance.json`: `passing` = file, postgres, neo4j,
+  elasticsearch, minio, redis, `unconfigured` = [], `required_all` = `true`;
+  `pytest-summary.json`: `junit_total` 1122, `skipped_in_ci` [], `ok` `true`;
+  `results.json`: 78 entries, 0 nonzero return codes. The docs commit `b5bc16c`
+  repeated the same numbers in run **39460496509** (parser 56/56; 1122 passed;
+  capture 78/78; egress 56/49/49; storage 6/6).
 - **tracelines unit verified:** commit `0ac22ed` (the unit's first code commit
   `89c6400` plus the Python-3.12 image fix). Local evidence before commit:
   parser preflight 54/54; suite 1030 passed + 70 environment-only skips = 1100;
@@ -67,10 +81,22 @@ prerequisites are met. A tier classification is project policy, not a legal conc
   check exercises `_parse_args` + `_parse_observation`, and a regression test
   pins it. Manifest `verified-fixture`; docs `c169b1e` verified by run
   **39451409086**; the state push is the last step.
-- **In progress locally (not committed):** pybdshadow (#16) — offline
-  building-shadow adapter over pybdshadow 0.3.5 (BSD-3-Clause, commit
-  `e2665ee`), file-seed JSON input, tier 1, no network; manifest 59 entries /
-  56 adapters, image, fixture, tests and three capture cases prepared.
+- **pybdshadow unit verified:** commit `4505ae5` — offline building-shadow
+  adapter over pybdshadow 0.3.5 (BSD-3-Clause, commit `e2665ee`), file-seed
+  JSON input, tier 1, no network. Local: parser 56/56; suite 1050 passed + 72
+  skipped = 1122; the CI container run confirms `pin_file: true`, 8/8 selftest
+  checks and a real synthetic shadow computation. Manifest `verified-fixture`;
+  docs `b5bc16c` verified by run **39460496509**; the state push is the last
+  step. GeoLocator (#18) was recorded in the same docs commit as an
+  upstream-withdrawal blocker: the official TIBHannover/GeoEstimation repository
+  removed all source and model weights, the checkpoint URLs return HTTP 404,
+  and no code was built.
+- **In progress locally (not committed):** crypttrace (#20) — Bitcoin-only
+  fund-flow adapter over the pinned crypttrace 0.22.0 (MIT, commit `cf60a88`);
+  calls `report.generate` at depth 2 / branching 3 with no API key; manifest
+  60 entries / 57 adapters, image, fixture, tests and three capture cases
+  prepared. Local parser 57/57; suite 1059 passed + 73 skipped = 1132; driver
+  health and 8/8 selftest checks pass in an isolated venv.
 - Evidence lines copied from the downloaded artifact of run `39141365915`
   (`ci-artifacts-39141365915`), not typed:
   - `PARSER PREFLIGHT: PASS — 49/49 adapters have parser coverage`
@@ -82,17 +108,20 @@ prerequisites are met. A tier classification is project policy, not a legal conc
   7 = `egress_events` 7; `phase15-egress-policy-covers-registry` = `adapters=49
   network_required=44 wired=44`; the crtsh check returned `new CONNECT crt.sh entries=1
   status=200` this run; the four `phase12-*` checks pass.
-- Local consistency at the ShadowFinder-verified tree: **1041 passed + 71 skipped = 1112**,
-  which equals the CI passed count exactly. The 71 skips are 66 Docker-dependent
-  tests (no Docker on this machine, including the ShadowFinder container-health
+- Local consistency at the pybdshadow-verified tree: **1050 passed + 72 skipped = 1122**,
+  which equals the CI passed count exactly. The 72 skips are 67 Docker-dependent
+  tests (no Docker on this machine, including the pybdshadow container-health
   case) and 5 `tests/test_storage_services.py` (no `ALETHEIA_STORAGE_*` service
   configured); both groups execute in CI, and CI now *fails* if either group
   skips — see `docs/SKIPPED_IN_CI.md`.
-- 55 registered adapters; all 55 are `verified-fixture` in
+- 56 registered adapters; all 56 are `verified-fixture` in
   `PROJECT_MANIFEST.json`. One infrastructure component (`egress_proxy`),
   `verified-fixture`. Six storage backends, all conformance-verified against
-  real services in CI. 49 of the 55 adapters declare `network_required=True`,
+  real services in CI. 49 of the 56 adapters declare `network_required=True`,
   and the egress policy wires all 49.
+- The working tree additionally contains the uncommitted crypttrace #20 unit
+  (57th adapter, one network host pair, 1059 passed + 73 skipped = 1132); it is
+  not part of the verified counts above.
 
 ## Phase 17 — pivot cascade + source completeness (staged 2026-10-18; autonomous campaign)
 
