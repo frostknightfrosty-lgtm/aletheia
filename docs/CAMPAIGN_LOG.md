@@ -19,14 +19,14 @@
   image defect, and passed after the fix.
 - Position: **P17.11 Wave A**: §A 33 (Unpaywall), 31 (SearXNG), 36 (CipherScan),
   11 (Broń Vault), 2 (Zehef), 4 (tiktok-hashtag-analysis), 12 (VENOM), 13
-  (PicImageSearch) and 14 (tracelines) are **CI-verified and flipped**; §A 3
-  (scrawler) is recorded as an interface blocker. Next: ShadowFinder (#15).
-- Last verified commit: `0ac22ed` (tracelines code; run `39416003189`: parser
-  54/54, **1100 passed**, capture 73/73, egress 54/49/49, storage 6/6). The
-  tracelines docs flip is unverified until its own run reports.
-- Next action: continue Wave A — ShadowFinder (#15), pybdshadow, GeoLocator,
-  crypttrace CLI wrap, ERATV, BigQuery; then Waves B–E; P17.12/P17.13;
-  close-out.
+  (PicImageSearch), 14 (tracelines) and 15 (ShadowFinder) are **CI-verified and
+  flipped**; §A 3 (scrawler) is recorded as an interface blocker. Next:
+  pybdshadow.
+- Last verified commit: `5ddf240` (ShadowFinder code; run `39448325747`: parser
+  55/55, **1112 passed**, capture 75/75, egress 55/49/49, storage 6/6). The
+  ShadowFinder docs flip is unverified until its own run reports.
+- Next action: continue Wave A — pybdshadow, GeoLocator, crypttrace CLI wrap,
+  ERATV, BigQuery; then Waves B–E; P17.12/P17.13; close-out.
 - Owner-blocked (parked, never wait on): everything in `docs/USER_ACTIONS.md`
   except §0, which is now resolved.
 - Decision defaults in force: see "Adopted defaults" below.
@@ -756,3 +756,24 @@ activate when the key exists.
   offline Python API over the shipped timezone grid; the CLI only renders
   PNGs); then pybdshadow, GeoLocator, crypttrace CLI wrap, ERATV, BigQuery;
   then Waves B–E.
+
+- 2026-10-20 — P17.11 ShadowFinder adapter (#15) — commit `5ddf240` — run
+  `39448325747` — docker-verification **green**. Copied from the downloaded
+  artifact `ci-artifacts-39448325747`:
+  - `PARSER PREFLIGHT: PASS — 55/55 adapters have parser coverage`
+  - pytest-summary.json: `"console_summary": "1112 passed, 1 warning"`,
+    `"junit_total": 1112`, `"skipped_in_ci": []`, `"ok": true`
+  - docker-integration/capture.log: `DOCKER CAPTURE: PASS — 75/75 cases
+    captured`, including `phase17-shadowfinder-health` (`ok`) and
+    `phase17-shadowfinder-selftest` (9/9 checks) under `--network none`
+  - egress-scenario.json: `adapters=55 network_required=49 wired=49`; the
+    crtsh check passed with `entries=1 status=200`
+  - storage-conformance.json: `"passing": ["file", "postgres", "neo4j",
+    "elasticsearch", "minio", "redis"]`, `"required_all": true`, `"ok": true`
+  - docker-integration/results.json: 75 entries, 0 nonzero return codes
+  The first attempt (`0eca2b4`, run `39444978518`) built the image and passed
+  health, parser, and the full suite, but failed the selftest's
+  `target_validation` check: it asserted `_parse_args("bad") is None`, while
+  `_parse_args` is syntactic and `main` rejects invalid observations via
+  `_parse_observation`. Fixed in `5ddf240` by testing the real contract and
+  adding a regression test.

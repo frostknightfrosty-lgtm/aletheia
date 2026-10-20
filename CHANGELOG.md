@@ -1,5 +1,39 @@
 # Changelog
 
+## 2026-10-20 — P17.11: ShadowFinder adapter (source #15)
+
+Every number below is copied from the downloaded artifact
+`ci-artifacts-39448325747` (run `39448325747`, commit `5ddf240`).
+
+- `PARSER PREFLIGHT: PASS — 55/55 adapters have parser coverage` (54 → 55:
+  the sixth Phase 17 registry addition).
+- `"console_summary": "1112 passed, 1 warning"` with `"junit_total": 1112`,
+  `"skipped_in_ci": []`, `"ok": true` — 12 new tests (10 adapter/driver tests,
+  the container health test, and one manifest-driven parametrization), none
+  skipped in CI (1100 → 1112).
+- `DOCKER CAPTURE: PASS — 75/75 cases captured`, including the two new cases
+  `phase17-shadowfinder-health` and `phase17-shadowfinder-selftest` (under
+  `--network none`; health stdout `ok`, with `pin_file: true`,
+  `grid_resolution_deg: 0.5`, `grid_cells: 208800`, `network_imports: []`, and
+  package `0.7.1`; the selftest passed 9/9 checks, including a real 3×3 solar
+  computation with 9 finite cells).
+- `egress-scenario.json`: `adapters=55 network_required=49 wired=49` (the new
+  source is offline, so the wired set is unchanged).
+- `storage-conformance.json`: `"passing": ["file", "postgres", "neo4j",
+  "elasticsearch", "minio", "redis"]`, `"required_all": true`, `"ok": true`.
+- `results.json`: 75 entries, 0 nonzero return codes.
+- Scope: new `SeedType.SHADOW_OBSERVATION` (object height, shadow length, UTC
+  datetime); the pinned Bellingcat ShadowFinder library (MIT, tag v0.7.1,
+  commit `215485a`) runs entirely offline over its shipped 0.5° grid. Outputs
+  are coarse 1° possibility bins (bbox, centroid, best cell, relative
+  difference, cell count), not a confirmed location; tolerance 0.10 (max 0.5),
+  1° bins (0.25–5°), top 20 regions (max 50), grid step 1 (max 4), years
+  1900–2100, polar regions excluded. No coordinate or measurement leaves the
+  container; no request library is imported; no owner action is needed. See
+  `docker/shadowfinder/RATE_LIMITS.md`.
+- `§A 15` flipped; manifest `shadowfinder` is `verified-fixture`; counts are now
+  **81 of 111** wired and **55 registered adapters**, with **30 remaining**.
+
 ## 2026-10-20 — P17.11: tracelines adapter (source #14)
 
 Every number below is copied from the downloaded artifact

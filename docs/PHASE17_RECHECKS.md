@@ -260,3 +260,36 @@ unverified, and re-opens only on a vendor change.
   `--network none`, 10/10 selftest checks). The first attempt exposed a real
   image defect: Python 3.11 could not install `networkx==3.7`; the image now
   builds on Python 3.12.
+
+## #15 ShadowFinder Web — scoped review outcome (2026-10-20)
+
+- License: MIT (upstream `LICENSE`), version 0.7.1, pinned at commit
+  `215485abd5a46a9b98c4ba0fbfce7df6b6bb1be8` (tag `v0.7.1`, released
+  2026-09-03). The package is operated unmodified in its own image; the
+  Aletheia driver is separate and the package is not patched.
+- Interface: the upstream CLI (`fire` + `quick_find`) only renders a PNG and
+  regenerates the timezone grid on demand. The driver calls the library
+  directly (`ShadowFinder` plus the shipped `timezone_grid.json`) and
+  summarises the likelihood grid, so no plotting or file output is involved.
+- Offline by construction: one `SHADOW_OBSERVATION` seed (object height,
+  shadow length, UTC datetime, tolerance, bin size) is evaluated over the
+  shipped 0.5° grid; no coordinate, measurement or query is transmitted, no
+  request library is imported, and the capture runs under `--network none`.
+  The model is a possibility band from solar geometry, not a probability or a
+  confirmed location.
+- Bounds reviewed and locked in `docker/shadowfinder/RATE_LIMITS.md`: tolerance
+  0.10 (max 0.5), 1° summary bins (0.25–5°), top 20 regions (max 50), grid
+  step 1 (max 4), dates 1900–2100, grid latitude −60..85° (polar regions
+  excluded). Bins are grid-aligned boxes, not connected components; the
+  centroid is the mean of matching cells; the grid is sampled coarsely for
+  larger steps.
+- No owner action is needed: the computation is local and fixture-verified;
+  no Gate 2 live target exists or is required.
+- **Outcome:** built and CI-verified — run `39448325747` on commit `5ddf240`
+  (parser 55/55; 1112 passed; capture 75/75, including
+  `phase17-shadowfinder-health` (`ok`) and
+  `phase17-shadowfinder-selftest` (9/9 checks) under `--network none`). The
+  unit's first run (`0eca2b4`) exposed a selftest bug: the check asserted
+  `_parse_args` rejects a malformed observation, but `_parse_args` is syntactic
+  and `main` rejects invalid observations via `_parse_observation`; the check
+  now exercises that contract and a regression test pins it.
