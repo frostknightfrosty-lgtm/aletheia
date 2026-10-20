@@ -64,7 +64,7 @@ prerequisites are met. A tier classification is project policy, not a legal conc
   `tests/test_docker_integration.py` (no Docker on this machine) and 5
   `tests/test_storage_services.py` (no `ALETHEIA_STORAGE_*` service configured); both groups
   execute in CI, and CI now *fails* if either group skips — see `docs/SKIPPED_IN_CI.md`.
-  The working tree additionally carries the prepared tracelines unit (uncommitted),
+  The tracelines unit is committed as `89c6400` but unverified (see below),
   taking the local suite to 1030 passed + 70 skipped = 1100.
 - 54 registered adapters; 53 were `verified-fixture` in `PROJECT_MANIFEST.json`
   before the CI block, and the newly committed tracelines entry is `unknown`
