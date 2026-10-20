@@ -13,34 +13,22 @@
 
 ## NOW (edited in place — this is the current position)
 
-- Campaign: **PARKED — CI capacity blocked** (see §0 of `docs/USER_ACTIONS.md`).
-  Owner mandate received and executed until the block: P17.1–P17.10 complete and
-  verified (P17.10 live cascade green), P17.11 Wave A through PicImageSearch
-  verified.
+- Campaign: **ACTIVE** — CI capacity was restored on 2026-10-20 when the
+  repository was made public (standard runners are free for public
+  repositories); the blocked tracelines run then executed, exposed one real
+  image defect, and passed after the fix.
 - Position: **P17.11 Wave A**: §A 33 (Unpaywall), 31 (SearXNG), 36 (CipherScan),
   11 (Broń Vault), 2 (Zehef), 4 (tiktok-hashtag-analysis), 12 (VENOM), 13
-  (PicImageSearch) and 14 (tracelines, code only) are built; §A 3 (scrawler)
-  recorded as an interface blocker. The first eight are **CI-verified and
-  flipped**; tracelines is **committed (`89c6400`) but not verified** because
-  GitHub Actions stopped starting jobs on 2026-10-20T11:05Z.
-- Blocker: the private repository's GitHub Actions included minutes are
-  exhausted — 2,003 wall-minutes of successful runs in October 2026 plus failed
-  attempts (billing rounds each job up). Run `39412502739` (tracelines, commit
-  `89c6400`) failed twice at start-up with `runner_id` 0 and zero steps in under
-  3 s; GitHub's status page is operational. No code defect is involved and no
-  minutes remain to verify anything further.
-- Last verified commit: `19db818` (PicImageSearch code; run `39404418732`:
-  parser 53/53, **1089 passed**, capture 71/71, egress 53/48/48, storage 6/6);
-  docs `6d2a049` and state `0bb8dbc` were both verified green (runs
-  `39407226773` and `39410068828`).
-- Next action: **owner** — restore free CI capacity by either making the
-  repository public (standard runners are free for public repositories) or
-  waiting for the included-minutes reset (no payment either way). Then the
-  campaign resumes with: verify tracelines (`89c6400`), flip §A 14, and continue
-  ShadowFinder, pybdshadow, GeoLocator, crypttrace, ERATV, BigQuery, Waves B–E,
-  P17.12/P17.13, close-out.
-- Owner-blocked (parked, never wait on): `docs/USER_ACTIONS.md` §0 (CI capacity)
-  plus everything else in that file.
+  (PicImageSearch) and 14 (tracelines) are **CI-verified and flipped**; §A 3
+  (scrawler) is recorded as an interface blocker. Next: ShadowFinder (#15).
+- Last verified commit: `0ac22ed` (tracelines code; run `39416003189`: parser
+  54/54, **1100 passed**, capture 73/73, egress 54/49/49, storage 6/6). The
+  tracelines docs flip is unverified until its own run reports.
+- Next action: continue Wave A — ShadowFinder (#15), pybdshadow, GeoLocator,
+  crypttrace CLI wrap, ERATV, BigQuery; then Waves B–E; P17.12/P17.13;
+  close-out.
+- Owner-blocked (parked, never wait on): everything in `docs/USER_ACTIONS.md`
+  except §0, which is now resolved.
 - Decision defaults in force: see "Adopted defaults" below.
 
 ## Operating loop (per work item)
@@ -732,3 +720,39 @@ activate when the key exists.
   (no payment): make the repository public (unlimited standard runners) or wait
   for the monthly included-minutes reset. Section 0 of `USER_ACTIONS.md`; the
   parked remainder is section 6. Campaign paused here.
+- 2026-10-20 — CI capacity restored — the repository is now public (verified
+  via the API: `private: false`, `visibility: public`; Actions enabled), so
+  standard GitHub-hosted runners are free. The blocked tracelines run was
+  resumed. The first real attempt exposed a genuine image defect: the
+  Dockerfile used `python:3.11-slim-bookworm` while the pinned `networkx==3.7`
+  requires Python ≥3.12, so the build failed with
+  `ERROR: No matching distribution found for networkx==3.7` (run
+  `39412502739`, attempt 4). Fixed in `0ac22ed` by building on
+  `python:3.12-slim-bookworm`. A scan of the now-public tree found 570 tracked
+  files and zero secret-pattern hits (only `.env.example`).
+- 2026-10-20 — P17.11 tracelines verification (§A 14) — commit `0ac22ed` — run
+  `39416003189` — docker-verification **green**. Copied from the downloaded
+  artifact `ci-artifacts-39416003189`:
+  - `PARSER PREFLIGHT: PASS — 54/54 adapters have parser coverage` (53 → 54)
+  - pytest-summary.json: `"console_summary": "1100 passed, 1 warning"`,
+    `"junit_total": 1100`, `"skipped_in_ci": []`, `"ok": true` (1089 → 1100:
+    the 9 tracelines driver/parser tests, the container health test, and one
+    manifest-driven parametrization; none skipped)
+  - `DOCKER CAPTURE: PASS — 73/73 cases captured` (new cases
+    `phase17-tracelines-health` and `phase17-tracelines-selftest`, return code 0
+    under `--network none`; health stdout `ok` with `pin_file: true`, pinned
+    checkout `0.2.0`, honest UA, `max_retries: 1`, `cache_enabled: false`,
+    `streetlevel_installed: false`, `tls_static: true`, provider bindings
+    `kartaview`/`mapillary`; the selftest ran 10/10 checks); results.json: 73
+    entries, 0 nonzero return codes; egress scenario:
+    `adapters=54 network_required=49 wired=49` (all nine checks ok; chain
+    `valid: true`); storage-conformance.json: `"required_all": true`,
+    `"ok": true`, `"unconfigured": []` (6/6 backends passing)
+  §A 14 flipped in `SOURCE_COMPLETENESS.md`; the `tracelines` manifest entry
+  cites the run. Fixture-only by design: no authorized point seed exists, so no
+  live requests were made. §0 of `USER_ACTIONS.md` is marked resolved.
+- Next: continue Wave A — ShadowFinder (§A 15) scoped review locked (MIT,
+  Bellingcat, pin `215485abd5a46a9b98c4ba0fbfce7df6b6bb1be8`, tag 0.7.1;
+  offline Python API over the shipped timezone grid; the CLI only renders
+  PNGs); then pybdshadow, GeoLocator, crypttrace CLI wrap, ERATV, BigQuery;
+  then Waves B–E.

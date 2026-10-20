@@ -1,6 +1,6 @@
 # Aletheia Handoff — Phase 17 staged (pivot cascade + source completeness; autonomous campaign)
 
-Last updated: 2026-10-20T11:11:57Z
+Last updated: 2026-10-20T11:52:38Z
 
 ## Project boundaries
 
@@ -13,41 +13,43 @@ prerequisites are met. A tier classification is project policy, not a legal conc
 
 ## Repository and CI state
 
-- Latest CI-verified commit: `19db818` (PicImageSearch adapter; docker
-  verification run **39404418732** green — parser 53/53; **1089 passed**;
-  capture 71/71; egress 48/48 wired; storage 6/6; docs `6d2a049` verified by
-  run **39407226773**; state `0bb8dbc` verified by run **39410068828**). Earlier: `0015ea4` (VENOM adapter; run **39196608448**,
-  1073 passed, capture 69/69; its docs/state push `da0283f` ran **39325135904**,
+- Latest CI-verified commit: `0ac22ed` (tracelines adapter; docker
+  verification run **39416003189** green — parser 54/54; **1100 passed**;
+  capture 73/73; egress 49/49 wired; storage 6/6). Earlier: `19db818`
+  (PicImageSearch; run **39404418732**: parser 53/53, 1089 passed, capture
+  71/71, egress 48/48 wired, storage 6/6; docs `6d2a049` and state `0bb8dbc`
+  verified by runs **39407226773** and **39410068828**); `0015ea4` (VENOM;
+  run **39196608448**; its docs/state push `da0283f` ran **39325135904**,
   green after three transient Go module-verification failures); `fedfd64`
-  (tiktok-hashtag adapter; run **39174382751**, 1058 passed, capture 67/67; its
-  docs/state push `de1a51e` ran **39195856352**, also green).
-- **CI capacity blocker (2026-10-20):** the private repository's included
-  GitHub Actions minutes are exhausted. October's successful runs alone total
-  **2,003 wall-minutes** (139 runs) from the API, before failed attempts; the
-  tracelines run `39412502739` (commit `89c6400`) failed twice at start-up with
-  `runner_id` 0 and zero steps in under three seconds, while GitHub reported all
-  systems operational. No code defect is involved. Free resolutions — make the
-  repository public (unlimited standard runners) or wait for the monthly reset —
-  are recorded in `docs/USER_ACTIONS.md` §0; the parked remainder is §6.
+  (tiktok-hashtag; run **39174382751**; its docs/state push `de1a51e` ran
+  **39195856352**).
+- **CI capacity restored (2026-10-20):** the repository was made public
+  (`private: false`), so standard GitHub-hosted runners are free; the blocked
+  tracelines run executed. Its first real attempt exposed a genuine image
+  defect — Python 3.11 could not install `networkx==3.7` — fixed in `0ac22ed`
+  by building on Python 3.12. The blocker record remains in
+  `docs/USER_ACTIONS.md` §0 as resolved; the parked queue (§6) was removed.
 - The authorized live run **39141366670** ran on tree `8939517` and is green (37m19s) —
   see the live-audit section below.
-- Newest artifact check (run **39404418732**, commit `19db818`): lines copied from the
-  downloaded artifact (`ci-artifacts-39404418732`), not typed —
-  `PARSER PREFLIGHT: PASS — 53/53 adapters have parser coverage`; `1089 passed,
-  1 warning`; `DOCKER CAPTURE: PASS — 71/71 cases captured` (including the new
-  `phase17-picimagesearch-health` and `phase17-picimagesearch-selftest` offline
-  cases; the picimagesearch selftest ran 9/9 checks); `egress-scenario.json`:
-  `adapters=53 network_required=48 wired=48`; `storage-conformance.json`:
+- Newest artifact check (run **39416003189**, commit `0ac22ed`): lines copied from the
+  downloaded artifact (`ci-artifacts-39416003189`), not typed —
+  `PARSER PREFLIGHT: PASS — 54/54 adapters have parser coverage`; `1100 passed,
+  1 warning`; `DOCKER CAPTURE: PASS — 73/73 cases captured` (including the new
+  `phase17-tracelines-health` and `phase17-tracelines-selftest` offline cases;
+  health stdout `ok` with `pin_file: true`, pinned checkout `0.2.0`, honest UA,
+  `max_retries: 1`, `cache_enabled: false`, `streetlevel_installed: false`,
+  `tls_static: true`, provider bindings `kartaview`/`mapillary`; the selftest
+  ran 10/10 checks); `egress-scenario.json`:
+  `adapters=54 network_required=49 wired=49`; `storage-conformance.json`:
   `passing` = file, postgres, neo4j, elasticsearch, minio, redis,
   `unconfigured` = [], `required_all` = `true`; `pytest-summary.json`:
-  `junit_total` 1089, `skipped_in_ci` [], `ok` `true`; `results.json`: 71
-  entries, 0 nonzero return codes. The docs push `6d2a049` repeated the same
-  numbers in run **39407226773**.
-- **Committed but not verified:** `89c6400` (tracelines adapter). It was pushed
-  after the state push above was green; its verification run could not start
-  (blocker above). Local evidence before commit: parser preflight 54/54; suite
-  1030 passed + 70 environment-only skips = 1100; driver health/selftest green
-  in the pinned venv. Its manifest entry is `unknown`, not `verified-fixture`.
+  `junit_total` 1100, `skipped_in_ci` [], `ok` `true`; `results.json`: 73
+  entries, 0 nonzero return codes.
+- **tracelines unit verified:** commit `0ac22ed` (the unit's first code commit
+  `89c6400` plus the Python-3.12 image fix). Local evidence before commit:
+  parser preflight 54/54; suite 1030 passed + 70 environment-only skips = 1100;
+  the CI container run confirms `pin_file: true` and 10/10 selftest checks. The
+  manifest entry is `verified-fixture` with the run citation.
 - Evidence lines copied from the downloaded artifact of run `39141365915`
   (`ci-artifacts-39141365915`), not typed:
   - `PARSER PREFLIGHT: PASS — 49/49 adapters have parser coverage`
@@ -59,19 +61,17 @@ prerequisites are met. A tier classification is project policy, not a legal conc
   7 = `egress_events` 7; `phase15-egress-policy-covers-registry` = `adapters=49
   network_required=44 wired=44`; the crtsh check returned `new CONNECT crt.sh entries=1
   status=200` this run; the four `phase12-*` checks pass.
-- Local consistency at the picimagesearch-verified tree: **1020 passed + 69 skipped = 1089**,
-  which equals the CI passed count exactly. The 69 skips are 64
-  `tests/test_docker_integration.py` (no Docker on this machine) and 5
-  `tests/test_storage_services.py` (no `ALETHEIA_STORAGE_*` service configured); both groups
-  execute in CI, and CI now *fails* if either group skips — see `docs/SKIPPED_IN_CI.md`.
-  The tracelines unit is committed as `89c6400` but unverified (see below),
-  taking the local suite to 1030 passed + 70 skipped = 1100.
-- 54 registered adapters; 53 were `verified-fixture` in `PROJECT_MANIFEST.json`
-  before the CI block, and the newly committed tracelines entry is `unknown`
-  (its verification run could not start — see the CI capacity blocker above).
-  One infrastructure component (`egress_proxy`), `verified-fixture`. Six storage
-  backends, all conformance-verified against real services in CI. 49 of the 54
-  adapters declare `network_required=True`, and the egress policy wires all 49.
+- Local consistency at the tracelines-verified tree: **1030 passed + 70 skipped = 1100**,
+  which equals the CI passed count exactly. The 70 skips are 65 Docker-dependent
+  tests (no Docker on this machine, including the new tracelines container-health
+  case) and 5 `tests/test_storage_services.py` (no `ALETHEIA_STORAGE_*` service
+  configured); both groups execute in CI, and CI now *fails* if either group
+  skips — see `docs/SKIPPED_IN_CI.md`.
+- 54 registered adapters; all 54 are `verified-fixture` in
+  `PROJECT_MANIFEST.json`. One infrastructure component (`egress_proxy`),
+  `verified-fixture`. Six storage backends, all conformance-verified against
+  real services in CI. 49 of the 54 adapters declare `network_required=True`,
+  and the egress policy wires all 49.
 
 ## Phase 17 — pivot cascade + source completeness (staged 2026-10-18; autonomous campaign)
 
@@ -83,7 +83,7 @@ any seed (seed list / raw text / screenshot) → evidence-gated adapter→adapte
 → tiered identity map to exhaustion, every step evidence-gated. Owner directive of
 2026-10-18: everything in the 111 accepted candidates and every policy-permitted
 not-yet-integrated source becomes fully integrated, wired and working — tracked
-item-by-item in `docs/SOURCE_COMPLETENESS.md` (79 of 111 already built; 32 gaps in §A;
+item-by-item in `docs/SOURCE_COMPLETENESS.md` (80 of 111 already built; 31 gaps in §A;
 §B policy-permitted set; §C owner actions; §D recorded blockers).
 
 Both were recorded in docs commits `61cd60d` → `b6ad26d` → `c4faa40` (each

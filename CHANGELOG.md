@@ -1,5 +1,53 @@
 # Changelog
 
+## 2026-10-20 — P17.11: tracelines adapter (source #14)
+
+Every number below is copied from the downloaded artifact
+`ci-artifacts-39416003189` (run `39416003189`, commit `0ac22ed`).
+
+- `PARSER PREFLIGHT: PASS — 54/54 adapters have parser coverage` (53 → 54: the
+  fifth Phase 17 registry addition).
+- `"console_summary": "1100 passed, 1 warning"` with `"junit_total": 1100`,
+  `"skipped_in_ci": []`, `"ok": true` — 11 new tests (the 9 driver/parser
+  tests, the container health test, and one manifest-driven parametrization),
+  none skipped in CI (1089 → 1100).
+- `DOCKER CAPTURE: PASS — 73/73 cases captured`, including the two new cases
+  `phase17-tracelines-health` and `phase17-tracelines-selftest` (return code 0
+  under `--network none`; health stdout `ok` with `pin_file: true`, pinned
+  checkout `0.2.0`, `max_retries: 1`, `cache_enabled: false`,
+  `streetlevel_installed: false`, `tls_static: true`, honest UA, provider
+  bindings `kartaview`/`mapillary`; the selftest ran 10/10 checks);
+  results.json: 73 entries, 0 nonzero return codes; the egress scenario
+  reported `adapters=54 network_required=49 wired=49` (all nine checks ok;
+  chain `valid: true`); storage-conformance.json: `"required_all": true`,
+  `"ok": true`, `"unconfigured": []` (6/6 backends passing).
+- What landed: `docker/tracelines/` gained a driver and image over the pinned
+  upstream (commit `99257f0519b30ce7d890db25252f6cf440fa102e`; tag v0.2.0,
+  released 2026-07-14; AGPL-3.0-or-later), operated unmodified in its own image
+  (the SearXNG copyleft precedent). Only the documented providers are bound:
+  Mapillary sequence vector tiles (free `MAPILLARY_TOKEN`; recorded skip
+  without it) and keyless KartaView sequences. The Google provider is excluded
+  structurally: `streetlevel` is never installed, and the driver refuses to run
+  if it becomes importable. One point seed, a derived ≤300 m bbox, one to four
+  Mapillary z14 tile requests, and at most two KartaView sequence requests; no
+  retries (`max_retries=1`), no disk cache, no pagination. Coverage is
+  summarized in memory (segment length, point count, centroid/endpoints,
+  capture date) with Mapillary/KartaView CC-BY-SA 4.0 attribution; no geometry
+  is written or redistributed. TLS is never relaxed. No authorized point seed
+  exists, so the adapter ships **fixture-verified only** — no live requests
+  were made.
+- Build defect found by CI (recorded, not hidden): the unit's first real run
+  (`39412502739`, attempt 4) failed in the image build with
+  `ERROR: No matching distribution found for networkx==3.7` — the Dockerfile
+  used `python:3.11-slim-bookworm`, while the pinned `networkx==3.7` requires
+  Python ≥3.12. Fixed in `0ac22ed` by building on `python:3.12-slim-bookworm`;
+  this run verifies the fixed tree. The failures before that were the CI
+  capacity block, not this defect.
+- Docs/state: §A 14 flipped in `SOURCE_COMPLETENESS.md` (80 of 111 wired; 54
+  adapters; 31 remain); the `tracelines` manifest entry cites the run; §0 of
+  `USER_ACTIONS.md` marked resolved (the repository was made public) and the
+  parked queue removed; `HANDOFF.md` updated.
+
 ## 2026-10-20 — P17.11: PicImageSearch adapter (source #13)
 
 Every number below is copied from the downloaded artifact

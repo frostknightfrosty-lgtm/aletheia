@@ -34,10 +34,9 @@ Build sequencing: Phase 17 items **P17.11–P17.12** in
 
 ## A. The 111 accepted candidates — remaining gaps
 
-Already implemented and wired: **79 of 111** (the 53 CI-verified registered
+Already implemented and wired: **80 of 111** (the 54 CI-verified registered
 adapters and their sub-sources; some are key-gated — their skip reasons are
-recorded; a 54th adapter, `tracelines`, is committed but unverified because CI
-is blocked — see `USER_ACTIONS.md` §0). **32 of 111 remain.** Of these, one is
+recorded). **31 of 111 remain.** Of these, one is
 externally blocked (FollowTheMoney),
 several have owner-action prerequisites, and a few carry factual re-checks that
 may resolve to a recorded blocker if the free path no longer exists. No status
@@ -58,7 +57,7 @@ below may be upgraded except from copied artifact lines.
 | 11 | Bron Vault | 3 | **Wired (CI-verified)**: loopback-only sub-source of `leak_checkers` for the operator's own self-hosted instance (contract pinned to release v1.4.0 commit `6bfdcc0196ac90ed38a35a1099697497680c1666`; non-loopback URLs refused before any socket; off-host redirects refused; proxies bypassed; skips unless `BRON_VAULT_URL`/`BRON_VAULT_API_KEY` set) — run `39168364470`, 1034 passed. See `docker/leak_checkers/RATE_LIMITS.md` | Build offline local-log parser adapter (no egress) | — |
 | 12 | VENOM | 3 | **Wired (CI-verified)**: standalone one-off adapter over the pinned checkout (commit `6fa3a483abc9cb0a1d96567e33b2919be59522c6`; 29 upstream classes / 30 driver bindings — keyed services, scraping, and TLS-relaxation paths excluded with recorded reasons; honest-agent and forced-TLS deviations) — run `39196608448`, 1073 passed. See `docker/venom/RATE_LIMITS.md` | Build one-off; review and constrain its 25+-service request set | — |
 | 13 | PicImageSearch | 4 | **Wired (CI-verified)**: standalone image-input adapter over the pinned upstream (commit `784713e546273a09aae4b247a8b6f798825efafa`; self-reported 3.12.11; MIT), running five keyless engines (IQDB, 3D IQDB, Ascii2D colour search, TraceMoe, AnimeTrace) plus the official SauceNAO API when `SAUCENAO_API_KEY` is set; consumer-web scrapers, Copyseeker, Lenso, TinEye and EHentai are never imported — run `39404418732`, 1089 passed. Fixture-only: no authorized live image target, so no live requests. See `docker/picimagesearch/RATE_LIMITS.md` | — |
-| 14 | tracelines | 4 | Not built (`geolocation_image` drop) | Build offline (street-view coverage lines) | — |
+| 14 | tracelines | 4 | **Wired (CI-verified)**: standalone point-input adapter over the pinned upstream (commit `99257f0519b30ce7d890db25252f6cf440fa102e`; tag v0.2.0; AGPL-3.0-or-later, operated unmodified in its own image), running only the documented Mapillary (free `MAPILLARY_TOKEN`; recorded skip without it) and keyless KartaView providers — the Google/streetlevel provider is structurally excluded (never installed; driver refuses if importable); one point seed with a ≤300 m bbox; summarized segments only with CC-BY-SA 4.0 attribution; no retries or disk cache — run `39416003189`, 1100 passed. Fixture-only: no authorized point seed, so no live requests. See `docker/tracelines/RATE_LIMITS.md` | — |
 | 15 | ShadowFinder Web | 4 | Not built (one-off) | Build offline shadow/solar geolocation analysis | — |
 | 16 | pybdshadow | 4 | Not built (one-off) | Build offline building-shadow geometry | — |
 | 17 | youtube-geofind | 4 | Not built (one-off) | Build with YouTube Data API free quota | Owner: YT key |

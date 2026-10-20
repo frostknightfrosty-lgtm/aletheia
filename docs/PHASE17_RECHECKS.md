@@ -229,3 +229,34 @@ unverified, and re-opens only on a vendor change.
   UA and TLS verification, and the selftest ran 9/9 checks). Fixture-verified
   only: no authorized live image target exists, so no live requests were
   made. The optional SauceNAO key is recorded as an owner item.
+
+## #14 tracelines — scoped review outcome (2026-10-20)
+
+- License: AGPL-3.0-or-later (upstream `LICENSE`), version 0.2.0, pinned at
+  commit `99257f0519b30ce7d890db25252f6cf440fa102e` (tag `v0.2.0`, released
+  2026-07-14). Operated unmodified in its own image (the SearXNG copyleft
+  precedent); the Aletheia driver is separate and the package is not patched.
+- Reviewed and locked in `docker/tracelines/RATE_LIMITS.md`: documented
+  providers only — Mapillary sequence vector tiles (free `MAPILLARY_TOKEN`;
+  recorded skip without it) and keyless KartaView sequences. The Google
+  provider is excluded structurally: the package is installed without
+  `streetlevel`, the driver refuses to run if it becomes importable, and the
+  image carries no Google credentials or endpoints. One point seed, a derived
+  ≤300 m bbox, one to four Mapillary z14 tile requests and at most two
+  KartaView sequence requests; no retries (`max_retries=1`), no disk cache, no
+  pagination.
+- Output is summarized in memory (segment length, point count, centroid,
+  endpoints, capture date) with Mapillary/KartaView CC-BY-SA 4.0 attribution;
+  no coverage geometry is written or redistributed. The query point and derived
+  bbox are transmitted to both providers, so a live run needs an explicit Gate 2
+  authorization; none exists, so the adapter is fixture-verified only.
+- Fail-closed properties checked at start-up: honest fixed UA
+  `Aletheia/0.9.0 (tracelines)`, static TLS scan of the pinned sources, pin file
+  matches the commit, and provider construction succeeds without the excluded
+  Google dependency.
+- **Outcome:** built and CI-verified — run `39416003189` on commit `0ac22ed`
+  (parser 54/54; 1100 passed; capture 73/73, including
+  `phase17-tracelines-health` and `phase17-tracelines-selftest` under
+  `--network none`, 10/10 selftest checks). The first attempt exposed a real
+  image defect: Python 3.11 could not install `networkx==3.7`; the image now
+  builds on Python 3.12.
