@@ -13,29 +13,34 @@
 
 ## NOW (edited in place — this is the current position)
 
-- Campaign: **ACTIVE** — owner mandate received and executing.
-- Position: **P17.10 complete** — CI green (run `39159820872`; 1005 passed),
-  repair verified (run `39161437568`; 1011 passed), and the live cascade
-  **green** (run `39161463451`, tree `9a9cb38`: `stop_reason=saturated`,
-  `expansions=1`, `trail_digest=f2af6529…`, `coverage_ok=True`,
-  `manifest anchor: verified`; instaloader blocked ×2 and recorded — the
-  failure class the repair targeted is closed). **P17.11 Wave A**: re-checks
-  recorded; §A 33 (Unpaywall) CI-verified and flipped; §A 31 (SearXNG)
-  CI-verified and flipped; §A 36 (CipherScan) CI-verified and flipped; §A 11
-  (Bron Vault) CI-verified and flipped; §A 2 (Zehef) CI-verified and flipped;
-  §A 4 (tiktok-hashtag-analysis) CI-verified and flipped; §A 3 (scrawler)
-  recorded as an interface blocker (Windows-only GUI; no CLI per the upstream
-  FAQ).
-  **P17.3–P17.10 verified green.**
-- Next action: continue Wave A — VENOM (#12) unit in progress locally (driver,
-  image and adapter written; manifest entry, fixture, tests and count bumps
-  next); then PicImageSearch, tracelines, ShadowFinder, pybdshadow, GeoLocator,
-  crypttrace CLI wrap, ERATV, BigQuery; then Waves B–E.
-- In-flight CI: this docs/state push (tiktok-hashtag-analysis flip + state);
-  its run id and evidence lines are appended in the Log when green.
-- Last verified commit: `fedfd64` (run `39174382751`; parser 51/51;
-  **1058 passed**; capture 67/67; storage 6/6).
-- Owner-blocked (parked, never wait on): everything in `docs/USER_ACTIONS.md`.
+- Campaign: **PARKED — CI capacity blocked** (see §0 of `docs/USER_ACTIONS.md`).
+  Owner mandate received and executed until the block: P17.1–P17.10 complete and
+  verified (P17.10 live cascade green), P17.11 Wave A through PicImageSearch
+  verified.
+- Position: **P17.11 Wave A**: §A 33 (Unpaywall), 31 (SearXNG), 36 (CipherScan),
+  11 (Broń Vault), 2 (Zehef), 4 (tiktok-hashtag-analysis), 12 (VENOM), 13
+  (PicImageSearch) and 14 (tracelines, code only) are built; §A 3 (scrawler)
+  recorded as an interface blocker. The first eight are **CI-verified and
+  flipped**; tracelines is **committed (`89c6400`) but not verified** because
+  GitHub Actions stopped starting jobs on 2026-10-20T11:05Z.
+- Blocker: the private repository's GitHub Actions included minutes are
+  exhausted — 2,003 wall-minutes of successful runs in October 2026 plus failed
+  attempts (billing rounds each job up). Run `39412502739` (tracelines, commit
+  `89c6400`) failed twice at start-up with `runner_id` 0 and zero steps in under
+  3 s; GitHub's status page is operational. No code defect is involved and no
+  minutes remain to verify anything further.
+- Last verified commit: `19db818` (PicImageSearch code; run `39404418732`:
+  parser 53/53, **1089 passed**, capture 71/71, egress 53/48/48, storage 6/6);
+  docs `6d2a049` and state `0bb8dbc` were both verified green (runs
+  `39407226773` and `39410068828`).
+- Next action: **owner** — restore free CI capacity by either making the
+  repository public (standard runners are free for public repositories) or
+  waiting for the included-minutes reset (no payment either way). Then the
+  campaign resumes with: verify tracelines (`89c6400`), flip §A 14, and continue
+  ShadowFinder, pybdshadow, GeoLocator, crypttrace, ERATV, BigQuery, Waves B–E,
+  P17.12/P17.13, close-out.
+- Owner-blocked (parked, never wait on): `docs/USER_ACTIONS.md` §0 (CI capacity)
+  plus everything else in that file.
 - Decision defaults in force: see "Adopted defaults" below.
 
 ## Operating loop (per work item)
@@ -709,3 +714,21 @@ activate when the key exists.
   path is structurally excluded; free `MAPILLARY_TOKEN` optional); then
   ShadowFinder, pybdshadow, GeoLocator, crypttrace CLI wrap, ERATV, BigQuery;
   then Waves B–E.
+- 2026-10-20 — tracelines (§A 14) — commit `89c6400` — **CI blocked at job
+  start; unit unverified**. Run `39412502739` (attempt 1) and its rerun
+  (attempt 2) both ended `failure` in ~3 s: one job, `runner_id` 0, zero steps,
+  `started_at == created_at`; GitHub's status page reported all systems
+  operational and the repository's Actions permissions are enabled. Measured
+  cause: the private repository's 2,000 included Actions minutes are exhausted —
+  October shows 139 successful runs totalling **2,003 wall-minutes** before
+  failed attempts (billing rounds each job up). No code ran, so no failure
+  excerpt exists beyond the job shape above.
+  The unit itself is complete and locally green: parser preflight 54/54;
+  local suite 1030 passed + 70 environment-only skips = 1100; driver
+  `--health`/`--selftest` verified in the pinned venv; manifest 57 entries.
+  Its manifest status is **`unknown`** (not `verified-fixture`) until a
+  downloaded green artifact exists.
+- 2026-10-20 — CI capacity blocker recorded. Free resolutions for the owner
+  (no payment): make the repository public (unlimited standard runners) or wait
+  for the monthly included-minutes reset. Section 0 of `USER_ACTIONS.md`; the
+  parked remainder is section 6. Campaign paused here.

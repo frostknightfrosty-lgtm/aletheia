@@ -34,9 +34,11 @@ Build sequencing: Phase 17 items **P17.11–P17.12** in
 
 ## A. The 111 accepted candidates — remaining gaps
 
-Already implemented and wired: **79 of 111** (the 53 registered adapters and
-their sub-sources; some are key-gated — their skip reasons are recorded).
-**32 of 111 remain.** Of these, one is externally blocked (FollowTheMoney),
+Already implemented and wired: **79 of 111** (the 53 CI-verified registered
+adapters and their sub-sources; some are key-gated — their skip reasons are
+recorded; a 54th adapter, `tracelines`, is committed but unverified because CI
+is blocked — see `USER_ACTIONS.md` §0). **32 of 111 remain.** Of these, one is
+externally blocked (FollowTheMoney),
 several have owner-action prerequisites, and a few carry factual re-checks that
 may resolve to a recorded blocker if the free path no longer exists. No status
 below may be upgraded except from copied artifact lines.

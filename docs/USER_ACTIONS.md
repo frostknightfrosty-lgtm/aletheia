@@ -9,6 +9,32 @@
 > adopted. Keyed sources are already built with recorded skip paths, so most of
 > these convert a recorded skip into live coverage the moment the key exists.
 
+## 0. CI capacity (blocking; free to resolve)
+
+The campaign cannot verify anything further until GitHub Actions can start jobs.
+On 2026-10-20T11:05Z the private repository's included Actions minutes ran out:
+October's successful runs alone measure **2,003 wall-minutes** (139 runs) from
+the API, before counting failed attempts (billing rounds each job up). The next
+run (`39412502739`, tracelines commit `89c6400`) failed twice at start-up with
+`runner_id` 0 and zero steps in under three seconds, while GitHub's status page
+reported all systems operational. This is a billing-quota block, not a code
+failure.
+
+Two free resolutions — pick one (no payment is involved):
+
+- [ ] **Make the repository public** (Settings → General → Danger Zone → Change
+  visibility). Standard GitHub-hosted runners are free and unlimited for public
+  repositories, so CI resumes immediately. This is a visibility decision:
+  the repo contains OSINT tooling and documentation and no secrets are
+  committed, but it would become world-readable.
+- [ ] **Wait for the monthly included-minutes reset** — GitHub Free restores
+  2,000 minutes per billing cycle; the exact reset date is shown under
+  Settings → Billing → Plans and usage. CI resumes automatically afterwards.
+
+After either, the campaign verifies `89c6400` (tracelines), flips §A 14, and
+continues. Adding paid minutes is possible in GitHub's UI but is **not**
+proposed — the campaign never adopts anything paid.
+
 ## 1. Free API keys (Gate 3) — register, then store as GitHub Secrets
 
 How: repo → **Settings → Secrets and variables → Actions → New repository secret**
@@ -104,3 +130,16 @@ their recorded key states. HIBP direct email lookups stay out under nothing-paid
 Any live-run target beyond today's on-file authorization needs a fresh Gate 2
 assertion written by the owner (ownership + authorization; public, legal, open
 sources only). Currently on file: `username:frost2233` (owner self-audit).
+
+## 6. Parked behind CI capacity (no owner action beyond §0)
+
+Work that is built or planned but cannot be CI-verified until §0 is resolved.
+It resumes automatically; listed so this file is the complete remainder.
+
+- Verify tracelines (`89c6400`) and flip §A 14 in `SOURCE_COMPLETENESS.md`.
+- Wave A remaining: ShadowFinder, pybdshadow, GeoLocator, crypttrace CLI wrap,
+  ERATV, BigQuery.
+- Waves B–E of the completeness directive; P17.12 completeness verification;
+  P17.13 horizon completion (Wayback CDX, Wikidata/ORCID, keyservers, GitHub
+  endpoints, Mojang/NameMC, WhatsMyName, social-graph lists, Phase 9 residuals);
+  close-out and the final report.
