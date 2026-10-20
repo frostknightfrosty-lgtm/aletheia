@@ -357,3 +357,9 @@ def test_phase15_egress_policy_covers_every_network_adapter():
 def test_phase15_egress_previously_unwired_adapter_is_proxied():
     check = _scenario_check("phase15-egress-previously-unwired-adapter")
     assert check["ok"], check["detail"]
+
+def test_phase17_researcher_ids_container_health():
+    r = _run(["docker", "run", "--rm", "--network", "none",
+              "aletheia/researcher-ids:v1", "--health"])
+    assert r.returncode == 0, r.stdout + r.stderr
+    assert r.stdout.strip() == "ok", r.stdout + r.stderr

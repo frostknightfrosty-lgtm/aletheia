@@ -26,6 +26,7 @@ from aletheia.adapters.tracelines import TracelinesAdapter
 from aletheia.adapters.shadowfinder import ShadowFinderAdapter
 from aletheia.adapters.pybdshadow import PybdshadowAdapter
 from aletheia.adapters.crypttrace import CrypttraceAdapter
+from aletheia.adapters.researcher_ids import ResearcherIdsAdapter
 from aletheia.adapters.phase5c import GravatarAdapter, RdapAdapter
 from aletheia.adapters.government_records_us import GovernmentRecordsUSAdapter
 from aletheia.adapters.corporate_registry import CorporateRegistryAdapter
@@ -123,6 +124,7 @@ def phase7_adapters() -> dict[str, Adapter]:
     adapters[ShadowFinderAdapter.descriptor.name] = ShadowFinderAdapter()
     adapters[PybdshadowAdapter.descriptor.name] = PybdshadowAdapter()
     adapters[CrypttraceAdapter.descriptor.name] = CrypttraceAdapter()
+    adapters[ResearcherIdsAdapter.descriptor.name] = ResearcherIdsAdapter()
     # Construction-time Tier 5 rejection: every adapter must have a manifest
     # entry, and an entry declaring legal_tier=5 refuses construction.
     enforce_adapter_tier_policy(adapters.keys(), manifest=_manifest_entries())

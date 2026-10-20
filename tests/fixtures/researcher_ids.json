@@ -1,0 +1,48 @@
+{
+  "source": "researcher_ids",
+  "status": "ok",
+  "query": "Ada Example",
+  "wikidata": {
+    "status": "ok",
+    "num_found": 1,
+    "results": [
+      {
+        "qid": "Q999001",
+        "label": "Ada Example",
+        "description": "synthetic example person",
+        "aliases": ["A. Example"],
+        "human": true,
+        "instance_of": ["human"],
+        "occupation": ["mathematician"],
+        "birth_date": "1815-12-10",
+        "birthplace": ["Example City"],
+        "citizenship": ["Exampleland"],
+        "gender": "female",
+        "given_name": "Ada",
+        "family_name": "Example",
+        "ids": {
+          "orcid": "0000-0002-1825-0097",
+          "viaf": "999000001"
+        },
+        "website": "https://example.org/ada",
+        "twitter": "ada_example"
+      }
+    ]
+  },
+  "orcid": {
+    "status": "ok",
+    "num_found": 1,
+    "results": [
+      {
+        "orcid": "0000-0002-1825-0097",
+        "given_name": "Ada",
+        "family_name": "Example",
+        "credit_name": "Ada Example",
+        "other_names": ["A. Example"],
+        "institutions": ["Example University"]
+      }
+    ],
+    "query_mode": "fielded"
+  },
+  "errors": []
+}

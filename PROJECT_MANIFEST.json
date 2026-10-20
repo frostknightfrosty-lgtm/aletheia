@@ -1771,6 +1771,40 @@
       "note": "Synthetic fixture and Docker health smoke verified in Docker Verification run 38952489236 on commit 2fc9933d375917c133fc4af44db26dc07c2949d4 (https://github.com/frostknightfrosty-lgtm/aletheia/actions/runs/38952489236). Raw artifact evidence: PARSER PREFLIGHT: PASS — 49/49 adapters have parser coverage; 560 passed, 1 warning in 16.17s; DOCKER CAPTURE: PASS — 50/50 cases captured. results.json contains 50 entries with 0 nonzero return codes; phase9-leak-checkers returned 0 with stdout ok under --network none. fixture file: tests/fixtures/leak_checkers.json. No live source lookups occurred. Two keyed sources are enabled by default: leakix and grayhatwarfare; breachdirectory and leak-lookup remain documented skips. The bron-vault sub-source was added later and verified in CI run 39168364470 on commit d3e7d16 (parser 49/49; 1034 passed, 1 warning; capture 63/63 cases, including the phase17-leak-checkers-bron-vault offline selftest case; storage 6/6); it only queries an operator-run loopback instance and reports a documented skip until BRON_VAULT_URL and BRON_VAULT_API_KEY are set."
     },
     {
+      "name": "researcher_ids",
+      "upstream": "https://github.com/frostknightfrosty-lgtm/aletheia/tree/main/docker/researcher_ids",
+      "license": "Composite adapter; Wikidata data is CC0 1.0 and ORCID public data is CC0 1.0, used through each service's published public API terms.",
+      "version_pin": "1.0 (public API contracts reviewed 2026-10-20)",
+      "invocation": "Bounded public HTTPS JSON APIs (Wikidata Action API and ORCID public API v3.0) via dedicated Docker runner (aletheia/researcher-ids:v1)",
+      "input_types": [
+        "person_name"
+      ],
+      "output_schema": "ResearcherIdentityFinding[]",
+      "legal_notes": "One bounded person-name query per run. Wikidata: one wbsearchentities request (max 5 hits) plus at most two wbgetentities reads (hits and at most 40 referenced IDs); ORCID: one expanded-search request (max 5 rows). Both APIs are keyless and public; no credential, account, email address, or private profile field is collected. The runner deliberately discards ORCID email arrays. Name matches are leads, not identity proof; common names collide and neither service asserts the result is the person the operator meant. See docker/researcher_ids/RATE_LIMITS.md.",
+      "network": "required",
+      "last_audited": "2026-10-20T00:00:00Z",
+      "verification_status": "unknown",
+      "fixture_provenance": "synthetic",
+      "legal_tier": 1,
+      "enabled_by_default": true,
+      "disabled_reason": null,
+      "batch_grouping": "researcher_ids",
+      "requires_key": false,
+      "sub_sources": [
+        {
+          "name": "wikidata",
+          "requires_key": false,
+          "enabled_by_default": true
+        },
+        {
+          "name": "orcid",
+          "requires_key": false,
+          "enabled_by_default": true
+        }
+      ],
+      "note": "Pending CI verification. fixture file: tests/fixtures/researcher_ids.json. No live source lookups occurred; the runner and parser use synthetic documents only."
+    },
+    {
       "name": "egress_proxy",
       "upstream": "https://github.com/frostknightfrosty-lgtm/aletheia/tree/main/docker/egress_proxy",
       "license": "Project-internal infrastructure component (Aletheia repository); no third-party code bundled.",

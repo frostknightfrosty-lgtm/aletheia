@@ -79,6 +79,9 @@ CASES = [
     ("phase17-crypttrace-health", "aletheia/crypttrace:v1", ["--health"]),
     ("phase17-crypttrace-selftest", "aletheia/crypttrace:v1", ["--selftest"]),
     ("phase17-crypttrace-normalize", "aletheia/crypttrace:v1", ["--normalize", "/work/report.json"]),
+    ("phase17-researcher-ids-health", "aletheia/researcher-ids:v1", ["--health"]),
+    ("phase17-researcher-ids-selftest", "aletheia/researcher-ids:v1", ["--selftest"]),
+    ("phase17-researcher-ids-normalize", "aletheia/researcher-ids:v1", ["--normalize", "/work/combined.json"]),
     ("phase11-egress-proxy", "aletheia/egress-proxy:v1", ["--health"]),
 ]
 
@@ -174,6 +177,11 @@ def main() -> int:
             }],
             "errors": [],
         }), encoding="utf-8")
+        researcher_ids_combined = Path(td) / "combined.json"
+        researcher_ids_combined.write_text(
+            Path("tests/fixtures/researcher_ids.json").read_text(encoding="utf-8"),
+            encoding="utf-8",
+        )
         for name, image, args in CASES:
             cmd = ["docker", "run", "--rm", "--network", "none"]
             if name == "phase1-exiftool":
@@ -182,6 +190,8 @@ def main() -> int:
                 cmd += ["-v", f"{pybdshadow_input}:/work/input.json:ro"]
             if name == "phase17-crypttrace-normalize":
                 cmd += ["-v", f"{crypttrace_report}:/work/report.json:ro"]
+            if name == "phase17-researcher-ids-normalize":
+                cmd += ["-v", f"{researcher_ids_combined}:/work/combined.json:ro"]
             if name == "phase7-core-import":
                 cmd += ["--entrypoint", "python"]
             if name == "phase4-holehe":
