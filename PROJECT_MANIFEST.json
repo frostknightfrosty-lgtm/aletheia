@@ -552,6 +552,27 @@
       "batch_grouping": "geoint"
     },
     {
+      "name": "pybdshadow",
+      "upstream": "https://github.com/ni1o1/pybdshadow",
+      "license": "BSD-3-Clause",
+      "version_pin": "0.3.5 (commit e2665ee7a6527b9fb0d581bbf7d6dc2914015b02)",
+      "invocation": "Docker / CLI",
+      "input_types": [
+        "file_path"
+      ],
+      "output_schema": "per-building shadow summaries (bbox, centroid, geodesic area, polygon and vertex counts) from a local footprint JSON document; offline only",
+      "legal_notes": "Offline building-shadow geometry from a user-supplied local JSON document (footprints, heights and one UTC datetime); the pinned pybdshadow package runs locally and no coordinate or query is transmitted. Outputs are geometric shadow summaries (bbox, centroid, geodesic area, polygon/vertex counts), not a confirmed location or a probability. BSD-3-Clause upstream, operated unmodified in its own image; the package's optional footprint-fetching helpers are never invoked; see docker/pybdshadow/RATE_LIMITS.md.",
+      "network": "none",
+      "last_audited": "2026-10-20T00:00:00Z",
+      "verification_status": "unknown",
+      "note": "Fixture parser coverage passes; fixture provenance: synthetic; fixture file: tests/fixtures/pybdshadow.json. No live container run has occurred. Verification pending the unit's CI run.",
+      "fixture_provenance": "synthetic",
+      "legal_tier": 1,
+      "enabled_by_default": true,
+      "disabled_reason": null,
+      "batch_grouping": "geoint"
+    },
+    {
       "name": "gravatar",
       "upstream": "https://docs.gravatar.com/sdk/profiles/",
       "license": "Gravatar Public API terms; no client library bundled",

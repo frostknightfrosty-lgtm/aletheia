@@ -1,0 +1,34 @@
+{
+  "source": "pybdshadow",
+  "status": "ok",
+  "pinned_commit": "e2665ee7a6527b9fb0d581bbf7d6dc2914015b02",
+  "input": {
+    "datetime_utc": "2024-06-01T12:00:00Z",
+    "buildings_total": 2
+  },
+  "thresholds": {
+    "max_buildings": 200,
+    "max_vertices": 1000,
+    "height_range_m": [0.1, 1000.0],
+    "max_input_bytes": 1000000
+  },
+  "shadows": [
+    {
+      "building_id": "b1",
+      "bbox": [-0.00012, -0.00004, 0.0002, 0.00021],
+      "centroid": [0.00004, 0.00008],
+      "shadow_area_m2": 23.457,
+      "polygons": 1,
+      "vertices": 5
+    },
+    {
+      "building_id": "b2",
+      "bbox": [0.0004, 0.0004, 0.0007, 0.00065],
+      "centroid": [0.00055, 0.00052],
+      "shadow_area_m2": 8.912,
+      "polygons": 1,
+      "vertices": 6
+    }
+  ],
+  "shadows_total": 2
+}

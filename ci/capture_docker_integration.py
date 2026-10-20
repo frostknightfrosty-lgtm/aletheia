@@ -73,6 +73,9 @@ CASES = [
     ("phase17-tracelines-selftest", "aletheia/tracelines:v1", ["--selftest"]),
     ("phase17-shadowfinder-health", "aletheia/shadowfinder:v1", ["--health"]),
     ("phase17-shadowfinder-selftest", "aletheia/shadowfinder:v1", ["--selftest"]),
+    ("phase17-pybdshadow-health", "aletheia/pybdshadow:v1", ["--health"]),
+    ("phase17-pybdshadow-selftest", "aletheia/pybdshadow:v1", ["--selftest"]),
+    ("phase17-pybdshadow-run", "aletheia/pybdshadow:v1", ["/work/input.json"]),
     ("phase11-egress-proxy", "aletheia/egress-proxy:v1", ["--health"]),
 ]
 
@@ -118,10 +121,30 @@ def main() -> int:
     with TemporaryDirectory() as td:
         sample = Path(td) / "sample.txt"
         sample.write_text("Aletheia", encoding="utf-8")
+        pybdshadow_input = Path(td) / "buildings.json"
+        pybdshadow_input.write_text(json.dumps({
+            "datetime_utc": "2024-06-01T12:00:00Z",
+            "buildings": {
+                "type": "FeatureCollection",
+                "features": [{
+                    "type": "Feature",
+                    "properties": {"building_id": "capture-b1", "height": 10.0},
+                    "geometry": {
+                        "type": "Polygon",
+                        "coordinates": [[
+                            [0.0, 0.0], [0.0002, 0.0], [0.0002, 0.0002],
+                            [0.0, 0.0002], [0.0, 0.0],
+                        ]],
+                    },
+                }],
+            },
+        }), encoding="utf-8")
         for name, image, args in CASES:
             cmd = ["docker", "run", "--rm", "--network", "none"]
             if name == "phase1-exiftool":
                 cmd += ["-v", f"{sample}:/work/sample.txt:ro"]
+            if name == "phase17-pybdshadow-run":
+                cmd += ["-v", f"{pybdshadow_input}:/work/input.json:ro"]
             if name == "phase7-core-import":
                 cmd += ["--entrypoint", "python"]
             if name == "phase4-holehe":
