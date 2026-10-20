@@ -363,3 +363,9 @@ def test_phase17_researcher_ids_container_health():
               "aletheia/researcher-ids:v1", "--health"])
     assert r.returncode == 0, r.stdout + r.stderr
     assert r.stdout.strip() == "ok", r.stdout + r.stderr
+
+def test_phase17_weather_container_health():
+    r = _run(["docker", "run", "--rm", "--network", "none",
+              "aletheia/weather:v1", "--health"])
+    assert r.returncode == 0, r.stdout + r.stderr
+    assert r.stdout.strip() == "ok", r.stdout + r.stderr

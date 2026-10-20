@@ -1,0 +1,34 @@
+{
+  "source": "weather",
+  "status": "ok",
+  "mode": "forecast_current",
+  "query": {
+    "latitude": 51.5007,
+    "longitude": -0.1246,
+    "date": "2026-10-20"
+  },
+  "grid": {
+    "latitude": 51.49349,
+    "longitude": -0.13172913,
+    "elevation": 8.0,
+    "timezone": "GMT",
+    "utc_offset_seconds": 0
+  },
+  "units": {
+    "time": "iso8601",
+    "temperature_2m": "°C",
+    "precipitation": "mm",
+    "weather_code": "wmo code",
+    "wind_speed_10m": "km/h"
+  },
+  "observation": {
+    "time": "2026-10-20T19:30",
+    "interval": 900,
+    "temperature_2m": 12.0,
+    "precipitation": 0.0,
+    "weather_code": 3,
+    "wind_speed_10m": 10.8
+  },
+  "attribution": "Weather data by Open-Meteo.com (CC-BY 4.0)",
+  "errors": []
+}

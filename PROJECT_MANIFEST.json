@@ -1805,6 +1805,40 @@
       "note": "Pending CI verification. fixture file: tests/fixtures/researcher_ids.json. No live source lookups occurred; the runner and parser use synthetic documents only."
     },
     {
+      "name": "weather",
+      "upstream": "https://github.com/frostknightfrosty-lgtm/aletheia/tree/main/docker/weather",
+      "license": "CC-BY 4.0 (Open-Meteo data; attribution required)",
+      "version_pin": "1.0 (Open-Meteo API reviewed 2026-10-20)",
+      "invocation": "Bounded public HTTPS JSON APIs (Open-Meteo forecast and historical weather) via dedicated Docker runner (aletheia/weather:v1)",
+      "input_types": [
+        "geolocation"
+      ],
+      "output_schema": "WeatherObservationFinding[]",
+      "legal_notes": "One coordinate (and optional date) per run; one keyless HTTPS request. Open-Meteo's free API is non-commercial only, with documented limits of 600 calls/minute, 5,000/hour and 10,000/day per IP/application. Data is CC-BY 4.0 and every finding carries 'Weather data by Open-Meteo.com (CC-BY 4.0)'. Weather is environmental context, not proof of an image's location or time. No identity or account data is sent. See docker/weather/RATE_LIMITS.md.",
+      "network": "required",
+      "last_audited": "2026-10-20T00:00:00Z",
+      "verification_status": "unknown",
+      "fixture_provenance": "synthetic",
+      "legal_tier": 1,
+      "enabled_by_default": true,
+      "disabled_reason": null,
+      "batch_grouping": "weather",
+      "requires_key": false,
+      "sub_sources": [
+        {
+          "name": "open-meteo-forecast",
+          "requires_key": false,
+          "enabled_by_default": true
+        },
+        {
+          "name": "open-meteo-archive",
+          "requires_key": false,
+          "enabled_by_default": true
+        }
+      ],
+      "note": "Pending CI verification. fixture file: tests/fixtures/weather.json. No live source lookups occurred; the runner and parser use synthetic documents only."
+    },
+    {
       "name": "egress_proxy",
       "upstream": "https://github.com/frostknightfrosty-lgtm/aletheia/tree/main/docker/egress_proxy",
       "license": "Project-internal infrastructure component (Aletheia repository); no third-party code bundled.",

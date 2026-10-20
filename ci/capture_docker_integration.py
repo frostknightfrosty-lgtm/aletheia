@@ -82,6 +82,9 @@ CASES = [
     ("phase17-researcher-ids-health", "aletheia/researcher-ids:v1", ["--health"]),
     ("phase17-researcher-ids-selftest", "aletheia/researcher-ids:v1", ["--selftest"]),
     ("phase17-researcher-ids-normalize", "aletheia/researcher-ids:v1", ["--normalize", "/work/combined.json"]),
+    ("phase17-weather-health", "aletheia/weather:v1", ["--health"]),
+    ("phase17-weather-selftest", "aletheia/weather:v1", ["--selftest"]),
+    ("phase17-weather-normalize", "aletheia/weather:v1", ["--normalize", "/work/response.json"]),
     ("phase11-egress-proxy", "aletheia/egress-proxy:v1", ["--health"]),
 ]
 
@@ -182,6 +185,16 @@ def main() -> int:
             Path("tests/fixtures/researcher_ids.json").read_text(encoding="utf-8"),
             encoding="utf-8",
         )
+        weather_response = Path(td) / "weather.json"
+        weather_response.write_text(json.dumps({
+            "latitude": 51.49349, "longitude": -0.13172913,
+            "utc_offset_seconds": 0, "timezone": "GMT", "elevation": 8.0,
+            "current_units": {"time": "iso8601", "temperature_2m": "°C",
+                              "precipitation": "mm", "weather_code": "wmo code"},
+            "current": {"time": "2026-10-20T19:30", "interval": 900,
+                        "temperature_2m": 12.0, "precipitation": 0.0,
+                        "weather_code": 3, "wind_speed_10m": 10.8},
+        }), encoding="utf-8")
         for name, image, args in CASES:
             cmd = ["docker", "run", "--rm", "--network", "none"]
             if name == "phase1-exiftool":
@@ -192,6 +205,8 @@ def main() -> int:
                 cmd += ["-v", f"{crypttrace_report}:/work/report.json:ro"]
             if name == "phase17-researcher-ids-normalize":
                 cmd += ["-v", f"{researcher_ids_combined}:/work/combined.json:ro"]
+            if name == "phase17-weather-normalize":
+                cmd += ["-v", f"{weather_response}:/work/response.json:ro"]
             if name == "phase7-core-import":
                 cmd += ["--entrypoint", "python"]
             if name == "phase4-holehe":
