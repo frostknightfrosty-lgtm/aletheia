@@ -34,10 +34,10 @@ Build sequencing: Phase 17 items **P17.11–P17.12** in
 
 ## A. The 111 accepted candidates — remaining gaps
 
-Already implemented and wired: **81 of 111** (the 55 CI-verified registered
+Already implemented and wired: **82 of 111** (the 56 CI-verified registered
 adapters and their sub-sources; some are key-gated — their skip reasons are
-recorded). **30 of 111 remain.** Of these, one is
-externally blocked (FollowTheMoney),
+recorded). **29 of 111 remain.** Of these, two are
+externally blocked (FollowTheMoney, GeoLocator),
 several have owner-action prerequisites, and a few carry factual re-checks that
 may resolve to a recorded blocker if the free path no longer exists. No status
 below may be upgraded except from copied artifact lines.
@@ -59,9 +59,9 @@ below may be upgraded except from copied artifact lines.
 | 13 | PicImageSearch | 4 | **Wired (CI-verified)**: standalone image-input adapter over the pinned upstream (commit `784713e546273a09aae4b247a8b6f798825efafa`; self-reported 3.12.11; MIT), running five keyless engines (IQDB, 3D IQDB, Ascii2D colour search, TraceMoe, AnimeTrace) plus the official SauceNAO API when `SAUCENAO_API_KEY` is set; consumer-web scrapers, Copyseeker, Lenso, TinEye and EHentai are never imported — run `39404418732`, 1089 passed. Fixture-only: no authorized live image target, so no live requests. See `docker/picimagesearch/RATE_LIMITS.md` | — |
 | 14 | tracelines | 4 | **Wired (CI-verified)**: standalone point-input adapter over the pinned upstream (commit `99257f0519b30ce7d890db25252f6cf440fa102e`; tag v0.2.0; AGPL-3.0-or-later, operated unmodified in its own image), running only the documented Mapillary (free `MAPILLARY_TOKEN`; recorded skip without it) and keyless KartaView providers — the Google/streetlevel provider is structurally excluded (never installed; driver refuses if importable); one point seed with a ≤300 m bbox; summarized segments only with CC-BY-SA 4.0 attribution; no retries or disk cache — run `39416003189`, 1100 passed. Fixture-only: no authorized point seed, so no live requests. See `docker/tracelines/RATE_LIMITS.md` | — |
 | 15 | ShadowFinder Web | 4 | **Wired (CI-verified)**: standalone offline adapter over the pinned Bellingcat library (commit `215485abd5a46a9b98c4ba0fbfce7df6b6bb1be8`; tag v0.7.1; MIT), new `SeedType.SHADOW_OBSERVATION` for one object height, shadow length and UTC datetime; models the observation over the shipped 0.5° solar grid and returns ranked 1° possibility bins (bbox, centroid, best cell, relative difference, cell count) with bounded grid sampling and no coordinate or measurement transmitted — run `39448325747`, 1112 passed. Not a confirmed location; see `docker/shadowfinder/RATE_LIMITS.md` | — |
-| 16 | pybdshadow | 4 | Not built (one-off) | Build offline building-shadow geometry | — |
+| 16 | pybdshadow | 4 | **Wired (CI-verified)**: standalone offline building-shadow adapter over the pinned pybdshadow 0.3.5 (commit `e2665ee7a6527b9fb0d581bbf7d6dc2914015b02`; BSD-3-Clause); a local file-seed JSON supplies 1–200 footprint polygons, heights and one UTC datetime; per-building shadow summaries (bbox, centroid, geodesic area, polygon/vertex counts) are computed under `--network none` — run `39457146650`, 1122 passed. Not a confirmed location; see `docker/pybdshadow/RATE_LIMITS.md` | — |
 | 17 | youtube-geofind | 4 | Not built (one-off) | Build with YouTube Data API free quota | Owner: YT key |
-| 18 | GeoLocator | 4 | Not built (one-off) | Build offline vision model; license + weights review | — |
+| 18 | GeoLocator | 4 | **Blocked (upstream withdrawal)**: the MIT demo app depends on the GeoEstimation pre-trained ResNet; the official `TIBHannover/GeoEstimation` repository removed all source code and model weights, retains the repository for documentation only, and explicitly refrains from further public release (README "Important Notice", re-checked 2026-10-20); the checkpoint and hparams URLs used by the app return HTTP 404. The retained fork is not used because it would contradict the authors' withdrawal. See `docs/PHASE17_RECHECKS.md` #18 | — |
 | 19 | Betaface | 4 | Not built (one-off) | Build with free evaluation tier (≤500 images/day); corroboration-only role; never sole basis | Owner: free key + secret |
 | 20 | crypttrace | 5 | Dropped (`crypto_blockchain`): no importable API | Re-review: wrap pinned CLI in container if output is parseable; else record blocker | — |
 | 21 | FollowTheMoney | 6 | Not built; **Gate 7 documented exclusion** | **Externally blocked**: no published request contract; parent OpenSecrets discontinued public API 2025-04-15; commercial route only. Re-open only on vendor change | — |

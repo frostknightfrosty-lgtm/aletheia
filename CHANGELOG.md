@@ -1,5 +1,38 @@
 # Changelog
 
+## 2026-10-20 — P17.11: pybdshadow adapter (source #16)
+
+Every number below is copied from the downloaded artifact
+`ci-artifacts-39457146650` (run `39457146650`, commit `4505ae5`).
+
+- `PARSER PREFLIGHT: PASS — 56/56 adapters have parser coverage` (55 → 56:
+  the seventh Phase 17 registry addition).
+- `"console_summary": "1122 passed, 1 warning"` with `"junit_total": 1122`,
+  `"skipped_in_ci": []`, `"ok": true` — 10 new tests (eight adapter/driver
+  tests, the container health test and one manifest-driven parametrization),
+  none skipped in CI (1112 → 1122).
+- `DOCKER CAPTURE: PASS — 78/78 cases captured`, including the three new
+  cases `phase17-pybdshadow-health` (stdout `ok`, with `pin_file: true`,
+  package `0.3.5`, geopandas `1.2.0`, pyproj `3.8.0`, shapely `2.2.0`),
+  `phase17-pybdshadow-selftest` (8/8 checks, including a real footprint shadow
+  computation and the night-rejection path) and `phase17-pybdshadow-run`, a
+  synthetic footprint run through the real library.
+- `egress-scenario.json`: `adapters=56 network_required=49 wired=49` (the new
+  source is offline, so the wired set is unchanged).
+- `storage-conformance.json`: `"passing": ["file", "postgres", "neo4j",
+  "elasticsearch", "minio", "redis"]`, `"required_all": true`, `"ok": true`.
+- `results.json`: 78 entries, 0 nonzero return codes.
+- Scope: new file-seed input (`SeedType.FILE_PATH`) carrying 1–200 building
+  footprint polygons with heights and one UTC datetime; the pinned pybdshadow
+  library (BSD-3-Clause, 0.3.5, commit `e2665ee`) runs entirely offline.
+  Per-building outputs are shadow summaries (bbox, centroid, geodesic area,
+  polygon/vertex counts), not a confirmed location; bounds are 1,000,000 input
+  bytes, 1–200 buildings, 4–1,000 vertices, heights 0.1–1,000 m, years
+  1900–2100, no holes. Holes are rejected because the upstream routine uses
+  the exterior ring. See `docker/pybdshadow/RATE_LIMITS.md`.
+- `§A 16` flipped; manifest `pybdshadow` is `verified-fixture`; counts are now
+  **82 of 111** wired and **56 registered adapters**, with **29 remaining**.
+
 ## 2026-10-20 — P17.11: ShadowFinder adapter (source #15)
 
 Every number below is copied from the downloaded artifact

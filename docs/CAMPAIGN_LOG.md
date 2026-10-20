@@ -19,14 +19,16 @@
   image defect, and passed after the fix.
 - Position: **P17.11 Wave A**: §A 33 (Unpaywall), 31 (SearXNG), 36 (CipherScan),
   11 (Broń Vault), 2 (Zehef), 4 (tiktok-hashtag-analysis), 12 (VENOM), 13
-  (PicImageSearch), 14 (tracelines) and 15 (ShadowFinder) are **CI-verified and
-  flipped**; §A 3 (scrawler) is recorded as an interface blocker. Next:
-  pybdshadow.
-- Last verified commit: `5ddf240` (ShadowFinder code; run `39448325747`: parser
-  55/55, **1112 passed**, capture 75/75, egress 55/49/49, storage 6/6). The
-  ShadowFinder docs flip is unverified until its own run reports.
-- Next action: continue Wave A — pybdshadow, GeoLocator, crypttrace CLI wrap,
-  ERATV, BigQuery; then Waves B–E; P17.12/P17.13; close-out.
+  (PicImageSearch), 14 (tracelines), 15 (ShadowFinder) and 16 (pybdshadow) are
+  **CI-verified and flipped**; §A 3 (scrawler) is recorded as an interface
+  blocker and §A 18 (GeoLocator) as an **upstream-withdrawal blocker** (all
+  GeoEstimation code and weights removed; the app's checkpoint URLs return
+  HTTP 404). Next: crypttrace (#20), ERATV (#27), BigQuery (#29).
+- Last verified commit: `4505ae5` (pybdshadow code; run `39457146650`: parser 56/56,
+  **1122 passed**, capture 78/78, egress 56/49/49, storage 6/6). The pybdshadow
+  docs flip + GeoLocator blocker record are unverified until this docs run reports.
+- Next action: continue Wave A — crypttrace CLI wrap, ERATV, BigQuery; then
+  Waves B–E; P17.12/P17.13; close-out.
 - Owner-blocked (parked, never wait on): everything in `docs/USER_ACTIONS.md`
   except §0, which is now resolved.
 - Decision defaults in force: see "Adopted defaults" below.
@@ -777,3 +779,27 @@ activate when the key exists.
   `_parse_args` is syntactic and `main` rejects invalid observations via
   `_parse_observation`. Fixed in `5ddf240` by testing the real contract and
   adding a regression test.
+
+- 2026-10-20 — P17.11 pybdshadow adapter (#16) — commit `4505ae5` — run
+  `39457146650` — docker-verification **green**. Copied from the downloaded artifact
+  `ci-artifacts-39457146650`:
+  - `PARSER PREFLIGHT: PASS — 56/56 adapters have parser coverage`
+  - pytest-summary.json: `"console_summary": "1122 passed, 1 warning"`,
+    `"junit_total": 1122`, `"skipped_in_ci": []`, `"ok": true`
+  - docker-integration/capture.log: `DOCKER CAPTURE: PASS — 78/78 cases
+    captured`, including `phase17-pybdshadow-health` (stdout `ok`),
+    `phase17-pybdshadow-selftest` (8/8 checks) and the synthetic
+    `phase17-pybdshadow-run`, all under `--network none`
+  - egress-scenario.json: `adapters=56 network_required=49 wired=49`
+  - storage-conformance.json: `"passing": ["file", "postgres", "neo4j",
+    "elasticsearch", "minio", "redis"]`, `"required_all": true`, `"ok": true`
+  - docker-integration/results.json: 78 entries, 0 nonzero return codes
+- 2026-10-20 — P17.11 GeoLocator (#18) — no code — recorded as a **blocker**:
+  the MIT demo app wraps `TIBHannover/GeoEstimation`'s pre-trained ResNet, but
+  the official repository removed all source code and model weights from the
+  repository and its entire history and explicitly refrains from further public
+  release ("Important Notice", re-checked 2026-10-20); the checkpoint and
+  hparams release URLs used by the app return HTTP 404. The retained
+  `samhita-alla/GeoEstimation` fork is not used because it would contradict the
+  authors' withdrawal. No owner action is required. See
+  `docs/PHASE17_RECHECKS.md` #18.

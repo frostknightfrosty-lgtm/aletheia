@@ -293,3 +293,66 @@ unverified, and re-opens only on a vendor change.
   `_parse_args` rejects a malformed observation, but `_parse_args` is syntactic
   and `main` rejects invalid observations via `_parse_observation`; the check
   now exercises that contract and a regression test pins it.
+
+## #16 pybdshadow — scoped review outcome (2026-10-20)
+
+- License: BSD-3-Clause (upstream `LICENSE`), version 0.3.5, pinned at commit
+  `e2665ee7a6527b9fb0d581bbf7d6dc2914015b02` (2025-03-19). The package is
+  installed unmodified in its own image; the Aletheia driver is separate.
+- Interface: one local JSON document (`SeedType.FILE_PATH`) with a UTC
+  datetime and a GeoJSON FeatureCollection of Polygon footprints carrying
+  `height` and optional `building_id`. The driver builds a WGS84 GeoDataFrame
+  and calls `pybdshadow.bdshadow_sunlight`, then summarises the returned
+  shadow geometries.
+- Offline by construction: no request library is called by the driver; the
+  package's optional footprint-fetching helpers (`get_buildings`, which uses
+  `requests`/`vt2geojson`) are never invoked, and every capture case runs under
+  `--network none`. The image installs the package without its `keplergl`
+  extra; import-time analysis/visualisation modules work with `transbigdata`
+  installed.
+- Bounds reviewed and locked in `docker/pybdshadow/RATE_LIMITS.md`: at most
+  1,000,000 input bytes, 1–200 buildings, 4–1,000 vertices per exterior ring,
+  heights 0.1–1,000 m, dates 1900–2100, WGS84 lon/lat checks, closed rings,
+  no holes (the upstream routine uses the exterior ring), unique building ids.
+  The sun position is computed at the centre of the footprint bounds; when the
+  sun is below the horizon the driver returns `status: "no_sunlight"` with exit
+  code 0.
+- Output is per-building summary geometry (`bbox`, `centroid`,
+  `shadow_area_m2`, `polygons`, `vertices`), not a confirmed location,
+  probability, or redistributable footprint dataset.
+- No owner action is needed: the input is owner-supplied and the computation is
+  local; there is no Gate 2 live target for a building-shadow capability, and
+  none is required.
+- **Outcome:** built and CI-verified — run `39457146650` on commit `4505ae5`
+  (parser 56/56; 1122 passed; capture 78/78, including
+  `phase17-pybdshadow-health` (`ok`), `phase17-pybdshadow-selftest` (8/8
+  checks) and the synthetic `phase17-pybdshadow-run` under `--network none`).
+  The library was first validated locally against the exact pinned stack
+  (geopandas 1.2.0, pandas 3.0.6, shapely 2.2.0, pyproj 3.8.0), including the
+  night-rejection path.
+
+## #18 GeoLocator — scoped review outcome (2026-10-20)
+
+- App: `samhita-alla/geolocator`, MIT (upstream `LICENSE`), last commit
+  `80f270a4c6e962b5542545127edfd320d7168dc9` (2022-12-27). It is an
+  end-to-end demo (PyTorch Lightning, ONNX Runtime, BentoML, Gradio) wrapped
+  around the ECCV-2018 GeoEstimation ResNet; the only image-geolocation
+  capability worth adopting is that pre-trained model.
+- Weights: the app's notebook and service download
+  `epoch.014-val_loss.18.4833.ckpt` and `hparams.yaml` from the
+  `TIBHannover/GeoEstimation` `pytorch` release. Re-checked 2026-10-20: the
+  official repository's README states that **all source code and model
+  weights have been removed** from the repository and its entire history,
+  "after careful consideration of the ethical and societal risks", retains the
+  repository for documentation only, and explicitly "refrains from further
+  public release of the implementation". Both release URLs used by the app
+  return HTTP 404.
+- The `samhita-alla/GeoEstimation` fork still exists, but building from it
+  would contradict the upstream authors' stated withdrawal; Aletheia does not
+  use it. The app's video path additionally depends on YouTube-DL and network
+  access, which would require an authorized live target; none exists for this
+  source.
+- **Outcome:** recorded as a blocker, no code and no manifest entry. No owner
+  action is required; an owner who wants this capability would have to obtain
+  explicit permission from the GeoEstimation authors, which this campaign does
+  not do. The source remains one of the 29 not-yet-wired rows.
