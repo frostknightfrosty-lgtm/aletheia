@@ -1,6 +1,6 @@
 # Aletheia Handoff — Phase 18 pending (Operator-Driven Model; Phase 17 complete)
 
-Last updated: 2026-10-22T16:12:57Z
+Last updated: 2026-10-22T17:09:16Z
 
 ## Project boundaries
 
@@ -561,10 +561,14 @@ the top CHANGELOG entry and the live-audit section above). What remains needs us
 
 - **Gate 2 is satisfied for `frost2233` only.** Any other target — or a broader sweep — needs
   a fresh, explicit ownership assertion before a live run.
-- **Gate 3** — free API keys as GitHub Secrets. `LEAKIX_API_KEY`, `IPGEOLOCATION_KEY`,
-  and `UNPAYWALL_EMAIL` are configured. `REDDIT_CLIENT_ID`/`SECRET`, `YOUTUBE_API_KEY`,
-  `GRAYHATWARFARE_TOKEN`, `ABUSEIPDB_KEY`, `NETLAS_KEY`, and `SAUCENAO_API_KEY` remain
-  pending owner action.
+- **Gate 3** — free API keys as GitHub Secrets. Configured and directly verified:
+  `LEAKIX_API_KEY` and `IPGEOLOCATION_KEY` (2026-10-20); `UNPAYWALL_EMAIL`
+  (2026-10-20); `GRAYHATWARFARE_TOKEN`, `ABUSEIPDB_KEY`, `NETLAS_KEY`,
+  `SAUCENAO_API_KEY`, `YOUTUBE_API_KEY`, and the abuse.ch `URLHAUS_AUTH_KEY` /
+  `THREATFOX_AUTH_KEY` / `MALWAREBAZAAR_AUTH_KEY` (2026-10-22). Only
+  `REDDIT_CLIENT_ID`/`SECRET` remains pending. Direct checks: Grayhat 200
+  (honest UA), AbuseIPDB 200, Netlas 200 (honest UA), SauceNAO 200 (file upload;
+  URL mode Cloudflare), YouTube 200, and all three abuse.ch APIs 200.
 - Optional bookkeeping: promote the adapters exercised by the authorized run to
   `verified-live` using the run as copied evidence; and re-run the audit periodically as
   platform data changes.
@@ -605,13 +609,13 @@ the top CHANGELOG entry and the live-audit section above). What remains needs us
 - **Gate 2** — user-owned target required before any live investigation. Satisfied on
   2026-10-18 for `username:frost2233` (owner assertion recorded verbatim in the run
   manifest); any other target re-opens the gate.
-- **Gate 3** — verify API keys and cost before a phase depends on them. Still open for
-  several providers: `LEAKIX_API_KEY`, `IPGEOLOCATION_KEY`, and `UNPAYWALL_EMAIL` are
-  configured; `REDDIT_CLIENT_ID`/`SECRET`, `YOUTUBE_API_KEY`, `GRAYHATWARFARE_TOKEN`,
-  `ABUSEIPDB_KEY`, `NETLAS_KEY`, and `SAUCENAO_API_KEY` await owner action. `reddit-api`,
-  `youtube-api`, and the GrayhatWarfare path still skip until their keys exist. The grouped
-  free-registration master list is `docs/USER_ACTIONS.md` (see also
-  `docs/SOURCE_COMPLETENESS.md` §C).
+- **Gate 3** — verify API keys and cost before a phase depends on them. Configured and
+  directly verified: `LEAKIX_API_KEY`, `IPGEOLOCATION_KEY`, `UNPAYWALL_EMAIL`,
+  `GRAYHATWARFARE_TOKEN`, `ABUSEIPDB_KEY`, `NETLAS_KEY`, `SAUCENAO_API_KEY`,
+  `YOUTUBE_API_KEY`, and the abuse.ch `URLHAUS_AUTH_KEY` / `THREATFOX_AUTH_KEY` /
+  `MALWAREBAZAAR_AUTH_KEY`. Only `REDDIT_CLIENT_ID`/`SECRET` remains pending; `reddit-api`
+  still skips until those exist. The grouped free-registration master list is
+  `docs/USER_ACTIONS.md` (see also `docs/SOURCE_COMPLETENESS.md` §C).
 - **Gate 5** — evidence lines must be copied from a downloaded artifact, never typed.
 - **Gate 6** — `transport_movement` and `darkweb_search` build in the autonomous campaign
   (transport with recorded skip paths; dark web behind container-level Tor); live coverage

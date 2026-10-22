@@ -20,19 +20,30 @@ record.
 
 ## 1. Free API keys (Gate 3) — register, then store as GitHub Secrets
 
+Last verified: 2026-10-22. Secret values are stored only in GitHub Actions
+secrets and the local DPAPI store; they are never committed.
+
 How: repo → **Settings → Secrets and variables → Actions → New repository secret**
 (`frostknightfrosty-lgtm/aletheia`). The campaign records the exact env-var name and
 the signup URL actually used during each scoped review (never guessed).
 
-Known today (from the existing adapters):
+Configured and directly verified:
 
-- [ ] **LeakIX** — live `leak_checkers` path — secret `LEAKIX_API_KEY` — leakix.net
-- [ ] **GrayhatWarfare** — live `leak_checkers` path — secret `GRAYHATWARFARE_TOKEN` — grayhatwarfare.com
+- [x] **LeakIX** — live `leak_checkers` path — secret `LEAKIX_API_KEY` — direct API HTTP 200 (2026-10-20)
+- [x] **IPGeolocation.io** — `ip_intelligence` path — secret `IPGEOLOCATION_KEY` — direct API HTTP 200 (2026-10-20)
+- [x] **GrayhatWarfare** — live `leak_checkers` path — secret `GRAYHATWARFARE_TOKEN` — direct API HTTP 200 with the honest Aletheia user agent (2026-10-22)
+- [x] **AbuseIPDB** — `ip_intelligence` path — secret `ABUSEIPDB_KEY` — direct API HTTP 200 (2026-10-22)
+- [x] **Netlas** — `ip_intelligence` path — secret `NETLAS_KEY` — direct API HTTP 200 with the honest Aletheia user agent (2026-10-22)
+- [x] **SauceNAO** — `picimagesearch` optional path — secret `SAUCENAO_API_KEY` — file-upload API HTTP 200 (2026-10-22); URL-fetch mode may hit Cloudflare
+- [x] **YouTube Data API** — `youtube-api` adapter + `youtube-geofind` — secret `YOUTUBE_API_KEY` — direct API HTTP 200 (2026-10-22)
+- [x] **abuse.ch** — `ip_intelligence` URLhaus / ThreatFox / MalwareBazaar — secrets `URLHAUS_AUTH_KEY`, `THREATFOX_AUTH_KEY`, `MALWAREBAZAAR_AUTH_KEY` — all three APIs HTTP 200 (2026-10-22)
+
+Still pending:
+
 - [ ] **Reddit** — `reddit-api` adapter — secrets `REDDIT_CLIENT_ID` + `REDDIT_CLIENT_SECRET` — register at reddit.com/prefs/apps
-- [ ] **YouTube Data API** — `youtube-api` adapter + `youtube-geofind` — secret `YOUTUBE_API_KEY` — Google Cloud console
 
-New sources from the completeness directive (signup URL + secret name recorded at
-build review):
+Other source families from the completeness directive (configured entries are
+listed above; the rest remain owner-gated or source-blocked):
 
 - **Breach / leak / exposure:** BreachDirectory (RapidAPI free tier), Leak-Lookup,
   LeakCheck (OSINT-Hub free path), Hudson Rock, Intelligence X (`x-key`), abuse.ch
@@ -62,8 +73,8 @@ build review):
 
 Configuration values (no registration, still owner-provided):
 
-- [ ] **Unpaywall** — the documented DOI endpoint requires a contact email —
-  secret `UNPAYWALL_EMAIL` (see `PHASE17_RECHECKS.md` #33).
+- [x] **Unpaywall** — the documented DOI endpoint requires a contact email —
+  secret `UNPAYWALL_EMAIL`; configured 2026-10-20 (see `PHASE17_RECHECKS.md` #33).
 - [ ] **Broń Vault (optional)** — only if you ever run the Broń Vault stealer-log
   dashboard locally (your own instance; the campaign never deploys or uploads to
   one): set `BRON_VAULT_URL` (a loopback address, e.g. `http://127.0.0.1:3000`)

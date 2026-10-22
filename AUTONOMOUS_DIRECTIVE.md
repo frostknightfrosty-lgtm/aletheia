@@ -309,7 +309,7 @@ Every one of the above requires a CI run URL. A claim without a run URL is not a
 
 **Gate 2 — Live investigation target.** Satisfied for `username:frost2233` only by explicit owner assertion. Any other target or broader sweep requires a fresh explicit assertion. Do not use a random public target.
 
-**Gate 3 — Free API keys.** Remaining provider keys (including Reddit, YouTube, GrayhatWarfare, AbuseIPDB, Netlas, and SauceNAO) are owner actions. If a required key is absent when a phase needs it, pause and ask; do not stub adapters to bypass credential checks. LeakIX, IPGeolocation, and Unpaywall configuration are already set.
+**Gate 3 — Free API keys.** Reddit remains the outstanding key in the current Gate 3 set. LeakIX, IPGeolocation, Unpaywall, GrayhatWarfare, AbuseIPDB, Netlas, SauceNAO, YouTube, and abuse.ch keys are configured. If a required key is absent when a phase needs it, pause and ask; do not stub adapters to bypass credential checks.
 
 Tier labels are descriptive and never a reason to pause for policy uncertainty.
 
