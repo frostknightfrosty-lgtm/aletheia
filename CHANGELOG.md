@@ -1,5 +1,45 @@
 # Changelog
 
+## 2026-10-23 — Phase 18.1 exponential linking 2.0
+
+Every CI number below is copied from the downloaded attempt-2 artifact for the
+cited commit; the local pytest count is explicitly marked as local. The first
+artifact belongs to the failed attempt and was not used.
+
+- Code `e5e2303` implements avatar-pHash, network-Jaccard and temporal-cadence
+  linking in the Entity Resolver and Pivot Cascade, plus interactive candidate
+  review. Docker Verification run `39865145257` (attempt 2) green:
+  `PARSER PREFLIGHT: PASS — 62/62 adapters have parser coverage`;
+  `"console_summary": "1190 passed, 1 warning"` (`1190 passed, 1 warning in
+  60.51s (0:01:00)`; `junit_total` 1190; `skipped_in_ci` empty);
+  `DOCKER CAPTURE: PASS — 96/96 cases captured`;
+  `STORAGE CONFORMANCE: PASS — 6/6 backends conform`; egress
+  `adapters=62 network_required=55 wired=55`; crtsh `rc=0`, one CONNECT
+  entry, status 200; storage 6/6; results 96 entries, 0 nonzero.
+- Avatar pHash: Hamming distance `<= 5` creates `SAME_AS_CONFIRMED` at `0.95`
+  with `source="avatar_phash"`; the default avatar fetch is proxy-aware and
+  the resolver triggers an injected adapter refetch hook for missing avatars.
+  Network Jaccard `>= 0.40` creates `SAME_AS_CONFIRMED` at `0.90` with
+  `source="network_overlap"`. Active-hour histograms in `cascade/scoring.py`
+  add `+0.15` to fuzzy matches when both sides have at least three UTC
+  timestamps and overlap is at least `0.70`.
+- Interactive review: `aletheia cascade --interactive` prompts candidates at
+  confidence `0.70–0.85` with exactly
+  `[?] Candidate Match: "jdoe88" (GitHub) == "john.doe" (Reddit). Are they the same person? [y/N/s(kip)]`;
+  `y`/`n` become confirmed/excluded profile links and append labels to
+  `tests/fixtures/calibration_pairs.json` (schema preserved).
+- Tests: `tests/test_phase18_linking.py` adds ten cases covering pHash,
+  missing-avatar refetch, Jaccard, temporal overlap/boost, interactive y/n,
+  the exact CLI prompt, flag placement, and cascade expansion after a new
+  avatar edge. Local consistency: 1112 passed + 78 skipped = 1190.
+- Attempt record: attempt 1 failed only the known transient `crt.sh` egress
+  scenario (`crtsh rc=1`, 0 CONNECT entries); attempt 2 passed with
+  `crtsh rc=0`, 1 CONNECT entry, status 200. No live run occurred; no
+  `verification_status` changed; Reddit remains excluded. Honest limits
+  (pHash collisions/shared avatars, JPEG needing Pillow, no adapter-provided
+  connection list yet, sparse temporal samples, injected refetch boundary)
+  are recorded in `HANDOFF.md`.
+
 ## 2026-10-22 — Gate 3 live validation and LeakIX 204 handling
 
 Every number below is copied from the downloaded artifacts for the cited

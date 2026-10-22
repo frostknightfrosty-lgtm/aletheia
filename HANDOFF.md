@@ -1,6 +1,6 @@
-# Aletheia Handoff — Phase 18 pending (Operator-Driven Model; Phase 17 complete)
+# Aletheia Handoff — Phase 18.1 complete (Phase 18 broader pending; Phase 17 complete)
 
-Last updated: 2026-10-22T20:17:00Z
+Last updated: 2026-10-22T23:09:41Z
 
 ## Project boundaries
 
@@ -14,12 +14,20 @@ deployment; it is a passive OSINT tool.
 
 ## Repository and CI state
 
-- **Newest CI-verified close-out: `c1f8cde`** (final docs/state tree; docker
+- **Newest CI-verified code commit: `e5e2303`** (Phase 18.1 exponential
+  linking; Docker Verification run **39865145257**, attempt 2 green on
+  `e5e2303f00785fab706e8d800a4ea51082c949a6` — parser 62/62; **1190 passed,
+  1 warning in 60.51s**; capture 96/96; egress 62/55/55 wired; storage 6/6;
+  96 results, 0 nonzero. Local: **1112 passed + 78 skipped = 1190**. The
+  first attempt failed only the known transient `crt.sh` egress scenario
+  (`crtsh rc=1`, 0 CONNECT entries); attempt 2 recorded `crtsh rc=0`, 1
+  CONNECT entry, status 200. No live run.)
+- **Phase 17 close-out: `c1f8cde`** (final docs/state tree; docker
   verification run **39499810107** green — parser 62/62; **1175 passed**;
   capture 96/96; egress 62/55/55 wired; storage 6/6; 96 results, 0 nonzero).
   No live source run occurred. The final report is
   `docs/FINAL_REPORT_PHASE17.md`.
-- **Newest CI-verified code commit: `02c08d5`** (LeakIX `HTTP 204`
+- **Previous CI-verified code commit: `02c08d5`** (LeakIX `HTTP 204`
   normalization for the Gate 3 live path; Docker Verification run
   **39841924500** green — parser 62/62; **1180 passed**, 1 warning; capture
   96/96; egress 62/55/55 wired; storage 6/6; 96 results, 0 nonzero).
@@ -200,6 +208,81 @@ deployment; it is a passive OSINT tool.
 - No unverified unit remains in the working tree and no adoptable free P17.13
   adapter remains. NameMC, social-graph list ingestion, and news_search are
   written exclusions in `docs/NOT_INTEGRATED.md`; Waves B–D are owner-gated.
+
+## Phase 18.1 — exponential linking 2.0 (complete, `e5e2303`)
+
+CI evidence, copied from the downloaded attempt-2 artifact
+(`ci-artifacts-39865145257`, artifact id `12464733847`; the first artifact,
+id `12465115318`, is the failed attempt 1 and was not used):
+
+- `PARSER PREFLIGHT: PASS — 62/62 adapters have parser coverage`
+- `1190 passed, 1 warning in 60.51s (0:01:00)`
+- `DOCKER CAPTURE: PASS — 96/96 cases captured`
+- `STORAGE CONFORMANCE: PASS — 6/6 backends conform`
+- `egress-scenario.json`: all checks ok — `adapters=62 network_required=55
+  wired=55`; `crtsh rc=0 new CONNECT crt.sh entries=1 status=200`; chain
+  `valid: true` with `log_entries` 11 = `egress_events` 11; `results.json`:
+  96 entries, 0 nonzero return codes; `pytest-summary.json`: `junit_total`
+  1190, `skipped_in_ci` [], `ok` true.
+
+What shipped:
+
+- **Avatar pHash.** `cascade/profile_linking.py` hashes two public avatars
+  (the default fetch is proxy-aware and rejects non-public HTTP(S) targets)
+  and confirms a link at Hamming distance `<= 5` with confidence `0.95` and
+  `source="avatar_phash"`. The resolver runs an enrichment pre-pass and
+  invokes an injected adapter-backed `profile_enricher` before pair
+  generation, so an adapter that omitted the avatar can supply it.
+- **Network Jaccard.** Normalized `connections` sets are compared with
+  Jaccard; `>= 0.40` confirms at `0.90` with `source="network_overlap"`.
+- **Temporal cadence.** `cascade/scoring.py` extracts UTC active hours
+  `0–23`, compares normalized 24-bin histograms, and returns a `+0.15` boost
+  only when both sides have at least three timestamps and overlap is at least
+  `0.70`. The Entity Resolver applies it to fuzzy candidates before the
+  candidate threshold; the cascade maps it to MEDIUM corroboration.
+- **Resolver integration.** A separate bounded profile-comparison block
+  injects idempotent `SAME_AS_CONFIRMED` edges for avatar and network
+  evidence without weakening Phase 17 strong-key blocking. Confirmed profile
+  links are exposed through `last_confirmed_links`, `resolution.json`, and
+  `confirmed_profile_link_count`.
+- **Pivot Cascade.** Confirmed profile edges are also emitted from the
+  cascade's profile pair block; accepted links are pumped as new observations
+  and can expand the cascade. `CascadeResult.profile_links` is written to
+  `runs/<run_id>/cascade/profile_links.json`.
+- **Interactive review.** `aletheia cascade --interactive` (flag accepted
+  before or after `run`) prompts only for `SAME_AS_CANDIDATE` pairs at
+  confidence `0.70–0.85` (inclusive), with exactly:
+  `[?] Candidate Match: "jdoe88" (GitHub) == "john.doe" (Reddit). Are they the same person? [y/N/s(kip)]`.
+  `y` confirms, `n` excludes, `s` skips; y/n labels append to
+  `tests/fixtures/calibration_pairs.json` by default (the schema remains
+  `score`/`label`/`note` plus pair metadata), and `--calibration-pairs`
+  overrides the path.
+- **Capture inputs.** GitHub identity now carries `avatar_url` and public
+  event timestamps; YouTube carries the channel thumbnail as `avatar_url`.
+- **Tests.** `tests/test_phase18_linking.py` adds ten tests: pHash distance,
+  missing-avatar refetch, Jaccard (including the "not raw overlap" case),
+  temporal significance/boost, interactive `y` and `n`, exact CLI prompt,
+  CLI `--interactive` placement, and cascade expansion after a new avatar
+  edge.
+
+Honest limits, recorded rather than smoothed:
+
+- A 64-bit pHash at distance 5 can collide; shared/default avatars remain a
+  false-positive source. Avatar reuse is not proof of common ownership.
+- JPEG decoding uses Pillow only when the runtime provides it; without it
+  the fetch is recorded as an image-load failure and produces no link.
+- No registered adapter currently emits a reliable public `connections`
+  list, so the Jaccard rule is inert unless attributes carry one.
+- Temporal cadence needs at least three UTC timestamps per side; timezone
+  shifts, sparse feeds and scheduled posting reduce its value.
+- The missing-avatar refetch is an injected adapter boundary; the Phase 2
+  service has no adapter registry and must be given the hook by its caller.
+- Interactive behaviour is tested with injected input and a temporary
+  calibration fixture; the repository fixture is synthetic and gains real
+  labels only when an operator runs the command.
+- No live run occurred in Phase 18.1; no adapter `verification_status`
+  changed. The target remains `username:frost2233` for any future live work,
+  and Reddit remains excluded.
 
 ## Phase 17 — pivot cascade + source completeness (staged 2026-10-18; autonomous campaign)
 
@@ -615,13 +698,15 @@ manifest**, not a digital signature and not a legal-admissibility guarantee.
 
 ## Next action
 
-**Legal framework updated 2026-10-22** to the Operator-Driven Model (SpiderFoot parity);
-this was a docs-only change. Phase 18 will implement the code-level removal of tier gates
-and SpiderFoot integration. Live authorization remains `username:frost2233` only.
+**Phase 18.1 is complete and CI-verified.** Exponential Linking 2.0 is in the Entity
+Resolver and Pivot Cascade at `e5e2303` (run `39865145257`, attempt 2). The broader Phase
+18 code-level tier-gate removal and SpiderFoot integration have not started; do not start
+them without explicit instruction. Live authorization remains `username:frost2233` only.
 
 **The authorized live self-audit has run** (run `39141366670`, target `username:frost2233`,
 owner-asserted; every live-path defect found along the way is repaired and re-verified — see
-the top CHANGELOG entry and the live-audit section above). What remains needs user decisions:
+the Gate 3 live-validation entries in `CHANGELOG.md` and the live-audit section above). What
+remains needs user decisions:
 
 - **Gate 2 is satisfied for `frost2233` only.** Any other target — or a broader sweep — needs
   a fresh, explicit ownership assertion before a live run.
