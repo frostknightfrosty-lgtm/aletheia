@@ -119,6 +119,40 @@ def test_leakix_request_matches_official_search_contract(monkeypatch):
     assert "fixture-secret" not in json.dumps(result.to_dict())
 
 
+def test_fetch_json_204_no_content_is_not_a_json_error(monkeypatch):
+    runner = load_runner()
+    monkeypatch.setattr(runner, "_fetch_bytes", lambda url, headers=None: (b"", 204, None))
+    assert runner._fetch_json("https://leakix.net/search") == (None, 204, None)
+
+
+def test_leakix_204_no_content_is_an_empty_result(monkeypatch):
+    runner = load_runner()
+    monkeypatch.setenv("LEAKIX_API_KEY", "fixture-secret")
+    monkeypatch.setattr(runner, "_fetch_json", lambda url, headers=None: (None, 204, None))
+
+    result = runner.query_leakix("frost2233")
+
+    assert result.error is None
+    assert result.skipped is False
+    assert result.http_status == 204
+    assert result.data["record_count"] == 0
+    assert result.data["records"] == []
+
+
+def test_grayhatwarfare_204_no_content_is_an_empty_result(monkeypatch):
+    runner = load_runner()
+    monkeypatch.setenv("GRAYHATWARFARE_TOKEN", "fixture-secret")
+    monkeypatch.setattr(runner, "_fetch_json", lambda url, headers=None: (None, 204, None))
+
+    result = runner.query_grayhatwarfare("frost2233")
+
+    assert result.error is None
+    assert result.skipped is False
+    assert result.http_status == 204
+    assert result.data["record_count"] == 0
+    assert result.data["records"] == []
+
+
 def test_grayhatwarfare_request_matches_official_api_v2_contract(monkeypatch):
     runner = load_runner()
     monkeypatch.setenv("GRAYHATWARFARE_TOKEN", "fixture-secret")

@@ -119,6 +119,10 @@ def _fetch_json(url: str, headers: dict[str, str] | None = None) -> tuple[Any, i
     body, status, error = _fetch_bytes(url, headers=headers)
     if error:
         return None, status, error
+    if status == 204:
+        # LeakIX uses 204 for a successful query with no matching records.
+        # There is no body to decode; callers map None to their empty shape.
+        return None, status, None
     try:
         return json.loads((body or b"").decode("utf-8", errors="replace")), status, None
     except json.JSONDecodeError as exc:
@@ -169,6 +173,8 @@ def query_leakix(value: str) -> SourceResult:
     payload, status, error = _fetch_json(endpoint, headers=headers)
     if error:
         return SourceResult("leakix", http_status=status, error=error)
+    if payload is None and status == 204:
+        payload = []
     if not isinstance(payload, list):
         return SourceResult("leakix", http_status=status, error="Unexpected JSON root type")
 
@@ -219,6 +225,8 @@ def query_grayhatwarfare(value: str) -> SourceResult:
     payload, status, error = _fetch_json(endpoint, headers=headers)
     if error:
         return SourceResult("grayhatwarfare", http_status=status, error=error)
+    if payload is None and status == 204:
+        payload = {}
     if not isinstance(payload, dict):
         return SourceResult("grayhatwarfare", http_status=status, error="Unexpected JSON root type")
 
