@@ -1,10 +1,16 @@
 # Aletheia Project Direction
 
+> **Status: historical strategy record.** The Florida posture below was superseded on
+> 2026-10-22 by the Operator-Driven Model (SpiderFoot parity) in
+> [`OPERATOR_DRIVEN_MODEL.md`](OPERATOR_DRIVEN_MODEL.md). Tiers are descriptive; there is no
+> Tier 5 hard floor. This document is retained as the design history that led to the current
+> model.
+>
 > Strategy record only. This document does not change the current CLI, router, adapter enforcement, or live investigation behavior. The Florida project posture supersedes the older grey posture and tier ladder below; the repository still uses its existing legal-only and authorization-assertion implementation.
 
 ## Purpose
 
-Aletheia's project policy is based on Florida, USA. It does not use the earlier court-defensibility-first or generic grey posture. The four prohibited categories below are the project's Tier 5 floor; they are not an exhaustive summary of Florida or federal law. Every operation remains subject to applicable law, court orders, source access controls, and any binding service terms. This document is a project policy record, not legal advice or a determination that a particular collection method is lawful.
+Aletheia's former project policy was based on Florida, USA. It did not use the earlier court-defensibility-first or generic grey posture. The four prohibited categories below were the former project's Tier 5 floor; under the current Operator-Driven Model they describe operations Aletheia does not implement, not a legal gate. They are not an exhaustive summary of Florida or federal law. Every operation remains subject to applicable law, court orders, source access controls, and any binding service terms. This document is a historical project policy record, not legal advice or a determination that a particular collection method is lawful.
 
 Under the project policy, public automation, leak indexes, aggregators, stealer-log indexes, dark-web search indexes, operator-owned account workflows, bulk processing, and plaintext credential storage may be considered for integration, subject to the explicit structural rule below and separate implementation review. A source being permitted by project policy does not mean it is implemented, verified, or suitable for every target.
 
@@ -29,9 +35,9 @@ Every manifest adapter is intended to carry:
 - disabled_reason: string or null; required when enabled_by_default is false
 - batch_grouping: string or null
 
-The Phase 5b/5c registries are proposals only. Their entries do not mean that code, routing, credentials, or runtime enforcement already exists. Sources newly permitted by the Florida policy remain unimplemented unless they have a separate integration entry and implementation.
+The Phase 5b/5c registries are proposals only. Their entries do not mean that code, routing, credentials, or runtime enforcement already exists. Sources newly permitted by the Operator-Driven Model remain unimplemented unless they have a separate integration entry and implementation.
 
-## Tier ladder and hard floor
+## Historical tier ladder (superseded)
 
 | Tier | Category | Project default |
 | --- | --- | --- |
@@ -41,7 +47,7 @@ The Phase 5b/5c registries are proposals only. Their entries do not mean that co
 | 4 | Leak indexes, aggregators, plaintext credential sources, dark-web indexes, stealer logs | On |
 | 5 | Unauthorized computer access; communications interception; criminal marketplace transactions; stalking/harassment | Off |
 
-The project's hard floor prohibits Tier 5 activities: unauthorized computer access (including use of another person's credentials or bypassing CAPTCHAs/paywalls), communications interception, criminal marketplace transactions, and stalking or harassment. Tier metadata and defaults are project policy; the current runtime loader has no constructor-time tier enforcement. This table does not override other laws, court orders, contractual limits, or source-specific access controls.
+The former project's hard floor prohibited Tier 5 activities: unauthorized computer access (including use of another person's credentials or bypassing CAPTCHAs/paywalls), communications interception, criminal marketplace transactions, and stalking or harassment. Under the Operator-Driven Model, these are operations Aletheia does not implement, not a legal gate. This historical table does not override other laws, court orders, contractual limits, or source-specific access controls.
 
 ## Posture shift note — Phase 5b
 
@@ -127,12 +133,12 @@ the design is recorded for review before any code.
 
 The project owner directed that **every accepted candidate from the
 111-candidate verification sweep** ([`VERIFICATION_COMPLETE.md`](VERIFICATION_COMPLETE.md))
-**and every source permitted by the Florida policy but not yet integrated**
-([`DIRECTIVE_AMENDMENT_FLORIDA.md`](DIRECTIVE_AMENDMENT_FLORIDA.md)) become
+**and every source permitted by the Operator-Driven Model but not yet integrated**
+([`OPERATOR_DRIVEN_MODEL.md`](OPERATOR_DRIVEN_MODEL.md)) become
 **fully integrated, wired, and working** — nothing accepted or permitted stays
 backlogged, disabled, or dropped while a free/open path exists.
 
-Unchanged constraints: nothing paid (Gate 3); the Tier 5 floor; each source
+Unchanged constraints: nothing paid (Gate 3); each source
 keeps its own scoped source/license/scope/implementation review before code;
 free-key registrations and provider permissions are user actions; and evidence
 is never fabricated — a vendor-blocked item is recorded with evidence and

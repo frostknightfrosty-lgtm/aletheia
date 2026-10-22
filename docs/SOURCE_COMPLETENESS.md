@@ -2,13 +2,13 @@
 
 > **Owner directive (2026-10-18).** Everything accepted in the 111-candidate
 > verification sweep ([`VERIFICATION_COMPLETE.md`](VERIFICATION_COMPLETE.md)) and
-> every source permitted by the Florida project policy
-> ([`DIRECTIVE_AMENDMENT_FLORIDA.md`](DIRECTIVE_AMENDMENT_FLORIDA.md)) but not
+> every source permitted by the Operator-Driven Model
+> ([`OPERATOR_DRIVEN_MODEL.md`](OPERATOR_DRIVEN_MODEL.md)) but not
 > yet integrated is to be **fully integrated, wired, and working**. Nothing
 > accepted or permitted stays backlogged, disabled, or dropped while a free,
 > open path exists.
 >
-> Unchanged constraints: nothing paid (Gate 3); the Tier 5 floor; each source
+> Unchanged constraints: nothing paid (Gate 3); each source
 > keeps its own scoped source / license / scope / implementation review before
 > code; free-key registrations and provider permissions are owner actions;
 > evidence is never fabricated (Gate 5) — an item blocked by vendor facts is
@@ -84,7 +84,7 @@ below may be upgraded except from copied artifact lines.
 
 ## B. Policy-permitted, not-yet-integrated sources
 
-Allowed by the Florida policy ([`DIRECTIVE_AMENDMENT_FLORIDA.md`](DIRECTIVE_AMENDMENT_FLORIDA.md))
+Allowed by the Operator-Driven Model ([`OPERATOR_DRIVEN_MODEL.md`](OPERATOR_DRIVEN_MODEL.md))
 or listed as review-gated expansions (`PIVOT_CASCADE.md` §10.1). Each gets its
 scoped review first, then implementation.
 
@@ -102,7 +102,7 @@ scoped review first, then implementation.
 | 10 | Face-search free paths | Build free-path services only (e.g. Betaface eval tier) | Corroboration only, never sole basis; paid products (PimEyes, FaceCheck.ID, Search4Faces, Lenso.ai programmatic) stay out under nothing-paid |
 | 11 | Paste indexes (psbdmp-class, LeakCheck OSINT-Hub) | Build | Flag-only storage: existence, date, source name; never dump contents beyond evidence hashes |
 | 12 | Reverse-image-search automation | Built as the standalone `picimagesearch` adapter (#13 in §A above): free engines only (IQDB, 3D IQDB, Ascii2D colour search, TraceMoe, AnimeTrace; optional SauceNAO) | Per-engine terms review; local pHash + archived captures remain the fallback |
-| 13 | Dark-web engines (Ahmia, Torch, OnionLand, DarkSearch) | Wire through the darkweb_search composite / OnionSearch-class tooling | Ahmia and similar prohibit scraping — recorded ToS risk under the Florida posture; OnionLand/DarkSearch interface review; Tor container setup |
+| 13 | Dark-web engines (Ahmia, Torch, OnionLand, DarkSearch) | Wire through the darkweb_search composite / OnionSearch-class tooling | Ahmia and similar prohibit scraping — permitted under the Operator-Driven Model; the operator assumes the ToS risk; OnionLand/DarkSearch interface review; Tor container setup |
 | 14 | Bulk/paste data processing | Policy capability; no separate adapter | Retention and flag rules apply |
 
 Note: email-existence checks (holehe-class) listed in `PIVOT_CASCADE.md` §10.1

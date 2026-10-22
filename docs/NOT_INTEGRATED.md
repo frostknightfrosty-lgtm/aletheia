@@ -1,10 +1,15 @@
 # Not Integrated
 
-This page records tools not currently integrated and source-review history. A status of “allowed” under the Florida project policy does not mean that a tool was installed, implemented, executed, or verified by Aletheia.
+> **Legal posture superseded 2026-10-22.** The Florida/Tier 5 framework referenced below was
+> replaced by the Operator-Driven Model (SpiderFoot parity) in
+> [`OPERATOR_DRIVEN_MODEL.md`](OPERATOR_DRIVEN_MODEL.md). Legal/ToS exclusions recorded here
+> are historical; technical and paid-source limitations still apply.
 
-## Previously excluded — now allowed under Florida framework
+This page records tools not currently integrated and source-review history. A status of “allowed” under the Operator-Driven Model does not mean that a tool was installed, implemented, executed, or verified by Aletheia.
 
-The project owner changed the project policy on 2026-10-12. These sources are no longer excluded by the project-level Tier 5 classification; each remains unimplemented and unverified unless stated otherwise elsewhere.
+## Previously excluded — now permitted
+
+The project owner changed the project policy on 2026-10-12 and again on 2026-10-22 (Operator-Driven Model). These sources are permitted; each remains unimplemented and unverified unless stated otherwise elsewhere.
 
 - **LeakCheck:** allowed, including the free OSINT-Hub path. No source was queried or implementation attempted during this review.
 - **LeakRadar:** allowed by project policy; previously described as a stealer-log/combolist and dark-web index.
@@ -14,7 +19,7 @@ The project owner changed the project policy on 2026-10-12. These sources are no
 - **Lullar:** allowed by project policy. Earlier source review found a browser URL-generation workflow and no documented machine-readable interface; this remains an implementation limitation, not a policy exclusion.
 - **Hudson Rock:** allowed by project policy, including the documented username endpoint that may return credential fields. No Aletheia adapter or endpoint call was added. Any future credential parsing/storage must remain structurally separate from authenticated HTTP code.
 
-This section records Aletheia policy only. It is not a legal conclusion, a claim that these sources are accurate or licensed for every use, or evidence of an integration. ONYPHE remains excluded for its own-systems Free View scope mismatch, as recorded below. Other source-specific Phase 5c exclusions remain unchanged.
+This section records Aletheia policy only. It is not a legal conclusion, a claim that these sources are accurate or licensed for every use, or evidence of an integration. ONYPHE is permitted under the Operator-Driven Model but remains unimplemented; its own-systems Free View scope is a risk note, as recorded below. Other source-specific Phase 5c exclusions are implementation notes, not legal bans.
 
 ## Removed integrations
 

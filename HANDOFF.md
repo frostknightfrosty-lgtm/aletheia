@@ -1,15 +1,16 @@
-# Aletheia Handoff — Phase 17 staged (pivot cascade + source completeness; autonomous campaign)
+# Aletheia Handoff — Phase 18 pending (Operator-Driven Model; Phase 17 complete)
 
-Last updated: 2026-10-20T22:02:00Z
+Last updated: 2026-10-22T16:12:57Z
 
 ## Project boundaries
 
-Aletheia is a free, open-source OSINT investigation platform under the Florida project
-policy (`docs/DIRECTIVE_AMENDMENT_FLORIDA.md`). Sources sit on five tiers; the only project
-gate is the Tier 5 hard floor: unauthorized computer access (including another person's
-credentials or CAPTCHA/paywall bypass), communications interception, criminal marketplace
-transactions, and stalking/harassment. Tier 1–4 sources run by default when their
-prerequisites are met. A tier classification is project policy, not a legal conclusion.
+Aletheia is a free, open-source OSINT investigation platform under the Operator-Driven
+Model (`docs/OPERATOR_DRIVEN_MODEL.md`). It provides maximum OSINT capability, and the
+operator assumes 100% of the legal and ethical responsibility for how it is used. Tiers are
+descriptive operator-awareness categories, not code-enforced gates. All passive adapters —
+including leak indexes, dark-web scrapers, and sources whose terms are hostile to
+automation — are permitted. Aletheia does not implement active network intrusion or malware
+deployment; it is a passive OSINT tool.
 
 ## Repository and CI state
 
@@ -550,20 +551,26 @@ manifest**, not a digital signature and not a legal-admissibility guarantee.
 
 ## Next action
 
+**Legal framework updated 2026-10-22** to the Operator-Driven Model (SpiderFoot parity);
+this was a docs-only change. Phase 18 will implement the code-level removal of tier gates
+and SpiderFoot integration. Live authorization remains `username:frost2233` only.
+
 **The authorized live self-audit has run** (run `39141366670`, target `username:frost2233`,
 owner-asserted; every live-path defect found along the way is repaired and re-verified — see
 the top CHANGELOG entry and the live-audit section above). What remains needs user decisions:
 
 - **Gate 2 is satisfied for `frost2233` only.** Any other target — or a broader sweep — needs
   a fresh, explicit ownership assertion before a live run.
-- **Gate 3** — free API keys as GitHub Secrets (`REDDIT_CLIENT_ID`/`SECRET`,
-  `YOUTUBE_API_KEY`, `LEAKIX_API_KEY`, `GRAYHATWARFARE_TOKEN`) would turn three key-gated
-  skips into live coverage. None are configured.
+- **Gate 3** — free API keys as GitHub Secrets. `LEAKIX_API_KEY`, `IPGEOLOCATION_KEY`,
+  and `UNPAYWALL_EMAIL` are configured. `REDDIT_CLIENT_ID`/`SECRET`, `YOUTUBE_API_KEY`,
+  `GRAYHATWARFARE_TOKEN`, `ABUSEIPDB_KEY`, `NETLAS_KEY`, and `SAUCENAO_API_KEY` remain
+  pending owner action.
 - Optional bookkeeping: promote the adapters exercised by the authorized run to
   `verified-live` using the run as copied evidence; and re-run the audit periodically as
   platform data changes.
 - `transport_movement` and `darkweb_search` remain deferred on Gate 6 (registrations /
-  written permission; no verifiable request contract).
+  written permission; no verifiable request contract). Under the Operator-Driven Model,
+  ToS hostility and dark-web access are operator risks, not project-level legal gates.
 
 ## Known deferred issues
 
@@ -598,15 +605,19 @@ the top CHANGELOG entry and the live-audit section above). What remains needs us
 - **Gate 2** — user-owned target required before any live investigation. Satisfied on
   2026-10-18 for `username:frost2233` (owner assertion recorded verbatim in the run
   manifest); any other target re-opens the gate.
-- **Gate 3** — verify API keys and cost before a phase depends on them. Still open; no keys
-  are configured, so `reddit-api`, `youtube-api` and `leak_checkers` skip by design. The
-  grouped free-registration master list is `docs/USER_ACTIONS.md` (see also
+- **Gate 3** — verify API keys and cost before a phase depends on them. Still open for
+  several providers: `LEAKIX_API_KEY`, `IPGEOLOCATION_KEY`, and `UNPAYWALL_EMAIL` are
+  configured; `REDDIT_CLIENT_ID`/`SECRET`, `YOUTUBE_API_KEY`, `GRAYHATWARFARE_TOKEN`,
+  `ABUSEIPDB_KEY`, `NETLAS_KEY`, and `SAUCENAO_API_KEY` await owner action. `reddit-api`,
+  `youtube-api`, and the GrayhatWarfare path still skip until their keys exist. The grouped
+  free-registration master list is `docs/USER_ACTIONS.md` (see also
   `docs/SOURCE_COMPLETENESS.md` §C).
 - **Gate 5** — evidence lines must be copied from a downloaded artifact, never typed.
 - **Gate 6** — `transport_movement` and `darkweb_search` build in the autonomous campaign
   (transport with recorded skip paths; dark web behind container-level Tor); live coverage
-  for each remains gated on owner registrations / written permission and Tor setup —
-  grouped in `docs/USER_ACTIONS.md`.
+  for each requires owner registrations / written permission and Tor setup. ToS hostility
+  is no longer a project-level legal gate under the Operator-Driven Model. Grouped in
+  `docs/USER_ACTIONS.md`.
 - **Gate 6 (MinIO server)** — deferred pending a usable image or endpoint: `minio/minio`
   returns 404 on Docker Hub and `quay.io/minio/minio` refuses anonymous pulls, so the S3 code
   path is verified against `adobe/s3mock:5.2.3` instead.

@@ -18,29 +18,29 @@ If any file is missing or truncated, report the gap before proceeding.
 
 ## 1. What Aletheia is
 
-Aletheia is a **free, open-source OSINT investigation platform using the Florida project policy recorded in `docs/DIRECTIVE_AMENDMENT_FLORIDA.md`.** It takes a single seed (username, email, phone, domain, IP, image, name, geolocation, crypto address) and produces a unified, provenance-tracked entity graph across public sources, with resumable investigations, an audit log, and a five-tier project policy.
+Aletheia is a **free, open-source OSINT investigation platform using the Operator-Driven Model recorded in `docs/OPERATOR_DRIVEN_MODEL.md`.** It takes a single seed (username, email, phone, domain, IP, image, name, geolocation, crypto address) and produces a unified, provenance-tracked entity graph across public sources, with resumable investigations, an audit log, and a five-tier descriptive model.
 
-**Stack:** Python 3.13, FastAPI, adapter-plugin architecture, one Docker container per external tool, resumable DAG, audit log, unified entity graph. A verifiable hash chain is not implemented yet.
+**Stack:** Python 3.13, FastAPI, adapter-plugin architecture, one Docker container per external tool, resumable DAG, hash-chained audit log, unified entity graph. The chain is tamper-evident relative to a preserved run manifest; it is not a digital signature.
 
 **Repo:** `frostknightfrosty-lgtm/aletheia`. Branch `main`. (Earlier `igttm` references are stale.)
 
-**Project goal:** maximum free capability under the Florida project policy. The four-category Tier 5 floor is recorded in `docs/DIRECTIVE_AMENDMENT_FLORIDA.md`; this is not a complete statement of applicable law.
+**Project goal:** maximum free capability under the Operator-Driven Model. Tiers are descriptive categories for operator awareness, not code-enforced legal gates. The operator assumes full legal responsibility for the data they query and collect. See `docs/OPERATOR_DRIVEN_MODEL.md`; this is not legal advice.
 
 ---
 
-## 2. Tier system (the legal model)
+## 2. Tier system (descriptive, not enforced)
 
-Every source sits on one tier:
+Every source has a descriptive tier for operator awareness:
 
-| Tier | Category | Project default |
+| Tier | Category | Meaning |
 |---|---|---|
-| 1 | Public, unauthenticated, no ToS concern | On |
-| 2 | Public, ToS-hostile to automation | On |
-| 3 | Requires free API key | On when key present |
-| 4 | Leak indexes, aggregators, plaintext credential sources, dark-web indexes, stealer logs | On |
-| 5 | Unauthorized computer access, communications interception, criminal marketplace transactions, stalking/harassment | Off |
+| 1 | Public, unauthenticated, no ToS concern | Lowest operational risk; still subject to law and source terms. |
+| 2 | Public, ToS-hostile to automation | The operator accepts the source's terms and any resulting risk. |
+| 3 | Requires free API key | Runs when the operator supplies a key. |
+| 4 | Leak indexes, aggregators, plaintext credential sources, dark-web indexes, stealer logs | Permitted by project policy; the operator assumes legal and ethical responsibility. |
+| 5 | Active network intrusion or malware deployment | Aletheia does not implement these operations; this is a capability boundary, not a code-level legal gate. |
 
-The Tier 5 list is Aletheia's project-policy floor, not an exhaustive statement of Florida or federal law. Applicable statutes, court orders, source access controls, contracts, and rights still apply. The current runtime loader does not enforce tier values at construction time.
+Tiers are descriptive, not enforced by the code. The runtime loader does not block an adapter because of its tier. Aletheia is a passive OSINT platform: it does not perform active network intrusion or malware deployment. Legal responsibility for how the tool is used rests solely with the operator. See `docs/OPERATOR_DRIVEN_MODEL.md`.
 
 ---
 
@@ -66,21 +66,21 @@ An adapter runs whenever its `input_types` matches the seed and its prerequisite
 - Every adapter ships with `enabled_by_default: true`.
 - An adapter may be registered with `false` only if it carries a `disabled_reason` field. The loader rejects `false` without one.
 
-The only project-policy tier gate is Tier 5. The Tier 4 default and its limits are described in `docs/DIRECTIVE_AMENDMENT_FLORIDA.md`; this does not make every use lawful or appropriate.
+There is no project-policy tier gate. Tiers are descriptive; every adapter runs when its input types and credentials match. The operator assumes full legal responsibility for the data they query and collect.
 
 ---
 
 ## 5. Sources not currently integrated
 
-LeakCheck, LeakRadar, OsintCat, OathNet, Blackbird, Lullar, and Hudson Rock are permitted by the current Florida project policy but are not integrated. See `docs/NOT_INTEGRATED.md` for previous source-review facts. Their policy status does not mean an adapter is built or verified.
+LeakCheck, LeakRadar, OsintCat, OathNet, Blackbird, Lullar, and Hudson Rock are permitted by the Operator-Driven Model but are not integrated. See `docs/NOT_INTEGRATED.md` for previous source-review facts. Their policy status does not mean an adapter is built or verified.
 
 **Paid-only (removed):** twilio-lookup, censys, google-vision.
 
-**ToS incompatible with investigative use:** ONYPHE (Free View ToS restricts use to the customer's own systems).
+**ToS-hostile sources:** ONYPHE and similar sources are permitted by the Operator-Driven Model. Their terms remain a risk the operator assumes; lack of an adapter is an implementation fact, not a legal ban.
 
-**Other source-review exclusions:** DarkNyx, osint-darkweb-pkg, Mr.Holmes, IVRE, urlscan, ThreatCluster, Social Analyzer, and ONYPHE remain excluded as documented, except where the project owner later changes a specific decision. ONYPHE remains excluded because its Free View terms limit use to the operator's own systems.
+**Other source-review exclusions:** DarkNyx, osint-darkweb-pkg, Mr.Holmes, IVRE, urlscan, ThreatCluster, Social Analyzer, and ONYPHE remain unimplemented for technical or source-review reasons recorded in `docs/NOT_INTEGRATED.md`. The Operator-Driven Model does not treat ToS hostility as a project-level blocker.
 
-Any new exclusion gets documented in `docs/NOT_INTEGRATED.md` with the specific reason and a primary-source link.
+Any new technical or paid-source limitation gets documented in `docs/NOT_INTEGRATED.md` with the specific reason and a primary-source link.
 
 ---
 
@@ -90,7 +90,7 @@ These override everything else. Violating any of them invalidates the session.
 
 1. **No fabrication.** Every "green" claim requires a CI run URL. Every "verified" claim requires a commit SHA and a raw artifact line. A claim without evidence is not a claim.
 2. **Do not skip, xfail, or delete tests.** Do not weaken assertions to make a test pass.
-3. **Do not perform Tier 5 activities.** The current Tier 5 categories are listed in `docs/DIRECTIVE_AMENDMENT_FLORIDA.md`. Tier 4 is permitted by project policy but remains subject to applicable law and separate source/integration review.
+3. **Do not perform active network intrusion or malware deployment.** Aletheia is a passive OSINT tool. The operator assumes full legal responsibility for the data they query and collect.
 4. **Do not add paid-only adapters.** Free-to-register keys are fine. Anything requiring payment to function is not.
 5. **Commit state updates separately from code changes.** `RESUME_STATE.json`, `HANDOFF.md`, `CHANGELOG.md` updates get their own commit.
 6. **Update `RESUME_STATE.json` after every commit.**
@@ -161,7 +161,7 @@ Context limits are real and expected. Plan for them.
 Last updated: <iso8601>
 
 ## Project boundaries
-<one paragraph restating the tier system and hard floor>
+<one paragraph restating the descriptive tier system and operator responsibility>
 
 ## Repository and CI state
 - Latest CI-verified commit: <sha>
@@ -307,11 +307,11 @@ Every one of the above requires a CI run URL. A claim without a run URL is not a
 
 **Gate 1 — LeakCheck.** RESOLVED. The owner changed the project policy on 2026-10-12: LeakCheck is permitted, not integrated, and no new source implementation is authorized by that classification alone. See `docs/NOT_INTEGRATED.md`.
 
-**Gate 2 — Live investigation target.** Pending. When the project reaches the live-investigation phase, pause and ask the user for a target they own (throwaway username or domain). Do not register accounts. Do not use a random public target.
+**Gate 2 — Live investigation target.** Satisfied for `username:frost2233` only by explicit owner assertion. Any other target or broader sweep requires a fresh explicit assertion. Do not use a random public target.
 
-**Gate 3 — Free API keys.** Pending. Shodan, HIBP, Reddit, YouTube, OpenCorporates require free-registration keys. If they are not present in GitHub Secrets when a phase needs them, pause and ask. Do not stub adapters to bypass credential checks.
+**Gate 3 — Free API keys.** Remaining provider keys (including Reddit, YouTube, GrayhatWarfare, AbuseIPDB, Netlas, and SauceNAO) are owner actions. If a required key is absent when a phase needs it, pause and ask; do not stub adapters to bypass credential checks. LeakIX, IPGeolocation, and Unpaywall configuration are already set.
 
-**Gate 4 — Genuine policy uncertainty.** Ongoing. If unsure whether a source or method crosses one of the four Tier 5 categories in `docs/DIRECTIVE_AMENDMENT_FLORIDA.md`, pause and ask. Do not guess. Apply already-recorded owner policy calls without asking them again.
+Tier labels are descriptive and never a reason to pause for policy uncertainty.
 
 **Additional stop conditions:**
 - Three consecutive failures of the same underlying problem.
@@ -338,9 +338,7 @@ Everything else proceeds autonomously.
 - Install Python packages locally for testing.
 
 **You may not, without asking:**
-- Move an adapter across tier boundaries without a project-owner decision.
-- Add any adapter or operation that performs a Tier 5 activity.
-- Add a source still excluded in `NOT_INTEGRATED.md`.
+- Add active network intrusion or malware deployment. Aletheia is a passive OSINT tool.
 - Add a paid-only source.
 - Remove a test, weaken an assertion, or skip a case.
 - Add a secret or credential to a committed file.

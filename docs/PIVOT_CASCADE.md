@@ -1,13 +1,20 @@
 # Pivot Cascade — Design (Phase 17)
 
+> **Legal posture superseded 2026-10-22.** The Florida/Tier 5 wording below is retained as
+> design history. The current project model is the Operator-Driven Model (SpiderFoot parity)
+> in [`OPERATOR_DRIVEN_MODEL.md`](OPERATOR_DRIVEN_MODEL.md): tiers are descriptive, there is
+> no Tier 5 hard floor, and the operator assumes legal responsibility. The technical design
+> remains as written.
+>
 > Status: design draft **v3 — maximal scope, for review; not implemented**. No
 > cascade code exists yet. This is the review artifact that precedes
 > implementation, per the project sequence (design → tests → CI-verified code).
 > Nothing here changes the current CLI, router, adapter enforcement, or
 > live-investigation behavior. Everything below runs on free / open-source
-> tools or free-tier API registrations only — **nothing paid**. Tier 2–4
-> sources are enabled by project policy and marked review-gated; the Tier 5
-> floor is unchanged; no source is added without its own scoped review.
+> tools or free-tier API registrations only — **nothing paid**. Tiers are
+> descriptive; Tier 2–4 sources are enabled by project policy and marked
+> review-gated; the former Tier 5 floor is superseded by the Operator-Driven
+> Model; no source is added without its own scoped review.
 
 Revision note — v3 adds, on top of v2: (a) the **universal seed horizon** —
 any entry point, including raw pasted text or a screenshot, a location, a
@@ -15,12 +22,12 @@ name, an organization, an image, a document, a phone, a crypto address, a
 vehicle or a patent, is a first-class start with its own playbook and
 bridge-claim class-jumping; (b) a **classified expansion policy** — every
 item previously listed as "excluded though free" is now sorted against the
-Florida Tier ladder: Tier 2–4 items are included as review-gated expansions
+Tier ladder: Tier 2–4 items are included as review-gated expansions
 (email-existence checks, GHunt on the operator's own account, people-search
 free tiers, face search free paths, stealer-log checkers, paste indexes,
-reverse-image search, dark-web indexes at Gate 6), while the Tier 5 floor
-(unauthorized access, interception, criminal-marketplace transactions,
-stalking/harassment) and paid-only defaults stay out; (c) a Wave-2 build
+reverse-image search, dark-web indexes at Gate 6), while active intrusion,
+interception, criminal-marketplace transactions, stalking/harassment, and
+paid-only defaults stay out; (c) a Wave-2 build
 phase for those expansions. v2 brought: seed autodetection, likelihood-ratio
 scoring (Fellegi–Sunter) with base-rate priors, falsification-first review
 and ACH, union-find conflict propagation, source grading, VOI scheduling
@@ -30,11 +37,11 @@ synthetic-world test program.
 
 Directive addendum — **2026-10-18**: the owner directed that **everything
 accepted in the 111-candidate verification sweep and everything permitted by
-the Florida project policy but not yet integrated be fully integrated, wired,
+the Operator-Driven Model but not yet integrated be fully integrated, wired,
 and working**, superseding the earlier narrower Wave-2 wording. Section 15
 carries this as P17.11–P17.12; the item-by-item status inventory lives in
 [`SOURCE_COMPLETENESS.md`](SOURCE_COMPLETENESS.md). All standing constraints
-are unchanged: nothing paid, the Tier 5 floor, a scoped review per source
+are unchanged: nothing paid, the passive-only boundary, a scoped review per source
 before code, and no fabricated evidence.
 
 ## 1. Objective
@@ -53,11 +60,12 @@ Given any seed (or seed set, or raw text containing seeds), the engine must:
 
 ### Non-goals (unchanged policy)
 
-- No paid-only sources or paid default dependencies (Gate 3); no Tier 5
-  activity — unauthorized computer access, communications interception,
-  criminal-marketplace transactions, stalking/harassment. Tiers 1–4 are
-  enabled by project policy; ToS-hostile-public sources are Tier 2 and
-  enabled, with per-source risk recorded at integration.
+- No paid-only sources or paid default dependencies (Gate 3); no active
+  intrusion or malware deployment — unauthorized computer access,
+  communications interception, criminal-marketplace transactions, and
+  stalking/harassment are not implemented. Tiers are descriptive;
+  ToS-hostile-public sources are enabled, with per-source risk recorded at
+  integration.
 - No target-account logins: adapters read public surfaces; the single
   authenticated-workflow exception is the operator's own account with
   explicit authorization (the GHunt pattern).
@@ -345,7 +353,7 @@ listed in the report's next-actions checklist.
 
 ### 10.1 Review-gated expansions — included (Tiers 2–4, project-allowed)
 
-Each item below is allowed by project policy (`DIRECTIVE_AMENDMENT_FLORIDA.md`)
+Each item below is allowed by project policy (`OPERATOR_DRIVEN_MODEL.md`)
 and is part of the Wave-2 build plan (P17.11); each still needs its own
 source, license, scope, and implementation review before code. Permitted
 sources with open interface facts (Blackbird licensing, Lullar's missing
@@ -365,7 +373,7 @@ the facts, or recorded with evidence if the facts block implementation.
 | Dark-web search indexes (Ahmia, Torch, OnionLand, DarkSearch) | 4, dark-web indexes | policy-allowed; **Gate 6 deferred** (no verifiable request contract; Tor setup) — adapter slot designed, activates when Gate 6 clears |
 | Bulk/paste data processing | 4 | allowed by policy; subject scope and retention rules apply |
 
-### 10.2 Stays excluded — Tier 5 floor and paid defaults
+### 10.2 Not implemented — active intrusion and paid defaults
 
 - Brute-force or any access to non-public / access-controlled endpoints
   (unauthorized computer access).
@@ -431,7 +439,7 @@ the facts, or recorded with evidence if the facts block implementation.
 - **Property tests**: no merge without the evidence rule; vetoes always win;
   determinism (same seeds + budget => identical order and trail); dedup
   invariant; budgets never exceeded; egress only via proxy; third-party
-  firewall holds; Tier 5 line holds (no credential-use paths); bridge
+  firewall holds; passive-only boundary holds (no credential-use paths); bridge
   coverage (every `EntityType` has an extractor or terminal classification).
 - **Golden cascade run**: fixed fixture => stable trail hash (regression
   detector for scoring changes).

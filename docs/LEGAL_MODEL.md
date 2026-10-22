@@ -1,5 +1,10 @@
 # Legal / compliance boundary — Phase 1
 
+> **Superseded 2026-10-22.** This Phase 1 boundary is historical. The current project posture
+> is the Operator-Driven Model (SpiderFoot parity) in
+> [`OPERATOR_DRIVEN_MODEL.md`](OPERATOR_DRIVEN_MODEL.md). Tiers are descriptive and the
+> operator assumes full legal responsibility.
+
 Aletheia is a provenance-first orchestrator, not a bypass mechanism. Phase 1 accepts only `legal_only=true` investigations.
 
 The adapter layer must reject access-control circumvention, credentialed access without explicit authorization, CAPTCHA bypasses, paywall bypasses, and active target-facing actions outside an explicitly authorized scope.
