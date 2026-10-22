@@ -1,6 +1,6 @@
 # Aletheia Handoff — Phase 18 pending (Operator-Driven Model; Phase 17 complete)
 
-Last updated: 2026-10-22T17:56:00Z
+Last updated: 2026-10-22T20:17:00Z
 
 ## Project boundaries
 
@@ -19,17 +19,25 @@ deployment; it is a passive OSINT tool.
   capture 96/96; egress 62/55/55 wired; storage 6/6; 96 results, 0 nonzero).
   No live source run occurred. The final report is
   `docs/FINAL_REPORT_PHASE17.md`.
-- **Newest CI-verified code commit: `9c9cd9c`** (minecraft adapter; run
+- **Newest CI-verified code commit: `02c08d5`** (LeakIX `HTTP 204`
+  normalization for the Gate 3 live path; Docker Verification run
+  **39841924500** green — parser 62/62; **1180 passed**, 1 warning; capture
+  96/96; egress 62/55/55 wired; storage 6/6; 96 results, 0 nonzero).
+  Immediately prior: `4d46f1b` (Gate 3 secret plumbing into both live
+  workflows plus the SauceNAO `secret_env`; Docker Verification run
+  **39828587604** green — parser 62/62; **1177 passed**, 1 warning; capture
+  96/96; egress 62/55/55 wired; storage 6/6; 96 results, 0 nonzero).
+  Adapter commits: `9c9cd9c` (minecraft adapter; run
   **39495727637** green — parser 62/62; 1175 passed; capture 96/96; egress
-  62/55/55 wired; storage 6/6). Immediately prior:
+  62/55/55 wired; storage 6/6),
   `82a4049` (pgp_keys; run **39494804791** — parser 61/61; 1167 passed;
   capture 93/93; egress 61/54/54; storage 6/6), `58aa354` (github_identity;
   run **39493701837** — parser 60/60; 1158 passed; capture 90/90; egress
   60/53/53; storage 6/6), `503b431` (weather; run **39487437707** — parser
   59/59; 1149 passed; capture 87/87; egress 59/52/52; storage 6/6), and
   `ceaf595` (researcher_ids; run **39484536317** — parser 58/58; 1141 passed;
-  capture 84/84; egress 58/51/51; storage 6/6). All five are fixture-only; no
-  live source lookup occurred.
+  capture 84/84; egress 58/51/51; storage 6/6). Those five adapter commits are
+  fixture-only; no live source lookup occurred.
 - Latest CI-verified commit before those: `5ddf240` (ShadowFinder adapter; docker
   verification run **39448325747** green — parser 55/55; **1112 passed**;
   capture 75/75; egress 55/49/49 wired; storage 6/6; docs `c169b1e` verified by
@@ -53,6 +61,11 @@ deployment; it is a passive OSINT tool.
   `docs/USER_ACTIONS.md` §0 as resolved; the parked queue (§6) was removed.
 - The authorized live run **39141366670** ran on tree `8939517` and is green (37m19s) —
   see the live-audit section below.
+- **Gate 3 live validation (2026-10-22):** code `4d46f1b` and the LeakIX 204
+  follow-up `02c08d5` passed Docker Verification; live run **39841929311** on
+  `02c08d5` is green (35m21s). `youtube-api` and `leak_checkers` ran without
+  missing-key skips; `reddit-api` remains the only missing-credential skip.
+  See the live-audit section below.
 - Newest artifact check (run **39448325747**, commit `5ddf240`): lines copied
   from the downloaded artifact (`ci-artifacts-39448325747`), not typed —
   `PARSER PREFLIGHT: PASS — 55/55 adapters have parser coverage`; `1112 passed,
@@ -252,8 +265,59 @@ and I authorize an investigation of my own username across public, legal, open s
 - **Honest limits:** `instaloader` still ends on Instagram's side (`429 Too Many Requests`);
   `social_username` egresses correctly (2 entries, both HTTP 200) but both sources returned
   nothing usable (octosuite: `HTTP 403` inside the tunnel — GitHub's unauthenticated limit;
-  masto: no finding); `reddit-api`, `youtube-api` and `leak_checkers` remain key-gated skips
-  (Gate 3). No `verification_status` in `PROJECT_MANIFEST.json` was changed.
+  masto: no finding); `reddit-api`, `youtube-api` and `leak_checkers` were key-gated skips
+  at the time (Gate 3). The 2026-10-22 follow-up below activates YouTube and the
+  LeakIX/Grayhat sub-sources; `reddit-api` remains excluded by owner decision. No
+  `verification_status` in `PROJECT_MANIFEST.json` was changed.
+
+### Gate 3 live validation (2026-10-22)
+
+This is a separate scoped run on the same owner-asserted target; it does not
+change the Gate 2 record.
+
+- **Code path:** `4d46f1b` wired the Gate 3 secrets into both live workflows and
+  added `SAUCENAO_API_KEY` to `PicImageSearchAdapter`; Docker Verification run
+  **39828587604** green — parser 62/62; 1177 passed; capture 96/96; egress
+  62/55/55; storage 6/6; 96 results, 0 nonzero. Follow-up `02c08d5` normalizes
+  LeakIX `HTTP 204 No Content` as an empty result; Docker Verification run
+  **39841924500** green — parser 62/62; **1180 passed**, 1 warning; capture
+  96/96; egress 62/55/55; storage 6/6; 96 results, 0 nonzero.
+- **Clean live run:** **39841929311** on `02c08d5`, green in **35m21s**; run
+  directory `e1aeb9ad-3e61-4307-ab36-8e1f50a32dfe`; artifact
+  `aletheia-live-39841929311`. Lines copied from `MANIFEST.json`:
+  `completed` = sherlock, maigret, instaloader, reddit-api, youtube-api,
+  social_username, leak_checkers, venom, github_identity, minecraft;
+  `pending` = `[]`; `failed` = `[]`; `chain_tip` =
+  `43de83ce514b807c392d0f7ef4d35116644981cc1961ffffee439ed5f9c5e0a5`.
+  The only `skipped` entries are `reddit-api` (missing
+  `REDDIT_CLIENT_ID`/`REDDIT_CLIENT_SECRET`), `bron-vault` (no local instance),
+  `breachdirectory` (HTTP 403 during contract review) and `leak-lookup`
+  (written-authorization terms). No `youtube-api`, `leakix` or
+  `grayhatwarfare` skip is present.
+- **YouTube:** `youtube-api` status `succeeded`, `exit_code` 0; four findings
+  covering **two distinct channel IDs**; egress log has three `CONNECT`
+  entries to `www.googleapis.com`, all status 200. No missing-key skip. Both
+  channels are same-username *candidates*, not ownership proof.
+- **Leak checkers:** `leak_checkers` status `succeeded`, `exit_code` 0. LeakIX
+  finding value `leakix`, `raw_evidence.api_source` = `LeakIX Search API`,
+  `key_source` = `env:LEAKIX_API_KEY`, `record_count` 0, no error field.
+  GrayhatWarfare finding value `grayhatwarfare`, `api_source` =
+  `GrayhatWarfare Public Buckets API`, `key_source` =
+  `env:GRAYHATWARFARE_TOKEN`, `record_count` 0, no error field. Egress log has
+  one `CONNECT` each to `leakix.net` and `buckets.grayhatwarfare.com`, both
+  status 200. `bron-vault`, `breachdirectory` and `leak-lookup` remain
+  documented source skips.
+- **Reddit:** `reddit-api` status `partial`, `exit_code` 5; only recorded
+  reason is `REDDIT_CLIENT_ID and REDDIT_CLIENT_SECRET are required`. This is
+  the owner-excluded adapter, not a Gate 3 gap.
+- **Attempt record:** the first dispatch (`39831436380`) failed after 16m35s
+  because the operator default `timeout_seconds=120` killed `instaloader`
+  during Instagram's 429 retry, before the keyed adapters. Re-dispatched with
+  the prior run's `timeout_seconds=1800` and egress `100/500`. That keyed run
+  (`39834159214`, 38m28s) exposed the LeakIX 204 handling defect; `02c08d5`
+  fixes it and `39841929311` is the clean re-run. No `verification_status` was
+  changed; the artifact contains only `env:` key-source labels, not secret
+  values.
 
 ## Phase 16 — multi-seed investigations and context features (complete)
 
@@ -569,7 +633,13 @@ the top CHANGELOG entry and the live-audit section above). What remains needs us
   complete; Reddit is explicitly excluded by owner decision (2026-10-22), and
   `reddit-api` remains a recorded skip. Direct checks: Grayhat 200 (honest UA),
   AbuseIPDB 200, Netlas 200 (honest UA), SauceNAO 200 (file upload; URL mode
-  Cloudflare), YouTube 200, and all three abuse.ch APIs 200.
+  Cloudflare), YouTube 200, and all three abuse.ch APIs 200. Live validation
+  (2026-10-22): run `39841929311` on `02c08d5` executed `youtube-api` (two
+  channel candidates, no missing-key skip) and `leak_checkers` (LeakIX and
+  Grayhat, both `env:` keyed, zero records, no missing-key skips);
+  `reddit-api` remains the only missing-credential skip. IP intelligence,
+  SauceNAO and abuse.ch are wired and direct-verified but were not exercised
+  by this username-only seed.
 - Optional bookkeeping: promote the adapters exercised by the authorized run to
   `verified-live` using the run as copied evidence; and re-run the audit periodically as
   platform data changes.
@@ -579,14 +649,16 @@ the top CHANGELOG entry and the live-audit section above). What remains needs us
 
 ## Known deferred issues
 
-- **Egress coverage is proven by policy per adapter and by execution for four adapters.** Every
+- **Egress coverage is proven by policy per adapter and by execution for six adapters.** Every
   `network_required=True` adapter is wired (checked against the registry), but the proxied path
-  has only been exercised end to end for `search_engines`, `ssl_tls`, `ip_intelligence` and
-  `crtsh`. An adapter whose client ignores the proxy variables fails closed rather than
+  has only been exercised end to end for `search_engines`, `ssl_tls`, `ip_intelligence`,
+  `crtsh`, `youtube-api` and `leak_checkers` (the last two in the 2026-10-22 Gate 3 live
+  run). An adapter whose client ignores the proxy variables fails closed rather than
   egressing unproxied; that failure mode is not demonstrated per adapter.
 - No `verified-live` adapters in `PROJECT_MANIFEST.json`; every fixture is synthetic
   unless separately documented. The 2026-10-18 authorized run executed `sherlock`, `maigret`,
-  `instaloader`, `social_username` and `leak_checkers` live without changing any
+  `instaloader`, `social_username` and `leak_checkers` live, and the 2026-10-22 Gate 3 run
+  executed `youtube-api` and `leak_checkers` live, without changing any
   `verification_status` — see the live-audit section.
 - Score/confidence separation is incomplete; `--purpose` is not a required adapter field.
 - `AUTONOMOUS_DIRECTIVE.md` and `AGENT_SETUP.md` live at the repo root and now reference

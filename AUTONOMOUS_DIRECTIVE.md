@@ -309,7 +309,7 @@ Every one of the above requires a CI run URL. A claim without a run URL is not a
 
 **Gate 2 — Live investigation target.** Satisfied for `username:frost2233` only by explicit owner assertion. Any other target or broader sweep requires a fresh explicit assertion. Do not use a random public target.
 
-**Gate 3 — Free API keys.** The current Gate 3 set is complete: LeakIX, IPGeolocation, Unpaywall, GrayhatWarfare, AbuseIPDB, Netlas, SauceNAO, YouTube, and abuse.ch keys are configured. Reddit is explicitly excluded by the owner (2026-10-22); `reddit-api` remains a recorded skip and is not a required key. If a required key is absent when a phase needs it, pause and ask; do not stub adapters to bypass credential checks.
+**Gate 3 — Free API keys.** The current Gate 3 set is complete: LeakIX, IPGeolocation, Unpaywall, GrayhatWarfare, AbuseIPDB, Netlas, SauceNAO, YouTube, and abuse.ch keys are configured. Reddit is explicitly excluded by the owner (2026-10-22); `reddit-api` remains a recorded skip and is not a required key. Live validation (2026-10-22): run `39841929311` on `02c08d5` executed `youtube-api` and the LeakIX/Grayhat sub-sources without missing-key skips; IP-intelligence, SauceNAO and abuse.ch remain direct-verified only because the authorized seed is username-only. If a required key is absent when a phase needs it, pause and ask; do not stub adapters to bypass credential checks.
 
 Tier labels are descriptive and never a reason to pause for policy uncertainty.
 

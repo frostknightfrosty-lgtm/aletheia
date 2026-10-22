@@ -1,5 +1,40 @@
 # Changelog
 
+## 2026-10-22 — Gate 3 live validation and LeakIX 204 handling
+
+Every number below is copied from the downloaded artifacts for the cited
+commits. The target was the owner-asserted `username:frost2233` only; the
+assertion is recorded verbatim in the live `MANIFEST.json`.
+
+- Code `4d46f1b` passed the Gate 3 secrets into both live workflows and added
+  `SAUCENAO_API_KEY` to `PicImageSearchAdapter.descriptor.secret_env`. Docker
+  Verification run `39828587604` green: parser 62/62; 1177 passed, 1 warning;
+  capture 96/96; egress 62/55/55; storage 6/6; 96 results, 0 nonzero.
+- Code `02c08d5` normalizes LeakIX `HTTP 204 No Content` as an empty result
+  instead of a JSON decode error. Docker Verification run `39841924500` green:
+  `PARSER PREFLIGHT: PASS — 62/62 adapters have parser coverage`;
+  `"console_summary": "1180 passed, 1 warning"` (`junit_total` 1180;
+  `skipped_in_ci` empty); `DOCKER CAPTURE: PASS — 96/96 cases captured`;
+  egress `adapters=62 network_required=55 wired=55`; storage 6/6; results
+  96 entries, 0 nonzero.
+- Clean live run `39841929311` on `02c08d5` green in 35m21s, run directory
+  `e1aeb9ad-3e61-4307-ab36-8e1f50a32dfe`. `MANIFEST.json`: `completed` =
+  sherlock, maigret, instaloader, reddit-api, youtube-api, social_username,
+  leak_checkers, venom, github_identity, minecraft; `pending` and `failed`
+  empty; `chain_tip` =
+  `43de83ce514b807c392d0f7ef4d35116644981cc1961ffffee439ed5f9c5e0a5`.
+  `youtube-api` exit 0, four findings over two distinct channel candidates,
+  three CONNECT entries to `www.googleapis.com` all status 200.
+  `leak_checkers` exit 0: LeakIX `env:LEAKIX_API_KEY`, 0 records, no error;
+  GrayhatWarfare `env:GRAYHATWARFARE_TOKEN`, 0 records, no error; one CONNECT
+  each to `leakix.net` and `buckets.grayhatwarfare.com`, status 200. Only
+  credential skip is `reddit-api`; bron-vault, breachdirectory and leak-lookup
+  remain documented source skips. No `verification_status` changed.
+- Attempt record: the first dispatch `39831436380` failed after 16m35s when
+  `instaloader` hit the 120s timeout during Instagram 429 retries; the
+  re-dispatch `39834159214` (38m28s) succeeded but exposed the LeakIX 204
+  defect. `02c08d5` fixes it; the run above is the clean re-run.
+
 ## 2026-10-20 — P17.13: minecraft adapter (Mojang current profile)
 
 Every number below is copied from the downloaded artifact

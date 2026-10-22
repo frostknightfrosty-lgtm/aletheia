@@ -38,6 +38,19 @@ Configured and directly verified:
 - [x] **YouTube Data API** — `youtube-api` adapter + `youtube-geofind` — secret `YOUTUBE_API_KEY` — direct API HTTP 200 (2026-10-22)
 - [x] **abuse.ch** — `ip_intelligence` URLhaus / ThreatFox / MalwareBazaar — secrets `URLHAUS_AUTH_KEY`, `THREATFOX_AUTH_KEY`, `MALWAREBAZAAR_AUTH_KEY` — all three APIs HTTP 200 (2026-10-22)
 
+**Live workflow validation (2026-10-22).** Live Investigation run
+[`39841929311`](https://github.com/frostknightfrosty-lgtm/aletheia/actions/runs/39841929311)
+on commit `02c08d5` is green (35m21s) for the owner-asserted
+`username:frost2233`. `youtube-api` succeeded (exit 0; two distinct channel
+candidates; no missing-key skip) and `leak_checkers` succeeded with LeakIX and
+GrayhatWarfare (both `env:` keyed; zero records; no missing-key skips).
+`reddit-api` remains the only missing-credential skip. The IP-intelligence,
+SauceNAO and abuse.ch keys are wired and direct-verified, but a username-only
+seed cannot exercise those paths; no authorized IP or image seed exists. The
+first successful keyed run (`39834159214`, 38m28s) exposed LeakIX's `HTTP 204`
+empty-response handling; the fix is `02c08d5` and this run is the clean
+re-verification.
+
 Closed by owner decision (no action):
 
 - **Reddit** — `reddit-api` adapter — owner decided on 2026-10-22 that Reddit credentials are not needed. The adapter remains a recorded skip; no `REDDIT_CLIENT_ID`/`SECRET` action.
