@@ -272,3 +272,7 @@ def test_picimagesearch_pinned_constants():
     assert driver.GATHER_TIMEOUT_SECONDS == 150.0
     assert driver.HARD_DEADLINE_SECONDS == 210.0
     assert driver.MAX_UPLOAD_BYTES == 12 * 1024 * 1024
+
+
+def test_picimagesearch_descriptor_passes_saucenao_key_to_container():
+    assert PicImageSearchAdapter.descriptor.secret_env == ["SAUCENAO_API_KEY"]

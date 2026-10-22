@@ -326,6 +326,7 @@ class PicImageSearchAdapter(Phase5Adapter):
         docker_image="aletheia/picimagesearch:v1",
         output_schema={"engines": "object", "status": "string"},
         health_check="--health", requires_authorization_assertion=True,
+        secret_env=["SAUCENAO_API_KEY"],
     )
 
     def supports(self, seed_type: SeedType) -> bool:
