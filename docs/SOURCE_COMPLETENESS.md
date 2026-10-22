@@ -128,8 +128,8 @@ defaults.
 - **Code / search / academic:** GitLab token, Debian Salsa (DCS key),
   Marginalia email key, Semantic Scholar, CORE, EPO OPS, USPTO Open Data
   Portal key (PatentsView migration — free account with identity fields).
-- **Social / media:** Reddit, YouTube Data API, GitHub token, Mapillary,
-  Copernicus Data Space, Betaface.
+- **Social / media:** YouTube Data API, GitHub token, Mapillary,
+  Copernicus Data Space, Betaface; Reddit excluded by owner decision (2026-10-22).
 - **Transport (with Gate 6 items):** OpenSky (registration + written
   integration permission), BarentsWatch, Network Rail, National Rail,
   Deutsche Bahn.

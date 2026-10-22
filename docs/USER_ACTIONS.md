@@ -38,9 +38,9 @@ Configured and directly verified:
 - [x] **YouTube Data API** — `youtube-api` adapter + `youtube-geofind` — secret `YOUTUBE_API_KEY` — direct API HTTP 200 (2026-10-22)
 - [x] **abuse.ch** — `ip_intelligence` URLhaus / ThreatFox / MalwareBazaar — secrets `URLHAUS_AUTH_KEY`, `THREATFOX_AUTH_KEY`, `MALWAREBAZAAR_AUTH_KEY` — all three APIs HTTP 200 (2026-10-22)
 
-Still pending:
+Closed by owner decision (no action):
 
-- [ ] **Reddit** — `reddit-api` adapter — secrets `REDDIT_CLIENT_ID` + `REDDIT_CLIENT_SECRET` — register at reddit.com/prefs/apps
+- **Reddit** — `reddit-api` adapter — owner decided on 2026-10-22 that Reddit credentials are not needed. The adapter remains a recorded skip; no `REDDIT_CLIENT_ID`/`SECRET` action.
 
 Other source families from the completeness directive (configured entries are
 listed above; the rest remain owner-gated or source-blocked):

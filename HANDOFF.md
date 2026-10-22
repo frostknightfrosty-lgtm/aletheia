@@ -1,6 +1,6 @@
 # Aletheia Handoff — Phase 18 pending (Operator-Driven Model; Phase 17 complete)
 
-Last updated: 2026-10-22T17:09:16Z
+Last updated: 2026-10-22T17:56:00Z
 
 ## Project boundaries
 
@@ -565,10 +565,11 @@ the top CHANGELOG entry and the live-audit section above). What remains needs us
   `LEAKIX_API_KEY` and `IPGEOLOCATION_KEY` (2026-10-20); `UNPAYWALL_EMAIL`
   (2026-10-20); `GRAYHATWARFARE_TOKEN`, `ABUSEIPDB_KEY`, `NETLAS_KEY`,
   `SAUCENAO_API_KEY`, `YOUTUBE_API_KEY`, and the abuse.ch `URLHAUS_AUTH_KEY` /
-  `THREATFOX_AUTH_KEY` / `MALWAREBAZAAR_AUTH_KEY` (2026-10-22). Only
-  `REDDIT_CLIENT_ID`/`SECRET` remains pending. Direct checks: Grayhat 200
-  (honest UA), AbuseIPDB 200, Netlas 200 (honest UA), SauceNAO 200 (file upload;
-  URL mode Cloudflare), YouTube 200, and all three abuse.ch APIs 200.
+  `THREATFOX_AUTH_KEY` / `MALWAREBAZAAR_AUTH_KEY` (2026-10-22). The current set is
+  complete; Reddit is explicitly excluded by owner decision (2026-10-22), and
+  `reddit-api` remains a recorded skip. Direct checks: Grayhat 200 (honest UA),
+  AbuseIPDB 200, Netlas 200 (honest UA), SauceNAO 200 (file upload; URL mode
+  Cloudflare), YouTube 200, and all three abuse.ch APIs 200.
 - Optional bookkeeping: promote the adapters exercised by the authorized run to
   `verified-live` using the run as copied evidence; and re-run the audit periodically as
   platform data changes.
@@ -613,9 +614,10 @@ the top CHANGELOG entry and the live-audit section above). What remains needs us
   directly verified: `LEAKIX_API_KEY`, `IPGEOLOCATION_KEY`, `UNPAYWALL_EMAIL`,
   `GRAYHATWARFARE_TOKEN`, `ABUSEIPDB_KEY`, `NETLAS_KEY`, `SAUCENAO_API_KEY`,
   `YOUTUBE_API_KEY`, and the abuse.ch `URLHAUS_AUTH_KEY` / `THREATFOX_AUTH_KEY` /
-  `MALWAREBAZAAR_AUTH_KEY`. Only `REDDIT_CLIENT_ID`/`SECRET` remains pending; `reddit-api`
-  still skips until those exist. The grouped free-registration master list is
-  `docs/USER_ACTIONS.md` (see also `docs/SOURCE_COMPLETENESS.md` §C).
+  `MALWAREBAZAAR_AUTH_KEY`. The current Gate 3 set is complete; Reddit is explicitly
+  excluded by owner decision (2026-10-22) and `reddit-api` remains a recorded skip.
+  The grouped free-registration master list is `docs/USER_ACTIONS.md` (see also
+  `docs/SOURCE_COMPLETENESS.md` §C).
 - **Gate 5** — evidence lines must be copied from a downloaded artifact, never typed.
 - **Gate 6** — `transport_movement` and `darkweb_search` build in the autonomous campaign
   (transport with recorded skip paths; dark web behind container-level Tor); live coverage

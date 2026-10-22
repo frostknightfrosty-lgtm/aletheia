@@ -49,7 +49,7 @@ copied artifact lines.
 
 ## Checks to perform when the task reaches them
 
-- **Gate 3 — API keys and cost:** Before a phase depends on Shodan, HIBP, Reddit, YouTube, OpenCorporates, or another key-protected service, verify access and cost. Ask for user action if a required free-registration key is not available. Do not add a paid default dependency.
+- **Gate 3 — API keys and cost:** Before a phase depends on Shodan, HIBP, YouTube, OpenCorporates, or another key-protected service, verify access and cost. Ask for user action if a required free-registration key is not available. Do not add a paid default dependency.
 - **Gate 2 — live target:** Before the authorized live-investigation phase, verify that the target is user-owned and explicitly supplied for that run. Do not use an unrelated target.
 
 ## Paused work note (2026-10-16)
