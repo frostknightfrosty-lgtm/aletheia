@@ -78,11 +78,22 @@ from aletheia.cascade.claims import (
 from aletheia.cascade.evidence import compare_claims
 from aletheia.cascade.extractors import extract_pivots
 from aletheia.cascade.falsify import falsify
+from aletheia.cascade.interactive import (
+    CANDIDATE_REVIEW_MAX,
+    CANDIDATE_REVIEW_MIN,
+    CandidateMatch,
+)
 from aletheia.cascade.ledger import DecisionLedger
 from aletheia.cascade.merge_graph import MergeGraph
 from aletheia.cascade.priors import handle_prior_log_odds
+from aletheia.cascade.profile_linking import ProfileLink, profile_comparison_pairs
 from aletheia.cascade.scheduler import CascadeScheduler, SchedulerPolicy, StopReason
-from aletheia.cascade.scoring import score_evidence, tier_for
+from aletheia.cascade.scoring import (
+    EvidenceClass,
+    EvidenceItem,
+    score_evidence,
+    tier_for,
+)
 from aletheia.cascade.trail import TrailHop
 from aletheia.core.models import (
     ClusterDecision,
@@ -92,6 +103,7 @@ from aletheia.core.models import (
     IdentityTier,
     Seed,
     SeedType,
+    RelationshipType,
 )
 
 __all__ = ["CandidateCase", "CascadeEngine", "CascadeResult", "Observation"]
@@ -118,6 +130,7 @@ class Observation:
 
 
 Observer = Callable[[Seed], Observation]
+ReviewCallback = Callable[[CandidateMatch], str]
 
 
 @dataclass(frozen=True)
@@ -130,6 +143,10 @@ class CandidateCase:
     reason: str
     ach_surviving: Hypothesis | None
     veto: str | None
+    # Phase 18.1: the base confidence of the best fuzzy profile/name pair and
+    # the operator's label when the interactive review ran (None otherwise).
+    confidence: float | None = None
+    operator_label: str | None = None
 
 
 @dataclass
@@ -147,10 +164,70 @@ class CascadeResult:
     expansions: int
     passes: int
     checkpoint: dict[str, Any]
+    profile_links: tuple[ProfileLink, ...] = ()
 
 
 def _sigmoid(value: float) -> float:
     return 1.0 / (1.0 + math.exp(-value))
+
+
+def _candidate_confidence(items: Sequence[EvidenceItem]) -> float | None:
+    """The best base similarity among a pair's evidence, if one is recorded."""
+    similarities = [item.similarity for item in items if item.similarity is not None]
+    return round(max(similarities), 6) if similarities else None
+
+
+def _normalise_operator_label(raw: str | None) -> str:
+    value = (raw or "").strip().casefold()
+    if value in {"y", "yes", "confirmed", "confirm"}:
+        return "confirmed"
+    if value in {"n", "no", "excluded", "exclude"}:
+        return "excluded"
+    return "skip"
+
+
+def _profile_links_from_items(
+    left: Claim,
+    right: Claim,
+    items: Sequence[EvidenceItem],
+) -> list[ProfileLink]:
+    """Materialize confirmed profile edges from the evidence reasons."""
+    links: list[ProfileLink] = []
+    for item in items:
+        reason = item.reason.casefold()
+        if item.evidence_class is not EvidenceClass.HARD:
+            continue
+        if reason.startswith("avatar phash"):
+            links.append(
+                ProfileLink(
+                    left_entity_id=left.claim_id,
+                    right_entity_id=right.claim_id,
+                    relationship=RelationshipType.SAME_AS_CONFIRMED,
+                    confidence=0.95,
+                    source="avatar_phash",
+                    detail=item.reason,
+                    left_value=left.value,
+                    right_value=right.value,
+                    left_platform=str(left.attributes.get("platform") or "") or None,
+                    right_platform=str(right.attributes.get("platform") or "") or None,
+                )
+            )
+        elif reason.startswith("network overlap"):
+            links.append(
+                ProfileLink(
+                    left_entity_id=left.claim_id,
+                    right_entity_id=right.claim_id,
+                    relationship=RelationshipType.SAME_AS_CONFIRMED,
+                    confidence=0.90,
+                    source="network_overlap",
+                    detail=item.reason,
+                    left_value=left.value,
+                    right_value=right.value,
+                    left_platform=str(left.attributes.get("platform") or "") or None,
+                    right_platform=str(right.attributes.get("platform") or "") or None,
+                )
+            )
+    return links
 
 
 class CascadeEngine:
@@ -164,6 +241,7 @@ class CascadeEngine:
         ledger: DecisionLedger | None = None,
         rng_seed: int = 0,
         max_waves: int = 64,
+        review_callback: ReviewCallback | None = None,
     ) -> None:
         if max_waves < 1:
             raise ValueError("max_waves must be >= 1")
@@ -172,6 +250,7 @@ class CascadeEngine:
         self._ledger = ledger
         self._rng_seed = int(rng_seed)
         self._max_waves = max_waves
+        self._review_callback = review_callback
 
     # -- VOI priors -----------------------------------------------------------
 
@@ -201,6 +280,7 @@ class CascadeEngine:
         hops: list[TrailHop] = []
         decisions: list[ClusterDecision] = []
         candidates: list[CandidateCase] = []
+        profile_links: list[ProfileLink] = []
         wave_added = 0
         waves = 0
 
@@ -272,6 +352,7 @@ class CascadeEngine:
                     depth=entry.depth + 1,
                     decisions=decisions,
                     candidates=candidates,
+                    profile_links=profile_links,
                 )
                 if novel_value or accepted:
                     wave_added += 1
@@ -308,6 +389,7 @@ class CascadeEngine:
             expansions=scheduler.expansions,
             passes=scheduler.passes,
             checkpoint=scheduler.checkpoint(),
+            profile_links=tuple(profile_links),
         )
 
     # -- internals ------------------------------------------------------------
@@ -356,6 +438,7 @@ class CascadeEngine:
         depth: int,
         decisions: list[ClusterDecision],
         candidates: list[CandidateCase],
+        profile_links: list[ProfileLink],
     ) -> bool:
         """Falsify, compare, decide, merge, and pump one arriving claim.
 
@@ -401,20 +484,148 @@ class CascadeEngine:
 
         combined = [*subject_claims, claim]
         by_id = {candidate.claim_id: candidate for candidate in combined}
-        items = []
-        for left_id, right_id in block_claims(combined).pairs:
+        pair_items: list[tuple[UUID, UUID, list[EvidenceItem]]] = []
+        pairs = set(block_claims(combined).pairs)
+        pairs.update(
+            profile_comparison_pairs(
+                [(candidate.claim_id, candidate.attributes) for candidate in combined]
+            )
+        )
+        for left_id, right_id in sorted(
+            pairs, key=lambda pair: (str(pair[0]), str(pair[1]))
+        ):
             if claim.claim_id not in (left_id, right_id):
                 continue
-            items.extend(compare_claims(by_id[left_id], by_id[right_id]))
+            compared = compare_claims(by_id[left_id], by_id[right_id])
+            if compared:
+                pair_items.append((left_id, right_id, compared))
+        items = [item for _, _, compared in pair_items for item in compared]
         for item in items:
             scheduler.note_evidence(item.evidence_class)
+
+        # The best fuzzy pair supplies the interactive review prompt. A pair
+        # whose only evidence is HARD (avatar/network) is already confirmed and
+        # is not a SAME_AS_CANDIDATE edge, so it never prompts.
+        confidence: float | None = None
+        best_pair: tuple[UUID, UUID, list[EvidenceItem]] | None = None
+        for left_id, right_id, compared in pair_items:
+            pair_confidence = _candidate_confidence(compared)
+            if pair_confidence is None:
+                continue
+            if confidence is None or pair_confidence > confidence:
+                confidence = pair_confidence
+                best_pair = (left_id, right_id, compared)
 
         tier_result = tier_for(items)
         ach = assess_hypotheses(items)
         score_result = score_evidence(items)
-        accepted = tier_result.tier is IdentityTier.CONFIRMED and ach.surviving is Hypothesis.SUBJECT
+        operator_label: str | None = None
+        operator_reason: str | None = None
+        if (
+            self._review_callback is not None
+            and best_pair is not None
+            and confidence is not None
+            and CANDIDATE_REVIEW_MIN <= confidence <= CANDIDATE_REVIEW_MAX
+            and tier_result.tier
+            in {IdentityTier.POSSIBLE, IdentityTier.PROBABLE}
+        ):
+            left_id, right_id, _ = best_pair
+            subject_claim = by_id[right_id] if left_id == claim.claim_id else by_id[left_id]
+            match = CandidateMatch(
+                subject_claim=subject_claim,
+                candidate_claim=claim,
+                confidence=confidence,
+                score=score_result.log_lr_total,
+                reason=f"candidate ({tier_result.tier.value})",
+            )
+            operator_label = _normalise_operator_label(self._review_callback(match))
+            if operator_label in {"confirmed", "excluded"}:
+                operator_reason = (
+                    "operator-confirmed candidate match"
+                    if operator_label == "confirmed"
+                    else "operator excluded candidate match"
+                )
+                operator_item = EvidenceItem(
+                    EvidenceClass.HARD
+                    if operator_label == "confirmed"
+                    else EvidenceClass.VETO,
+                    operator_reason,
+                    origin=f"operator|{claim.claim_id}|{subject_claim.claim_id}",
+                    similarity=confidence,
+                )
+                items.append(operator_item)
+                scheduler.note_evidence(operator_item.evidence_class)
+                ledger.append(
+                    "operator_label",
+                    {
+                        "claim_id": str(claim.claim_id),
+                        "subject_claim_id": str(subject_claim.claim_id),
+                        "label": operator_label,
+                        "confidence": confidence,
+                        "left_value": match.left_value,
+                        "right_value": match.right_value,
+                        "left_platform": match.left_platform,
+                        "right_platform": match.right_platform,
+                    },
+                )
+                tier_result = tier_for(items)
+                ach = assess_hypotheses(items)
+                score_result = score_evidence(items)
+                if operator_label == "confirmed":
+                    profile_links.append(
+                        ProfileLink(
+                            left_entity_id=subject_claim.claim_id,
+                            right_entity_id=claim.claim_id,
+                            relationship=RelationshipType.SAME_AS_CONFIRMED,
+                            confidence=confidence,
+                            source="interactive_label",
+                            detail=operator_reason,
+                            left_value=subject_claim.value,
+                            right_value=claim.value,
+                            left_platform=match.left_platform,
+                            right_platform=match.right_platform,
+                        )
+                    )
+                else:
+                    profile_links.append(
+                        ProfileLink(
+                            left_entity_id=subject_claim.claim_id,
+                            right_entity_id=claim.claim_id,
+                            relationship=RelationshipType.SAME_AS_EXCLUDED,
+                            confidence=confidence,
+                            source="interactive_label",
+                            detail=operator_reason,
+                            left_value=subject_claim.value,
+                            right_value=claim.value,
+                            left_platform=match.left_platform,
+                            right_platform=match.right_platform,
+                        )
+                    )
+
+        if best_pair is not None:
+            for left_id, right_id, compared in pair_items:
+                for linked in _profile_links_from_items(
+                    by_id[left_id], by_id[right_id], compared
+                ):
+                    if not any(
+                        existing.source == linked.source
+                        and {
+                            existing.left_entity_id,
+                            existing.right_entity_id,
+                        }
+                        == {linked.left_entity_id, linked.right_entity_id}
+                        for existing in profile_links
+                    ):
+                        profile_links.append(linked)
+
+        accepted = (
+            tier_result.tier is IdentityTier.CONFIRMED
+            and (ach.surviving is Hypothesis.SUBJECT or operator_label == "confirmed")
+        )
         if accepted:
             reason = "confirmed merge"
+        elif operator_label == "excluded":
+            reason = "operator excluded candidate"
         elif tier_result.tier is None:
             reason = "no supporting evidence against the subject set"
         else:
@@ -435,7 +646,9 @@ class CascadeEngine:
                 accepted=accepted,
                 reason=reason,
                 ach_surviving=ach.surviving,
-                veto=None,
+                veto=operator_reason if operator_label == "excluded" else None,
+                confidence=confidence,
+                operator_label=operator_label,
             )
         )
         ledger.append(
@@ -453,6 +666,8 @@ class CascadeEngine:
                 "evidence": [item.reason for item in items],
                 "capped_by_review_gate": tier_result.capped_by_review_gate,
                 "capped_by_low_grade": tier_result.capped_by_low_grade,
+                "confidence": confidence,
+                "operator_label": operator_label,
             },
         )
 

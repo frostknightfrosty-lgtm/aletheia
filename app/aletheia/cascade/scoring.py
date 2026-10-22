@@ -33,6 +33,7 @@ import math
 import re
 from collections.abc import Iterable, Mapping
 from dataclasses import dataclass, field
+from datetime import datetime, timezone, tzinfo
 from enum import StrEnum
 
 from aletheia.core.calibration import Calibrator
@@ -41,10 +42,26 @@ from aletheia.core.models import IdentityTier
 __all__ = [
     "DEFAULT_LIKELIHOOD_RATIOS",
     "LOW_GRADE_RELIABILITIES",
+    "TEMPORAL_CONFIDENCE_BOOST",
+    "TEMPORAL_MIN_SAMPLES",
+    "TEMPORAL_OVERLAP_THRESHOLD",
     "EvidenceClass",
     "EvidenceItem",
     "ScoreResult",
+    "TemporalCadence",
     "TierResult",
+    "active_hour_histogram",
+    "active_hour_overlap",
+    "active_hours",
+    "activity_histogram",
+    "apply_temporal_boost",
+    "boost_temporal_confidence",
+    "compare_active_hours",
+    "compare_activity_histograms",
+    "extract_active_hours",
+    "temporal_cadence_overlap",
+    "temporal_cadence_similarity",
+    "temporal_confidence_boost",
     "score_evidence",
     "tier_for",
 ]
@@ -70,11 +87,313 @@ DEFAULT_LIKELIHOOD_RATIOS: dict[EvidenceClass, float] = {
     EvidenceClass.VETO: 1.0,
 }
 
+# Public-activity cadence (Phase 18.1). The comparison is deliberately a
+# reviewable constant rather than a fitted model: three independent public
+# timestamps per side is the minimum evidence that an hour histogram describes
+# a habit, and a 70% histogram intersection is the v1 "significant" boundary.
+TEMPORAL_CONFIDENCE_BOOST = 0.15
+TEMPORAL_OVERLAP_THRESHOLD = 0.70
+TEMPORAL_MIN_SAMPLES = 3
+
 # Admiralty reliabilities that count as low-grade for the tier-gate cap
 # (design section 6.3: "low-grade sources alone can never clear a tier gate").
 LOW_GRADE_RELIABILITIES = frozenset({"E", "F"})
 
 _GRADE_LABEL_RE = re.compile(r"[A-F][1-6]")
+
+
+@dataclass(frozen=True)
+class TemporalCadence:
+    """The public-activity cadence comparison for one pair of profiles.
+
+    ``left_hours``/``right_hours`` are the extracted UTC hours (0-23), and
+    ``overlap`` is the histogram intersection of the two normalized 24-bin
+    distributions. ``significant`` is true only when both sides have at least
+    ``min_samples`` observations and ``overlap`` reaches the configured
+    threshold, so a single shared timestamp can never manufacture a boost.
+    """
+
+    left_hours: tuple[int, ...]
+    right_hours: tuple[int, ...]
+    overlap: float
+    significant: bool
+    threshold: float
+
+    @property
+    def left_samples(self) -> int:
+        return len(self.left_hours)
+
+    @property
+    def right_samples(self) -> int:
+        return len(self.right_hours)
+
+    @property
+    def boost(self) -> float:
+        return TEMPORAL_CONFIDENCE_BOOST if self.significant else 0.0
+
+    def to_dict(self) -> dict[str, object]:
+        return {
+            "left_hours": list(self.left_hours),
+            "right_hours": list(self.right_hours),
+            "left_samples": self.left_samples,
+            "right_samples": self.right_samples,
+            "overlap": self.overlap,
+            "threshold": self.threshold,
+            "significant": self.significant,
+            "boost": self.boost,
+        }
+
+
+def _coerce_hour(value: int, tz: tzinfo) -> int:
+    """Turn a numeric public timestamp into a UTC hour.
+
+    Integers ``0..23`` are accepted directly as hours (handy for fixtures and
+    for adapters that already bucket activity); larger values are treated as
+    Unix timestamps. Out-of-range values raise ``ValueError``.
+    """
+    if 0 <= value <= 23:
+        return int(value)
+    try:
+        stamp = datetime.fromtimestamp(float(value), tz=timezone.utc)
+    except (OverflowError, OSError, ValueError) as exc:
+        raise ValueError(f"invalid activity timestamp: {value!r}") from exc
+    return stamp.astimezone(tz).hour
+
+
+def _coerce_timestamp(value: object, tz: tzinfo) -> int:
+    """Extract the UTC hour from a datetime, ISO-8601 string, or Unix stamp."""
+    if isinstance(value, datetime):
+        stamp = value if value.tzinfo is not None else value.replace(tzinfo=timezone.utc)
+        return stamp.astimezone(tz).hour
+    if isinstance(value, bool):
+        raise ValueError(f"invalid activity timestamp: {value!r}")
+    if isinstance(value, (int, float)):
+        return _coerce_hour(value, tz)
+    if isinstance(value, str):
+        text = value.strip()
+        if not text:
+            raise ValueError("empty activity timestamp")
+        # A bare hour is useful in fixtures; an ISO date/time is the normal
+        # adapter shape. Epoch numeric strings are accepted too.
+        if text.isdigit() and len(text) <= 2:
+            return _coerce_hour(int(text), tz)
+        try:
+            stamp = datetime.fromisoformat(text.replace("Z", "+00:00"))
+        except ValueError:
+            try:
+                return _coerce_hour(int(float(text)), tz)
+            except ValueError as exc:
+                raise ValueError(f"invalid activity timestamp: {value!r}") from exc
+        if stamp.tzinfo is None:
+            stamp = stamp.replace(tzinfo=timezone.utc)
+        return stamp.astimezone(tz).hour
+    raise ValueError(f"invalid activity timestamp: {value!r}")
+
+
+def extract_active_hours(
+    timestamps: Iterable[object],
+    *,
+    tz: tzinfo = timezone.utc,
+) -> tuple[int, ...]:
+    """Extract the public-activity hours (0-23) from timestamps.
+
+    Invalid entries are skipped rather than guessed; callers that need to know
+    how much public activity was usable can compare the returned tuple length
+    with their input length. Naive datetimes are treated as UTC.
+    """
+    if isinstance(timestamps, (str, datetime, int, float)) and not isinstance(
+        timestamps, bool
+    ):
+        timestamps = (timestamps,)
+    hours: list[int] = []
+    for value in timestamps:
+        try:
+            hours.append(_coerce_timestamp(value, tz))
+        except ValueError:
+            continue
+    return tuple(hours)
+
+
+def active_hours(timestamps: Iterable[object], *, tz: tzinfo = timezone.utc) -> tuple[int, ...]:
+    """Alias for :func:`extract_active_hours` (public API readability)."""
+    return extract_active_hours(timestamps, tz=tz)
+
+
+def activity_histogram(
+    timestamps: Iterable[object],
+    *,
+    tz: tzinfo = timezone.utc,
+    normalize: bool = True,
+) -> tuple[float, ...]:
+    """A 24-bin activity histogram (normalized by default).
+
+    The normalized form is a distribution over UTC hours, so profiles with
+    different volumes of public activity are comparable. Set
+    ``normalize=False`` for raw counts.
+    """
+    hours = extract_active_hours(timestamps, tz=tz)
+    counts = [0] * 24
+    for hour in hours:
+        if 0 <= hour <= 23:
+            counts[hour] += 1
+    total = sum(counts)
+    if not normalize:
+        return tuple(float(count) for count in counts)
+    if total == 0:
+        return tuple(0.0 for _ in counts)
+    return tuple(count / total for count in counts)
+
+
+def active_hour_histogram(
+    timestamps: Iterable[object],
+    *,
+    tz: tzinfo = timezone.utc,
+    normalize: bool = True,
+) -> tuple[float, ...]:
+    """Alias for :func:`activity_histogram`."""
+    return activity_histogram(timestamps, tz=tz, normalize=normalize)
+
+
+def _histogram_intersection(left: tuple[float, ...], right: tuple[float, ...]) -> float:
+    return min(1.0, sum(min(a, b) for a, b in zip(left, right)))
+
+
+def compare_activity_histograms(
+    left: Iterable[object],
+    right: Iterable[object],
+    *,
+    threshold: float = TEMPORAL_OVERLAP_THRESHOLD,
+    min_samples: int = TEMPORAL_MIN_SAMPLES,
+    tz: tzinfo = timezone.utc,
+) -> TemporalCadence:
+    """Compare two public-activity histories by active-hour overlap.
+
+    ``overlap`` is the histogram intersection of the two normalized 24-bin
+    distributions. The comparison is significant only when both sides provide
+    at least ``min_samples`` usable timestamps and ``overlap >= threshold``.
+    """
+    if not 0.0 <= threshold <= 1.0:
+        raise ValueError("threshold must be in [0, 1]")
+    if min_samples < 1:
+        raise ValueError("min_samples must be >= 1")
+    left_hours = extract_active_hours(left, tz=tz)
+    right_hours = extract_active_hours(right, tz=tz)
+    left_hist = activity_histogram(left_hours)
+    right_hist = activity_histogram(right_hours)
+    overlap = round(_histogram_intersection(left_hist, right_hist), 6)
+    significant = (
+        len(left_hours) >= min_samples
+        and len(right_hours) >= min_samples
+        and overlap >= threshold
+    )
+    return TemporalCadence(
+        left_hours=left_hours,
+        right_hours=right_hours,
+        overlap=overlap,
+        significant=significant,
+        threshold=threshold,
+    )
+
+
+def temporal_cadence_overlap(
+    left: Iterable[object],
+    right: Iterable[object],
+    *,
+    threshold: float = TEMPORAL_OVERLAP_THRESHOLD,
+    min_samples: int = TEMPORAL_MIN_SAMPLES,
+    tz: tzinfo = timezone.utc,
+) -> TemporalCadence:
+    """Alias for :func:`compare_activity_histograms`."""
+    return compare_activity_histograms(
+        left, right, threshold=threshold, min_samples=min_samples, tz=tz
+    )
+
+
+def compare_active_hours(
+    left: Iterable[object],
+    right: Iterable[object],
+    *,
+    threshold: float = TEMPORAL_OVERLAP_THRESHOLD,
+    min_samples: int = TEMPORAL_MIN_SAMPLES,
+    tz: tzinfo = timezone.utc,
+) -> TemporalCadence:
+    """Alias for :func:`compare_activity_histograms`."""
+    return compare_activity_histograms(
+        left, right, threshold=threshold, min_samples=min_samples, tz=tz
+    )
+
+
+def active_hour_overlap(
+    left: Iterable[object],
+    right: Iterable[object],
+    *,
+    tz: tzinfo = timezone.utc,
+) -> float:
+    """Alias for :func:`temporal_cadence_similarity`."""
+    return temporal_cadence_similarity(left, right, tz=tz)
+
+
+def temporal_cadence_similarity(
+    left: Iterable[object],
+    right: Iterable[object],
+    *,
+    tz: tzinfo = timezone.utc,
+) -> float:
+    """The active-hour histogram intersection in [0, 1]."""
+    return compare_activity_histograms(left, right, tz=tz).overlap
+
+
+def temporal_confidence_boost(
+    left: Iterable[object],
+    right: Iterable[object],
+    *,
+    threshold: float = TEMPORAL_OVERLAP_THRESHOLD,
+    min_samples: int = TEMPORAL_MIN_SAMPLES,
+    tz: tzinfo = timezone.utc,
+) -> float:
+    """Return ``+0.15`` for a significant overlap, otherwise ``0.0``."""
+    cadence = compare_activity_histograms(
+        left, right, threshold=threshold, min_samples=min_samples, tz=tz
+    )
+    return TEMPORAL_CONFIDENCE_BOOST if cadence.significant else 0.0
+
+
+def boost_temporal_confidence(
+    left: Iterable[object],
+    right: Iterable[object],
+    *,
+    threshold: float = TEMPORAL_OVERLAP_THRESHOLD,
+    min_samples: int = TEMPORAL_MIN_SAMPLES,
+    tz: tzinfo = timezone.utc,
+) -> float:
+    """Alias for :func:`temporal_confidence_boost` (returns 0.0 or +0.15)."""
+    return temporal_confidence_boost(
+        left, right, threshold=threshold, min_samples=min_samples, tz=tz
+    )
+
+
+def apply_temporal_boost(
+    score: float,
+    left: Iterable[object],
+    right: Iterable[object],
+    *,
+    threshold: float = TEMPORAL_OVERLAP_THRESHOLD,
+    min_samples: int = TEMPORAL_MIN_SAMPLES,
+    boost: float = TEMPORAL_CONFIDENCE_BOOST,
+    cap: float = 1.0,
+    tz: tzinfo = timezone.utc,
+) -> tuple[float, TemporalCadence]:
+    """Add the documented cadence boost to a fuzzy-match confidence.
+
+    The boost is applied only when the comparison is significant. Returned
+    scores are rounded to six decimals and capped at ``cap`` (1.0 by default).
+    """
+    cadence = compare_activity_histograms(
+        left, right, threshold=threshold, min_samples=min_samples, tz=tz
+    )
+    if not cadence.significant:
+        return round(float(score), 6), cadence
+    return min(float(cap), round(float(score) + float(boost), 6)), cadence
 
 
 @dataclass(frozen=True)

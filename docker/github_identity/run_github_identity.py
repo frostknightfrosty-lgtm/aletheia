@@ -249,6 +249,7 @@ def _clean_profile(payload: Any) -> dict[str, Any] | None:
         "blog": _text(payload.get("blog"), 300),
         "location": _text(payload.get("location"), 200),
         "bio": _text(payload.get("bio"), 500),
+        "avatar_url": _text(payload.get("avatar_url"), 500),
         "twitter_username": _text(payload.get("twitter_username"), 120),
         "public_repos": _number(payload.get("public_repos")),
         "public_gists": _number(payload.get("public_gists")),

@@ -83,6 +83,7 @@ def build_parser() -> argparse.ArgumentParser:
     storage_sync.add_argument("--data-dir", default=os.getenv("ALETHEIA_DATA_DIR", "./data"))
 
     cascade = sub.add_parser("cascade", help="Phase 17 cascade tools: run, review, confirm, purge")
+    cascade.add_argument("--interactive", action="store_true", help="pause on SAME_AS_CANDIDATE edges in the 0.70-0.85 review band and record the operator's labels")
     cascade_sub = cascade.add_subparsers(dest="cascade_cmd", required=True)
     cascade_run = cascade_sub.add_parser("run", help="run the pivot cascade (fixture dry-run or live adapters) and write its artifacts")
     cascade_run.add_argument("--seed", required=True, action="append", help="type:value; repeat for a multi-seed cascade")
@@ -97,6 +98,8 @@ def build_parser() -> argparse.ArgumentParser:
     cascade_run.add_argument("--egress-burst", type=float, default=1.0, help="per-adapter egress proxy limit: burst capacity (default 1)")
     cascade_run.add_argument("--max-expansions", type=int, default=None, help="hard budget on pivot expansions (default: uncapped)")
     cascade_run.add_argument("--owner-mode", action="store_true", help="owner mode: depth escalation to 5 once HARD evidence is seen")
+    cascade_run.add_argument("--interactive", action="store_true", default=argparse.SUPPRESS, help="pause on SAME_AS_CANDIDATE edges in the 0.70-0.85 review band")
+    cascade_run.add_argument("--calibration-pairs", default=None, help="path to append human-labelled pairs (default: tests/fixtures/calibration_pairs.json)")
     cascade_review = cascade_sub.add_parser("review", help="replay a decision ledger and verify its hash chain")
     cascade_review.add_argument("--ledger", required=True, help="path to the decision ledger (JSONL records or a JSON list)")
     cascade_review.add_argument("--kinds", default=None, help="comma-separated kinds to show, e.g. pivot_granted,stop")
@@ -198,6 +201,12 @@ def main() -> None:
                 egress_burst=args.egress_burst,
                 max_expansions=args.max_expansions,
                 owner_mode=args.owner_mode,
+                interactive=getattr(args, "interactive", False),
+                calibration_pairs_path=(
+                    Path(args.calibration_pairs)
+                    if getattr(args, "calibration_pairs", None)
+                    else None
+                ),
             )
             observer = fixture_observer(Path(args.fixture)) if args.fixture else None
             outcome = run_cascade(config, observer=observer)
@@ -208,6 +217,8 @@ def main() -> None:
             print(f"expansions={outcome.expansions}")
             print(f"trail_digest={outcome.trail_digest}")
             print(f"coverage_ok={outcome.coverage_ok}")
+            if getattr(args, "interactive", False):
+                print(f"labels_recorded={outcome.labels_recorded}")
         elif args.cascade_cmd == "review":
             from aletheia.cascade.ledger import DecisionLedger
 

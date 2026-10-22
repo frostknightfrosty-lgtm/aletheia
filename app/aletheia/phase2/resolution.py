@@ -2,13 +2,23 @@ from __future__ import annotations
 
 import ipaddress
 import re
-from dataclasses import dataclass, asdict
+from dataclasses import asdict, dataclass
 from datetime import date, datetime, timezone
 from urllib.parse import urlsplit, urlunsplit
 from uuid import UUID
 
 from rapidfuzz.distance import JaroWinkler, Levenshtein
 
+from aletheia.cascade.profile_linking import (
+    AvatarFetcher,
+    ProfileAttributes,
+    ProfileEnricher,
+    ProfileLink,
+    ProfileLinker,
+    profile_comparison_pairs,
+    profile_temporal_cadence,
+)
+from aletheia.cascade.scoring import TEMPORAL_CONFIDENCE_BOOST
 from aletheia.core.calibration import Calibrator
 from aletheia.core.graph import Graph
 from aletheia.core.models import ContextFilters, Entity, EntityType, RelationshipType, Provenance
@@ -38,6 +48,9 @@ class ResolutionCandidate:
     # is True only when a trained calibrator produced ``calibrated_probability``.
     calibrated: bool = False
     calibrated_probability: float | None = None
+    # Phase 18.1: public-activity cadence support for a fuzzy match.
+    temporal_overlap: float | None = None
+    temporal_boost: float = 0.0
 
     def to_dict(self) -> dict:
         raw = asdict(self)
@@ -297,15 +310,36 @@ class EntityResolver:
     they become explicit SAME_AS_CANDIDATE edges with a machine-readable explanation.
     """
 
-    def __init__(self, *, candidate_threshold: float = 0.88, auto_merge_threshold: float = 0.985,
-                 calibrator: Calibrator | None = None) -> None:
+    def __init__(
+        self,
+        *,
+        candidate_threshold: float = 0.88,
+        auto_merge_threshold: float = 0.985,
+        calibrator: Calibrator | None = None,
+        avatar_fetcher: AvatarFetcher | None = None,
+        profile_enricher: ProfileEnricher | None = None,
+        proxy_url: str | None = None,
+        fetch_avatars: bool = True,
+    ) -> None:
         self.candidate_threshold = candidate_threshold
         self.auto_merge_threshold = auto_merge_threshold
         # A calibrator maps the raw similarity score to a probability. When it is
         # absent or untrained, candidates are reported as ``calibrated: false``.
         self.calibrator = calibrator
+        # Phase 18.1 profile linking. The fetcher/enricher are injected so tests
+        # (and offline runs) never touch the network; the default fetcher is the
+        # proxy-aware public-image path. An adapter that omitted the avatar is
+        # asked for it through ``profile_enricher`` before the pair is compared.
+        self.profile_linker = ProfileLinker(
+            avatar_fetcher=avatar_fetcher,
+            profile_enricher=profile_enricher,
+            proxy_url=proxy_url,
+            fetch_avatars=fetch_avatars,
+        )
+        self.last_confirmed_links: list[ProfileLink] = []
 
     def resolve(self, graph: Graph, *, context_filters: ContextFilters | None = None) -> list[ResolutionCandidate]:
+        self.last_confirmed_links = []
         # First pass: canonicalize and exact-merge within an entity type.
         by_canonical: dict[tuple[EntityType, str], Entity] = {}
         candidates: list[ResolutionCandidate] = []
@@ -363,10 +397,8 @@ class EntityResolver:
                 for i in range(len(block_members)):
                     for j in range(i + 1, len(block_members)):
                         left, right = block_members[i], block_members[j]
-                        jw, lev, score = _score(left.canonical_value, right.canonical_value)
-                        if score < self.candidate_threshold:
-                            continue
-                        raw_score = score
+                        jw, lev, raw_score = _score(left.canonical_value, right.canonical_value)
+                        score = raw_score
                         decision = "candidate"
                         explanation = [
                             f"same_entity_type={entity_type.value}",
@@ -374,18 +406,43 @@ class EntityResolver:
                             f"levenshtein={lev:.6f}",
                             "no automatic merge because fuzzy similarity is not source evidence",
                         ]
+                        # Phase 18.1 temporal cadence: public post/comment
+                        # timestamps produce 24 hourly bins; a significant
+                        # overlap adds the documented +0.15 confidence boost.
+                        # The boost is applied before the threshold check so a
+                        # well-supported cadence can promote a borderline fuzzy
+                        # match, but a single shared timestamp cannot.
+                        left_profile = ProfileAttributes.from_attributes(left.attributes)
+                        right_profile = ProfileAttributes.from_attributes(right.attributes)
+                        cadence = profile_temporal_cadence(left_profile, right_profile)
+                        temporal_overlap = cadence.overlap if cadence.left_samples or cadence.right_samples else None
+                        temporal_boost = 0.0
+                        if cadence.significant:
+                            temporal_boost = TEMPORAL_CONFIDENCE_BOOST
+                            score = min(1.0, round(score + temporal_boost, 6))
+                            explanation.append(
+                                f"temporal_active_hours_overlap={cadence.overlap:.6f}"
+                            )
+                            explanation.append(
+                                f"temporal_boost={raw_score:.6f}->{score:.6f}"
+                            )
+                        if score < self.candidate_threshold:
+                            continue
                         # Intersection pass: an entity corroborated by more than one
                         # seed tree gets a documented, bounded score boost. The boost
-                        # never creates a candidate (the raw threshold is applied first)
+                        # never creates a candidate (the threshold was applied first)
                         # and never feeds the calibrator, which was trained on raw
                         # similarity scores.
                         trees = sorted(
                             attribution.get(left.entity_id, set()) | attribution.get(right.entity_id, set())
                         )
                         if len(trees) >= 2:
-                            score = min(1.0, round(raw_score * (1 + 0.05 * (len(trees) - 1)), 6))
+                            before_cross_seed = score
+                            score = min(1.0, round(score * (1 + 0.05 * (len(trees) - 1)), 6))
                             explanation.append("cross_seed_trees=" + ",".join(str(index) for index in trees))
-                            explanation.append(f"cross_seed_boost={raw_score:.6f}->{score:.6f}")
+                            explanation.append(
+                                f"cross_seed_boost={before_cross_seed:.6f}->{score:.6f}"
+                            )
                             explanation.append(
                                 "boost is a documented heuristic prior (5% per additional tree), not calibrator output"
                             )
@@ -415,8 +472,75 @@ class EntityResolver:
                             left.entity_id, right.entity_id, entity_type,
                             left.canonical_value, right.canonical_value,
                             jw, lev, score, decision, tuple(explanation),
-                            calibrated, probability,
+                            calibrated, probability, temporal_overlap, temporal_boost,
                         ))
                         graph.link(left, right, RelationshipType.SAME_AS_CANDIDATE, score, provenance,
                                    attributes={"resolution": candidates[-1].to_dict()})
+        self._confirm_profile_links(graph, survivors)
         return candidates
+
+    def _confirm_profile_links(self, graph: Graph, survivors: list[Entity]) -> None:
+        """Inject Phase 18.1 SAME_AS_CONFIRMED profile edges.
+
+        The profile block is separate from the type-specific fuzzy block because
+        avatar/network evidence is cross-type by design (a GitHub social account
+        and a Reddit URL can be the same person). Edges are idempotent per
+        source/pair, and every edge carries the signal that produced it.
+        """
+        by_id = {entity.entity_id: entity for entity in survivors}
+        # Ask the adapter-backed hook for a missing avatar before pair
+        # generation. This is deliberately a pre-pass: a profile with no avatar
+        # still gets the refetch attempt even when its only possible match has
+        # already been discarded by the fuzzy pass.
+        for entity in survivors:
+            self.profile_linker.prepare(entity)
+        include_ids = {
+            entity.entity_id
+            for entity in survivors
+            if entity.entity_type is EntityType.SOCIAL_ACCOUNT
+        }
+        pairs = profile_comparison_pairs(
+            [(entity.entity_id, entity.attributes) for entity in survivors],
+            include_ids=include_ids,
+        )
+        existing: set[tuple[frozenset[UUID], str]] = set()
+        for edge in graph.edges.values():
+            if edge.relationship is not RelationshipType.SAME_AS_CONFIRMED:
+                continue
+            source = str(edge.attributes.get("source") or "")
+            existing.add(
+                (
+                    frozenset({edge.source_entity_id, edge.target_entity_id}),
+                    source,
+                )
+            )
+        for left_id, right_id in pairs:
+            left = by_id.get(left_id)
+            right = by_id.get(right_id)
+            if left is None or right is None:
+                continue
+            for link in self.profile_linker.link(left, right):
+                key = (frozenset({left_id, right_id}), link.source)
+                if key in existing:
+                    continue
+                provenance = Provenance(
+                    tool="aletheia.profile_linker",
+                    source_url="internal://phase18.1-profile-linking",
+                    observed_at=datetime.now(timezone.utc),
+                    confidence=link.confidence,
+                    adapter_version="0.1.0",
+                    notes=[
+                        "Phase 18.1 profile-level link; avatar download, when used, "
+                        "went through the configured egress proxy."
+                    ],
+                )
+                graph.link(
+                    left,
+                    right,
+                    RelationshipType.SAME_AS_CONFIRMED,
+                    link.confidence,
+                    provenance,
+                    attributes=link.to_dict(),
+                )
+                self.last_confirmed_links.append(link)
+                existing.add(key)

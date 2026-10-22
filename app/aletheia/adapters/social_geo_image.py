@@ -162,7 +162,14 @@ class YouTubeAPIAdapter(Phase5Adapter):
             snip=item.get("snippet",{}) or {}; stats=item.get("statistics",{}) or {}
             if not cid: continue
             url=f"https://www.youtube.com/channel/{cid}"
-            attrs={"platform":"youtube","title":snip.get("title"),"description":snip.get("description"),"custom_url":snip.get("customUrl"),"country":snip.get("country"),"statistics":stats}
+            thumbs = snip.get("thumbnails") if isinstance(snip.get("thumbnails"), dict) else {}
+            avatar = None
+            for size in ("high", "medium", "default"):
+                thumb = thumbs.get(size) if isinstance(thumbs.get(size), dict) else {}
+                if isinstance(thumb.get("url"), str):
+                    avatar = thumb["url"]
+                    break
+            attrs={"platform":"youtube","title":snip.get("title"),"description":snip.get("description"),"custom_url":snip.get("customUrl"),"country":snip.get("country"),"statistics":stats,"avatar_url":avatar}
             findings.append(Finding(entity_type=EntityType.URL,value=url,attributes={"platform":"youtube","channel_id":cid,"username_query":request.seed.value},provenance=_prov(self.descriptor,source_url=url,confidence=0.95,raw=raw)))
             findings.append(Finding(entity_type=EntityType.SOCIAL_ACCOUNT,value=url,attributes=attrs,provenance=_prov(self.descriptor,source_url="https://developers.google.com/youtube/v3",confidence=0.94,raw=raw)))
         if exit_code == 5 and not stdout.strip():

@@ -13,7 +13,8 @@ one audited run:
 - artifacts are written under ``runs/<run_id>/cascade/``: ``ledger.jsonl``
   (the hash-chained decision ledger), ``trail.json`` (parent-linked hops with
   the golden digest), ``dossier.json`` (tiered fields with evidence chains),
-  ``coverage.json`` (the end-of-run audit; any violation raises), and
+  ``coverage.json`` (the end-of-run audit; any violation raises),
+  ``profile_links.json`` (Phase 18.1 confirmed/excluded profile edges), and
   ``next_actions.json``;
 - when a case id is given, the run and its summary are recorded on the case
   (P17.7 case memory), never silently.
@@ -50,7 +51,11 @@ from aletheia.cascade.dossier import (
     EvidenceRef,
     build_dossier,
 )
-from aletheia.cascade.engine import CascadeEngine, Observation, Observer
+from aletheia.cascade.engine import CascadeEngine, Observation, Observer, ReviewCallback
+from aletheia.cascade.interactive import (
+    default_calibration_pairs_path,
+    interactive_reviewer,
+)
 from aletheia.cascade.ledger import DecisionLedger
 from aletheia.cascade.next_actions import build_next_actions
 from aletheia.cascade.scheduler import SchedulerPolicy
@@ -97,6 +102,9 @@ class CascadeRunConfig:
     max_expansions: int | None = None
     owner_mode: bool = False
     subject_label: str = "subject"
+    interactive: bool = False
+    calibration_pairs_path: Path | None = None
+    review_callback: ReviewCallback | None = None
 
 
 @dataclass(frozen=True)
@@ -110,6 +118,7 @@ class CascadeRunOutcome:
     passes: int
     trail_digest: str
     coverage_ok: bool
+    labels_recorded: int = 0
 
 
 def _is_skip_finding(finding: Finding) -> bool:
@@ -477,10 +486,34 @@ def run_cascade(config: CascadeRunConfig, *, observer: Observer | None = None) -
         raise RuntimeError("cascade run has no root claims (every root adapter returned nothing or was blocked)")
 
     ledger = DecisionLedger()
+    recorded_labels: list[dict[str, Any]] = []
+    review_callback = config.review_callback
+    calibration_path: Path | None = None
+    if config.interactive:
+        calibration_path = (
+            Path(config.calibration_pairs_path)
+            if config.calibration_pairs_path is not None
+            else default_calibration_pairs_path()
+        )
+        interactive_callback, recorded_labels = interactive_reviewer(calibration_path)
+        if review_callback is None:
+            review_callback = interactive_callback
+        audit.log(
+            AuditEvent(
+                run_id=run_id,
+                event_type="cascade_interactive_started",
+                request_meta={
+                    "calibration_pairs": str(calibration_path),
+                    "review_band": [0.70, 0.85],
+                },
+                outcome="started",
+            )
+        )
     engine = CascadeEngine(
         observer,
         policy=SchedulerPolicy(owner_mode=config.owner_mode, max_expansions=config.max_expansions),
         ledger=ledger,
+        review_callback=review_callback,
     )
     try:
         result = engine.run(root_claims, subject_label=config.subject_label)
@@ -545,6 +578,15 @@ def run_cascade(config: CascadeRunConfig, *, observer: Observer | None = None) -
     coverage_path = _write_json(cascade_dir / "coverage.json", coverage.payload)
     assert_coverage(coverage)
 
+    profile_links_path = _write_json(
+        cascade_dir / "profile_links.json",
+        {
+            "run_id": str(run_id),
+            "links": [link.to_dict() for link in result.profile_links],
+            "interactive_labels": len(recorded_labels),
+        },
+    )
+
     next_actions_path = _write_json(
         cascade_dir / "next_actions.json",
         build_next_actions(
@@ -569,6 +611,7 @@ def run_cascade(config: CascadeRunConfig, *, observer: Observer | None = None) -
                 "passes": result.passes,
                 "trail_digest": digest,
                 "coverage_ok": coverage.ok,
+                "interactive_labels": len(recorded_labels),
             },
             outcome="completed",
         )
@@ -584,12 +627,16 @@ def run_cascade(config: CascadeRunConfig, *, observer: Observer | None = None) -
         "subject_claims": len(result.subject_claims),
         "trail_digest": digest,
         "coverage_ok": coverage.ok,
+        "interactive": bool(config.interactive),
+        "interactive_labels": len(recorded_labels),
+        "calibration_pairs": str(calibration_path) if calibration_path is not None else None,
         "scheduler_checkpoint": result.checkpoint,
         "artifacts": {
             "ledger": str(ledger_path),
             "trail": trail_path,
             "dossier": dossier_path,
             "coverage": coverage_path,
+            "profile_links": profile_links_path,
             "next_actions": next_actions_path,
         },
     }
@@ -626,6 +673,7 @@ def run_cascade(config: CascadeRunConfig, *, observer: Observer | None = None) -
             "trail": trail_path,
             "dossier": dossier_path,
             "coverage": coverage_path,
+            "profile_links": profile_links_path,
             "next_actions": next_actions_path,
         },
         stop_reason=result.stop_reason.value,
@@ -633,4 +681,5 @@ def run_cascade(config: CascadeRunConfig, *, observer: Observer | None = None) -
         passes=result.passes,
         trail_digest=digest,
         coverage_ok=coverage.ok,
+        labels_recorded=len(recorded_labels),
     )

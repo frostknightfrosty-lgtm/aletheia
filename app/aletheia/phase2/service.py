@@ -127,6 +127,7 @@ class Phase2Service:
             else None
         )
         candidates = self.resolver.resolve(graph, context_filters=filters)
+        confirmed_links = list(getattr(self.resolver, "last_confirmed_links", []))
         adapter_summary = _adapter_summary(manifest, run_dir=self.checkpoints.run_dir(run_id))
         warnings = evaluate_jurisdiction_warnings(seeds=seeds, entities=graph.entities.values())
         self.graph_store.save_graph(str(run_id), graph.export())
@@ -135,6 +136,8 @@ class Phase2Service:
             "run_id": str(run_id),
             "candidate_count": len(candidates),
             "candidates": [c.to_dict() for c in candidates],
+            "confirmed_link_count": len(confirmed_links),
+            "confirmed_links": [link.to_dict() for link in confirmed_links],
         }
         resolution_path.write_text(json.dumps(resolution_payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
 
@@ -147,6 +150,7 @@ class Phase2Service:
         manifest["resolution"] = {
             "completed": True,
             "candidate_count": len(candidates),
+            "confirmed_link_count": len(confirmed_links),
             "artifact": str(resolution_path),
         }
         manifest["reports"] = {k: v for k, v in artifacts.items() if k in {"json", "pdf", "graphml", "stix2"}}
@@ -165,7 +169,7 @@ class Phase2Service:
             ))
         audit.log(AuditEvent(
             run_id=run_id, event_type="phase2_finalize",
-            request_meta={"candidate_count": len(candidates), "jurisdiction_warning_count": len(warnings)},
+            request_meta={"candidate_count": len(candidates), "confirmed_link_count": len(confirmed_links), "jurisdiction_warning_count": len(warnings)},
             outcome="succeeded",
         ))
         manifest["chain_tip"] = audit_chain_tip(run_id, data_root=self.data_root)

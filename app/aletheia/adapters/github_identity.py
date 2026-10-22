@@ -162,6 +162,15 @@ class GithubIdentityAdapter(Adapter):
 
         if profile is not None:
             login = _text(profile.get("login"), 64) or username
+            activity_timestamps = [
+                value
+                for value in (
+                    _text(item.get("created_at"), 64)
+                    for item in events
+                    if isinstance(item, dict)
+                )
+                if value
+            ]
             findings.append(Finding(
                 entity_type=EntityType.SOCIAL_ACCOUNT,
                 value=f"{self.descriptor.name}:profile:{login}",
@@ -174,6 +183,8 @@ class GithubIdentityAdapter(Adapter):
                     "blog": _text(profile.get("blog"), 300),
                     "location": _text(profile.get("location"), 200),
                     "bio": _text(profile.get("bio"), 500),
+                    "avatar_url": _text(profile.get("avatar_url"), 500),
+                    "activity_timestamps": activity_timestamps,
                     "twitter_username": _text(profile.get("twitter_username"), 120),
                     "public_repos": _number(profile.get("public_repos")),
                     "public_gists": _number(profile.get("public_gists")),

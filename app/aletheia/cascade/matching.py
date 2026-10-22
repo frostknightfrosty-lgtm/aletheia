@@ -31,6 +31,7 @@ __all__ = [
     "era_coherence",
     "fold_diacritics",
     "idf_token_overlap",
+    "jaccard_similarity",
     "jaro_winkler",
     "levenshtein_similarity",
     "mutual_link_overlap",
@@ -263,6 +264,11 @@ def set_overlap(left: AbstractSet[str], right: AbstractSet[str]) -> float:
     if not union:
         return 0.0
     return len(set(left) & set(right)) / len(union)
+
+
+def jaccard_similarity(left: AbstractSet[str], right: AbstractSet[str]) -> float:
+    """Explicit name for the Jaccard set similarity used by network matching."""
+    return set_overlap(left, right)
 
 
 def shared_values(left: AbstractSet[str], right: AbstractSet[str]) -> frozenset[str]:

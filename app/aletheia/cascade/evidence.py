@@ -15,6 +15,9 @@ one place:
 | identical VIN | STRONG | binds the same asset |
 | identical media sha256 | STRONG | "identical media asset hash" |
 | avatar pHash match | STRONG (weight 0.8) | local-only perceptual match, requires a cheap hash to agree too |
+| profile avatar pHash distance <= 5 | HARD | Phase 18.1 profile link; pHash alone is the rule |
+| profile connections Jaccard >= 0.40 | HARD | Phase 18.1 network overlap |
+| profile cadence overlap >= 0.70 | MEDIUM | Phase 18.1 fuzzy-name corroborator; carries the +0.15 boost note |
 | name variant / near-identical name | MEDIUM (weight 0.8-1.0) | nickname expansion, then Jaro-Winkler >= 0.92 |
 | identical company name | MEDIUM (weight 0.6) | companies share names |
 | shared personal mail domain | MEDIUM (weight 0.5) | applies within email claims and across email/domain/host claims |
@@ -40,9 +43,25 @@ from __future__ import annotations
 from urllib.parse import urlsplit
 
 from aletheia.cascade.claims import Claim, pair_origin_key
-from aletheia.cascade.matching import fold_diacritics, jaro_winkler, names_equivalent
+from aletheia.cascade.matching import (
+    fold_diacritics,
+    jaccard_similarity,
+    jaro_winkler,
+    names_equivalent,
+)
 from aletheia.cascade.phash import ImageHashes, is_match
-from aletheia.cascade.scoring import EvidenceClass, EvidenceItem
+from aletheia.cascade.profile_linking import (
+    AVATAR_PHASH_MAX_DISTANCE,
+    NETWORK_JACCARD_THRESHOLD,
+    ProfileAttributes,
+    profile_fuzzy_similarity,
+    profile_temporal_cadence,
+)
+from aletheia.cascade.scoring import (
+    TEMPORAL_CONFIDENCE_BOOST,
+    EvidenceClass,
+    EvidenceItem,
+)
 from aletheia.cascade.seeds import is_crypto_address, is_url_like, is_vin_like
 from aletheia.core.models import EntityType
 
@@ -307,11 +326,103 @@ def _cross_type_evidence(left: Claim, right: Claim, origin: str) -> list[Evidenc
     return []
 
 
+def _profile_evidence(left: Claim, right: Claim, origin: str) -> list[EvidenceItem]:
+    """Phase 18.1 profile signals: avatar pHash, network Jaccard, cadence.
+
+    These rules deliberately live in the evidence mapping rather than in the
+    hash/scoring modules so every threshold is reviewable in one place. The
+    avatar and network rules are confirmed-class evidence (HARD), matching the
+    Phase 18.1 requirement that they inject ``SAME_AS_CONFIRMED`` edges. The
+    cadence rule is a MEDIUM corroborator and carries the documented ``+0.15``
+    boost note; it never confirms anything by itself.
+    """
+    left_profile = ProfileAttributes.from_attributes(left.attributes)
+    right_profile = ProfileAttributes.from_attributes(right.attributes)
+    profile_types = (EntityType.SOCIAL_ACCOUNT, EntityType.URL)
+    profile_attrs = (
+        left_profile.platform
+        or left_profile.profile_url
+        or left_profile.connections
+        or left_profile.activity_values
+        or right_profile.platform
+        or right_profile.profile_url
+        or right_profile.connections
+        or right_profile.activity_values
+    )
+    if not (
+        left.type in profile_types
+        or right.type in profile_types
+        or profile_attrs
+    ):
+        return []
+    items: list[EvidenceItem] = []
+
+    if left_profile.avatar_phash and right_profile.avatar_phash:
+        try:
+            distance = abs(
+                int(left_profile.avatar_phash, 16) ^ int(right_profile.avatar_phash, 16)
+            ).bit_count()
+        except (TypeError, ValueError):
+            distance = 999
+        if distance <= AVATAR_PHASH_MAX_DISTANCE:
+            items.append(
+                EvidenceItem(
+                    evidence_class=EvidenceClass.HARD,
+                    reason=(
+                        "avatar pHash match "
+                        f"(Hamming {distance} <= {AVATAR_PHASH_MAX_DISTANCE})"
+                    ),
+                    origin=origin,
+                    similarity=round(1.0 - distance / 64.0, 6),
+                    weight=1.0,
+                )
+            )
+
+    if left_profile.connections and right_profile.connections:
+        jaccard = round(
+            jaccard_similarity(left_profile.connections, right_profile.connections), 6
+        )
+        if jaccard >= NETWORK_JACCARD_THRESHOLD:
+            items.append(
+                EvidenceItem(
+                    evidence_class=EvidenceClass.HARD,
+                    reason=(
+                        f"network overlap (Jaccard {jaccard:.6f} >= "
+                        f"{NETWORK_JACCARD_THRESHOLD:.2f})"
+                    ),
+                    origin=origin,
+                    similarity=jaccard,
+                    weight=1.0,
+                )
+            )
+
+    similarity, field = profile_fuzzy_similarity(left_profile, right_profile)
+    if similarity >= 0.70 and similarity < 0.92:
+        cadence = profile_temporal_cadence(left_profile, right_profile)
+        if cadence.significant:
+            items.append(
+                EvidenceItem(
+                    evidence_class=EvidenceClass.MEDIUM,
+                    reason=(
+                        f"temporal active-hour overlap ({field}, "
+                        f"overlap {cadence.overlap:.6f}; +{TEMPORAL_CONFIDENCE_BOOST:.2f} boost)"
+                    ),
+                    origin=origin,
+                    similarity=round(similarity, 6),
+                    weight=0.7,
+                )
+            )
+    return items
+
+
 def compare_claims(left: Claim, right: Claim) -> list[EvidenceItem]:
     """The evidence items for one claim pair (empty when the pair says nothing)."""
     if left.claim_id == right.claim_id:
         raise ValueError("compare_claims expects two distinct claims")
     origin = pair_origin_key(left, right)
     if left.type is right.type:
-        return _same_type_evidence(left, right, origin)
-    return _cross_type_evidence(left, right, origin)
+        items = _same_type_evidence(left, right, origin)
+    else:
+        items = _cross_type_evidence(left, right, origin)
+    items.extend(_profile_evidence(left, right, origin))
+    return items

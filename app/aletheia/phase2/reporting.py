@@ -118,6 +118,13 @@ def build_report_payload(*, run_id: UUID, seed: Seed, graph: Graph, manifest: di
             "entity_count": len(claims),
             "edge_count": sum(1 for e in graph.edges.values() if e.relationship != RelationshipType.SAME_AS_CANDIDATE),
             "resolution_candidate_count": len(candidates),
+            "confirmed_profile_link_count": sum(
+                1
+                for edge in graph.edges.values()
+                if edge.relationship is RelationshipType.SAME_AS_CONFIRMED
+                and str(edge.attributes.get("source") or "")
+                in {"avatar_phash", "network_overlap", "interactive_label"}
+            ),
             "tools_with_evidence": sorted({item["tool"] for claim in claims for item in claim["evidence"]}),
             "seed_count": len(seeds),
             "cross_seed_entity_count": cross_seed_entity_count,
