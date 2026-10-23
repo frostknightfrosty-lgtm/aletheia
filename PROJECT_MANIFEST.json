@@ -2056,7 +2056,7 @@
           "enabled_by_default": true
         }
       ],
-      "note": "Synthetic SpiderFoot JSON fixture and parser/provenance/priority tests have not yet been verified in Docker; local tests pass. fixture file: tests/fixtures/spiderfoot.json. No live SpiderFoot lookup occurred and no key was used. Docker smoke case phase18-spiderfoot-health runs python3 sf.py -h under --network none."
+      "note": "Synthetic SpiderFoot JSON fixture and parser/provenance/priority tests verified in Docker Verification run 39918646764 on commit c2a2cad61d63576dcd3f2244c49bc3a2eb708935 (https://github.com/frostknightfrosty-lgtm/aletheia/actions/runs/39918646764). Raw artifact evidence: PARSER PREFLIGHT: PASS - 63/63 adapters have parser coverage; 1201 passed, 1 warning; DOCKER CAPTURE: PASS - 97/97 cases captured; phase18-spiderfoot-health rc=0 under --network none and python3 sf.py -h printed SpiderFoot 4.0.0 usage. fixture file: tests/fixtures/spiderfoot.json. No live SpiderFoot lookup occurred and no key was used."
     },
     {
       "name": "egress_proxy",

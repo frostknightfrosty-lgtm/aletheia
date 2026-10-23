@@ -1,6 +1,6 @@
-# Aletheia Handoff — Phase 18.1 complete (Phase 18 broader pending; Phase 17 complete)
+# Aletheia Handoff — Phase 18.2 complete (SpiderFoot integrated; Phase 17 complete)
 
-Last updated: 2026-10-22T23:09:41Z
+Last updated: 2026-10-23T07:56:42Z
 
 ## Project boundaries
 
@@ -14,7 +14,13 @@ deployment; it is a passive OSINT tool.
 
 ## Repository and CI state
 
-- **Newest CI-verified code commit: `e5e2303`** (Phase 18.1 exponential
+- **Newest CI-verified code commit: `c2a2cad`** (Phase 18.2 SpiderFoot
+  meta-adapter; Docker Verification run **39918646764** green on
+  `c2a2cad61d63576dcd3f2244c49bc3a2eb708935` — parser 63/63; **1201
+  passed, 1 warning in 86.21s**; capture 97/97; egress 63/56/56 wired;
+  storage 6/6; 97 results, 0 nonzero. Local: **1123 passed + 78 skipped =
+  1201**. No live run.)
+- **Previous CI-verified code commit: `e5e2303`** (Phase 18.1 exponential
   linking; Docker Verification run **39865145257**, attempt 2 green on
   `e5e2303f00785fab706e8d800a4ea51082c949a6` — parser 62/62; **1190 passed,
   1 warning in 60.51s**; capture 96/96; egress 62/55/55 wired; storage 6/6;
@@ -191,17 +197,17 @@ deployment; it is a passive OSINT tool.
   container-health cases) and 5 `tests/test_storage_services.py` (no
   `ALETHEIA_STORAGE_*` service configured); both groups execute in CI, and CI
   now *fails* if either group skips — see `docs/SKIPPED_IN_CI.md`.
-- Local consistency at the final tree: **1097 passed + 78 skipped = 1175**,
+- Local consistency at the final tree: **1123 passed + 78 skipped = 1201**,
   which equals the CI passed count exactly. The 78 skips are 73
   Docker-dependent tests (including the researcher_ids, weather,
   github_identity, pgp_keys and minecraft health cases) and the same 5
   storage-service tests; all execute in CI.
-- 62 registered adapters; all 62 are `verified-fixture` in
+- 63 registered adapters; all 63 are `verified-fixture` in
   `PROJECT_MANIFEST.json`. Three manifest entries are non-adapter entries
-  (`egress_proxy` plus two libraries), for 65 tool-inventory entries total.
+  (`egress_proxy` plus two libraries), for 66 tool-inventory entries total.
   Six storage backends, all conformance-verified
-  against real services in CI. 55 of the 62 adapters declare
-  `network_required=True`, and the egress policy wires all 55.
+  against real services in CI. 56 of the 63 adapters declare
+  `network_required=True`, and the egress policy wires all 56.
 - Tracker: 83 of 111 sources wired, 28 remaining — all owner-gated
   (Gate 3/Gate 6/Gate 7) or recorded drops/blockers. See
   `docs/COMPLETENESS_AUDIT.md`.
@@ -281,6 +287,87 @@ Honest limits, recorded rather than smoothed:
   calibration fixture; the repository fixture is synthetic and gains real
   labels only when an operator runs the command.
 - No live run occurred in Phase 18.1; no adapter `verification_status`
+  changed. The target remains `username:frost2233` for any future live work,
+  and Reddit remains excluded.
+
+## Phase 18.2 — SpiderFoot meta-adapter (complete, `c2a2cad`)
+
+CI evidence copied from the downloaded artifact for run `39918646764`:
+
+- `PARSER PREFLIGHT: PASS — 63/63 adapters have parser coverage`
+- `1201 passed, 1 warning in 86.21s (0:01:26)`; `pytest-summary.json`:
+  `junit_total` 1201, `skipped_in_ci` [], `ok` true.
+- `DOCKER CAPTURE: PASS — 97/97 cases captured`
+- `STORAGE CONFORMANCE: PASS — 6/6 backends conform`
+- `egress-scenario.json`: all 9 checks true — `adapters=63
+  network_required=56 wired=56`; crtsh `rc=0`, one CONNECT entry, status
+  200; chain `valid: true` with 11 log entries = 11 egress events.
+- `results.json`: 97 entries, 0 nonzero return codes.
+  `phase18-spiderfoot-health` ran
+  `docker run --rm --network none aletheia/spiderfoot:v4.0 --health`,
+  returned `0`, and `python3 sf.py -h` printed the SpiderFoot 4.0.0 usage
+  banner. The image was built as `aletheia/spiderfoot:v4.0`
+  (`sha256:200fdc929ea0df70673900e795168ed0a2f615fca0c61c30fbb2cff75cb27add`);
+  Dockerfile SHA-256
+  `490f1c7add4d52540b97e6ee298488f034986bfa65e7c8afbc9809ab196ca334`.
+
+What shipped:
+
+- **Pinned image.** `docker/spiderfoot/Dockerfile` starts from
+  `python:3.11-slim`, clones SpiderFoot v4.0.0 at commit
+  `b9c345de5b085debc7444fc10e0e26e7745df5f2`, installs the upstream
+  requirements with six Python-3.11 compatibility constraints, and runs as
+  a non-root user. State, cache, logs, and the scratch SQLite config live
+  only under `/tmp`; no key is ever placed in argv.
+- **Curated runner.** `docker/spiderfoot/runner.py` accepts
+  `domain:`, `ip:`, `email:`, `username:`, and `phone:` seeds, enables
+  exactly 14 documented modules, and invokes
+  `python3 sf.py -s <value> -t <event-type> -o json -q -m <modules>`.
+  API keys are injected into a private `tbl_config` and scrubbed after the
+  child exits. Missing keys produce explicit skip records; errors and
+  timeouts produce a JSON envelope instead of silent empty output.
+- **Module catalogue.** `docker/spiderfoot/MODULES.md` documents ThreatCrowd,
+  ThreatMiner, Robtex, Keybase, OpenPhish, PhishTank, ThreatFox, abuse.ch,
+  EmailRep, Hunter, Pulsedive, Intelligence X, C99, and Have I Been Pwned.
+  Per-module legal tiers are descriptive logging metadata and do not block
+  execution; no selected module is tier 5. The manifest adapter is tier 4
+  because registry construction still rejects tier 5.
+- **Parser and provenance.** `app/aletheia/adapters/spiderfoot.py` accepts a
+  raw SpiderFoot JSON array or the runner envelope. It maps
+  `DOMAIN_NAME`→`domain`, `IP_ADDRESS`→`ip`, `EMAILADDR`→`email`,
+  `ACCOUNT_EXTERNAL_KNOWN`→`username`/`url`, and `LEAKSITE_CONTENT`→terminal
+  `BREACH_HIT`, plus related person/company/phone/location and malicious
+  indicator families. Every finding carries module/data-source provenance,
+  legal tier, event type, and `source_priority: "secondary"`. Emails embedded
+  in leak content also become email findings so Holehe/H8mail can be routed.
+- **Priority and cascade.** Findings, claims, and graph entities carry
+  `source_priority`; graph merges let primary attributes win while retaining
+  secondary-only fields. Secondary-only fuzzy pairs are suppressed so
+  meta-adapter data reinforces existing clusters instead of creating new
+  ones. The routing graph still sends a newly observed email to native
+  Holehe and H8mail. `BREACH_HIT` is terminal and is never used as a search
+  seed.
+- **Tests.** `tests/test_spiderfoot_adapter.py` adds ten cases covering the
+  fixture mappings, provenance, priority, primary/precedence, cascade pivot
+  routing, secondary-only resolver suppression, envelope skip/error
+  records, malformed output, build-command construction, seed/module
+  selection, and key scrubbing. Fixture:
+  `tests/fixtures/spiderfoot.json`.
+
+Honest limits, recorded rather than smoothed:
+
+- CI proves the offline help smoke and the synthetic parser fixture only.
+  No SpiderFoot module queried a live source, no key was configured, and no
+  source reachability, quota, rate-limit, or live schema stability is
+  claimed.
+- Upstream SpiderFoot is GPL-3.0 and remains inside the pinned image; the
+  Aletheia runner and parser are original. Each selected data source keeps
+  its own terms and availability.
+- Keyed modules (EmailRep, Hunter, Pulsedive, Intelligence X, C99, HIBP) are
+  skipped with explicit reason records when their environment variable is
+  absent. The manifest's tier is an adapter-level maximum, not a live-source
+  quality claim.
+- No live run occurred in Phase 18.2; no adapter `verification_status`
   changed. The target remains `username:frost2233` for any future live work,
   and Reddit remains excluded.
 
@@ -698,10 +785,11 @@ manifest**, not a digital signature and not a legal-admissibility guarantee.
 
 ## Next action
 
-**Phase 18.1 is complete and CI-verified.** Exponential Linking 2.0 is in the Entity
-Resolver and Pivot Cascade at `e5e2303` (run `39865145257`, attempt 2). The broader Phase
-18 code-level tier-gate removal and SpiderFoot integration have not started; do not start
-them without explicit instruction. Live authorization remains `username:frost2233` only.
+**Phase 18.2 is complete and CI-verified.** SpiderFoot 4.0 is integrated as a
+curated 14-module Docker meta-adapter at `c2a2cad` (run `39918646764`). The broader
+Phase 18 code-level tier-gate removal has not started; do not start it without
+explicit instruction. Live authorization remains `username:frost2233` only, and
+Reddit remains excluded.
 
 **The authorized live self-audit has run** (run `39141366670`, target `username:frost2233`,
 owner-asserted; every live-path defect found along the way is repaired and re-verified — see
@@ -725,6 +813,12 @@ remains needs user decisions:
   `reddit-api` remains the only missing-credential skip. IP intelligence,
   SauceNAO and abuse.ch are wired and direct-verified but were not exercised
   by this username-only seed.
+- **Optional SpiderFoot keys.** `EMAILREP_API_KEY`, `HUNTER_API_KEY`,
+  `PULSEDIVE_API_KEY`, `INTELX_API_KEY`, `C99_API_KEY`, and `HIBP_API_KEY`
+  are not configured; their modules skip explicitly. The free tier-1/tier-2
+  modules need no key. Enabling keyed modules remains an operator decision
+  under the Operator-Driven Model, including source terms, quotas, and
+  commercial-use obligations.
 - Optional bookkeeping: promote the adapters exercised by the authorized run to
   `verified-live` using the run as copied evidence; and re-run the audit periodically as
   platform data changes.
@@ -775,6 +869,11 @@ remains needs user decisions:
   excluded by owner decision (2026-10-22) and `reddit-api` remains a recorded skip.
   The grouped free-registration master list is `docs/USER_ACTIONS.md` (see also
   `docs/SOURCE_COMPLETENESS.md` §C).
+- **Gate 3 (optional SpiderFoot sub-sources)** — `EMAILREP_API_KEY`, `HUNTER_API_KEY`,
+  `PULSEDIVE_API_KEY`, `INTELX_API_KEY`, `C99_API_KEY`, and `HIBP_API_KEY` are not
+  configured. Their modules are recorded skips; the free tier-1/tier-2 modules run
+  without keys. Enabling them remains an operator decision under the
+  Operator-Driven Model, including source terms, quotas, and commercial use.
 - **Gate 5** — evidence lines must be copied from a downloaded artifact, never typed.
 - **Gate 6** — `transport_movement` and `darkweb_search` build in the autonomous campaign
   (transport with recorded skip paths; dark web behind container-level Tor); live coverage

@@ -1,5 +1,51 @@
 # Changelog
 
+## 2026-10-23 — Phase 18.2 SpiderFoot meta-adapter
+
+Every CI number below is copied from the downloaded artifact for the cited
+commit. No live SpiderFoot lookup occurred and no source key was used.
+
+- Code `c2a2cad` integrates SpiderFoot 4.0 as a curated 14-module Docker
+  batch meta-adapter. Docker Verification run `39918646764` green:
+  `PARSER PREFLIGHT: PASS — 63/63 adapters have parser coverage`;
+  `"console_summary": "1201 passed, 1 warning"` (`1201 passed, 1 warning in
+  86.21s (0:01:26)`; `junit_total` 1201; `skipped_in_ci` empty);
+  `DOCKER CAPTURE: PASS — 97/97 cases captured`;
+  `STORAGE CONFORMANCE: PASS — 6/6 backends conform`; egress
+  `adapters=63 network_required=56 wired=56`, all 9 checks true, crtsh
+  `rc=0` with one CONNECT entry and status 200; results 97 entries, 0
+  nonzero. `phase18-spiderfoot-health` ran
+  `docker run --rm --network none aletheia/spiderfoot:v4.0 --health`, exited
+  `0`, and `python3 sf.py -h` printed the SpiderFoot 4.0.0 usage banner.
+- Image: `python:3.11-slim`, SpiderFoot release commit
+  `b9c345de5b085debc7444fc10e0e26e7745df5f2`, original runner and parser.
+  Curated modules: ThreatCrowd, ThreatMiner, Robtex, Keybase, OpenPhish,
+  PhishTank, ThreatFox, abuse.ch, EmailRep, Hunter, Pulsedive, Intelligence X,
+  C99, and Have I Been Pwned. Modules require no key or are skipped with an
+  explicit reason when their environment variable is absent.
+- Per-module legal tiers are descriptive logging metadata only and do not
+  block execution. Tier 4 covers the commercial/leak-index sources; no
+  selected module is tier 5. The manifest adapter itself is tier 4 because
+  registry construction rejects tier 5.
+- Parser mappings include `DOMAIN_NAME`→`domain`, `IP_ADDRESS`→`ip`,
+  `EMAILADDR`→`email`, `ACCOUNT_EXTERNAL_KNOWN`→`username`/`url`, and
+  `LEAKSITE_CONTENT`→terminal `BREACH_HIT`. Embedded emails in leak content
+  also become email findings so the Phase 17 cascade can invoke native
+  Holehe/H8mail pivots. Every SpiderFoot finding is `source_priority:
+  "secondary"` with module/data-source provenance; primary attributes win
+  graph conflicts and secondary-only fuzzy pairs cannot create clusters.
+- Tests: `tests/test_spiderfoot_adapter.py` adds ten cases for mappings,
+  provenance, priority, graph precedence, cascade routing, secondary-only
+  resolver suppression, envelope skips/errors, malformed output, command
+  construction, runner seed/module selection, and key scrubbing. Fixture:
+  `tests/fixtures/spiderfoot.json`.
+- Honest limits: only a synthetic fixture and the offline help smoke were
+  exercised in CI; no module queried a live API, no key was configured, and
+  the Docker run does not prove source reachability or output schema for
+  every upstream module. A missing key is represented as a secondary
+  technical finding rather than a silent gap. See
+  `docker/spiderfoot/MODULES.md` and `HANDOFF.md`.
+
 ## 2026-10-23 — Phase 18.1 exponential linking 2.0
 
 Every CI number below is copied from the downloaded attempt-2 artifact for the
