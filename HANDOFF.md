@@ -968,3 +968,17 @@ remains needs user decisions:
   was already committed as `5037108` and pushed; the test double in `tests/test_chain.py`
   already creates the per-adapter workspace (matching `Adapter.run`); and the real local
   count is 520 passed / 50 skipped = 570, matching CI.
+
+## Phase 19.0 — Live Stress Test & Integration Audit (2026-10-23, executed, environment blocker documented)
+- Target: `username:frost2233` (authorized assertion on file in MANIFEST.json of run `6709d343-609c-4182-be7f-69cd573e268d`).
+- Live cascade executed with `--authorization-assertion` (verbatim) and `--owner-mode`.
+- Docker engine verified (`Server Version: 29.8.2`, `Operating System: Docker Desktop`, `Storage Driver: overlayfs`).
+- Adapter image builds: 3 completed (`sherlock:0.16.2`, `theharvester:4.11.1`, `exiftool:13.59`); `amass` build failed due to Go compiler `read-only file system`; remaining builds blocked by Docker daemon crash (`Error response from daemon: Docker Desktop is unable to start`).
+- Cascade result: `RuntimeError: cascade run has no root claims`. Every adapter invocation blocked by egress proxy wiring failure: `docker network create --internal ... Error response from daemon: failed to update bridge store for object type *bridge.networkConfiguration: write /var/lib/docker/network/files/local-kv.db: read-only file system`.
+- Audit chain verified: `MANIFEST.json` `chain_tip` = `354e895898626ce072adbea0dd6d350e6d253806d547cfae30d344c56bc1959a`; `AUDIT.jsonl` 14 entries (`seq` 1-14); all entries valid; chain tip matches manifest.
+- Hard bug classification: `Docker Desktop VMM backend prevents `docker network create --internal` (required by `core/egress.py` for wired adapter runs)`. This is an environment-level infrastructure blocker, not a parser/adapter logic bug. Fix requires either Hyper-V backend (requires admin and reboot) or Docker VMM repair/reinstall (requires admin access to `C:\ProgramData\DockerDesktop` and `docker-users` group adjustments).
+- Semantic engine (`all-MiniLM-L6-v2`): did not trigger download during this run because the cascade produced zero eligible profile pairs (all adapter observations blocked at egress wiring stage).
+- Dossier generation (`generate_dossier`): did not execute during this run because `run_cascade` raised before returning an outcome (no `run_id` with findings to cite).
+- Stress test artifacts: `docs/STRESS_TEST_REPORT.md` (updated), `data/runs/6709d343-609c-4182-be7f-69cd573e268d/AUDIT.jsonl`, `MANIFEST.json`, `docker-build.log` (build evidence).
+- Commit staged locally: `f31d3f3` is one commit ahead of `origin/main`; new docs commit `docs: phase 19.0 audit` created locally. Full commit `phase-19.0: live stress test and integration audit` is prepared but not pushed (user must verify E: workspace before final push).
+- Migration state preserved: `C:\Users\N V\Documents\GitHub\aletheia` (legacy repo) NOT deleted; E: workspace (`E:\aletheia`) is primary working copy with rebuilt `.venv`; `HANDOFF.md` and `RESUME_STATE.json` updated.
