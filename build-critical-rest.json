@@ -1,0 +1,54 @@
+{
+  "ok": 12,
+  "fail": 0,
+  "results": [
+    {
+      "cmd": "aletheia/spiderfoot:v4.0",
+      "exit": 0
+    },
+    {
+      "cmd": "docker/core.Dockerfile",
+      "exit": 0
+    },
+    {
+      "cmd": "docker/sec-edgar/Dockerfile",
+      "exit": 0
+    },
+    {
+      "cmd": "docker/github_identity/Dockerfile",
+      "exit": 0
+    },
+    {
+      "cmd": "docker/social_profile/Dockerfile",
+      "exit": 0
+    },
+    {
+      "cmd": "docker/social_username/Dockerfile",
+      "exit": 0
+    },
+    {
+      "cmd": "docker/leak_checkers/Dockerfile",
+      "exit": 0
+    },
+    {
+      "cmd": "docker/venom/Dockerfile",
+      "exit": 0
+    },
+    {
+      "cmd": "docker/minecraft/Dockerfile",
+      "exit": 0
+    },
+    {
+      "cmd": "docker/reddit-api/Dockerfile",
+      "exit": 0
+    },
+    {
+      "cmd": "docker/youtube-api/Dockerfile",
+      "exit": 0
+    },
+    {
+      "cmd": "aletheia/instaloader:4.15.3",
+      "exit": 0
+    }
+  ]
+}

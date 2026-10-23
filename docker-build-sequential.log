@@ -1,0 +1,2 @@
+START [25/65] docker build -t aletheia/deepface:0.0.101 docker/deepface
+DAEMON DOWN - SKIPPING REMAINING

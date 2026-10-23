@@ -1,0 +1,452 @@
+START [1/65] docker build -t aletheia/sherlock:0.16.2 docker/sherlock
+END exit=0
+701ff095bb94298dff1f5456290dad1b6c
+#8 exporting config sha256:01d231c72723fd7b718484732608f6701ff095bb94298dff1f5456290dad1b6c 0.4s done
+#8 exporting attestation manifest sha256:379a90703b9cd7777ecd4ac4582ce70688cda98a595f50da32227f83e5a7e7f4
+#8 exporting attestation manifest sha256:379a90703b9cd7777ecd4ac4582ce70688cda98a595f50da32227f83e5a7e7f4 0.7s done
+#8 exporting manifest list sha256:ea4aa9ff1826fd7e16da3afaec8cedfa605c43ec7ecd125b46ba564083778f78
+#8 exporting manifest list sha256:ea4aa9ff1826fd7e16da3afaec8cedfa605c43ec7ecd125b46ba564083778f78 0.4s done
+#8 naming to docker.io/aletheia/sherlock:0.16.2
+#8 naming to docker.io/aletheia/sherlock:0.16.2 0.1s done
+#8 unpacking to docker.io/aletheia/sherlock:0.16.2
+#8 unpacking to docker.io/aletheia/sherlock:0.16.2 12.0s done
+#8 DONE 23.9s
+START [2/65] docker build -t aletheia/theharvester:4.11.1 docker/theharvester
+END exit=0
+ec9b2cefe9b4766a83
+#7 exporting config sha256:8dbdd020ed08c72362989202fb8cc46a7870b7fe0ce8d0ec9b2cefe9b4766a83 0.4s done
+#7 exporting attestation manifest sha256:8bf0ca6349181910be79e8180ca4aaf470caf0a2d894432aefd554ae4320e990
+#7 exporting attestation manifest sha256:8bf0ca6349181910be79e8180ca4aaf470caf0a2d894432aefd554ae4320e990 0.4s done
+#7 exporting manifest list sha256:fb2284225e89d26f9de26d9aad56bfdd5f4ef2d119d87724ce0d4adf57267ad7
+#7 exporting manifest list sha256:fb2284225e89d26f9de26d9aad56bfdd5f4ef2d119d87724ce0d4adf57267ad7 0.4s done
+#7 naming to docker.io/aletheia/theharvester:4.11.1
+#7 naming to docker.io/aletheia/theharvester:4.11.1 0.0s done
+#7 unpacking to docker.io/aletheia/theharvester:4.11.1
+#7 unpacking to docker.io/aletheia/theharvester:4.11.1 12.2s done
+#7 DONE 27.8s
+START [3/65] docker build -t aletheia/exiftool:13.59 docker/exiftool
+END exit=0
+84607c4f8de7bd9dbb3856173c77c1d1e300894
+#8 exporting config sha256:1f018db6a1f3e618cbdfd598e84607c4f8de7bd9dbb3856173c77c1d1e300894 0.3s done
+#8 exporting attestation manifest sha256:16feacbc0f9c8c8810123134a3c193b04f14ec0c8e0ba0dfc7a260be51224306
+#8 exporting attestation manifest sha256:16feacbc0f9c8c8810123134a3c193b04f14ec0c8e0ba0dfc7a260be51224306 0.3s done
+#8 exporting manifest list sha256:d97b1243528384e1687da06d20752736c9ac901d66e20287427f0742b1cd893b
+#8 exporting manifest list sha256:d97b1243528384e1687da06d20752736c9ac901d66e20287427f0742b1cd893b 0.3s done
+#8 naming to docker.io/aletheia/exiftool:13.59
+#8 naming to docker.io/aletheia/exiftool:13.59 0.0s done
+#8 unpacking to docker.io/aletheia/exiftool:13.59
+#8 unpacking to docker.io/aletheia/exiftool:13.59 6.6s done
+#8 DONE 11.3s
+START [4/65] docker build -t aletheia/amass:5.1.1 docker/amass
+END exit=0
+2b90948418f17fdcf07bc966336a750251af48e3a3c59881d
+#8 exporting config sha256:6feaa9be46318282b90948418f17fdcf07bc966336a750251af48e3a3c59881d 0.4s done
+#8 exporting attestation manifest sha256:51168cbe832b80abca4ce8e25d388095e5872ea64b0c50a68e7563b303399e7c
+#8 exporting attestation manifest sha256:51168cbe832b80abca4ce8e25d388095e5872ea64b0c50a68e7563b303399e7c 0.4s done
+#8 exporting manifest list sha256:af74c597de617dcfa0115260829f229180eb739db00dae992c599c9059a5388c
+#8 exporting manifest list sha256:af74c597de617dcfa0115260829f229180eb739db00dae992c599c9059a5388c 0.4s done
+#8 naming to docker.io/aletheia/amass:5.1.1
+#8 naming to docker.io/aletheia/amass:5.1.1 0.1s done
+#8 unpacking to docker.io/aletheia/amass:5.1.1
+#8 unpacking to docker.io/aletheia/amass:5.1.1 93.8s done
+#8 DONE 156.7s
+START [5/65] docker build -t aletheia/subfinder:2.17.0 docker/subfinder
+END exit=0
+c5cbf6382b999e2a6af87561953113
+#7 exporting config sha256:5311b6f9f10cc4bf6f4fb0be43966c6946c5cbf6382b999e2a6af87561953113 0.5s done
+#7 exporting attestation manifest sha256:d7bdb2273500a24e56e6b7474b4d4952a2b9e9f109fbea538b36a2d411861400
+#7 exporting attestation manifest sha256:d7bdb2273500a24e56e6b7474b4d4952a2b9e9f109fbea538b36a2d411861400 0.6s done
+#7 exporting manifest list sha256:47c61574d5c5e211de93c3724427b272f6a39b170ec3f3a6de5e2113adc3f931
+#7 exporting manifest list sha256:47c61574d5c5e211de93c3724427b272f6a39b170ec3f3a6de5e2113adc3f931 0.5s done
+#7 naming to docker.io/aletheia/subfinder:2.17.0
+#7 naming to docker.io/aletheia/subfinder:2.17.0 0.1s done
+#7 unpacking to docker.io/aletheia/subfinder:2.17.0
+#7 unpacking to docker.io/aletheia/subfinder:2.17.0 31.4s done
+#7 DONE 73.1s
+START [6/65] docker build -t aletheia/assetfinder:0.1.1 docker/assetfinder
+END exit=0
+5523d6ad58baf44d319b627fd8c
+#6 exporting config sha256:f457d0ae4da404eed8cbea4101c089d77d67e5523d6ad58baf44d319b627fd8c 0.4s done
+#6 exporting attestation manifest sha256:9c0a717cce45e37f72735cf0a16e6441f5605dcf28fdff1054336715c198cc9b
+#6 exporting attestation manifest sha256:9c0a717cce45e37f72735cf0a16e6441f5605dcf28fdff1054336715c198cc9b 0.5s done
+#6 exporting manifest list sha256:f890f2006f6ffda9c8741d9a07ff18aa0d73dc3b21c8e6d1f6fdbf5689973ff5
+#6 exporting manifest list sha256:f890f2006f6ffda9c8741d9a07ff18aa0d73dc3b21c8e6d1f6fdbf5689973ff5 0.5s done
+#6 naming to docker.io/aletheia/assetfinder:0.1.1
+#6 naming to docker.io/aletheia/assetfinder:0.1.1 0.1s done
+#6 unpacking to docker.io/aletheia/assetfinder:0.1.1
+#6 unpacking to docker.io/aletheia/assetfinder:0.1.1 4.1s done
+#6 DONE 13.3s
+START [7/65] docker build -t aletheia/dnsx:1.3.1 docker/dnsx
+END exit=0
+5bd73269f9bd48304dd7c9b28220654532d9dab08968f0f9b1dc53
+#6 exporting config sha256:1d90f951e45bd73269f9bd48304dd7c9b28220654532d9dab08968f0f9b1dc53 0.4s done
+#6 exporting attestation manifest sha256:61c7655317221b77d4d5c6ee9c37d42c673934e78d56d70c688bd99291f5037d
+#6 exporting attestation manifest sha256:61c7655317221b77d4d5c6ee9c37d42c673934e78d56d70c688bd99291f5037d 0.5s done
+#6 exporting manifest list sha256:4a1ba7951e2f59f0afc0bff580d176c42b725a6e697a7a1a91f1095b3d48f1a7
+#6 exporting manifest list sha256:4a1ba7951e2f59f0afc0bff580d176c42b725a6e697a7a1a91f1095b3d48f1a7 0.5s done
+#6 naming to docker.io/aletheia/dnsx:1.3.1
+#6 naming to docker.io/aletheia/dnsx:1.3.1 0.1s done
+#6 unpacking to docker.io/aletheia/dnsx:1.3.1
+#6 unpacking to docker.io/aletheia/dnsx:1.3.1 22.7s done
+#6 DONE 55.9s
+START [8/65] docker build -t aletheia/massdns:1.1.0 docker/massdns
+END exit=0
+e1cb202e2dbfa134e81af0deae07fe8cb
+#11 exporting config sha256:0dfbbc7bad4843ef56df34b59fdc9c9e1cb202e2dbfa134e81af0deae07fe8cb 0.4s done
+#11 exporting attestation manifest sha256:7429fac837839dfc35979810ece071905417f15a42388f6abe0d747c3e6e5ae3
+#11 exporting attestation manifest sha256:7429fac837839dfc35979810ece071905417f15a42388f6abe0d747c3e6e5ae3 1.0s done
+#11 exporting manifest list sha256:0eb2442afd86f5f41e22bdda18ec358887d1922a2bc6656fb618de9bac8842a7
+#11 exporting manifest list sha256:0eb2442afd86f5f41e22bdda18ec358887d1922a2bc6656fb618de9bac8842a7 0.9s done
+#11 naming to docker.io/aletheia/massdns:1.1.0
+#11 naming to docker.io/aletheia/massdns:1.1.0 0.1s done
+#11 unpacking to docker.io/aletheia/massdns:1.1.0
+#11 unpacking to docker.io/aletheia/massdns:1.1.0 1.7s done
+#11 DONE 10.0s
+START [9/65] docker build -t aletheia/dnsrecon:1.6.3 docker/dnsrecon
+END exit=0
+119b26232f82a14e3f62a4ce9379cac2c773813
+#6 exporting config sha256:90fdfd1201c5dbaf7ff06d776119b26232f82a14e3f62a4ce9379cac2c773813 0.5s done
+#6 exporting attestation manifest sha256:562d928407bb44fa77321b520affed51bb2de7b4e69b1095efc92fcf859a08bf
+#6 exporting attestation manifest sha256:562d928407bb44fa77321b520affed51bb2de7b4e69b1095efc92fcf859a08bf 1.0s done
+#6 exporting manifest list sha256:a3b6165db9a7b74540b4e8b9f2d30827b7bdc5d4e48617c915c2bb5b5950f4d0
+#6 exporting manifest list sha256:a3b6165db9a7b74540b4e8b9f2d30827b7bdc5d4e48617c915c2bb5b5950f4d0 0.8s done
+#6 naming to docker.io/aletheia/dnsrecon:1.6.3
+#6 naming to docker.io/aletheia/dnsrecon:1.6.3 0.2s done
+#6 unpacking to docker.io/aletheia/dnsrecon:1.6.3
+#6 unpacking to docker.io/aletheia/dnsrecon:1.6.3 2.6s done
+#6 DONE 12.4s
+START [10/65] docker build -t aletheia/fierce:1.6.0 docker/fierce
+END exit=0
+c4686fdf1e99604c9749a2b0e6ed449db1400544c7b4622b
+#6 exporting config sha256:0dd683db099808f1c4686fdf1e99604c9749a2b0e6ed449db1400544c7b4622b 0.5s done
+#6 exporting attestation manifest sha256:f0f820f9c07ce85223c1fec6ea030b378b3ead8a1c58c2951daa35c870aba595
+#6 exporting attestation manifest sha256:f0f820f9c07ce85223c1fec6ea030b378b3ead8a1c58c2951daa35c870aba595 0.9s done
+#6 exporting manifest list sha256:9031d5330af464d335b9188a360e3b719c5f29c6b2259834c75a838bbdaa7879
+#6 exporting manifest list sha256:9031d5330af464d335b9188a360e3b719c5f29c6b2259834c75a838bbdaa7879 0.7s done
+#6 naming to docker.io/aletheia/fierce:1.6.0
+#6 naming to docker.io/aletheia/fierce:1.6.0 0.2s done
+#6 unpacking to docker.io/aletheia/fierce:1.6.0
+#6 unpacking to docker.io/aletheia/fierce:1.6.0 1.1s done
+#6 DONE 7.5s
+START [11/65] docker build -t aletheia/shodan:1.31.0 docker/shodan
+END exit=0
+e93be243b0e6482c5673d29ea651befcac0d7ba088e
+#8 exporting config sha256:1f2a379fbc9f5825e8253e93be243b0e6482c5673d29ea651befcac0d7ba088e 0.5s done
+#8 exporting attestation manifest sha256:a317f470632da744e1f3887efb4b9e8a427b3e567bd8f608bef1464722e70f95
+#8 exporting attestation manifest sha256:a317f470632da744e1f3887efb4b9e8a427b3e567bd8f608bef1464722e70f95 1.0s done
+#8 exporting manifest list sha256:a5d36e0ec32098e653416f7e4baac3af37a120457e0086a8fea5acf8f407b5e6
+#8 exporting manifest list sha256:a5d36e0ec32098e653416f7e4baac3af37a120457e0086a8fea5acf8f407b5e6 1.1s done
+#8 naming to docker.io/aletheia/shodan:1.31.0
+#8 naming to docker.io/aletheia/shodan:1.31.0 0.1s done
+#8 unpacking to docker.io/aletheia/shodan:1.31.0
+#8 unpacking to docker.io/aletheia/shodan:1.31.0 2.1s done
+#8 DONE 11.9s
+START [12/65] docker build -t aletheia/crtsh:public-json docker/crtsh
+END exit=0
+715bd68a516861ea0ceea908185a
+#8 exporting config sha256:2c42c9b0b8da0f632eea6786f3506dceb464715bd68a516861ea0ceea908185a 0.6s done
+#8 exporting attestation manifest sha256:93b81921c9f5506e492e60a36b89619606090b7b0dfb12339ef10dfa606d6c1f
+#8 exporting attestation manifest sha256:93b81921c9f5506e492e60a36b89619606090b7b0dfb12339ef10dfa606d6c1f 1.0s done
+#8 exporting manifest list sha256:91bac463f5095193fd50195c1401a6adea0f06034eb32c2bb4d33c0367e6c28a
+#8 exporting manifest list sha256:91bac463f5095193fd50195c1401a6adea0f06034eb32c2bb4d33c0367e6c28a 0.8s done
+#8 naming to docker.io/aletheia/crtsh:public-json
+#8 naming to docker.io/aletheia/crtsh:public-json 0.1s done
+#8 unpacking to docker.io/aletheia/crtsh:public-json
+#8 unpacking to docker.io/aletheia/crtsh:public-json 1.0s done
+#8 DONE 7.2s
+START [13/65] docker build -t aletheia/maigret:0.6.6 docker/maigret
+END exit=0
+796687048cef49050605ba3a5fa130d2dc67f1db89
+#7 exporting config sha256:7165a4a3bdff570778e8fc796687048cef49050605ba3a5fa130d2dc67f1db89 0.5s done
+#7 exporting attestation manifest sha256:6bdf93169b9b6c466839d8559feb0915bcfe6ecdf3fa94ffc159342961481aff
+#7 exporting attestation manifest sha256:6bdf93169b9b6c466839d8559feb0915bcfe6ecdf3fa94ffc159342961481aff 0.9s done
+#7 exporting manifest list sha256:3d64e05302b26800209f708496333a24dbbd73e44efe27130407ff8024a8a485
+#7 exporting manifest list sha256:3d64e05302b26800209f708496333a24dbbd73e44efe27130407ff8024a8a485 0.7s done
+#7 naming to docker.io/aletheia/maigret:0.6.6
+#7 naming to docker.io/aletheia/maigret:0.6.6 0.2s done
+#7 unpacking to docker.io/aletheia/maigret:0.6.6
+#7 unpacking to docker.io/aletheia/maigret:0.6.6 15.4s done
+#7 DONE 33.9s
+START [14/65] docker build -t aletheia/holehe:1.61 docker/holehe
+END exit=0
+39869a524b15b8fc2dabbc0513dd767970304c59ea46e8c5870
+#7 exporting config sha256:fc3fc24d1c32039869a524b15b8fc2dabbc0513dd767970304c59ea46e8c5870 0.4s done
+#7 exporting attestation manifest sha256:e655e8afbcb115684f6ad796206222cc76f36bd9be227cc7b7678350cc06a6df
+#7 exporting attestation manifest sha256:e655e8afbcb115684f6ad796206222cc76f36bd9be227cc7b7678350cc06a6df 1.0s done
+#7 exporting manifest list sha256:060c49bd2de314b0e5bcc53feb66df80fe64829b12fd87ff7a88cfc017b8b96f
+#7 exporting manifest list sha256:060c49bd2de314b0e5bcc53feb66df80fe64829b12fd87ff7a88cfc017b8b96f 0.5s done
+#7 naming to docker.io/aletheia/holehe:1.61
+#7 naming to docker.io/aletheia/holehe:1.61 0.3s done
+#7 unpacking to docker.io/aletheia/holehe:1.61
+#7 unpacking to docker.io/aletheia/holehe:1.61 5.3s done
+#7 DONE 12.5s
+START [15/65] docker build -t aletheia/h8mail:2.5.6 docker/h8mail
+END exit=0
+06d5b76fc3bf8c25fc07b6a9f1358db6 0.4s done
+#7 exporting attestation manifest sha256:f4ac042928be58499676f8a4227c408b30df1e81be271b8d1a0d0accc810c034
+#7 exporting attestation manifest sha256:f4ac042928be58499676f8a4227c408b30df1e81be271b8d1a0d0accc810c034 0.9s done
+#7 exporting manifest list sha256:f4c9223677917cf72aa2a073545a2bf68881207616cb1a98cff13f57737b3d1e
+#7 exporting manifest list sha256:f4c9223677917cf72aa2a073545a2bf68881207616cb1a98cff13f57737b3d1e 0.8s done
+#7 naming to docker.io/aletheia/h8mail:2.5.6
+#7 naming to docker.io/aletheia/h8mail:2.5.6 0.1s done
+#7 unpacking to docker.io/aletheia/h8mail:2.5.6
+#7 unpacking to docker.io/aletheia/h8mail:2.5.6 1.7s done
+#7 DONE 8.8s
+
+View build details: docker-desktop://dashboard/build/desktop-linux/desktop-linux/m3xhap8kt26o67eaunsdp5ef3
+START [16/65] docker build -t aletheia/hibp:api-v3 docker/hibp
+END exit=0
+b39fee075252c3efe293c4feae7671a7637b 0.4s done
+#7 exporting attestation manifest sha256:9c0da28f172d869102cc320e71fa0c2e16dfc9d0021e6cd5024033b1a9c14e1e
+#7 exporting attestation manifest sha256:9c0da28f172d869102cc320e71fa0c2e16dfc9d0021e6cd5024033b1a9c14e1e 1.2s done
+#7 exporting manifest list sha256:77d4f3d044e7d1034f07333a0822f33cf286a36042c9d74956f946bfbe13fde3
+#7 exporting manifest list sha256:77d4f3d044e7d1034f07333a0822f33cf286a36042c9d74956f946bfbe13fde3 0.4s done
+#7 naming to docker.io/aletheia/hibp:api-v3
+#7 naming to docker.io/aletheia/hibp:api-v3 0.1s done
+#7 unpacking to docker.io/aletheia/hibp:api-v3
+#7 unpacking to docker.io/aletheia/hibp:api-v3 0.8s done
+#7 DONE 6.4s
+
+View build details: docker-desktop://dashboard/build/desktop-linux/desktop-linux/56z8p3fm8ft1j8587gc8wdxik
+START [17/65] docker build -t aletheia/xposedornot:api-v1 docker/xposedornot
+END exit=0
+e85b5763 0.4s done
+#7 exporting attestation manifest sha256:a982b03e17d31f7085deed24107e200ebff9d1f4d7b1b44c83cb005cfbd41a79
+#7 exporting attestation manifest sha256:a982b03e17d31f7085deed24107e200ebff9d1f4d7b1b44c83cb005cfbd41a79 0.9s done
+#7 exporting manifest list sha256:e0a9c8889f264fa6939956a2483b69840a4559525b3e695001ae676de8bbb641
+#7 exporting manifest list sha256:e0a9c8889f264fa6939956a2483b69840a4559525b3e695001ae676de8bbb641 0.6s done
+#7 naming to docker.io/aletheia/xposedornot:api-v1
+#7 naming to docker.io/aletheia/xposedornot:api-v1 0.2s done
+#7 unpacking to docker.io/aletheia/xposedornot:api-v1
+#7 unpacking to docker.io/aletheia/xposedornot:api-v1 0.8s done
+#7 DONE 6.0s
+
+View build details: docker-desktop://dashboard/build/desktop-linux/desktop-linux/oht8t087ulgtdjv5xd2ued0lr
+START [18/65] docker build -t aletheia/phoneinfoga:2.11.0 docker/phoneinfoga
+END exit=0
+045b20d 0.4s done
+#8 exporting attestation manifest sha256:72df52d87771bf308b32e55866a898c8f7247a92723987ef673324be1ca89417
+#8 exporting attestation manifest sha256:72df52d87771bf308b32e55866a898c8f7247a92723987ef673324be1ca89417 1.5s done
+#8 exporting manifest list sha256:ea86973fe03518d8431f8bb60f35e26b11c31541fac46a2571899df4f6f102bd
+#8 exporting manifest list sha256:ea86973fe03518d8431f8bb60f35e26b11c31541fac46a2571899df4f6f102bd 0.8s done
+#8 naming to docker.io/aletheia/phoneinfoga:2.11.0
+#8 naming to docker.io/aletheia/phoneinfoga:2.11.0 0.1s done
+#8 unpacking to docker.io/aletheia/phoneinfoga:2.11.0
+#8 unpacking to docker.io/aletheia/phoneinfoga:2.11.0 3.3s done
+#8 DONE 11.8s
+
+View build details: docker-desktop://dashboard/build/desktop-linux/desktop-linux/rd3g7q2bkz2g2m0n76eh9pmnw
+START [19/65] docker build -t aletheia/libphonenumber:9.0.40 docker/libphonenumber
+END exit=0
+ done
+#8 exporting attestation manifest sha256:110ca0401b7aa962feba40c2cab1cd21b3464f3bde901474bd447da1e6ae9957
+#8 exporting attestation manifest sha256:110ca0401b7aa962feba40c2cab1cd21b3464f3bde901474bd447da1e6ae9957 0.8s done
+#8 exporting manifest list sha256:e3032a2e005e4f7246efea0731df439092a499872fed00ef6325c6a5e44830ad
+#8 exporting manifest list sha256:e3032a2e005e4f7246efea0731df439092a499872fed00ef6325c6a5e44830ad 0.7s done
+#8 naming to docker.io/aletheia/libphonenumber:9.0.40
+#8 naming to docker.io/aletheia/libphonenumber:9.0.40 0.2s done
+#8 unpacking to docker.io/aletheia/libphonenumber:9.0.40
+#8 unpacking to docker.io/aletheia/libphonenumber:9.0.40 2.4s done
+#8 DONE 11.2s
+
+View build details: docker-desktop://dashboard/build/desktop-linux/desktop-linux/onpbxd4gcqmkw5wxjhhp78xw0
+START [20/65] docker build -t aletheia/instaloader:4.15.3 docker/instaloader
+END exit=0
+5b66a735 0.4s done
+#8 exporting attestation manifest sha256:1e6db17915c6810fbc6295e139af136964f241db9381b93f2770318934c2e173
+#8 exporting attestation manifest sha256:1e6db17915c6810fbc6295e139af136964f241db9381b93f2770318934c2e173 1.0s done
+#8 exporting manifest list sha256:648a02ac918eb1e5c0e6f1979f8785089958908a0b4e131a4f352d027250a252
+#8 exporting manifest list sha256:648a02ac918eb1e5c0e6f1979f8785089958908a0b4e131a4f352d027250a252 0.8s done
+#8 naming to docker.io/aletheia/instaloader:4.15.3
+#8 naming to docker.io/aletheia/instaloader:4.15.3 0.1s done
+#8 unpacking to docker.io/aletheia/instaloader:4.15.3
+#8 unpacking to docker.io/aletheia/instaloader:4.15.3 2.5s done
+#8 DONE 9.6s
+
+View build details: docker-desktop://dashboard/build/desktop-linux/desktop-linux/p6whzo4ng41wbxrwoitsg3sho
+START [21/65] docker build -t aletheia/reddit-api:v1 docker/reddit-api
+END exit=0
+954d160132534f5bea3d89951244 0.4s done
+#7 exporting attestation manifest sha256:afdc6d923a530e10f577b9226a74c292fbd7e20a05f21560d041a2bd18332bd2
+#7 exporting attestation manifest sha256:afdc6d923a530e10f577b9226a74c292fbd7e20a05f21560d041a2bd18332bd2 0.8s done
+#7 exporting manifest list sha256:4c326ffe39eac7cecd03b5397534fef99383a2355744cb0ad8c0518fa711f94e
+#7 exporting manifest list sha256:4c326ffe39eac7cecd03b5397534fef99383a2355744cb0ad8c0518fa711f94e 0.7s done
+#7 naming to docker.io/aletheia/reddit-api:v1
+#7 naming to docker.io/aletheia/reddit-api:v1 0.1s done
+#7 unpacking to docker.io/aletheia/reddit-api:v1
+#7 unpacking to docker.io/aletheia/reddit-api:v1 0.9s done
+#7 DONE 6.6s
+
+View build details: docker-desktop://dashboard/build/desktop-linux/desktop-linux/enr08iv1mt9ju6kik0v99codj
+START [22/65] docker build -t aletheia/youtube-api:v3 docker/youtube-api
+END exit=0
+4906ffc0d53069024dc6e5ab 0.4s done
+#7 exporting attestation manifest sha256:4692adcf32e0529b64c8c289964351e6fee417161cdf0acbb0fabaa707992cac
+#7 exporting attestation manifest sha256:4692adcf32e0529b64c8c289964351e6fee417161cdf0acbb0fabaa707992cac 1.1s done
+#7 exporting manifest list sha256:bc765e045395b634c4b58494a7d37fc8d9bb68a2a7402c51215f688e75411702
+#7 exporting manifest list sha256:bc765e045395b634c4b58494a7d37fc8d9bb68a2a7402c51215f688e75411702 0.5s done
+#7 naming to docker.io/aletheia/youtube-api:v3
+#7 naming to docker.io/aletheia/youtube-api:v3 0.1s done
+#7 unpacking to docker.io/aletheia/youtube-api:v3
+#7 unpacking to docker.io/aletheia/youtube-api:v3 0.9s done
+#7 DONE 6.4s
+
+View build details: docker-desktop://dashboard/build/desktop-linux/desktop-linux/mqox1bnwjt26fud5d33kmw6c1
+START [23/65] docker build -t aletheia/overpass:public docker/overpass
+END exit=0
+85cc114dab880d3c80eb 0.4s done
+#7 exporting attestation manifest sha256:b93b1385de8cf044bf8292d2ca4e12b8c5f47b88dc2dcbce052652908cc1961a
+#7 exporting attestation manifest sha256:b93b1385de8cf044bf8292d2ca4e12b8c5f47b88dc2dcbce052652908cc1961a 0.9s done
+#7 exporting manifest list sha256:680c031dd8393e2fa067196ceee61501aa8e709b8b24d4252f7706bff3a7e302
+#7 exporting manifest list sha256:680c031dd8393e2fa067196ceee61501aa8e709b8b24d4252f7706bff3a7e302 1.0s done
+#7 naming to docker.io/aletheia/overpass:public
+#7 naming to docker.io/aletheia/overpass:public 0.2s done
+#7 unpacking to docker.io/aletheia/overpass:public
+#7 unpacking to docker.io/aletheia/overpass:public 0.8s done
+#7 DONE 6.5s
+
+View build details: docker-desktop://dashboard/build/desktop-linux/desktop-linux/tdgjsdqni1qlborkc4xvqlx1r
+START [24/65] docker build -t aletheia/suncalc:2.0.2 docker/suncalc
+END exit=0
+fe96058b43251ea3644a19c697b 0.4s done
+#9 exporting attestation manifest sha256:1dbefa7b92bd110cde927fe31e3d115b927ab7acdcfd21208167629c83665b53
+#9 exporting attestation manifest sha256:1dbefa7b92bd110cde927fe31e3d115b927ab7acdcfd21208167629c83665b53 0.9s done
+#9 exporting manifest list sha256:ab5fee71fde4db28b950cae152c7042b6fd428d40f69aa02fafe5cdc03c7a9a8
+#9 exporting manifest list sha256:ab5fee71fde4db28b950cae152c7042b6fd428d40f69aa02fafe5cdc03c7a9a8 0.6s done
+#9 naming to docker.io/aletheia/suncalc:2.0.2
+#9 naming to docker.io/aletheia/suncalc:2.0.2 0.2s done
+#9 unpacking to docker.io/aletheia/suncalc:2.0.2
+#9 unpacking to docker.io/aletheia/suncalc:2.0.2 9.3s done
+#9 DONE 18.4s
+
+View build details: docker-desktop://dashboard/build/desktop-linux/desktop-linux/tpc6gpol9n635tt8lvcp9f61o
+START [25/65] docker build -t aletheia/deepface:0.0.101 docker/deepface
+END exit=1
+311-cp311-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl (7.1 MB)
+#6 110.8    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 7.1/7.1 MB 2.5 MB/s eta 0:00:00
+#6 111.0 Downloading python_dotenv-1.2.4-py3-none-any.whl (23 kB)
+#6 111.2 Downloading requests-2.34.2-py3-none-any.whl (73 kB)
+#6 111.3    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 73.1/73.1 kB 570.4 kB/s eta 0:00:00
+#6 111.4 Downloading retina_face-0.0.19-py3-none-any.whl (33 kB)
+#6 111.7 Downloading tensorflow-2.21.0-cp311-cp311-manylinux_2_27_x86_64.whl (572.4 MB)
+ERROR: failed to build: failed to receive status: rpc error: code = Unavailable desc = error reading from server: EOF
+START [26/65] docker build -t aletheia/insightface:2.1 docker/insightface
+END exit=1
+ERROR: failed to connect to the docker API at npipe:////./pipe/dockerDesktopLinuxEngine; check if the path is correct and if the daemon is running: open //./pipe/dockerDesktopLinuxEngine: The system cannot find the file specified.
+START [27/65] docker build -f docker/core.Dockerfile -t aletheia/core:0.7.0 .
+END exit=1
+ERROR: failed to connect to the docker API at npipe:////./pipe/dockerDesktopLinuxEngine; check if the path is correct and if the daemon is running: open //./pipe/dockerDesktopLinuxEngine: The system cannot find the file specified.
+START [28/65] docker build -f docker/sec-edgar/Dockerfile -t aletheia/sec-edgar:public-api doc
+END exit=1
+ERROR: failed to connect to the docker API at npipe:////./pipe/dockerDesktopLinuxEngine; check if the path is correct and if the daemon is running: open //./pipe/dockerDesktopLinuxEngine: The system cannot find the file specified.
+START [29/65] docker build -f docker/gleif/Dockerfile -t aletheia/gleif:api-v1 docker/gleif
+END exit=1
+ERROR: failed to connect to the docker API at npipe:////./pipe/dockerDesktopLinuxEngine; check if the path is correct and if the daemon is running: open //./pipe/dockerDesktopLinuxEngine: The system cannot find the file specified.
+START [30/65] docker build -f docker/opencorporates/Dockerfile -t aletheia/opencorporates:api-
+END exit=1
+ERROR: failed to connect to the docker API at npipe:////./pipe/dockerDesktopLinuxEngine; check if the path is correct and if the daemon is running: open //./pipe/dockerDesktopLinuxEngine: The system cannot find the file specified.
+START [31/65] docker build -f docker/opensanctions/Dockerfile -t aletheia/opensanctions:api do
+END exit=1
+ERROR: failed to connect to the docker API at npipe:////./pipe/dockerDesktopLinuxEngine; check if the path is correct and if the daemon is running: open //./pipe/dockerDesktopLinuxEngine: The system cannot find the file specified.
+START [32/65] docker build -f docker/courtlistener/Dockerfile -t aletheia/courtlistener:api-v3
+END exit=1
+ERROR: failed to connect to the docker API at npipe:////./pipe/dockerDesktopLinuxEngine; check if the path is correct and if the daemon is running: open //./pipe/dockerDesktopLinuxEngine: The system cannot find the file specified.
+START [33/65] docker build -f docker/gravatar/Dockerfile -t aletheia/gravatar:api-v3 docker/gr
+END exit=1
+ERROR: failed to connect to the docker API at npipe:////./pipe/dockerDesktopLinuxEngine; check if the path is correct and if the daemon is running: open //./pipe/dockerDesktopLinuxEngine: The system cannot find the file specified.
+START [34/65] docker build -f docker/rdap/Dockerfile -t aletheia/rdap:rfc9082 docker/rdap
+END exit=1
+ERROR: failed to connect to the docker API at npipe:////./pipe/dockerDesktopLinuxEngine; check if the path is correct and if the daemon is running: open //./pipe/dockerDesktopLinuxEngine: The system cannot find the file specified.
+START [35/65] docker build -f docker/ip_intelligence/Dockerfile -t aletheia/ip-intelligence:v1
+END exit=1
+ERROR: failed to connect to the docker API at npipe:////./pipe/dockerDesktopLinuxEngine; check if the path is correct and if the daemon is running: open //./pipe/dockerDesktopLinuxEngine: The system cannot find the file specified.
+START [36/65] docker build -f docker/government_records_us/Dockerfile -t aletheia/gov-records-
+END exit=1
+ERROR: failed to connect to the docker API at npipe:////./pipe/dockerDesktopLinuxEngine; check if the path is correct and if the daemon is running: open //./pipe/dockerDesktopLinuxEngine: The system cannot find the file specified.
+START [37/65] docker build -f docker/corporate_registry/Dockerfile -t aletheia/corp-registry:v
+END exit=1
+ERROR: failed to connect to the docker API at npipe:////./pipe/dockerDesktopLinuxEngine; check if the path is correct and if the daemon is running: open //./pipe/dockerDesktopLinuxEngine: The system cannot find the file specified.
+START [38/65] docker build -f docker/sanctions_enforcement_watchlists/Dockerfile -t aletheia/s
+END exit=1
+ERROR: failed to connect to the docker API at npipe:////./pipe/dockerDesktopLinuxEngine; check if the path is correct and if the daemon is running: open //./pipe/dockerDesktopLinuxEngine: The system cannot find the file specified.
+START [39/65] docker build -f docker/academic_search/Dockerfile -t aletheia/academic-search:v1
+END exit=1
+ERROR: failed to connect to the docker API at npipe:////./pipe/dockerDesktopLinuxEngine; check if the path is correct and if the daemon is running: open //./pipe/dockerDesktopLinuxEngine: The system cannot find the file specified.
+START [40/65] docker build -f docker/ssl_tls/Dockerfile -t aletheia/ssl-tls:v1 docker/ssl_tls
+END exit=1
+ERROR: failed to connect to the docker API at npipe:////./pipe/dockerDesktopLinuxEngine; check if the path is correct and if the daemon is running: open //./pipe/dockerDesktopLinuxEngine: The system cannot find the file specified.
+START [41/65] docker build -f docker/crypto_blockchain/Dockerfile -t aletheia/crypto-blockchai
+END exit=1
+ERROR: failed to connect to the docker API at npipe:////./pipe/dockerDesktopLinuxEngine; check if the path is correct and if the daemon is running: open //./pipe/dockerDesktopLinuxEngine: The system cannot find the file specified.
+START [42/65] docker build -f docker/patents_trademarks/Dockerfile -t aletheia/patents-tradema
+END exit=1
+ERROR: failed to connect to the docker API at npipe:////./pipe/dockerDesktopLinuxEngine; check if the path is correct and if the daemon is running: open //./pipe/dockerDesktopLinuxEngine: The system cannot find the file specified.
+START [43/65] docker build -f docker/email_auth/Dockerfile -t aletheia/email-auth:v1 docker/em
+END exit=1
+ERROR: failed to connect to the docker API at npipe:////./pipe/dockerDesktopLinuxEngine; check if the path is correct and if the daemon is running: open //./pipe/dockerDesktopLinuxEngine: The system cannot find the file specified.
+START [44/65] docker build -f docker/code_search/Dockerfile -t aletheia/code-search:v1 docker/
+END exit=1
+ERROR: failed to connect to the docker API at npipe:////./pipe/dockerDesktopLinuxEngine; check if the path is correct and if the daemon is running: open //./pipe/dockerDesktopLinuxEngine: The system cannot find the file specified.
+START [45/65] docker build -f docker/search_engines/Dockerfile -t aletheia/search-engines:v1 d
+END exit=1
+ERROR: failed to connect to the docker API at npipe:////./pipe/dockerDesktopLinuxEngine; check if the path is correct and if the daemon is running: open //./pipe/dockerDesktopLinuxEngine: The system cannot find the file specified.
+START [46/65] docker build -f docker/geolocation_image/Dockerfile -t aletheia/geolocation-imag
+END exit=1
+ERROR: failed to connect to the docker API at npipe:////./pipe/dockerDesktopLinuxEngine; check if the path is correct and if the daemon is running: open //./pipe/dockerDesktopLinuxEngine: The system cannot find the file specified.
+START [47/65] docker build -f docker/transport_asset_registry/Dockerfile -t aletheia/transport
+END exit=1
+ERROR: failed to connect to the docker API at npipe:////./pipe/dockerDesktopLinuxEngine; check if the path is correct and if the daemon is running: open //./pipe/dockerDesktopLinuxEngine: The system cannot find the file specified.
+START [48/65] docker build -f docker/social_profile/Dockerfile -t aletheia/social-profile:v1 d
+END exit=1
+ERROR: failed to connect to the docker API at npipe:////./pipe/dockerDesktopLinuxEngine; check if the path is correct and if the daemon is running: open //./pipe/dockerDesktopLinuxEngine: The system cannot find the file specified.
+START [49/65] docker build -f docker/social_username/Dockerfile -t aletheia/social-username:v1
+END exit=1
+ERROR: failed to connect to the docker API at npipe:////./pipe/dockerDesktopLinuxEngine; check if the path is correct and if the daemon is running: open //./pipe/dockerDesktopLinuxEngine: The system cannot find the file specified.
+START [50/65] docker build -f docker/leak_checkers/Dockerfile -t aletheia/leak-checkers:v1 doc
+END exit=1
+ERROR: failed to connect to the docker API at npipe:////./pipe/dockerDesktopLinuxEngine; check if the path is correct and if the daemon is running: open //./pipe/dockerDesktopLinuxEngine: The system cannot find the file specified.
+START [51/65] docker build -f docker/zehef/Dockerfile -t aletheia/zehef:v1 docker/zehef
+END exit=1
+ERROR: failed to connect to the docker API at npipe:////./pipe/dockerDesktopLinuxEngine; check if the path is correct and if the daemon is running: open //./pipe/dockerDesktopLinuxEngine: The system cannot find the file specified.
+START [52/65] docker build -f docker/tiktok_hashtag/Dockerfile -t aletheia/tiktok-hashtag:v1 d
+END exit=1
+ERROR: failed to connect to the docker API at npipe:////./pipe/dockerDesktopLinuxEngine; check if the path is correct and if the daemon is running: open //./pipe/dockerDesktopLinuxEngine: The system cannot find the file specified.
+START [53/65] docker build -f docker/venom/Dockerfile -t aletheia/venom:v1 docker/venom
+END exit=1
+ERROR: failed to connect to the docker API at npipe:////./pipe/dockerDesktopLinuxEngine; check if the path is correct and if the daemon is running: open //./pipe/dockerDesktopLinuxEngine: The system cannot find the file specified.
+START [54/65] docker build -f docker/picimagesearch/Dockerfile -t aletheia/picimagesearch:v1 d
+END exit=1
+ERROR: failed to connect to the docker API at npipe:////./pipe/dockerDesktopLinuxEngine; check if the path is correct and if the daemon is running: open //./pipe/dockerDesktopLinuxEngine: The system cannot find the file specified.
+START [55/65] docker build -f docker/tracelines/Dockerfile -t aletheia/tracelines:v1 docker/tr
+END exit=1
+ERROR: failed to connect to the docker API at npipe:////./pipe/dockerDesktopLinuxEngine; check if the path is correct and if the daemon is running: open //./pipe/dockerDesktopLinuxEngine: The system cannot find the file specified.
+START [56/65] docker build -f docker/shadowfinder/Dockerfile -t aletheia/shadowfinder:v1 docke
+END exit=1
+ERROR: failed to connect to the docker API at npipe:////./pipe/dockerDesktopLinuxEngine; check if the path is correct and if the daemon is running: open //./pipe/dockerDesktopLinuxEngine: The system cannot find the file specified.
+START [57/65] docker build -f docker/pybdshadow/Dockerfile -t aletheia/pybdshadow:v1 docker/py
+END exit=1
+ERROR: failed to connect to the docker API at npipe:////./pipe/dockerDesktopLinuxEngine; check if the path is correct and if the daemon is running: open //./pipe/dockerDesktopLinuxEngine: The system cannot find the file specified.
+START [58/65] docker build -f docker/crypttrace/Dockerfile -t aletheia/crypttrace:v1 docker/cr
+END exit=1
+ERROR: failed to connect to the docker API at npipe:////./pipe/dockerDesktopLinuxEngine; check if the path is correct and if the daemon is running: open //./pipe/dockerDesktopLinuxEngine: The system cannot find the file specified.
+START [59/65] docker build -f docker/researcher_ids/Dockerfile -t aletheia/researcher-ids:v1 d
+END exit=1
+ERROR: failed to connect to the docker API at npipe:////./pipe/dockerDesktopLinuxEngine; check if the path is correct and if the daemon is running: open //./pipe/dockerDesktopLinuxEngine: The system cannot find the file specified.
+START [60/65] docker build -f docker/weather/Dockerfile -t aletheia/weather:v1 docker/weather
+END exit=1
+ERROR: failed to connect to the docker API at npipe:////./pipe/dockerDesktopLinuxEngine; check if the path is correct and if the daemon is running: open //./pipe/dockerDesktopLinuxEngine: The system cannot find the file specified.
+START [61/65] docker build -f docker/github_identity/Dockerfile -t aletheia/github-identity:v1
+END exit=1
+ERROR: failed to connect to the docker API at npipe:////./pipe/dockerDesktopLinuxEngine; check if the path is correct and if the daemon is running: open //./pipe/dockerDesktopLinuxEngine: The system cannot find the file specified.
+START [62/65] docker build -f docker/pgp_keys/Dockerfile -t aletheia/pgp-keys:v1 docker/pgp_ke
+END exit=1
+ERROR: failed to connect to the docker API at npipe:////./pipe/dockerDesktopLinuxEngine; check if the path is correct and if the daemon is running: open //./pipe/dockerDesktopLinuxEngine: The system cannot find the file specified.
+START [63/65] docker build -f docker/minecraft/Dockerfile -t aletheia/minecraft:v1 docker/mine
+END exit=1
+ERROR: failed to connect to the docker API at npipe:////./pipe/dockerDesktopLinuxEngine; check if the path is correct and if the daemon is running: open //./pipe/dockerDesktopLinuxEngine: The system cannot find the file specified.
+START [64/65] docker build -t aletheia/spiderfoot:v4.0 docker/spiderfoot
+END exit=1
+ERROR: failed to connect to the docker API at npipe:////./pipe/dockerDesktopLinuxEngine; check if the path is correct and if the daemon is running: open //./pipe/dockerDesktopLinuxEngine: The system cannot find the file specified.
+START [65/65] docker build -f docker/egress_proxy/Dockerfile -t aletheia/egress-proxy:v1 docke
+END exit=1
+ERROR: failed to connect to the docker API at npipe:////./pipe/dockerDesktopLinuxEngine; check if the path is correct and if the daemon is running: open //./pipe/dockerDesktopLinuxEngine: The system cannot find the file specified.

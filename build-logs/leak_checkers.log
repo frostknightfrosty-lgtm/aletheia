@@ -1,0 +1,5 @@
+=== [28/64] aletheia/leak_checkers:latest (leak_checkers) ===
+START: 2026-10-23 22:37:09
+END: 2026-10-23 22:37:36 exit=0
+PRUNE: OK
+RESULT: SUCCESS

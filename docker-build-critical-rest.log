@@ -1,0 +1,119 @@
+START aletheia/spiderfoot:v4.0
+END exit=0
+f502d6356cadba53a1f5bb7125653ddf48dcc767a20 0.4s done
+#13 naming to docker.io/aletheia/spiderfoot:v4.0
+#13 naming to docker.io/aletheia/spiderfoot:v4.0 0.1s done
+#13 unpacking to docker.io/aletheia/spiderfoot:v4.0
+#13 unpacking to docker.io/aletheia/spiderfoot:v4.0 31.8s done
+#13 DONE 56.6s
+
+View build details: docker-desktop://dashboard/build/desktop-linux/desktop-linux/gfhls3mcgqpizhwb497jxvxxf
+START docker/core.Dockerfile
+END exit=0
+f7df64ee78c0134e4aa216388dde5805fd2543aa8d44aef50261913fad3d8e76 0.6s done
+#11 naming to docker.io/aletheia/core:0.7.0
+#11 naming to docker.io/aletheia/core:0.7.0 0.1s done
+#11 unpacking to docker.io/aletheia/core:0.7.0
+#11 unpacking to docker.io/aletheia/core:0.7.0 8.0s done
+#11 DONE 27.3s
+
+View build details: docker-desktop://dashboard/build/desktop-linux/desktop-linux/tmk5m7dbm80q2u4ze3v74spw0
+START docker/sec-edgar/Dockerfile
+END exit=0
+cd5574d97a862b957f74a3642b81c 0.5s done
+#9 naming to docker.io/aletheia/sec-edgar:public-api
+#9 naming to docker.io/aletheia/sec-edgar:public-api 0.3s done
+#9 unpacking to docker.io/aletheia/sec-edgar:public-api
+#9 unpacking to docker.io/aletheia/sec-edgar:public-api 6.0s done
+#9 DONE 16.1s
+
+View build details: docker-desktop://dashboard/build/desktop-linux/desktop-linux/sp3m3drp609hfooluxt8xuw6p
+START docker/github_identity/Dockerfile
+END exit=0
+6711ca472eb0562a652f4187040ae6dc4b27ab 0.7s done
+#8 naming to docker.io/aletheia/github-identity:v1
+#8 naming to docker.io/aletheia/github-identity:v1 0.1s done
+#8 unpacking to docker.io/aletheia/github-identity:v1
+#8 unpacking to docker.io/aletheia/github-identity:v1 1.1s done
+#8 DONE 8.3s
+
+View build details: docker-desktop://dashboard/build/desktop-linux/desktop-linux/sn3qojrh5ie5c3hh9ccrkihzd
+START docker/social_profile/Dockerfile
+END exit=0
+eca0f4c43ce9133d7d994a09eca295b363df 0.7s done
+#14 naming to docker.io/aletheia/social-profile:v1
+#14 naming to docker.io/aletheia/social-profile:v1 0.1s done
+#14 unpacking to docker.io/aletheia/social-profile:v1
+#14 unpacking to docker.io/aletheia/social-profile:v1 2.6s done
+#14 DONE 11.8s
+
+View build details: docker-desktop://dashboard/build/desktop-linux/desktop-linux/lbginm4hw1tivswfvd6cv21m5
+START docker/social_username/Dockerfile
+END exit=0
+d83f24aa34a9b1985b5a0ae7821749bd377d0 0.6s done
+#8 naming to docker.io/aletheia/social-username:v1
+#8 naming to docker.io/aletheia/social-username:v1 0.1s done
+#8 unpacking to docker.io/aletheia/social-username:v1
+#8 unpacking to docker.io/aletheia/social-username:v1 2.6s done
+#8 DONE 11.2s
+
+View build details: docker-desktop://dashboard/build/desktop-linux/desktop-linux/sgawh7ihxlvrq7q2dfrt0m32s
+START docker/leak_checkers/Dockerfile
+END exit=0
+cf41dfa3f243ffe6e25a9beafa2e0544b3acb4911e816e 0.4s done
+#8 naming to docker.io/aletheia/leak-checkers:v1
+#8 naming to docker.io/aletheia/leak-checkers:v1 0.1s done
+#8 unpacking to docker.io/aletheia/leak-checkers:v1
+#8 unpacking to docker.io/aletheia/leak-checkers:v1 3.7s done
+#8 DONE 9.5s
+
+View build details: docker-desktop://dashboard/build/desktop-linux/desktop-linux/03l2x83q4qch1rv6wg3lksxmz
+START docker/venom/Dockerfile
+END exit=0
+ sha256:91676ee77daa12f901d78bd4351c0dfb0cf02986dea016e0cabae3017e5bb761 0.4s done
+#10 naming to docker.io/aletheia/venom:v1
+#10 naming to docker.io/aletheia/venom:v1 0.1s done
+#10 unpacking to docker.io/aletheia/venom:v1
+#10 unpacking to docker.io/aletheia/venom:v1 5.6s done
+#10 DONE 15.8s
+
+View build details: docker-desktop://dashboard/build/desktop-linux/desktop-linux/udiv8i1rign5m0dhz8qo9nooi
+START docker/minecraft/Dockerfile
+END exit=0
+3705036adb3217a2aa38033e5e20f491789be9a130a56f86fc78662a0efc6a 0.4s done
+#9 naming to docker.io/aletheia/minecraft:v1
+#9 naming to docker.io/aletheia/minecraft:v1 0.1s done
+#9 unpacking to docker.io/aletheia/minecraft:v1
+#9 unpacking to docker.io/aletheia/minecraft:v1 0.5s done
+#9 DONE 4.5s
+
+View build details: docker-desktop://dashboard/build/desktop-linux/desktop-linux/qq4vwkj1y7wy60eupnljuf7so
+START docker/reddit-api/Dockerfile
+END exit=0
+847daa3d
+#7 exporting manifest list sha256:b437562b7c3f91007575647c76f19003b636546a7da5fdb68fd83a3d847daa3d 0.4s done
+#7 naming to docker.io/aletheia/reddit-api:v1
+#7 naming to docker.io/aletheia/reddit-api:v1 0.1s done
+#7 unpacking to docker.io/aletheia/reddit-api:v1 0.1s done
+#7 DONE 1.6s
+
+View build details: docker-desktop://dashboard/build/desktop-linux/desktop-linux/iytghvoitjxgsbsumkeijr67j
+START docker/youtube-api/Dockerfile
+END exit=0
+29109
+#7 exporting manifest list sha256:6a397a5bc1ed08fae001fd1eed0a1c92e9d17bde87b9f146ca8a51d3c5b29109 0.4s done
+#7 naming to docker.io/aletheia/youtube-api:v3
+#7 naming to docker.io/aletheia/youtube-api:v3 0.1s done
+#7 unpacking to docker.io/aletheia/youtube-api:v3 0.1s done
+#7 DONE 1.7s
+
+View build details: docker-desktop://dashboard/build/desktop-linux/desktop-linux/okghj844loroy12bwwjnq3iy2
+START aletheia/instaloader:4.15.3
+END exit=0
+orting manifest list sha256:8d731ba7fce122381fd3a417b94654bcfd04c437dbd2c2fd3ffc0327af0806af 0.4s done
+#8 naming to docker.io/aletheia/instaloader:4.15.3
+#8 naming to docker.io/aletheia/instaloader:4.15.3 0.1s done
+#8 unpacking to docker.io/aletheia/instaloader:4.15.3 0.1s done
+#8 DONE 1.7s
+
+View build details: docker-desktop://dashboard/build/desktop-linux/desktop-linux/8sndqgdaiu9l91ysnvoieklck
