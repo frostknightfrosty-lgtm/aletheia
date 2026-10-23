@@ -13,11 +13,23 @@ dependencies = [
   "uvicorn[standard]>=0.40,<1",
   "SQLAlchemy>=2.0,<3",
   "rapidfuzz==3.14.6",
-  "reportlab==5.0.1"
+  "reportlab==5.0.1",
+  # Phase 18.3 local-LLM dossier generation. The client is imported lazily so
+  # the base CLI starts without an OpenAI-compatible endpoint configured.
+  "openai>=1.40,<3"
 ]
 
 [project.optional-dependencies]
-dev = ["pytest>=9,<10", "httpx>=0.28,<1", "pytest-asyncio", "pytest-mock", "fakeredis>=2.30,<3"]
+dev = [
+  "pytest>=9,<10",
+  "httpx>=0.28,<1",
+  "pytest-asyncio",
+  "pytest-mock",
+  "fakeredis>=2.30,<3",
+  # Phase 18.3 semantic profile linking. Installed for development/CI, but
+  # imported only when a profile pair with usable bio text is compared.
+  "sentence-transformers>=2.7.0",
+]
 # Phase 14 networked storage backends. The file backend is always available;
 # these drivers are only needed to talk to PostgreSQL, Neo4j, Elasticsearch,
 # MinIO/S3, and Redis.

@@ -1,8 +1,10 @@
 from __future__ import annotations
 
 import argparse
+import ipaddress
 import json
 import os
+import re
 from pathlib import Path
 from uuid import UUID
 
@@ -29,6 +31,25 @@ def build_parser() -> argparse.ArgumentParser:
     inv.add_argument("--filter-age-max", type=int, default=None, help="constraint filter: maximum age (compared where an age is computable)")
     inv.add_argument("--filter-language", default=None, help="constraint filter: match recorded language attributes (token match)")
     inv.add_argument("--filter-timezone", default=None, help="constraint filter: match recorded IANA timezone attributes")
+
+    ask = sub.add_parser(
+        "ask",
+        help="parse a free-text question, run the pivot cascade, and generate a local-LLM dossier",
+    )
+    ask.add_argument("query", help='e.g. "Find the person behind username frost2233"')
+    ask.add_argument("--fixture", default=None, help="fixture observer JSON for a network-free dry-run")
+    ask.add_argument("--authorization-assertion", default=None, help="Explicit authorization statement; stored verbatim on the run manifest")
+    ask.add_argument("--case-id", default=None, type=UUID, help="record the run on this case (P17.7 case memory)")
+    ask.add_argument("--data-dir", default=os.getenv("ALETHEIA_DATA_DIR", "./data"))
+    ask.add_argument("--timeout", type=int, default=120)
+    ask.add_argument("--proxy", default=os.getenv("ALETHEIA_HTTP_PROXY") or None)
+    ask.add_argument("--no-egress-proxy", action="store_true", help="run network adapters without the egress proxy (offline replays only)")
+    ask.add_argument("--egress-rate", type=float, default=1.0, help="per-adapter egress proxy limit: sustained requests/second (default 1)")
+    ask.add_argument("--egress-burst", type=float, default=1.0, help="per-adapter egress proxy limit: burst capacity (default 1)")
+    ask.add_argument("--max-expansions", type=int, default=None, help="hard budget on pivot expansions (default: uncapped)")
+    ask.add_argument("--owner-mode", action="store_true", help="owner mode: depth escalation to 5 once HARD evidence is seen")
+    ask.add_argument("--llm-url", default=os.getenv("ALETHEIA_LLM_URL", "http://localhost:11434/v1"), help="OpenAI-compatible endpoint (default: local Ollama)")
+    ask.add_argument("--llm-model", default=os.getenv("ALETHEIA_LLM_MODEL", "llama3"), help="local model name (default: llama3)")
     phase2 = sub.add_parser("phase2", help="resolve entities and emit Phase 2 reports")
     phase2.add_argument("--run-id", required=True)
     phase2.add_argument("--data-dir", default=os.getenv("ALETHEIA_DATA_DIR", "./data"))
@@ -124,6 +145,179 @@ def parse_seed(raw: str) -> Seed:
         raise SystemExit("Seed must be formatted type:value") from exc
 
 
+_QUERY_SEED_TYPES = {
+    "account": SeedType.USERNAME,
+    "company": SeedType.COMPANY_NAME,
+    "handle": SeedType.USERNAME,
+    "user": SeedType.USERNAME,
+}
+_QUERY_STOPWORDS = {
+    "a",
+    "account",
+    "an",
+    "and",
+    "behind",
+    "for",
+    "handle",
+    "identity",
+    "is",
+    "of",
+    "person",
+    "profile",
+    "the",
+    "this",
+    "user",
+    "username",
+    "who",
+}
+_EMAIL_RE = re.compile(r"\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b")
+_URL_RE = re.compile(r"https?://[^\s<>\"']+", re.IGNORECASE)
+_IP_RE = re.compile(r"\b(?:\d{1,3}\.){3}\d{1,3}\b")
+_DOMAIN_RE = re.compile(
+    r"\b(?:[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?\.)+[A-Za-z]{2,63}\b"
+)
+_PHONE_RE = re.compile(r"(?<![\w.])(\+?\d[\d().\s-]{6,}\d)(?![\w.])")
+_HANDLE_HINT_RE = re.compile(
+    r"\b(?:username|handle|user)\s*(?::|=|\bis\b|\bnamed\b|\bcalled\b)?\s*[\"']?@?([A-Za-z0-9][A-Za-z0-9_.-]{1,63})",
+    re.IGNORECASE,
+)
+_HANDLE_AFTER_RE = re.compile(
+    r"\b(?:alias|behind|called|named)\s+[\"']?@?([A-Za-z0-9][A-Za-z0-9_.-]{1,63})",
+    re.IGNORECASE,
+)
+_PERSON_NAME_RE = re.compile(
+    r"\b(?:person|individual|name|person_name)\s*(?::|=|\bis\b|\bnamed\b|\bcalled\b)\s*[\"']?([^\"']+?)[\"']?(?:[?.!,]|$)",
+    re.IGNORECASE,
+)
+_EXPLICIT_PREFIX_RE = re.compile(
+    r"^(username|handle|email|phone|domain|url|ip|name|person_name|company|company_name|hashtag)\s*[:=]\s*(.+)$",
+    re.IGNORECASE,
+)
+_VALID_HANDLE_RE = re.compile(r"^@?[A-Za-z0-9][A-Za-z0-9_.-]{1,63}$")
+
+
+def _clean_query_value(value: str) -> str:
+    return value.strip().strip("\"'").rstrip(".,;:!?)]}").lstrip("@")
+
+
+def _query_handle(value: str) -> Seed | None:
+    cleaned = _clean_query_value(value)
+    if not cleaned or cleaned.casefold() in _QUERY_STOPWORDS:
+        return None
+    if not _VALID_HANDLE_RE.fullmatch(cleaned):
+        return None
+    return Seed(type=SeedType.USERNAME, value=cleaned)
+
+
+def parse_ask_query(query: str) -> Seed:
+    """Parse a natural-language question into one legal, typed seed.
+
+    This is intentionally a deterministic regex parser: it never calls a
+    remote service before the operator has authorized the investigation. An
+    operator can always bypass it with an explicit ``type:value`` seed.
+    """
+    text = " ".join(query.split()).strip()
+    if not text:
+        raise SystemExit("ask query is empty")
+
+    if not re.match(r"^[a-z][a-z0-9+.-]*://", text, re.IGNORECASE):
+        explicit = _EXPLICIT_PREFIX_RE.match(text)
+        if explicit:
+            raw_kind = explicit.group(1).casefold()
+            kind = _QUERY_SEED_TYPES.get(raw_kind, SeedType(raw_kind))
+            value = _clean_query_value(explicit.group(2))
+            if not value:
+                raise SystemExit("ask query has an empty seed value")
+            return Seed(type=kind, value=value)
+
+    email = _EMAIL_RE.search(text)
+    if email:
+        return Seed(type=SeedType.EMAIL, value=email.group(0))
+
+    url = _URL_RE.search(text)
+    if url:
+        return Seed(type=SeedType.URL, value=_clean_query_value(url.group(0)))
+
+    for candidate in _IP_RE.findall(text):
+        try:
+            ipaddress.ip_address(candidate)
+        except ValueError:
+            continue
+        return Seed(type=SeedType.IP, value=candidate)
+
+    for handle in _HANDLE_HINT_RE.finditer(text):
+        seed = _query_handle(handle.group(1))
+        if seed is not None:
+            return seed
+
+    at_handle = re.search(r"(?<![\w.])@([A-Za-z0-9][A-Za-z0-9_.-]{1,63})\b", text)
+    if at_handle:
+        seed = _query_handle(at_handle.group(1))
+        if seed is not None:
+            return seed
+
+    domain_hint = re.search(
+        r"\bdomain\s*(?::|=|\bis\b|\bnamed\b|\bcalled\b)?\s*[\"']?([A-Za-z0-9.-]+\.[A-Za-z]{2,63})",
+        text,
+        re.IGNORECASE,
+    )
+    if domain_hint:
+        return Seed(type=SeedType.DOMAIN, value=_clean_query_value(domain_hint.group(1)))
+
+    hashtag = re.search(r"(?<!\w)#([A-Za-z0-9_]{2,100})\b", text)
+    if hashtag:
+        return Seed(type=SeedType.HASHTAG, value=f"#{hashtag.group(1)}")
+
+    phone = _PHONE_RE.search(text)
+    if phone:
+        value = re.sub(r"[\s().-]+", "", phone.group(1))
+        if len(re.sub(r"\D", "", value)) >= 7:
+            return Seed(type=SeedType.PHONE, value=value)
+
+    person = _PERSON_NAME_RE.search(text)
+    if person:
+        value = _clean_query_value(person.group(1))
+        if len(value) >= 2 and value.casefold() not in _QUERY_STOPWORDS:
+            return Seed(type=SeedType.PERSON_NAME, value=value)
+
+    after = _HANDLE_AFTER_RE.search(text)
+    if after:
+        seed = _query_handle(after.group(1))
+        if seed is not None:
+            return seed
+
+    domain = _DOMAIN_RE.search(text)
+    if domain:
+        return Seed(type=SeedType.DOMAIN, value=domain.group(0).rstrip("."))
+
+    bare = _query_handle(text)
+    if bare is not None:
+        return bare
+
+    raise SystemExit(
+        "Could not parse a seed from the query. Use an explicit seed such as "
+        "username:alice, email:alice@example.com, domain:example.com, or url:https://example.com/profile"
+    )
+
+
+def _ask_cascade_config(args: argparse.Namespace, seed: Seed):
+    from aletheia.cascade.runner import CascadeRunConfig
+
+    return CascadeRunConfig(
+        data_root=Path(args.data_dir),
+        seeds=[seed],
+        authorization_assertion=args.authorization_assertion,
+        case_id=args.case_id,
+        timeout_seconds=args.timeout,
+        proxy_url=args.proxy,
+        wire_egress=not args.no_egress_proxy,
+        egress_rate=args.egress_rate,
+        egress_burst=args.egress_burst,
+        max_expansions=args.max_expansions,
+        owner_mode=args.owner_mode,
+    )
+
+
 def main() -> None:
     args = build_parser().parse_args()
     if args.cmd == "verify-chain":
@@ -155,6 +349,26 @@ def main() -> None:
                     proxy_url=args.proxy, wire_egress=not args.no_egress_proxy,
                     egress_rate=args.egress_rate, egress_burst=args.egress_burst)
         print(f"completed: {run_id}")
+    elif args.cmd == "ask":
+        from aletheia.cascade.runner import fixture_observer, run_cascade
+        from aletheia.reporting.dossier import generate_dossier
+
+        seed = parse_ask_query(args.query)
+        print(f"seed={seed.type.value}:{seed.value}")
+        observer = fixture_observer(Path(args.fixture)) if args.fixture else None
+        outcome = run_cascade(_ask_cascade_config(args, seed), observer=observer)
+        print(f"run: {outcome.run_id}")
+        for name, path in outcome.artifacts.items():
+            print(f"{name}={path}")
+        print(f"stop_reason={outcome.stop_reason}")
+        print(f"expansions={outcome.expansions}")
+        print(f"coverage_ok={outcome.coverage_ok}")
+        generate_dossier(
+            str(outcome.run_id),
+            args.data_dir,
+            args.llm_url,
+            model=args.llm_model,
+        )
     elif args.cmd == "phase2":
         from aletheia.phase2.service import Phase2Service
         artifacts = Phase2Service(Path(args.data_dir)).finalize(UUID(args.run_id))

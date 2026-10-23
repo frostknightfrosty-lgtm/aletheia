@@ -34,6 +34,7 @@ from uuid import UUID
 
 from aletheia.cascade.matching import fold_diacritics, jaccard_similarity, jaro_winkler
 from aletheia.cascade.phash import ImageHashes, hash_ensemble, hamming_text
+from aletheia.cascade.semantic import profile_bio
 from aletheia.cascade.scoring import (
     TEMPORAL_OVERLAP_THRESHOLD,
     TemporalCadence,
@@ -212,6 +213,7 @@ class ProfileAttributes:
     username: str | None = None
     platform: str | None = None
     profile_url: str | None = None
+    bio: str | None = None
 
     @classmethod
     def from_attributes(cls, attributes: Mapping[str, Any] | None) -> "ProfileAttributes":
@@ -296,6 +298,7 @@ class ProfileAttributes:
         profile_url = _text(
             _first(raw, ("profile_url", "html_url", "url", "account_url", "permalink"))
         )
+        bio = profile_bio(raw)
         return cls(
             avatar_url=avatar_url,
             avatar_phash=avatar_phash,
@@ -307,6 +310,7 @@ class ProfileAttributes:
             username=username,
             platform=platform.casefold() if platform else None,
             profile_url=profile_url,
+            bio=bio,
         )
 
     @property

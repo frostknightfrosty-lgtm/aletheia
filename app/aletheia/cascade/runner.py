@@ -64,16 +64,19 @@ from aletheia.core import egress
 from aletheia.core.audit import AuditLogger
 from aletheia.core.case_store import CaseStore
 from aletheia.core.chain import tip as audit_chain_tip
+from aletheia.core.graph import Graph
 from aletheia.core.models import (
     AdapterRunRequest,
     AuditEvent,
     ClusterDecision,
     Finding,
     IdentityTier,
+    Provenance,
     Seed,
     SeedType,
 )
 from aletheia.core.orchestrator import Orchestrator, extract_skipped_sources
+from aletheia.phase2.resolution import EntityResolver
 
 __all__ = [
     "AdapterObserver",
@@ -351,6 +354,63 @@ def _write_json(path: Path, payload: Mapping[str, Any]) -> str:
     return str(path)
 
 
+def _cascade_phase2_artifacts(
+    run_id: UUID, result: Any, root_claims: Sequence[Any]
+) -> tuple[Graph, dict[str, Any]]:
+    """Export observed claims to a normal Phase 2 graph and resolve it.
+
+    The cascade keeps its own merge graph for identity decisions. The dossier
+    needs the Phase 2 artifact pair (``graph.json`` + ``resolution.json``), so
+    every observed claim is materialized as source evidence with its original
+    provenance, then the ordinary resolver runs on it. This is also where
+    Phase 18.3 semantic links enter a cascade-backed ``ask`` run.
+    """
+    graph = Graph()
+    claims: list[Any] = []
+    seen: set[Any] = set()
+    for claim in [
+        *root_claims,
+        *(case.claim for case in result.candidates),
+        *result.subject_claims,
+    ]:
+        if claim.claim_id in seen:
+            continue
+        seen.add(claim.claim_id)
+        claims.append(claim)
+    for claim in claims:
+        finding = Finding(
+            finding_id=claim.finding_id,
+            entity_type=claim.type,
+            value=claim.value,
+            attributes=dict(claim.attributes),
+            source_kind="cascade",
+            provenance=Provenance(
+                tool=claim.source_adapter,
+                source_url=claim.source_url,
+                observed_at=claim.observed_at,
+                confidence=claim.confidence,
+                raw_evidence_sha256=claim.raw_evidence_sha256,
+                adapter_version="cascade",
+                seed_index=claim.seed_index,
+                parent_finding_id=claim.parent_finding_id,
+                notes=["Cascade claim exported to the Phase 2 evidence graph."],
+            ),
+        )
+        graph.ingest(finding)
+    resolver = EntityResolver(fetch_avatars=False)
+    candidates = resolver.resolve(graph)
+    resolution = {
+        "run_id": str(run_id),
+        "source": "cascade",
+        "candidate_count": len(candidates),
+        "candidates": [candidate.to_dict() for candidate in candidates],
+        "confirmed_link_count": len(resolver.last_confirmed_links),
+        "confirmed_links": [link.to_dict() for link in resolver.last_confirmed_links],
+        "semantic_error": resolver.last_semantic_error,
+    }
+    return graph, resolution
+
+
 def _clusters(
     result: Any, root_claims: Sequence[Any]
 ) -> list[DossierCluster]:
@@ -587,6 +647,30 @@ def run_cascade(config: CascadeRunConfig, *, observer: Observer | None = None) -
         },
     )
 
+    phase2_graph, resolution_payload = _cascade_phase2_artifacts(
+        run_id, result, root_claims
+    )
+    graph_path = orchestrator.graph_store.save_graph(
+        str(run_id), phase2_graph.export()
+    )
+    resolution_path = _write_json(
+        run_dir / "resolution.json", resolution_payload
+    )
+    audit.log(
+        AuditEvent(
+            run_id=run_id,
+            event_type="cascade_phase2_artifacts",
+            request_meta={
+                "graph": graph_path,
+                "resolution": resolution_path,
+                "candidates": resolution_payload["candidate_count"],
+                "confirmed_links": resolution_payload["confirmed_link_count"],
+                "semantic_error": resolution_payload.get("semantic_error"),
+            },
+            outcome="completed",
+        )
+    )
+
     next_actions_path = _write_json(
         cascade_dir / "next_actions.json",
         build_next_actions(
@@ -638,6 +722,8 @@ def run_cascade(config: CascadeRunConfig, *, observer: Observer | None = None) -
             "coverage": coverage_path,
             "profile_links": profile_links_path,
             "next_actions": next_actions_path,
+            "graph": graph_path,
+            "resolution": resolution_path,
         },
     }
     manifest["chain_tip"] = audit_chain_tip(run_id, data_root=config.data_root)
@@ -675,6 +761,8 @@ def run_cascade(config: CascadeRunConfig, *, observer: Observer | None = None) -
             "coverage": coverage_path,
             "profile_links": profile_links_path,
             "next_actions": next_actions_path,
+            "graph": graph_path,
+            "resolution": resolution_path,
         },
         stop_reason=result.stop_reason.value,
         expansions=result.expansions,

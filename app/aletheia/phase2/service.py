@@ -138,6 +138,7 @@ class Phase2Service:
             "candidates": [c.to_dict() for c in candidates],
             "confirmed_link_count": len(confirmed_links),
             "confirmed_links": [link.to_dict() for link in confirmed_links],
+            "semantic_error": getattr(self.resolver, "last_semantic_error", None),
         }
         resolution_path.write_text(json.dumps(resolution_payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
 

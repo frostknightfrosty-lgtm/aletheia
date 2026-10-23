@@ -19,6 +19,16 @@ from aletheia.cascade.profile_linking import (
     profile_temporal_cadence,
 )
 from aletheia.cascade.scoring import TEMPORAL_CONFIDENCE_BOOST
+from aletheia.cascade.semantic import (
+    TEXT_EMBEDDING_CONFIDENCE,
+    TEXT_EMBEDDING_MODEL,
+    TEXT_EMBEDDING_THRESHOLD,
+    TextEmbedder,
+    cosine_similarity,
+    embed_texts,
+    profile_bio,
+    usable_bio,
+)
 from aletheia.core.calibration import Calibrator
 from aletheia.core.graph import Graph
 from aletheia.core.models import ContextFilters, Entity, EntityType, RelationshipType, Provenance
@@ -324,6 +334,7 @@ class EntityResolver:
         profile_enricher: ProfileEnricher | None = None,
         proxy_url: str | None = None,
         fetch_avatars: bool = True,
+        text_embedder: TextEmbedder | None = None,
     ) -> None:
         self.candidate_threshold = candidate_threshold
         self.auto_merge_threshold = auto_merge_threshold
@@ -340,10 +351,15 @@ class EntityResolver:
             proxy_url=proxy_url,
             fetch_avatars=fetch_avatars,
         )
+        # Phase 18.3: inject an embedder in tests/offline callers. ``None``
+        # means the lazy ``all-MiniLM-L6-v2`` provider in ``semantic``.
+        self.text_embedder = text_embedder
         self.last_confirmed_links: list[ProfileLink] = []
+        self.last_semantic_error: str | None = None
 
     def resolve(self, graph: Graph, *, context_filters: ContextFilters | None = None) -> list[ResolutionCandidate]:
         self.last_confirmed_links = []
+        self.last_semantic_error = None
         # First pass: canonicalize and exact-merge within an entity type.
         by_canonical: dict[tuple[EntityType, str], Entity] = {}
         candidates: list[ResolutionCandidate] = []
@@ -486,6 +502,7 @@ class EntityResolver:
                         graph.link(left, right, RelationshipType.SAME_AS_CANDIDATE, score, provenance,
                                    attributes={"resolution": candidates[-1].to_dict()})
         self._confirm_profile_links(graph, survivors)
+        self._confirm_semantic_links(graph, survivors)
         return candidates
 
     def _confirm_profile_links(self, graph: Graph, survivors: list[Entity]) -> None:
@@ -555,3 +572,129 @@ class EntityResolver:
                 )
                 self.last_confirmed_links.append(link)
                 existing.add(key)
+
+    def _confirm_semantic_links(self, graph: Graph, survivors: list[Entity]) -> None:
+        """Inject Phase 18.3 bio-embedding ``SAME_AS_CONFIRMED`` edges.
+
+        Only profile-shaped entities with usable bio text are compared. The
+        model is loaded on the first eligible pair, never at resolver
+        construction or CLI startup. A missing/broken local model is recorded
+        in ``last_semantic_error`` and does not fail the investigation.
+        """
+        eligible: dict[UUID, Entity] = {}
+        bios: dict[UUID, str] = {}
+        for entity in survivors:
+            if entity.entity_type not in {EntityType.SOCIAL_ACCOUNT, EntityType.URL}:
+                continue
+            profile = ProfileAttributes.from_attributes(entity.attributes)
+            if entity.entity_type is EntityType.URL and not (
+                profile.platform
+                or profile.username
+                or profile.display_name
+                or profile.profile_url
+            ):
+                continue
+            bio = profile_bio(entity.attributes)
+            if not usable_bio(bio):
+                continue
+            assert bio is not None
+            eligible[entity.entity_id] = entity
+            bios[entity.entity_id] = bio
+        if len(eligible) < 2:
+            return
+
+        pairs = profile_comparison_pairs(
+            [(entity_id, entity.attributes) for entity_id, entity in eligible.items()],
+            include_ids=set(eligible),
+        )
+        if not pairs:
+            return
+
+        unique_bios = sorted(set(bios.values()))
+        try:
+            vectors = embed_texts(unique_bios, self.text_embedder)
+        except Exception as exc:  # noqa: BLE001 - optional local model
+            self.last_semantic_error = str(exc)[:500]
+            return
+        if len(vectors) != len(unique_bios):
+            self.last_semantic_error = (
+                "semantic profile linking unavailable: embedder returned "
+                f"{len(vectors)} vectors for {len(unique_bios)} bios"
+            )
+            return
+        by_bio = dict(zip(unique_bios, vectors, strict=True))
+
+        existing: set[tuple[frozenset[UUID], str]] = set()
+        for edge in graph.edges.values():
+            if edge.relationship is not RelationshipType.SAME_AS_CONFIRMED:
+                continue
+            existing.add(
+                (
+                    frozenset({edge.source_entity_id, edge.target_entity_id}),
+                    str(edge.attributes.get("source") or ""),
+                )
+            )
+
+        for left_id, right_id in pairs:
+            left = eligible.get(left_id)
+            right = eligible.get(right_id)
+            if left is None or right is None:
+                continue
+            if _is_secondary(left) and _is_secondary(right):
+                continue
+            left_bio = bios[left_id]
+            right_bio = bios[right_id]
+            try:
+                similarity = cosine_similarity(by_bio[left_bio], by_bio[right_bio])
+            except ValueError as exc:
+                self.last_semantic_error = str(exc)[:500]
+                continue
+            if similarity < TEXT_EMBEDDING_THRESHOLD:
+                continue
+            key = (frozenset({left_id, right_id}), "text_embedding")
+            if key in existing:
+                continue
+            left_profile = ProfileAttributes.from_attributes(left.attributes)
+            right_profile = ProfileAttributes.from_attributes(right.attributes)
+            link = ProfileLink(
+                left_entity_id=left_id,
+                right_entity_id=right_id,
+                relationship=RelationshipType.SAME_AS_CONFIRMED,
+                confidence=TEXT_EMBEDDING_CONFIDENCE,
+                source="text_embedding",
+                detail=(
+                    "profile bio embedding cosine "
+                    f"{similarity:.6f} >= {TEXT_EMBEDDING_THRESHOLD:.2f} "
+                    f"({TEXT_EMBEDDING_MODEL})"
+                ),
+                left_value=left.canonical_value,
+                right_value=right.canonical_value,
+                left_platform=left_profile.platform,
+                right_platform=right_profile.platform,
+                metrics={
+                    "cosine_similarity": similarity,
+                    "threshold": TEXT_EMBEDDING_THRESHOLD,
+                    "model": TEXT_EMBEDDING_MODEL,
+                },
+            )
+            provenance = Provenance(
+                tool="aletheia.semantic_profile_linker",
+                source_url="internal://phase18.3-text-embedding",
+                observed_at=datetime.now(timezone.utc),
+                confidence=TEXT_EMBEDDING_CONFIDENCE,
+                adapter_version="0.1.0",
+                notes=[
+                    "Phase 18.3 local sentence-embedding comparison; no text "
+                    "was sent to a remote service."
+                ],
+            )
+            graph.link(
+                left,
+                right,
+                RelationshipType.SAME_AS_CONFIRMED,
+                TEXT_EMBEDDING_CONFIDENCE,
+                provenance,
+                attributes=link.to_dict(),
+            )
+            self.last_confirmed_links.append(link)
+            existing.add(key)
