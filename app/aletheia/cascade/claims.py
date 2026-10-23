@@ -109,6 +109,11 @@ def normalize_claim_value(entity_type: EntityType, value: str) -> str:
 def claim_from_finding(finding: Finding) -> Claim:
     """Build a normalized claim from an adapter finding and its provenance."""
     provenance = finding.provenance
+    attributes = dict(finding.attributes)
+    # Keep source priority on the claim as well as the finding. Graph and
+    # resolver merges consult this attribute, and downstream reports need the
+    # same distinction after findings have been normalized into claims.
+    attributes["source_priority"] = finding.source_priority
     return Claim(
         type=finding.entity_type,
         value=normalize_claim_value(finding.entity_type, finding.value),
@@ -120,7 +125,7 @@ def claim_from_finding(finding: Finding) -> Claim:
         seed_index=provenance.seed_index,
         finding_id=finding.finding_id,
         parent_finding_id=provenance.parent_finding_id,
-        attributes=dict(finding.attributes),
+        attributes=attributes,
     )
 
 

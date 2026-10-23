@@ -94,6 +94,7 @@ CASES = [
     ("phase17-minecraft-health", "aletheia/minecraft:v1", ["--health"]),
     ("phase17-minecraft-selftest", "aletheia/minecraft:v1", ["--selftest"]),
     ("phase17-minecraft-normalize", "aletheia/minecraft:v1", ["--normalize", "/work/profile.json"]),
+    ("phase18-spiderfoot-health", "aletheia/spiderfoot:v4.0", ["--health"]),
     ("phase11-egress-proxy", "aletheia/egress-proxy:v1", ["--health"]),
 ]
 

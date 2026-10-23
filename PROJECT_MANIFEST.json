@@ -1961,6 +1961,104 @@
       "note": "Synthetic fixture and Docker health/selftest/normalize cases verified in Docker Verification run 39495727637 on commit 9c9cd9caaae93b6e316d1f05ef058d11de2ba5bf (https://github.com/frostknightfrosty-lgtm/aletheia/actions/runs/39495727637). Raw artifact evidence: PARSER PREFLIGHT: PASS — 62/62 adapters have parser coverage; 1175 passed, 1 warning; DOCKER CAPTURE: PASS — 96/96 cases captured. results.json contains 96 entries with 0 nonzero return codes; egress adapters=62 network_required=55 wired=55; storage 6/6. fixture file: tests/fixtures/minecraft.json. No live source lookups occurred; the phase17-minecraft health, selftest and normalize cases returned 0 under --network none."
     },
     {
+      "name": "spiderfoot",
+      "upstream": "https://github.com/smicallef/spiderfoot/tree/b9c345de5b085debc7444fc10e0e26e7745df5f2",
+      "license": "SpiderFoot v4.0.0 is GPL-3.0. The curated data sources retain their own terms and API policies; Aletheia bundles no SpiderFoot code outside the pinned Docker image and implements an original runner and parser.",
+      "version_pin": "4.0.0 (b9c345de5b085debc7444fc10e0e26e7745df5f2)",
+      "invocation": "Docker batch meta-adapter (aletheia/spiderfoot:v4.0) via docker/spiderfoot/runner.py",
+      "input_types": [
+        "domain",
+        "ip",
+        "email",
+        "username",
+        "phone"
+      ],
+      "output_schema": "Finding[] with source_priority=secondary, module provenance, TECHNICAL_FINDING skip/error records, and terminal BREACH_HIT observations",
+      "legal_notes": "One curated 14-module batch per seed. Module legal tiers are descriptive logging metadata only and do not block execution; the operator remains responsible for authorization, source terms, quotas, and enabling commercial or leak-index sources. Tier-4 modules (Intelligence X, C99, Have I Been Pwned) require explicit keys. Missing keys produce explicit skip findings rather than silent gaps. No CAPTCHA, Cloudflare, login, OAuth, paywall, or credential-reuse bypass. LEAKSITE_CONTENT is terminal and is not used as a search seed. All findings are secondary and native-adapter attributes win merge conflicts. See docker/spiderfoot/MODULES.md.",
+      "network": "required",
+      "last_audited": "2026-10-23T00:00:00Z",
+      "verification_status": "verified-fixture",
+      "fixture_provenance": "synthetic",
+      "legal_tier": 4,
+      "enabled_by_default": true,
+      "disabled_reason": null,
+      "batch_grouping": "meta_adapter",
+      "requires_key": true,
+      "sub_sources": [
+        {
+          "name": "sfp_threatcrowd",
+          "requires_key": false,
+          "enabled_by_default": true
+        },
+        {
+          "name": "sfp_threatminer",
+          "requires_key": false,
+          "enabled_by_default": true
+        },
+        {
+          "name": "sfp_robtex",
+          "requires_key": false,
+          "enabled_by_default": true
+        },
+        {
+          "name": "sfp_keybase",
+          "requires_key": false,
+          "enabled_by_default": true
+        },
+        {
+          "name": "sfp_openphish",
+          "requires_key": false,
+          "enabled_by_default": true
+        },
+        {
+          "name": "sfp_phishtank",
+          "requires_key": false,
+          "enabled_by_default": true
+        },
+        {
+          "name": "sfp_threatfox",
+          "requires_key": false,
+          "enabled_by_default": true
+        },
+        {
+          "name": "sfp_abusech",
+          "requires_key": false,
+          "enabled_by_default": true
+        },
+        {
+          "name": "sfp_emailrep",
+          "requires_key": true,
+          "enabled_by_default": true
+        },
+        {
+          "name": "sfp_hunter",
+          "requires_key": true,
+          "enabled_by_default": true
+        },
+        {
+          "name": "sfp_pulsedive",
+          "requires_key": true,
+          "enabled_by_default": true
+        },
+        {
+          "name": "sfp_intelx",
+          "requires_key": true,
+          "enabled_by_default": true
+        },
+        {
+          "name": "sfp_c99",
+          "requires_key": true,
+          "enabled_by_default": true
+        },
+        {
+          "name": "sfp_haveibeenpwned",
+          "requires_key": true,
+          "enabled_by_default": true
+        }
+      ],
+      "note": "Synthetic SpiderFoot JSON fixture and parser/provenance/priority tests have not yet been verified in Docker; local tests pass. fixture file: tests/fixtures/spiderfoot.json. No live SpiderFoot lookup occurred and no key was used. Docker smoke case phase18-spiderfoot-health runs python3 sf.py -h under --network none."
+    },
+    {
       "name": "egress_proxy",
       "upstream": "https://github.com/frostknightfrosty-lgtm/aletheia/tree/main/docker/egress_proxy",
       "license": "Project-internal infrastructure component (Aletheia repository); no third-party code bundled.",

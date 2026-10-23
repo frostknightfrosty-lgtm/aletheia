@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from datetime import datetime, timezone
 from enum import StrEnum
-from typing import Any
+from typing import Any, Literal
 from uuid import UUID, uuid4
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
@@ -56,6 +56,12 @@ class EntityType(StrEnum):
     PHONE = "phone"
     SERVICE = "service"
     BREACH = "breach"
+    # A single breach-index hit. Added for the SpiderFoot meta-adapter: a
+    # LEAKSITE_CONTENT / compromised-identifier event is evidence that an
+    # identifier appeared in a leak index, which is narrower than the existing
+    # BREACH entity (a named breach incident). It is deliberately terminal:
+    # leak content must not itself become a search seed.
+    BREACH_HIT = "breach_hit"
     SOCIAL_ACCOUNT = "social_account"
     PLACE = "place"
     GEOLOCATION = "geolocation"
@@ -195,6 +201,11 @@ class Finding(BaseModel):
     attributes: dict[str, Any] = Field(default_factory=dict)
     provenance: Provenance
     source_kind: str = "collector"
+    # Native adapters are the preferred source of record. A meta-adapter
+    # (SpiderFoot) marks its findings "secondary" so duplicate nodes are
+    # resolved in favour of native evidence. The default keeps every existing
+    # adapter's meaning unchanged.
+    source_priority: Literal["primary", "secondary"] = "primary"
 
 
 class Entity(BaseModel):

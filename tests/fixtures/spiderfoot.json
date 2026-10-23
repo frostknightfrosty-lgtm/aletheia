@@ -1,0 +1,121 @@
+[
+  {
+    "generated": "2026-10-23 12:00:01",
+    "type": "DOMAIN_NAME",
+    "data": "example.com",
+    "module": "sfp_threatcrowd",
+    "source": "ROOT"
+  },
+  {
+    "generated": "2026-10-23 12:00:02",
+    "type": "INTERNET_NAME",
+    "data": "api.example.com",
+    "module": "sfp_c99",
+    "source": "example.com"
+  },
+  {
+    "generated": "2026-10-23 12:00:03",
+    "type": "CO_HOSTED_SITE",
+    "data": "shared.example.net",
+    "module": "sfp_robtex",
+    "source": "api.example.com"
+  },
+  {
+    "generated": "2026-10-23 12:00:04",
+    "type": "IP_ADDRESS",
+    "data": "203.0.113.10",
+    "module": "sfp_robtex",
+    "source": "api.example.com"
+  },
+  {
+    "generated": "2026-10-23 12:00:05",
+    "type": "MALICIOUS_IPADDR",
+    "data": "203.0.113.10",
+    "module": "sfp_threatfox",
+    "source": "api.example.com"
+  },
+  {
+    "generated": "2026-10-23 12:00:06",
+    "type": "EMAILADDR",
+    "data": "alice@example.com",
+    "module": "sfp_hunter",
+    "source": "example.com"
+  },
+  {
+    "generated": "2026-10-23 12:00:07",
+    "type": "MALICIOUS_EMAILADDR",
+    "data": "EmailRep [alice@example.com]",
+    "module": "sfp_emailrep",
+    "source": "alice@example.com"
+  },
+  {
+    "generated": "2026-10-23 12:00:08",
+    "type": "ACCOUNT_EXTERNAL_KNOWN",
+    "data": "https://twitter.com/alice_example",
+    "module": "sfp_keybase",
+    "source": "alice@example.com"
+  },
+  {
+    "generated": "2026-10-23 12:00:09",
+    "type": "SOCIAL_MEDIA",
+    "data": "github: https://github.com/alice-example",
+    "module": "sfp_keybase",
+    "source": "alice@example.com"
+  },
+  {
+    "generated": "2026-10-23 12:00:10",
+    "type": "LEAKSITE_URL",
+    "data": "https://paste.example/leak/abc123",
+    "module": "sfp_haveibeenpwned",
+    "source": "alice@example.com"
+  },
+  {
+    "generated": "2026-10-23 12:00:11",
+    "type": "LEAKSITE_CONTENT",
+    "data": "alice@example.com:example-password",
+    "module": "sfp_haveibeenpwned",
+    "source": "https://paste.example/leak/abc123"
+  },
+  {
+    "generated": "2026-10-23 12:00:12",
+    "type": "HUMAN_NAME",
+    "data": "Alice Example",
+    "module": "sfp_hunter",
+    "source": "example.com"
+  },
+  {
+    "generated": "2026-10-23 12:00:13",
+    "type": "COMPANY_NAME",
+    "data": "Example Corp",
+    "module": "sfp_hunter",
+    "source": "example.com"
+  },
+  {
+    "generated": "2026-10-23 12:00:14",
+    "type": "PHONE_NUMBER",
+    "data": "+1 555 123 4567",
+    "module": "sfp_c99",
+    "source": "example.com"
+  },
+  {
+    "generated": "2026-10-23 12:00:15",
+    "type": "GEOINFO",
+    "data": "Country: US, City: Austin",
+    "module": "sfp_keybase",
+    "source": "alice@example.com"
+  },
+  {
+    "generated": "2026-10-23 12:00:16",
+    "type": "BITCOIN_ADDRESS",
+    "data": "1BoatSLRHtKNngkdXEeobR76b53LETtpyT",
+    "module": "sfp_keybase",
+    "source": "alice@example.com"
+  },
+  {
+    "generated": "2026-10-23 12:00:17",
+    "type": "RAW_RIR_DATA",
+    "data": "{\"raw\": \"not a graph node\"}",
+    "module": "sfp_robtex",
+    "source": "example.com"
+  }
+]

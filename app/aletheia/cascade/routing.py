@@ -87,6 +87,7 @@ BRIDGE_SEED_TYPES: dict[EntityType, frozenset[SeedType]] = {
 TERMINAL_ENTITY_TYPES: frozenset[EntityType] = frozenset(
     {
         EntityType.SERVICE,  # an account-exists / exposure observation on a service
+        EntityType.BREACH_HIT,  # a leak-index hit, not a search target by itself
         EntityType.FACE,  # compared locally (pHash); never a seed
         EntityType.JURISDICTION,  # a context-filter hint, not a query
         EntityType.UNKNOWN,  # catch-all

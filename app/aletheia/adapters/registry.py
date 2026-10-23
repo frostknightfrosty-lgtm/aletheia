@@ -31,6 +31,7 @@ from aletheia.adapters.weather import WeatherAdapter
 from aletheia.adapters.github_identity import GithubIdentityAdapter
 from aletheia.adapters.pgp_keys import PgpKeysAdapter
 from aletheia.adapters.minecraft import MinecraftAdapter
+from aletheia.adapters.spiderfoot import SpiderFootAdapter
 from aletheia.adapters.phase5c import GravatarAdapter, RdapAdapter
 from aletheia.adapters.government_records_us import GovernmentRecordsUSAdapter
 from aletheia.adapters.corporate_registry import CorporateRegistryAdapter
@@ -133,6 +134,7 @@ def phase7_adapters() -> dict[str, Adapter]:
     adapters[GithubIdentityAdapter.descriptor.name] = GithubIdentityAdapter()
     adapters[PgpKeysAdapter.descriptor.name] = PgpKeysAdapter()
     adapters[MinecraftAdapter.descriptor.name] = MinecraftAdapter()
+    adapters[SpiderFootAdapter.descriptor.name] = SpiderFootAdapter()
     # Construction-time Tier 5 rejection: every adapter must have a manifest
     # entry, and an entry declaring legal_tier=5 refuses construction.
     enforce_adapter_tier_policy(adapters.keys(), manifest=_manifest_entries())

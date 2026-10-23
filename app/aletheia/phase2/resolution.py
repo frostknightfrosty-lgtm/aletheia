@@ -181,6 +181,10 @@ def _score(left: str, right: str) -> tuple[float, float, float]:
     return round(jw, 6), round(lev, 6), composite
 
 
+def _is_secondary(entity: Entity) -> bool:
+    return str(entity.attributes.get("source_priority", "primary")).strip().lower() == "secondary"
+
+
 def seed_attribution(graph: Graph) -> dict[UUID, set[int]]:
     """Map each entity to the seed-tree indexes its evidence came from.
 
@@ -397,6 +401,11 @@ class EntityResolver:
                 for i in range(len(block_members)):
                     for j in range(i + 1, len(block_members)):
                         left, right = block_members[i], block_members[j]
+                        if _is_secondary(left) and _is_secondary(right):
+                            # Two meta-adapter observations can corroborate a
+                            # native cluster, but cannot create a new fuzzy
+                            # cluster on their own.
+                            continue
                         jw, lev, raw_score = _score(left.canonical_value, right.canonical_value)
                         score = raw_score
                         decision = "candidate"
@@ -518,6 +527,8 @@ class EntityResolver:
             left = by_id.get(left_id)
             right = by_id.get(right_id)
             if left is None or right is None:
+                continue
+            if _is_secondary(left) and _is_secondary(right):
                 continue
             for link in self.profile_linker.link(left, right):
                 key = (frozenset({left_id, right_id}), link.source)
