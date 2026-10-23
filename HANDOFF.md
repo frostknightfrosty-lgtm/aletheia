@@ -1,6 +1,6 @@
-# Aletheia Handoff — Phase 18.2 complete (SpiderFoot integrated; Phase 17 complete)
+# Aletheia Handoff — Phase 18.3 complete (semantic linking + local-LLM dossier; Phase 17 complete)
 
-Last updated: 2026-10-23T07:56:42Z
+Last updated: 2026-10-23T09:05:10Z
 
 ## Project boundaries
 
@@ -12,9 +12,86 @@ including leak indexes, dark-web scrapers, and sources whose terms are hostile t
 automation — are permitted. Aletheia does not implement active network intrusion or malware
 deployment; it is a passive OSINT tool.
 
+## Repository location
+
+- **Primary working copy: `E:\aletheia`** (clone of `4808bb3`, created and
+  verified 2026-10-23). The virtual environment is `E:\aletheia\.venv`
+  (Python 3.14.2; `sentence-transformers 6.2.0`, `torch 2.14.1`,
+  `openai 2.54.0`).
+- **Legacy copy: `C:\Users\N V\Documents\GitHub\aletheia`** — retained until
+  the operator confirms the E: copy. Do not delete it yet.
+- Activate and verify:
+
+  ```powershell
+  Set-Location E:\aletheia
+  .\.venv\Scripts\Activate.ps1
+  aletheia --help
+  aletheia ask --help
+  ```
+
+- Rebuild the environment:
+
+  ```powershell
+  Set-Location E:\aletheia
+  python -m venv .venv
+  .\.venv\Scripts\python.exe -m pip install -e ".[dev]"
+  ```
+
+- Run the local suite (Docker integration tests skip on this workstation):
+  `.\.venv\Scripts\python.exe -m pytest -q` → **1141 passed, 78 skipped**.
+
+## Phase 18.3 completion (2026-10-23)
+
+- The Phase 2 resolver compares profile bios with a lazily loaded local
+  `all-MiniLM-L6-v2` model. Cosine similarity `>= 0.85` emits
+  `SAME_AS_CONFIRMED` with confidence `0.85` and `source="text_embedding"`.
+  Empty, shorter-than-10-character, numeric-only, and predominantly non-Latin
+  bios are skipped. The model is imported on the first eligible profile pair,
+  never during normal CLI startup.
+- `generate_dossier(run_id, data_dir, llm_url=...)` reads the run's
+  `graph.json`, `resolution.json`, and hash-chained `AUDIT.jsonl`, calls an
+  OpenAI-compatible endpoint (default Ollama at
+  `http://localhost:11434/v1`, model `llama3`), writes
+  `runs/<RUN_ID>/dossier.md`, and prints it.
+- `aletheia ask "<query>"` parses a free-text query into a typed seed
+  (`username`, `email`, `url`, `domain`, `phone`, `ip`, `name`, etc.), runs
+  the Phase 17 Pivot Cascade to completion, and generates the dossier.
+  Cascade runs now also export the Phase 2 `graph.json` and
+  `resolution.json` artifacts consumed by the dossier.
+- Local LLM setup: run `ollama serve`, provide `llama3` (or `phi3`) once with
+  `ollama pull llama3`, then run
+  `aletheia ask "Find the person behind username frost2233"`.
+
+CI evidence copied from the downloaded artifact for run `39926068143`:
+
+- `PARSER PREFLIGHT: PASS — 63/63 adapters have parser coverage`
+- `1219 passed in 73.97s (0:01:13)`; `pytest-summary.json`:
+  `junit_total` 1219, `skipped_in_ci` [], `ok` true.
+- `DOCKER CAPTURE: PASS — 97/97 cases captured`
+- `STORAGE CONFORMANCE: PASS — 6/6 backends conform`
+- `egress-scenario.json`: `adapters=63 network_required=56 wired=56`; chain
+  valid with 11 log entries = 11 egress events. `results.json`: 97 entries,
+  0 nonzero return codes.
+
+Honest limits: `all-MiniLM-L6-v2` is an English model, so predominantly
+non-Latin bios are skipped rather than compared; the default embedder is only
+installed by the `dev` extra, and a missing model is recorded as
+`semantic_error` while resolution continues. Dossier generation requires an
+OpenAI-compatible local endpoint and must not be treated as verified analysis
+until its citations are checked.
+
 ## Repository and CI state
 
-- **Newest CI-verified code commit: `c2a2cad`** (Phase 18.2 SpiderFoot
+- **Newest CI-verified code commit: `4808bb3`** (Phase 18.3 semantic profile
+  linking + local-LLM dossier/`ask`; Docker Verification run **39926068143**
+  green on `4808bb30484a9507d1bfb054091d183552739250` — parser 63/63;
+  **1219 passed in 73.97s (0:01:13)**; capture 97/97; egress 63/56/56
+  wired; storage 6/6; 97 results, 0 nonzero. E: local suite **1141 passed +
+  78 skipped = 1219**.
+  CI installed `sentence-transformers` but never downloaded the 80MB
+  `all-MiniLM-L6-v2` weights: embedding and LLM tests use injected stubs.
+  No live run.)
+- **Previous CI-verified code commit: `c2a2cad`** (Phase 18.2 SpiderFoot
   meta-adapter; Docker Verification run **39918646764** green on
   `c2a2cad61d63576dcd3f2244c49bc3a2eb708935` — parser 63/63; **1201
   passed, 1 warning in 86.21s**; capture 97/97; egress 63/56/56 wired;
