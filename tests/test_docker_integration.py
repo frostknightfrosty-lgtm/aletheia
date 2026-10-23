@@ -113,7 +113,7 @@ def test_phase6_docker_health(image,args):
 
 
 def test_phase7_core_image_imports():
-    r=_run(["docker","run","--rm","--network","none","--entrypoint","python","aletheia/core:0.7.0","-c","import aletheia; print('core import ok')"])
+    r=_run(["docker","run","--rm","--network","none","--entrypoint","python","aletheia/core:0.7.0","-c","from fastapi.testclient import TestClient; from aletheia.api.app import app; response = TestClient(app).get('/'); assert response.status_code == 200, response.text; print('core API ok')"])
     assert r.returncode==0, r.stderr or r.stdout
 
 

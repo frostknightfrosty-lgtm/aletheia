@@ -49,6 +49,9 @@ aletheia-mcp = "aletheia.mcp.server:main"
 [tool.setuptools.packages.find]
 where = ["app"]
 
+[tool.setuptools.package-data]
+"aletheia.api" = ["templates/*.html", "static/*.js", "static/*.css"]
+
 [tool.pytest.ini_options]
 pythonpath = ["app"]
 testpaths = ["tests"]

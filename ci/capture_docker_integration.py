@@ -39,7 +39,7 @@ CASES = [
     ("phase6-opencorporates", "aletheia/opencorporates:api-v0.4.8", ["--health"]),
     ("phase6-opensanctions", "aletheia/opensanctions:api", ["--health"]),
     ("phase6-courtlistener", "aletheia/courtlistener:api-v3", ["--health"]),
-    ("phase7-core-import", "aletheia/core:0.7.0", ["-c", "import aletheia; print('core import ok')"]),
+    ("phase7-core-import", "aletheia/core:0.7.0", ["-c", "from fastapi.testclient import TestClient; from aletheia.api.app import app; response = TestClient(app).get('/'); assert response.status_code == 200, response.text; print('core API ok')"]),
     ("phase5c-gravatar", "aletheia/gravatar:api-v3", ["--health"]),
     ("phase5c-rdap", "aletheia/rdap:rfc9082", ["--health"]),
     ("phase9-ip-intelligence", "aletheia/ip-intelligence:v1", ["--health"]),

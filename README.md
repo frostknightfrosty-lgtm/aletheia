@@ -86,7 +86,15 @@ Corporate/records/sanctions adapters: SEC EDGAR, GLEIF, OpenCorporates, OpenSanc
 
 ## Phase 7
 
-The local web UI is served at `/` by the FastAPI application. It displays a persisted investigation graph and the benchmark leaderboard. The graph UI is intentionally local/simple and should be placed behind authentication before exposing it outside a trusted network.
+The local dashboard is served at `/` by the FastAPI application. Start it with Docker Compose:
+
+```bash
+docker compose up --build -d aletheia-api
+```
+
+Then open `http://127.0.0.1:8000`. The dashboard accepts a typed seed and a required authorization assertion, starts the run through Aletheia's orchestrator, and displays the saved graph, audit tail, reports, and dossier when available. Run data is stored in `./data` on the host. Stop the service with `docker compose down`.
+
+The Compose port is bound to loopback, and the API rejects non-local clients. Docker Desktop forwards browser requests through a gateway peer; the Compose file trusts `172.17.0.1` by default. If the local Docker gateway uses another address, set `ALETHEIA_TRUSTED_LOCAL_CLIENTS` to that exact address before starting Compose. Keep the published port bound to `127.0.0.1`; do not expose this unauthenticated operator dashboard to a public or shared network.
 
 The benchmark store is SQLite-backed for deterministic local use. Labeled cases calculate precision, recall, coverage, and false-positive rate; unlabeled execution telemetry contributes speed and optional cost without fabricating quality scores.
 

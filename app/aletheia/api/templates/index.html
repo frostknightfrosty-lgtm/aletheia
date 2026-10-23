@@ -1,0 +1,53 @@
+<!-- app/aletheia/api/templates/index.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="dark">
+  <title>Aletheia — Investigation Dashboard</title>
+
+  <!-- INLINE_STYLES -->
+
+</head>
+<body>
+  <div class="layout">
+
+    <aside class="pane pane-left">
+      <h1 class="brand">ALETHEIA</h1>
+      <div class="controls">
+        <label for="seed">Typed seed</label>
+        <input id="seed" type="text" placeholder="username:your_handle" autocomplete="off" spellcheck="false" required>
+        <label for="authorization-assertion">Authorization assertion</label>
+        <textarea id="authorization-assertion" rows="4" maxlength="2048" placeholder="State your lawful basis for this investigation." required></textarea>
+        <button id="btn" type="button">Investigate</button>
+      </div>
+    </aside>
+
+    <main class="pane pane-center">
+      <svg id="graph" role="img" aria-label="Investigation entity graph"></svg>
+    </main>
+
+    <aside class="pane pane-right">
+      <nav class="tabs" role="tablist">
+        <button class="tab-btn" data-tab="tab-dossier" role="tab" aria-selected="false">Dossier</button>
+        <button class="tab-btn active" data-tab="tab-audit" role="tab" aria-selected="true">Audit</button>
+        <button class="tab-btn" data-tab="tab-json" role="tab" aria-selected="false">JSON</button>
+      </nav>
+
+      <section class="tab-content">
+        <div id="tab-dossier" class="tab-panel dossier"></div>
+
+        <div id="tab-audit" class="tab-panel log-line active" aria-live="polite">No investigation is running.</div>
+
+        <div id="tab-json" class="tab-panel">
+          <pre id="json-output"></pre>
+        </div>
+      </section>
+    </aside>
+
+  </div>
+
+  <!-- INLINE_SCRIPT -->
+</body>
+</html>

@@ -34,7 +34,11 @@ MAX_RESOLUTION_CHARS = 16_000
 MAX_AUDIT_CHARS = 20_000
 
 SYSTEM_PROMPT = (
-    "You are a senior OSINT intelligence analyst. Review the following entities found during an investigation of the target '{seed}'. Write a formal intelligence dossier. Group the findings by category (Social Accounts, Breaches, Infrastructure, Crypto, Geolocation, etc.). Cite the adapter that found each piece of data. Focus ONLY on the target's digital footprint. Do not invent accounts or links not present in the evidence."
+    "You are a senior intelligence analyst. Review the following OSINT graph, "
+    "resolution candidates, and audit trail. Write a formal dossier. Explain who "
+    "this person likely is, their known accounts, their inferred location, and the "
+    "confidence of the connections. You MUST cite the specific evidence "
+    "(adapter, source URL) for every claim."
 )
 
 RULES = """\
@@ -111,44 +115,27 @@ def _audit_integrity(run_id: str, data_dir: Path) -> dict[str, Any]:
 
 def _build_user_prompt(
     run_id: str,
-    seed: str,
     graph: Mapping[str, Any],
+    resolution: Mapping[str, Any],
     audit: list[dict[str, Any]],
     integrity: Mapping[str, Any],
-    results_dir: Path,
 ) -> str:
-    # Read adapter result.json files from cascade expansions and merge them
-    merged_results: list[dict[str, Any]] = []
-    expansions_path = results_dir / "cascade" / "expansions"
-    if expansions_path.exists() and expansions_path.is_dir():
-        for sub in sorted(expansions_path.iterdir()):
-            result_file = sub / "result.json"
-            if result_file.exists():
-                try:
-                    payload = json.loads(result_file.read_text(encoding="utf-8"))
-                    if isinstance(payload, dict):
-                        payload["_adapter"] = sub.name.split("_")[0] if "_" in sub.name else sub.name
-                        merged_results.append(payload)
-                except (json.JSONDecodeError, OSError):
-                    pass
-    results_text = _bounded_json({"merged_adapter_results": merged_results}, 16_000) if merged_results else "No adapter result files found in cascade/expansions."
     return "\n".join(
         [
-            f"Target seed: {seed}",
             f"Run ID: {run_id}",
             "",
             RULES,
-            "### GRAPH.JSON (entity relationships)",
+            "### GRAPH.JSON",
             _bounded_json(graph, MAX_GRAPH_CHARS),
             "",
-            "### ADAPTER RESULTS (merged from cascade/expansions/result.json files)",
-            results_text,
+            "### RESOLUTION.JSON",
+            _bounded_json(resolution, MAX_RESOLUTION_CHARS),
             "",
-            "### RESOLUTION CANDIDATES",
-            _bounded_json({"resolution_path": str(results_dir / "resolution.json"), "run_id": run_id}, 8_000),
+            "### AUDIT.jsonl (hash-chained adapter and run events)",
+            _bounded_json(
+                {"integrity": dict(integrity), "entries": audit}, MAX_AUDIT_CHARS
+            ),
             "",
-            "### CASCADE EXPANSION EVIDENCE",
-            f"Run directory: {results_dir}",
             "Write the formal dossier now. Cite adapter and source URL for every claim.",
         ]
     )
@@ -195,18 +182,7 @@ def generate_dossier(
         raise ValueError(f"AUDIT.jsonl has no entries: {audit_path}")
 
     integrity = _audit_integrity(safe_id, root)
-    # Extract seed value from manifest for the prompt context
-    manifest_path = run_dir / "MANIFEST.json"
-    seed_value = "frost2233"
-    if manifest_path.exists():
-        try:
-            manifest_data = json.loads(manifest_path.read_text(encoding="utf-8"))
-            seeds = manifest_data.get("seeds", [])
-            if seeds and isinstance(seeds, list) and len(seeds) > 0:
-                seed_value = seeds[0].get("value", "frost2233")
-        except (json.JSONDecodeError, OSError):
-            pass
-    prompt = _build_user_prompt(safe_id, seed_value, graph, audit, integrity, run_dir)
+    prompt = _build_user_prompt(safe_id, graph, resolution, audit, integrity)
     model_name = model or os.getenv("ALETHEIA_LLM_MODEL") or DEFAULT_LLM_MODEL
     llm = client if client is not None else _make_client(llm_url)
     completion = llm.chat.completions.create(
