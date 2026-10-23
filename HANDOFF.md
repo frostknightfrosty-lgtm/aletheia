@@ -1,6 +1,19 @@
-# Aletheia Handoff — Phase 18.3 complete (semantic linking + local-LLM dossier; Phase 17 complete)
+# Aletheia Handoff - Phase 19.2 dashboard runtime repair in progress
 
-Last updated: 2026-10-23T09:05:10Z
+Last updated: 2026-10-23T23:02:12Z
+
+## Current session state - authoritative over older notes below
+
+- Primary checkout: E:/aletheia; branch main.
+- Implementation commit: 9c0648509fc16d194c92a8a8723dcef24ac24197 (phase-19.2: restore dossier and make core dashboard runnable). It is local and not yet pushed. A separate state/handoff commit is being prepared; push both commits together so one CI run verifies the resulting head.
+- Latest known green CI: run 40023815496 on a81312194b136ca0432ec238d553e543995f3f2b.
+- Latest CI before this fix: run 40025027735 on 1f32a4ddfe877c94915f94898ebb5dd1a346730e failed only in pytest: 2 failed, 1217 passed in 62.11s (0:01:02). Artifact lines: PARSER PREFLIGHT: PASS — 63/63 adapters have parser coverage and DOCKER CAPTURE: PASS — 97/97 cases captured; results.json had 97 entries. Full image build and all five storage-service checks succeeded. The two failures were dossier prompt expectations: the prompt lost the tested analyst phrase and chain-integrity JSON.
+- Local verification of commit 9c06485 before CI: 1145 passed, 78 deselected, 7 warnings in 9.91s for pytest -m not integration; the selected core Docker integration test passed (1 passed in 6.64s). A local core image built, imported the actual API, and served both /healthz and / with HTTP 200 from a read-only container when using the Compose-trusted Docker Desktop gateway. docker compose config --quiet and Python compilation passed. No investigation or adapter was run.
+- The core image previously could not start because it lacked PROJECT_MANIFEST.json; it also had no writable default data directory. The Dockerfile now copies the manifest, creates /data for UID 10001, and sets it as the default data path. Docker Compose trusts the verified Docker Desktop gateway peer while keeping its port bound to 127.0.0.1. The core CI smoke now imports the FastAPI app and checks / instead of importing only the base package.
+- The local full Docker test matrix is still incomplete: 78 integration tests were deselected in the broad local run; only the core image test was executed locally. The earlier local all-image attempt hit Docker Desktop/BuildKit EOF while exporting Amass. Do not claim full local Docker verification. CI is the full integration gate.
+- Worktree has unrelated user-local edits in six build-logs/*.log files and docs/STRESS_TEST_REPORT.md; leave them unstaged and untouched. These edits were not part of commit 9c06485.
+- Temporary dashboard containers created for smoke testing were stopped and removed. No containers are running. Existing files in data/ were not modified by this work. No live target was queried.
+- Exact next action: push the implementation and state commits to origin/main, wait for the push-triggered Docker Verification run, download its artifact with gh, and inspect parser, pytest/JUnit, capture results, and storage-conformance evidence. Do not claim success until all required evidence matches.
 
 ## Project boundaries
 

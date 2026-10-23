@@ -1,6 +1,13 @@
 # Project Gates
 
-Last reviewed: 2026-10-22
+Last reviewed: 2026-10-24
+
+## Current verification state
+
+- Latest prior green run: Docker Verification run `40023815496` on commit `a81312194b136ca0432ec238d553e543995f3f2b`.
+- Run `40025027735` on commit `1f32a4ddfe877c94915f94898ebb5dd1a346730e` built all pinned images, passed parser coverage (`63/63`), captured all Docker cases (`97/97`), and passed storage-service startup; pytest failed two dossier assertions (`2 failed, 1217 passed`).
+- Local repair commit `9c0648509fc16d194c92a8a8723dcef24ac24197` restores the artifact-aware dossier and fixes core API image startup/dashboard access. Local validation passed, but this commit is not CI-verified yet. Keep its status unverified until the next push-triggered CI artifact is inspected.
+- Local non-integration suite: `1145 passed, 78 deselected, 7 warnings in 9.91s`; only the core Docker integration test was run locally (`1 passed in 6.64s`). Do not treat the 78 deselected integration tests as locally verified.
 
 ## Open gates
 

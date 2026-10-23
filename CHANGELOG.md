@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-10-24 - Phase 19.2 dashboard runtime repair (CI pending)
+
+- Restored the artifact-aware dossier generator after run `40025027735` failed two prompt assertions. The restored version supplies graph, resolution, and audit integrity context and retains injected client/model support used by tests.
+- Made the core Docker API image startable: it now includes `PROJECT_MANIFEST.json`, defaults to a writable `/data` volume for its non-root user, and serves the packaged dashboard assets. Compose keeps the published port on loopback and trusts the verified Docker Desktop gateway peer.
+- Strengthened the core Docker smoke to import the FastAPI app and request `/`; added four dashboard/API boundary tests. No adapter, parser, or live-investigation code was changed.
+- Local evidence: `1145 passed, 78 deselected, 7 warnings in 9.91s`; core container test `1 passed in 6.64s`; read-only local container returned HTTP 200 from `/healthz` and `/`. CI verification of implementation commit `9c06485` is pending; no success status is claimed.
+
 ## 2026-10-23 — Phase 18.2 SpiderFoot meta-adapter
 
 Every CI number below is copied from the downloaded artifact for the cited
