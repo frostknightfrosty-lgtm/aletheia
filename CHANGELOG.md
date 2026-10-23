@@ -1,11 +1,11 @@
 # Changelog
 
-## 2026-10-24 - Phase 19.2 dashboard runtime repair (CI pending)
+## 2026-10-24 - Phase 19.2 dashboard runtime repair (CI-verified)
 
 - Restored the artifact-aware dossier generator after run `40025027735` failed two prompt assertions. The restored version supplies graph, resolution, and audit integrity context and retains injected client/model support used by tests.
-- Made the core Docker API image startable: it now includes `PROJECT_MANIFEST.json`, defaults to a writable `/data` volume for its non-root user, and serves the packaged dashboard assets. Compose keeps the published port on loopback and trusts the verified Docker Desktop gateway peer.
-- Strengthened the core Docker smoke to import the FastAPI app and request `/`; added four dashboard/API boundary tests. No adapter, parser, or live-investigation code was changed.
-- Local evidence: `1145 passed, 78 deselected, 7 warnings in 9.91s`; core container test `1 passed in 6.64s`; read-only local container returned HTTP 200 from `/healthz` and `/`. CI verification of implementation commit `9c06485` is pending; no success status is claimed.
+- Made the core Docker API image startable: it includes `PROJECT_MANIFEST.json`, defaults to a writable `/data` volume for its non-root user, and serves packaged dashboard assets. Compose keeps the published port on loopback and trusts the verified Docker Desktop gateway peer.
+- Strengthened the core Docker smoke to import the FastAPI app and request `/`; added dashboard/API boundary tests. No adapter, parser, or live-investigation code was changed.
+- CI verification: run [40037547697](https://github.com/frostknightfrosty-lgtm/aletheia/actions/runs/40037547697) on commit `315516800638ece05b4924aa2a9175559c8ac92a`. Downloaded artifact lines: `PARSER PREFLIGHT: PASS — 63/63 adapters have parser coverage`; `1223 passed in 65.88s`; `DOCKER CAPTURE: PASS — 97/97 cases captured`; `STORAGE CONFORMANCE: PASS — 6/6 backends conform`. `results.json` had 97 entries, all returncode 0 (88 stdout/stderr pairs plus 9 structured egress scenarios), SHA-256 `E96245C1276CD270466F7CE76877DAB5FAD0D3BC7522C1816DF34011085BD10E`.
 
 ## 2026-10-23 — Phase 18.2 SpiderFoot meta-adapter
 

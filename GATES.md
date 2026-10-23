@@ -4,10 +4,11 @@ Last reviewed: 2026-10-24
 
 ## Current verification state
 
-- Latest prior green run: Docker Verification run `40023815496` on commit `a81312194b136ca0432ec238d553e543995f3f2b`.
-- Run `40025027735` on commit `1f32a4ddfe877c94915f94898ebb5dd1a346730e` built all pinned images, passed parser coverage (`63/63`), captured all Docker cases (`97/97`), and passed storage-service startup; pytest failed two dossier assertions (`2 failed, 1217 passed`).
-- Local repair commit `9c0648509fc16d194c92a8a8723dcef24ac24197` restores the artifact-aware dossier and fixes core API image startup/dashboard access. Local validation passed, but this commit is not CI-verified yet. Keep its status unverified until the next push-triggered CI artifact is inspected.
-- Local non-integration suite: `1145 passed, 78 deselected, 7 warnings in 9.91s`; only the core Docker integration test was run locally (`1 passed in 6.64s`). Do not treat the 78 deselected integration tests as locally verified.
+- Latest verified implementation head: `315516800638ece05b4924aa2a9175559c8ac92a`; Docker Verification run [40037547697](https://github.com/frostknightfrosty-lgtm/aletheia/actions/runs/40037547697) completed successfully.
+- Downloaded artifact lines: `PARSER PREFLIGHT: PASS — 63/63 adapters have parser coverage`; `1223 passed in 65.88s (0:01:05)`; `DOCKER CAPTURE: PASS — 97/97 cases captured`; `STORAGE CONFORMANCE: PASS — 6/6 backends conform`.
+- Artifact results: 97 entries, zero nonzero return codes; 88 stdout/stderr pairs and 9 structured egress scenario records. The core API smoke printed `core API ok`.
+- This run verifies build, tests, captures and storage conformance. It does not establish live-source accuracy or completion of every roadmap item. No live adapter lookup was run.
+- Local focused dashboard/report tests: `19 passed`; local non-integration suite: `1145 passed, 78 deselected`; selected core Docker test: `1 passed`. CI ran the full Docker/storage matrix.
 
 ## Open gates
 

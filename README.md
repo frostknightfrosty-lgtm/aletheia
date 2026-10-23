@@ -4,7 +4,7 @@ Aletheia is a provenance-first meta-OSINT orchestration platform. Its core bound
 
 ## Current status
 
-**Phase 7 baseline and XposedOrNot fixture integration verified in GitHub Actions.** Run [38168341113](https://github.com/frostknightfrosty-lgtm/aletheia/actions/runs/38168341113), on commit `d9b3fe9afc9c7b28be37c8c1a5ae601c481fa59c`, reported 110 passed, `PARSER PREFLIGHT: PASS — 31/31 adapters have parser coverage`, and `DOCKER CAPTURE: PASS — 32/32 cases captured` with all capture return codes 0. This verifies fixtures and container startup only; no live XposedOrNot API lookup has been made.
+**Phase 19.2 dashboard runtime repair is CI-verified.** Docker Verification run [40037547697](https://github.com/frostknightfrosty-lgtm/aletheia/actions/runs/40037547697) tested commit `315516800638ece05b4924aa2a9175559c8ac92a`. Its downloaded artifact reports `PARSER PREFLIGHT: PASS — 63/63 adapters have parser coverage`, `1223 passed in 65.88s`, `DOCKER CAPTURE: PASS — 97/97 cases captured`, and `STORAGE CONFORMANCE: PASS — 6/6 backends conform`. This verifies build, tests, Docker captures, and storage conformance; it does not verify live-source accuracy or mean the full roadmap is complete.
 
 ## Quick start
 
