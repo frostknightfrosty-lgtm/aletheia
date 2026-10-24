@@ -1,15 +1,15 @@
 {
   "session_id": "2ba610de-14d2-4fab-925f-52a87db7e537",
-  "last_updated": "2026-10-24T00:01:33Z",
-  "last_commit": "e2df4d49a6a23e4cd074ac8b3e399f5d622f4b86",
-  "last_ci_verified_commit": "e2df4d49a6a23e4cd074ac8b3e399f5d622f4b86",
-  "last_ci_run": "40040233934",
+  "last_updated": "2026-10-24T00:28:12Z",
+  "last_commit": "678d69615c1592eea8ebbe69bda78a6fe5055652",
+  "last_ci_verified_commit": "678d69615c1592eea8ebbe69bda78a6fe5055652",
+  "last_ci_run": "40042927369",
   "last_ci_status": "green",
   "last_live_run": "39841929311",
   "last_live_run_status": "green",
   "last_live_run_commit": "02c08d57f6d9a5003412eec825e946944183e3ac",
-  "current_phase": "Phase 19.2 - dashboard runtime repair CI-verified; full local image/test audit in progress",
-  "current_task": "Finish the local pinned Docker image build, run the full local suite with Docker, and review the malformed user-edited stress report without losing content.",
+  "current_phase": "Project-wide readiness audit; Phase 19.2 runtime repair CI-verified",
+  "current_task": "Review evidence-backed readiness gaps and diagnose local Docker BuildKit behavior while preserving user edits",
   "current_status": "in_progress",
   "completed_phases": [
     "Original Phases 1\u00e2\u20ac\u201c7 baseline (subject to audit gaps documented in HANDOFF.md)",
@@ -105,7 +105,7 @@
     "Gate 6 \u00e2\u20ac\u201d MinIO server verification \u00e2\u20ac\u201d deferred pending a usable image or endpoint. minio/minio returns 404 on Docker Hub and quay.io/minio/minio refuses anonymous pulls, so the S3 code path is verified against adobe/s3mock:5.2.3 instead. Resume if a MinIO image or an S3-compatible endpoint with credentials becomes available.",
     "Gate 7 - FollowTheMoney documented exclusion (no published request contract; OpenSecrets API discontinued 2025-04-15; commercial only). Re-open only on vendor change."
   ],
-  "next_action": "Complete docker/build.sh locally, verify exact pinned image tag count, run full pytest with Docker, then continue reviewing the project-wide acceptance gaps.",
+  "next_action": "Continue the project-wide readiness audit from HANDOFF.md; do not claim full completion until every acceptance criterion has raw evidence",
   "files_in_flight": [],
-  "notes_for_next_session": "Primary checkout E:/aletheia, main. Dashboard repair/checkpoint commit e2df4d49a6a23e4cd074ac8b3e399f5d622f4b86 is CI-verified by Docker Verification run 40040233934 (https://github.com/frostknightfrosty-lgtm/aletheia/actions/runs/40040233934). Artifact raw lines: PARSER PREFLIGHT: PASS \u2014 63/63 adapters have parser coverage; 1223 passed in 69.88s (0:01:09); DOCKER CAPTURE: PASS \u2014 97/97 cases captured; STORAGE CONFORMANCE: PASS \u2014 6/6 backends conform. results.json 97 entries, zero nonzero, 88 stdout/stderr pairs + 9 structured egress scenarios, SHA-256 AA079210C862FAEE2A5DE0C6B16BA2776FBB6304FCC44D0303C71A25065EA96A. The core dashboard container smoke says `core API ok`. Current manifest: 66 inventory entries, 64 verified-fixture, 2 verified-source-read, no verified-live. CI verifies the current test/build/capture/storage gates, not live source accuracy or full project completion. Local full Docker build via docker/build.sh is running and has passed through reddit-api:v1 (about 21 of 65 targets at the last observation); continue it and run full pytest after completion. No live target or adapter was queried. User-local changes in six build-logs/*.log files and docs/STRESS_TEST_REPORT.md remain uncommitted and untouched. The stress report is malformed mixed UTF-16/newline data and Git treats it as binary; recover without discarding the user edit. Do not claim the full project is 100% complete."
+  "notes_for_next_session": "Owner requested a full project-wide readiness/debug audit and asked that the goal be noted. Do not promise literal 100% completion without evidence: the latest manifest inventory has 66 entries (64 verified-fixture, 2 verified-source-read, 0 verified-live), and open gates remain. Latest Docker Verification run 40042927369 on commit 678d69615c1592eea8ebbe69bda78a6fe5055652 succeeded: https://github.com/frostknightfrosty-lgtm/aletheia/actions/runs/40042927369. Downloaded artifact raw lines: PARSER PREFLIGHT: PASS — 63/63 adapters have parser coverage; 1223 passed in 70.86s (0:01:10); DOCKER CAPTURE: PASS — 97/97 cases captured; STORAGE CONFORMANCE: PASS — 6/6 backends conform. pytest-summary.json says junit_total=1223, ok=true, skipped_in_ci=[]; results.json has 97 returncode=0 entries, 88 stdout/stderr pairs and 9 structured scenarios; SHA-256 06A70F18952D9DBAB93913EA445BD1440FB61FE3247EB1624E0D81188B46C4BF; image evidence has 65 pinned image rows. Artifact downloaded to the system temp folder under aletheia-ci-40042927369. Local Docker BuildKit reproducibly fails on a minimal RUN /bin/sh step with exec format error, while docker run of node:22-alpine works and the legacy builder successfully built the suncalc image. The full local rebuild was stopped during slow theHarvester package downloads; no project files were changed by that build. No live adapter or target was queried. Preserve the seven user-local changes: six build-logs/*.log files and docs/STRESS_TEST_REPORT.md. The latter remains malformed mixed UTF-16/newline data (pre-update SHA-256 0F90243A02C993A05CD42B834671EAD0F13E17D58B6D9DD8F37697B0B84729E); do not overwrite it.",
 }

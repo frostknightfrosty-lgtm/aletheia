@@ -4,12 +4,12 @@ Last reviewed: 2026-10-24
 
 ## Current verification state
 
-- Latest verified head: `e2df4d49a6a23e4cd074ac8b3e399f5d622f4b86`; Docker Verification run [40040233934](https://github.com/frostknightfrosty-lgtm/aletheia/actions/runs/40040233934) completed successfully.
-- Artifact lines: `PARSER PREFLIGHT: PASS — 63/63 adapters have parser coverage`; `1223 passed in 69.88s (0:01:09)`; `DOCKER CAPTURE: PASS — 97/97 cases captured`; `STORAGE CONFORMANCE: PASS — 6/6 backends conform`.
-- `results.json` had 97 entries, all returncode 0, 88 stdout/stderr pairs plus 9 structured egress scenario entries; SHA-256 `AA079210C862FAEE2A5DE0C6B16BA2776FBB6304FCC44D0303C71A25065EA96A`.
-- Manifest inventory: 66 entries, 64 verified-fixture, 2 verified-source-read, 0 verified-live. CI does not prove live-source accuracy or full roadmap completion.
-- The dashboard repair is verified. A local pinned image build remains in progress; the user-owned stress report has malformed encoding and remains untouched.
-
+- Latest verified commit: 678d69615c1592eea8ebbe69bda78a6fe5055652; Docker Verification run [40042927369](https://github.com/frostknightfrosty-lgtm/aletheia/actions/runs/40042927369) completed successfully.
+- Artifact lines copied from the downloaded run: PARSER PREFLIGHT: PASS — 63/63 adapters have parser coverage; 1223 passed in 70.86s (0:01:10); DOCKER CAPTURE: PASS — 97/97 cases captured; STORAGE CONFORMANCE: PASS — 6/6 backends conform.
+- pytest-summary.json: junit_total=1223, ok=true, skipped_in_ci=[]. results.json: 97 entries, all returncode 0; 88 stdout/stderr pairs plus 9 structured scenarios; SHA-256 06A70F18952D9DBAB93913EA445BD1440FB61FE3247EB1624E0D81188B46C4BF.
+- The CI image build recorded 65 pinned-image rows. All workflow steps passed.
+- Manifest inventory: 66 entries, 64 verified-fixture, 2 verified-source-read, 0 verified-live; this is not full live-source or roadmap verification.
+- Local Docker BuildKit fails on a minimal /bin/sh build step, while docker run and legacy-builder suncalc build pass. Full local build was stopped during slow downloads; no project Dockerfile change is justified by this host-only failure.
 ## Open gates
 
 - **Gate 5 — evidence must be copied, never typed:** No adapter may be marked `verified-fixture` from a predicted, remembered, or hand-written evidence line. The three lines must be copied from the downloaded CI artifact for the exact run being cited. Opened 2026-10-14 after run `38323854024` was recorded with `DOCKER CAPTURE: PASS — 35/35 phases captured`, a line that does not exist anywhere in that run's log or artifacts and was hard-coded in `update_manifest_verified.py`.

@@ -1,19 +1,24 @@
-# Aletheia Handoff - Phase 19.2 dashboard repair CI-verified; local image audit in progress
+# Aletheia Handoff — project-wide readiness audit in progress
 
-Last updated: 2026-10-24T00:01:33Z
+Last updated: 2026-10-24T00:28:12Z
 
-## Current session state - authoritative over older notes below
+## Current session state — authoritative
 
-- Primary checkout: E:/aletheia; branch main. Latest verified head: `e2df4d49a6a23e4cd074ac8b3e399f5d622f4b86`.
-- Docker Verification run [40040233934](https://github.com/frostknightfrosty-lgtm/aletheia/actions/runs/40040233934) completed successfully against `e2df4d49a6a23e4cd074ac8b3e399f5d622f4b86`.
-- Downloaded artifact evidence: `PARSER PREFLIGHT: PASS — 63/63 adapters have parser coverage`; `1223 passed in 69.88s (0:01:09)`; `DOCKER CAPTURE: PASS — 97/97 cases captured`; `STORAGE CONFORMANCE: PASS — 6/6 backends conform`.
-- Artifact `results.json`: 97 entries, zero nonzero return codes, SHA-256 `AA079210C862FAEE2A5DE0C6B16BA2776FBB6304FCC44D0303C71A25065EA96A`; 88 stdout/stderr pairs plus 9 structured egress scenarios, all accounted for. Core API smoke stdout: `core API ok`.
-- Manifest inventory currently has 66 entries: 64 `verified-fixture`, 2 `verified-source-read`, 0 `verified-live`. This CI run verifies build/tests/captures/storage, not live-source accuracy or the full project roadmap.
-- Local `bash docker/build.sh` is still running and has successfully built through `aletheia/reddit-api:v1` (about 21 of 65 targets observed); complete it, check exact pinned tag coverage, then run full local pytest with Docker.
-- Local Docker build is currently healthy: the old stress-report claim of a VMM read-only failure has not recurred in the observed builds. No adapter was run and no target queried.
-- Preserve uncommitted user edits in six `build-logs/*.log` files and `docs/STRESS_TEST_REPORT.md`; do not stage them. The stress report is malformed mixed UTF-16/newline data and Git treats it as binary; recover without discarding the user edit.
-- Project-wide status remains in progress. Continue auditing against current authorities and do not claim full completion until all acceptance criteria have current raw evidence.
+- Primary checkout: E:/aletheia; branch main. Code commit verified in this audit: 678d69615c1592eea8ebbe69bda78a6fe5055652; origin/main matched before this documentation checkpoint.
+- Docker Verification run [40042927369](https://github.com/frostknightfrosty-lgtm/aletheia/actions/runs/40042927369) completed successfully against commit 678d69615c1592eea8ebbe69bda78a6fe5055652 in 22m47s.
+- Artifact raw lines: PARSER PREFLIGHT: PASS — 63/63 adapters have parser coverage; 1223 passed in 70.86s (0:01:10); DOCKER CAPTURE: PASS — 97/97 cases captured; STORAGE CONFORMANCE: PASS — 6/6 backends conform.
+- pytest-summary.json: 1,223 total, ok=true, no failures and skipped_in_ci=[]. results.json: 97 entries, all returncode=0; 88 .stdout and 88 .stderr files plus 9 structured scenarios. SHA-256: 06A70F18952D9DBAB93913EA445BD1440FB61FE3247EB1624E0D81188B46C4BF. The build evidence contains 65 pinned-image rows.
+- Artifact is downloaded under %TEMP%/aletheia-ci-40042927369/aletheia-docker-verification-40042927369.
+- Manifest inventory remains 66 entries: 64 verified-fixture, 2 verified-source-read, 0 verified-live. This run verifies CI build/tests/capture/storage, not source accuracy or completion of every roadmap item.
+- Local Docker: Docker Desktop 29.8.2, Linux x86_64 engine. docker run successfully executed /bin/sh and Node 22.23.4 from node:22-alpine. Docker BuildKit reproducibly failed even on a minimal RUN /bin/sh with exec format error; the legacy builder successfully built aletheia/suncalc:2.0.2. This is a local BuildKit problem, not a demonstrated Aletheia Dockerfile defect.
+- A second full local build was stopped while downloading theHarvester dependencies below 0.1 MB/s. The in-progress build container was removed; no containers remain. Local all-images build and full local Docker pytest were not completed.
+- Preserve seven pre-existing user changes: six build-logs/*.log files and docs/STRESS_TEST_REPORT.md. The stress report is malformed mixed UTF-16/newline content; its pre-update SHA-256 was 0F90243A02C993A05CD42B834671EAD0F13E17D58B6D9DD8F37697B0B84729E. It was not changed.
+- No live target or adapter was queried in this continuation.
+- The user requested that the project be fully ready and 100% verified. Keep pursuing evidence-backed readiness, but do not claim that literal completion until all project acceptance criteria have been met with raw evidence.
 
+## Next action
+
+Continue the project-wide readiness audit, using the current repository authorities and HANDOFF history. Preserve the seven user changes, do not run live adapters unless an owned target is explicitly authorized, and record every discovered limitation honestly.
 ## Project boundaries
 
 Aletheia is a free, open-source OSINT investigation platform under the Operator-Driven
