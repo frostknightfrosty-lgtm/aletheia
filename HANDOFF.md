@@ -1,14 +1,14 @@
 # Aletheia Handoff — project-wide readiness audit in progress
 
-Last updated: 2026-10-24T00:28:12Z
+Last updated: 2026-10-24T00:48:29Z
 
 ## Current session state — authoritative
 
-- Primary checkout: E:/aletheia; branch main. Code commit verified in this audit: 678d69615c1592eea8ebbe69bda78a6fe5055652; origin/main matched before this documentation checkpoint.
-- Docker Verification run [40042927369](https://github.com/frostknightfrosty-lgtm/aletheia/actions/runs/40042927369) completed successfully against commit 678d69615c1592eea8ebbe69bda78a6fe5055652 in 22m47s.
-- Artifact raw lines: PARSER PREFLIGHT: PASS — 63/63 adapters have parser coverage; 1223 passed in 70.86s (0:01:10); DOCKER CAPTURE: PASS — 97/97 cases captured; STORAGE CONFORMANCE: PASS — 6/6 backends conform.
-- pytest-summary.json: 1,223 total, ok=true, no failures and skipped_in_ci=[]. results.json: 97 entries, all returncode=0; 88 .stdout and 88 .stderr files plus 9 structured scenarios. SHA-256: 06A70F18952D9DBAB93913EA445BD1440FB61FE3247EB1624E0D81188B46C4BF. The build evidence contains 65 pinned-image rows.
-- Artifact is downloaded under %TEMP%/aletheia-ci-40042927369/aletheia-docker-verification-40042927369.
+- Primary checkout: E:/aletheia; branch main. Code/handoff commit verified by run 40045196861: f42edfe8f2f71fb164d8f62b73dcf50fe9d3e209; origin/main matched after the checkpoint push.
+- Docker Verification run [40045196861](https://github.com/frostknightfrosty-lgtm/aletheia/actions/runs/40045196861) completed successfully against commit f42edfe8f2f71fb164d8f62b73dcf50fe9d3e209 in 18m13s.
+- Artifact raw lines: PARSER PREFLIGHT: PASS — 63/63 adapters have parser coverage; 1223 passed in 55.56s; DOCKER CAPTURE: PASS — 97/97 cases captured; STORAGE CONFORMANCE: PASS — 6/6 backends conform.
+- pytest-summary.json: 1,223 total, ok=true, no failures and skipped_in_ci=[]. results.json: 97 entries, all returncode=0; 88 .stdout and 88 .stderr files plus 9 structured scenarios. SHA-256: A2C5BBB8EC12129968916E5C4633B416103982BCE3D1A833B6DCBB05970C4A97. The build evidence contains 65 pinned-image rows.
+- Artifact is downloaded under %TEMP%/aletheia-ci-40045196861/aletheia-docker-verification-40045196861.
 - Manifest inventory remains 66 entries: 64 verified-fixture, 2 verified-source-read, 0 verified-live. This run verifies CI build/tests/capture/storage, not source accuracy or completion of every roadmap item.
 - Local Docker: Docker Desktop 29.8.2, Linux x86_64 engine. docker run successfully executed /bin/sh and Node 22.23.4 from node:22-alpine. Docker BuildKit reproducibly failed even on a minimal RUN /bin/sh with exec format error; the legacy builder successfully built aletheia/suncalc:2.0.2. This is a local BuildKit problem, not a demonstrated Aletheia Dockerfile defect.
 - A second full local build was stopped while downloading theHarvester dependencies below 0.1 MB/s. The in-progress build container was removed; no containers remain. Local all-images build and full local Docker pytest were not completed.

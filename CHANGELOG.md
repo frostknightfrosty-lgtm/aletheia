@@ -1537,3 +1537,9 @@ artifact `ci-artifacts-39141366670`.
 - Artifact results.json: 97 returncode-zero entries, 88 stdout/stderr pairs plus 9 structured scenarios; SHA-256 06A70F18952D9DBAB93913EA445BD1440FB61FE3247EB1624E0D81188B46C4BF.
 - Local-only issue identified: Docker BuildKit reports exec format error for /bin/sh even in a minimal Node image build; docker run works and the legacy builder built the pinned SunCalc image. No project source change was made. Full local image rebuild stopped during slow theHarvester downloads.
 - User changes in six build logs and docs/STRESS_TEST_REPORT.md remain untouched. Project completion remains in progress; manifest inventory has zero verified-live adapters.
+
+## 2026-10-24 — State checkpoint CI verification
+
+- Docker Verification run 40045196861 passed on commit f42edfe8f2f71fb164d8f62b73dcf50fe9d3e209 (https://github.com/frostknightfrosty-lgtm/aletheia/actions/runs/40045196861). Artifact lines: parser preflight 63/63; 1223 passed in 55.56s; Docker capture 97/97; storage conformance 6/6; CI skips 0.
+- results.json: 97 returncode-zero entries, 88 stdout/stderr pairs plus 9 structured scenarios; SHA-256 A2C5BBB8EC12129968916E5C4633B416103982BCE3D1A833B6DCBB05970C4A97. Image evidence: 65 pinned-image rows.
+- Local Docker BuildKit diagnosis and the preserved user edits are recorded in HANDOFF.md and RESUME_STATE.json.
