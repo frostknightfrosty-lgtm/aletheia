@@ -4,11 +4,11 @@ Last reviewed: 2026-10-24
 
 ## Current verification state
 
-- Latest verified implementation head: `315516800638ece05b4924aa2a9175559c8ac92a`; Docker Verification run [40037547697](https://github.com/frostknightfrosty-lgtm/aletheia/actions/runs/40037547697) completed successfully.
-- Downloaded artifact lines: `PARSER PREFLIGHT: PASS — 63/63 adapters have parser coverage`; `1223 passed in 65.88s (0:01:05)`; `DOCKER CAPTURE: PASS — 97/97 cases captured`; `STORAGE CONFORMANCE: PASS — 6/6 backends conform`.
-- Artifact results: 97 entries, zero nonzero return codes; 88 stdout/stderr pairs and 9 structured egress scenario records. The core API smoke printed `core API ok`.
-- This run verifies build, tests, captures and storage conformance. It does not establish live-source accuracy or completion of every roadmap item. No live adapter lookup was run.
-- Local focused dashboard/report tests: `19 passed`; local non-integration suite: `1145 passed, 78 deselected`; selected core Docker test: `1 passed`. CI ran the full Docker/storage matrix.
+- Latest verified head: `e2df4d49a6a23e4cd074ac8b3e399f5d622f4b86`; Docker Verification run [40040233934](https://github.com/frostknightfrosty-lgtm/aletheia/actions/runs/40040233934) completed successfully.
+- Artifact lines: `PARSER PREFLIGHT: PASS — 63/63 adapters have parser coverage`; `1223 passed in 69.88s (0:01:09)`; `DOCKER CAPTURE: PASS — 97/97 cases captured`; `STORAGE CONFORMANCE: PASS — 6/6 backends conform`.
+- `results.json` had 97 entries, all returncode 0, 88 stdout/stderr pairs plus 9 structured egress scenario entries; SHA-256 `AA079210C862FAEE2A5DE0C6B16BA2776FBB6304FCC44D0303C71A25065EA96A`.
+- Manifest inventory: 66 entries, 64 verified-fixture, 2 verified-source-read, 0 verified-live. CI does not prove live-source accuracy or full roadmap completion.
+- The dashboard repair is verified. A local pinned image build remains in progress; the user-owned stress report has malformed encoding and remains untouched.
 
 ## Open gates
 

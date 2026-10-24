@@ -1,19 +1,18 @@
-# Aletheia Handoff - Phase 19.2 dashboard runtime repair CI-verified
+# Aletheia Handoff - Phase 19.2 dashboard repair CI-verified; local image audit in progress
 
-Last updated: 2026-10-23T23:31:57Z
+Last updated: 2026-10-24T00:01:33Z
 
 ## Current session state - authoritative over older notes below
 
-- Primary checkout: E:/aletheia; branch main. Implementation commit: `315516800638ece05b4924aa2a9175559c8ac92a`.
-- Docker Verification run [40037547697](https://github.com/frostknightfrosty-lgtm/aletheia/actions/runs/40037547697) completed successfully against commit `315516800638ece05b4924aa2a9175559c8ac92a`.
-- Raw downloaded artifact lines: `PARSER PREFLIGHT: PASS — 63/63 adapters have parser coverage`; `1223 passed in 65.88s (0:01:05)`; `DOCKER CAPTURE: PASS — 97/97 cases captured`; `STORAGE CONFORMANCE: PASS — 6/6 backends conform`.
-- Artifact `results.json`: 97 entries, zero nonzero return codes, SHA-256 `E96245C1276CD270466F7CE76877DAB5FAD0D3BC7522C1816DF34011085BD10E`. It contains 88 stdout/stderr pairs and 9 structured egress scenario records; all 97 entries are accounted for. Core API smoke stdout is `core API ok`.
-- The CI-verified repair restores artifact-aware dossier context and makes the packaged core dashboard/API runnable, including manifest packaging, writable `/data`, and Docker Desktop gateway access through an exact trusted-peer allowlist while Compose remains loopback-bound. Added API boundary tests and strengthened the core Docker smoke.
-- Local verification: focused Phase 7/reporting/dashboard selection `19 passed`; non-integration suite `1145 passed, 78 deselected, 7 warnings`; selected core Docker test `1 passed`; core container served `/healthz` and `/` with HTTP 200. CI is the full Docker/storage verification evidence.
-- Scope limits: this run verifies tests, images, captures and storage conformance; it does not prove live-source accuracy or that all project roadmap/acceptance criteria are complete. No live target or adapter lookup was run. Do not claim the entire project is 100% complete.
-- Preserve unrelated user-local edits in six `build-logs/*.log` files and `docs/STRESS_TEST_REPORT.md`; leave them unstaged and untouched.
-- Local Docker inventory: 33 of 65 exact tags from `docker/build.sh` are present; 32 pinned tags are absent although alternate tags exist. No containers or user build processes were running at inspection. The user-owned uncommitted `docs/STRESS_TEST_REPORT.md` has malformed mixed UTF-16 encoding and Git reports it as binary; it was left untouched.
-- Next: continue from the current project authorities, inspect remaining project gaps, and verify each claim with current evidence.
+- Primary checkout: E:/aletheia; branch main. Latest verified head: `e2df4d49a6a23e4cd074ac8b3e399f5d622f4b86`.
+- Docker Verification run [40040233934](https://github.com/frostknightfrosty-lgtm/aletheia/actions/runs/40040233934) completed successfully against `e2df4d49a6a23e4cd074ac8b3e399f5d622f4b86`.
+- Downloaded artifact evidence: `PARSER PREFLIGHT: PASS — 63/63 adapters have parser coverage`; `1223 passed in 69.88s (0:01:09)`; `DOCKER CAPTURE: PASS — 97/97 cases captured`; `STORAGE CONFORMANCE: PASS — 6/6 backends conform`.
+- Artifact `results.json`: 97 entries, zero nonzero return codes, SHA-256 `AA079210C862FAEE2A5DE0C6B16BA2776FBB6304FCC44D0303C71A25065EA96A`; 88 stdout/stderr pairs plus 9 structured egress scenarios, all accounted for. Core API smoke stdout: `core API ok`.
+- Manifest inventory currently has 66 entries: 64 `verified-fixture`, 2 `verified-source-read`, 0 `verified-live`. This CI run verifies build/tests/captures/storage, not live-source accuracy or the full project roadmap.
+- Local `bash docker/build.sh` is still running and has successfully built through `aletheia/reddit-api:v1` (about 21 of 65 targets observed); complete it, check exact pinned tag coverage, then run full local pytest with Docker.
+- Local Docker build is currently healthy: the old stress-report claim of a VMM read-only failure has not recurred in the observed builds. No adapter was run and no target queried.
+- Preserve uncommitted user edits in six `build-logs/*.log` files and `docs/STRESS_TEST_REPORT.md`; do not stage them. The stress report is malformed mixed UTF-16/newline data and Git treats it as binary; recover without discarding the user edit.
+- Project-wide status remains in progress. Continue auditing against current authorities and do not claim full completion until all acceptance criteria have current raw evidence.
 
 ## Project boundaries
 

@@ -1,10 +1,10 @@
-# Aletheia — Phase 7
+# Aletheia — OSINT Investigation Platform
 
 Aletheia is a provenance-first meta-OSINT orchestration platform. Its core boundary is a typed adapter system with legal policy, checkpoints, audit events, normalized graph data, entity resolution, and provenance-preserving reports.
 
 ## Current status
 
-**Phase 19.2 dashboard runtime repair is CI-verified.** Docker Verification run [40037547697](https://github.com/frostknightfrosty-lgtm/aletheia/actions/runs/40037547697) tested commit `315516800638ece05b4924aa2a9175559c8ac92a`. Its downloaded artifact reports `PARSER PREFLIGHT: PASS — 63/63 adapters have parser coverage`, `1223 passed in 65.88s`, `DOCKER CAPTURE: PASS — 97/97 cases captured`, and `STORAGE CONFORMANCE: PASS — 6/6 backends conform`. This verifies build, tests, Docker captures, and storage conformance; it does not verify live-source accuracy or mean the full roadmap is complete.
+**Phase 19.2 dashboard runtime repair is CI-verified.** Docker Verification run [40040233934](https://github.com/frostknightfrosty-lgtm/aletheia/actions/runs/40040233934) tested commit `e2df4d49a6a23e4cd074ac8b3e399f5d622f4b86`. The downloaded artifact reports `PARSER PREFLIGHT: PASS — 63/63 adapters have parser coverage`, `1223 passed in 69.88s`, `DOCKER CAPTURE: PASS — 97/97 cases captured`, and `STORAGE CONFORMANCE: PASS — 6/6 backends conform`. The manifest has 66 entries (64 verified-fixture, 2 verified-source-read, 0 verified-live). CI verifies build, tests, captures, and storage conformance; the full project and live-source accuracy remain unverified.
 
 ## Quick start
 
