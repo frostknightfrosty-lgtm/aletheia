@@ -59,7 +59,20 @@ def _echo_answers() -> dict[str, dict[str, object]]:
                     },
                 }
             ]
-        }
+        },
+        "domain:example.com": {
+            "findings": [
+                {
+                    "entity_type": "email_auth_record",
+                    "value": "example.com",
+                    "provenance": {
+                        "tool": "world-dns",
+                        "confidence": 1.0,
+                        "adapter_version": "fixture-1",
+                    },
+                }
+            ]
+        },
     }
 
 

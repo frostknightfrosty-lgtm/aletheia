@@ -61,7 +61,7 @@ from typing import Any
 
 from aletheia.cascade.ledger import DecisionLedger
 from aletheia.cascade.scoring import EvidenceClass
-from aletheia.core.models import PivotCandidate, SeedType
+from aletheia.core.models import PivotCandidate, Seed, SeedType
 
 __all__ = [
     "DEFAULT_COST",
@@ -259,6 +259,10 @@ class CascadeScheduler:
 
     def used_for(self, seed_type: SeedType) -> int:
         return self._used.get(seed_type, 0)
+
+    def mark_seen(self, seed: Seed) -> None:
+        """Mark a root seed as already queried before pivot scheduling begins."""
+        self._seen.add((seed.type, seed.value))
 
     def elapsed_seconds(self) -> float:
         return max(0.0, self._clock() - self._started)
@@ -469,6 +473,12 @@ class CascadeScheduler:
             "stop_reason": self._stop_reason.value if self._stop_reason is not None else None,
             "stop_note": self._stop_note,
             "used_by_type": {seed_type.value: count for seed_type, count in sorted(self._used.items())},
+            "seen": [
+                {"type": seed_type.value, "value": value}
+                for seed_type, value in sorted(
+                    self._seen, key=lambda item: (item[0].value, item[1])
+                )
+            ],
             "frontier": [
                 {
                     "candidate": entry.candidate.model_dump(mode="json"),
@@ -499,6 +509,10 @@ class CascadeScheduler:
             ledger=ledger,
             clock=clock,
             rng_seed=int(state.get("rng_seed", 0)),
+        )
+        scheduler._seen.update(
+            (SeedType(item["type"]), str(item["value"]))
+            for item in state.get("seen", [])
         )
         highest_sequence = -1
         for raw in state.get("frontier", []):

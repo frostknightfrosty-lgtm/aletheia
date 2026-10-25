@@ -576,7 +576,11 @@ def run_cascade(config: CascadeRunConfig, *, observer: Observer | None = None) -
         review_callback=review_callback,
     )
     try:
-        result = engine.run(root_claims, subject_label=config.subject_label)
+        result = engine.run(
+            root_claims,
+            subject_label=config.subject_label,
+            initial_seeds=config.seeds,
+        )
     finally:
         if live is not None:
             live.close()

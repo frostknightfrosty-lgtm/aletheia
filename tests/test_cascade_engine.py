@@ -23,6 +23,7 @@ from aletheia.core.models import (
     Hypothesis,
     IdentityTier,
     Provenance,
+    Seed,
     SeedType,
 )
 
@@ -131,6 +132,37 @@ def test_independent_adapter_confirmation_merges_the_shared_email() -> None:
     assert len(merges) == 1
     assert merges[0].payload["accepted"] is True
     _assert_decision_invariant(result)
+
+
+def test_cascade_uses_profile_url_and_does_not_requery_the_root_seed() -> None:
+    profile_url = "https://github.com/alice"
+    world = World().respond(SeedType.URL, profile_url)
+    root = _claim(
+        EntityType.SOCIAL_ACCOUNT,
+        "github_identity:profile:alice",
+        attributes={"username": "alice", "html_url": profile_url},
+    )
+
+    result = CascadeEngine(world).run(
+        [root], initial_seeds=[Seed(type=SeedType.USERNAME, value="@Alice")]
+    )
+
+    assert world.calls == [(SeedType.URL, profile_url)]
+    assert result.expansions == 1
+    proposed = [
+        entry.payload["seed_type"]
+        for entry in result.ledger.replay(kinds=["pivot_proposed"])
+    ]
+    assert proposed == ["url"]
+    assert {item["value"] for item in result.checkpoint["seen"]} == {
+        "alice",
+        profile_url,
+    }
+    assert any(
+        entry.payload["reason"] == "duplicate"
+        and entry.payload["seed_type"] == "username"
+        for entry in result.ledger.replay(kinds=["pivot_refused"])
+    )
 
 
 def test_world_separates_people_and_keeps_shared_platforms_apart() -> None:

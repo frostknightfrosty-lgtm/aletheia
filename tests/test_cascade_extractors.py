@@ -94,6 +94,24 @@ def test_social_account_handle_and_url():
     ]
 
 
+def test_social_account_structured_profile_fields_yield_follow_up_pivots():
+    claim = _claim(
+        EntityType.SOCIAL_ACCOUNT,
+        "github_identity:profile:alice",
+        attributes={
+            "username": "Alice",
+            "html_url": "https://github.com/Alice",
+            # Provenance/source API URLs must never be treated as target pivots.
+        },
+        source_url="https://api.github.com/users/alice",
+    )
+
+    assert _pairs(claim) == [
+        (SeedType.USERNAME, "alice"),
+        (SeedType.URL, "https://github.com/Alice"),
+    ]
+
+
 def test_ocr_text_runs_autodetection():
     claim = _claim(
         EntityType.OCR_TEXT,

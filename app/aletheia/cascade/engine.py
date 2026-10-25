@@ -87,6 +87,7 @@ from aletheia.cascade.ledger import DecisionLedger
 from aletheia.cascade.merge_graph import MergeGraph
 from aletheia.cascade.priors import handle_prior_log_odds
 from aletheia.cascade.profile_linking import ProfileLink, profile_comparison_pairs
+from aletheia.cascade.seeds import canonicalize_seed
 from aletheia.cascade.scheduler import CascadeScheduler, SchedulerPolicy, StopReason
 from aletheia.cascade.scoring import (
     EvidenceClass,
@@ -263,12 +264,20 @@ class CascadeEngine:
 
     # -- the run --------------------------------------------------------------
 
-    def run(self, root_claims: Sequence[Claim], *, subject_label: str = "subject") -> CascadeResult:
+    def run(
+        self,
+        root_claims: Sequence[Claim],
+        *,
+        subject_label: str = "subject",
+        initial_seeds: Sequence[Seed] = (),
+    ) -> CascadeResult:
         anchors = dedupe_claims(root_claims)
         if not anchors:
             raise ValueError("engine needs at least one root claim")
         ledger = self._ledger if self._ledger is not None else DecisionLedger()
         scheduler = CascadeScheduler(self._policy, ledger=ledger, rng_seed=self._rng_seed)
+        for seed in initial_seeds:
+            scheduler.mark_seen(canonicalize_seed(seed))
         graph = MergeGraph()
         subject_node = str(uuid5(NAMESPACE_URL, f"aletheia:subject:{subject_label}"))
         graph.find(subject_node)

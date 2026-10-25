@@ -158,11 +158,26 @@ def _academic_rule(value: str, attributes: dict[str, Any]) -> _RuleResult:
 
 
 def _social_account_rule(value: str, attributes: dict[str, Any]) -> _RuleResult:
+    out: _RuleResult = []
     if is_url_like(value):
-        return [(SeedType.URL, value, "account url yields its url")]
-    if is_handle_like(value):
-        return [(SeedType.USERNAME, value, "account handle yields its username")]
-    return []
+        out.append((SeedType.URL, value, "account url yields its url"))
+    elif is_handle_like(value):
+        out.append((SeedType.USERNAME, value, "account handle yields its username"))
+
+    # Adapters often use a namespaced value for a profile record while keeping
+    # its public handle and profile URL in structured attributes. Use only
+    # those target-facing fields: provenance.source_url may be the adapter's
+    # API endpoint and must not become a search target.
+    for key in ("username", "login", "handle", "screen_name", "user", "account"):
+        candidate = attributes.get(key)
+        if isinstance(candidate, str) and is_handle_like(candidate):
+            out.append((SeedType.USERNAME, candidate, f"account {key} yields its username"))
+
+    for key in ("profile_url", "html_url", "account_url", "permalink", "url"):
+        candidate = attributes.get(key)
+        if isinstance(candidate, str) and is_url_like(candidate):
+            out.append((SeedType.URL, candidate, f"account {key} yields its url"))
+    return out
 
 
 def _breach_rule(value: str, attributes: dict[str, Any]) -> _RuleResult:

@@ -38,6 +38,11 @@ class _FakeClient:
         self.chat = SimpleNamespace(completions=self.completions)
 
 
+class _FailingCompletions:
+    def create(self, **kwargs):
+        raise ConnectionError("Ollama unavailable")
+
+
 def _run_artifacts(tmp_path: Path) -> tuple[Path, str, UUID]:
     data = tmp_path / "data"
     run_id = uuid4()
@@ -107,21 +112,81 @@ def test_generate_dossier_reads_artifacts_and_writes_markdown(tmp_path: Path) ->
 
     dossier = generate_dossier(run_id, str(data), client=client, echo=False)
 
-    assert dossier.startswith("# Dossier")
+    assert dossier.startswith("# Evidence Dossier")
     output = data / "runs" / run_id / "dossier.md"
-    assert output.read_text(encoding="utf-8").startswith("# Dossier")
+    assert output.read_text(encoding="utf-8").startswith("# Evidence Dossier")
     call = client.completions.calls[0]
     assert call["model"] == "llama3"
     system = call["messages"][0]["content"]
     user = call["messages"][1]["content"]
-    assert "senior intelligence analyst" in system
-    assert "adapter, source URL" in system
+    assert "cautious OSINT analyst" in system
+    assert "adapter and source URL" in system
     assert "https://api.github.com/users/jdoe88" in user
     assert "github-identity" in user
     assert "text_embedding" in user
-    assert "AUDIT.jsonl" in user
-    assert '"hash"' in user
+    assert "AUDIT CHAIN INTEGRITY" in user
+    assert '"valid": true' in user
+    assert '"hash"' not in user
     assert "Evidence Gaps" in user
+
+
+def test_model_output_is_kept_separate_from_authoritative_dossier(tmp_path: Path) -> None:
+    data, run_id, _ = _run_artifacts(tmp_path)
+    model_text = "# Dossier\n\nSource: INVENTED-GRAPH-SOURCE"
+    client = _FakeClient(model_text)
+
+    dossier = generate_dossier(run_id, str(data), client=client, echo=False)
+
+    assert "https://github.com/jdoe88" in dossier
+    assert "github-identity" in dossier
+    assert "https://api.github.com/users/jdoe88" in dossier
+    assert "INVENTED-GRAPH-SOURCE" not in dossier
+    draft = (data / "runs" / run_id / "dossier.llm-draft.md").read_text(
+        encoding="utf-8"
+    )
+    assert "UNVERIFIED LLM DRAFT" in draft
+    assert model_text in draft
+
+
+def test_authoritative_dossier_survives_local_llm_unavailable(tmp_path: Path) -> None:
+    data, run_id, _ = _run_artifacts(tmp_path)
+    client = SimpleNamespace(
+        chat=SimpleNamespace(completions=_FailingCompletions())
+    )
+
+    dossier = generate_dossier(run_id, str(data), client=client, echo=False)
+
+    assert "https://github.com/jdoe88" in dossier
+    draft = (data / "runs" / run_id / "dossier.llm-draft.md").read_text(
+        encoding="utf-8"
+    )
+    assert "UNVERIFIED LLM DRAFT" in draft
+    assert "unavailable" in draft
+
+
+def test_dossier_prompt_excludes_raw_egress_and_forbids_location_guessing(
+    tmp_path: Path,
+) -> None:
+    data, run_id, parsed_run_id = _run_artifacts(tmp_path)
+    audit = AuditLogger(data / "runs" / run_id / "AUDIT.jsonl")
+    audit.log(
+        AuditEvent(
+            run_id=parsed_run_id,
+            event_type="egress_request",
+            request_meta={"host": "sentinel-egress.invalid", "status": 429},
+            outcome="observed",
+        )
+    )
+    client = _FakeClient()
+
+    generate_dossier(run_id, str(data), client=client, echo=False)
+
+    system, user = (
+        message["content"] for message in client.completions.calls[0]["messages"]
+    )
+    assert "sentinel-egress.invalid" not in user
+    assert "Never infer or guess a location" in system
+    assert '"valid": true' in user
 
 
 def test_generate_dossier_accepts_a_model_override(tmp_path: Path) -> None:
@@ -208,7 +273,8 @@ def test_cascade_artifacts_feed_dossier_generation(tmp_path: Path) -> None:
 
     dossier = generate_dossier(str(outcome.run_id), str(data), client=client, echo=False)
 
-    assert dossier == "# Cascade dossier"
+    assert dossier.startswith("# Evidence Dossier")
+    assert "alice@example.com" in dossier
     assert (data / "graphs" / str(outcome.run_id) / "graph.json").exists()
     assert (data / "runs" / str(outcome.run_id) / "resolution.json").exists()
     assert (data / "runs" / str(outcome.run_id) / "dossier.md").exists()
