@@ -165,6 +165,26 @@ def test_cascade_uses_profile_url_and_does_not_requery_the_root_seed() -> None:
     )
 
 
+def test_shared_profile_host_does_not_trigger_domain_adapter_sweep() -> None:
+    profile_url = "https://www.tiktok.com/@alice"
+    world = World().respond(
+        SeedType.URL,
+        profile_url,
+        _finding(EntityType.URL, profile_url, "social-profile"),
+    )
+    root = _claim(
+        EntityType.SOCIAL_ACCOUNT,
+        "social_profile:alice",
+        attributes={"username": "alice", "profile_url": profile_url},
+    )
+
+    CascadeEngine(world).run(
+        [root], initial_seeds=[Seed(type=SeedType.USERNAME, value="alice")]
+    )
+
+    assert world.calls == [(SeedType.URL, profile_url)]
+
+
 def test_world_separates_people_and_keeps_shared_platforms_apart() -> None:
     world = (
         World()

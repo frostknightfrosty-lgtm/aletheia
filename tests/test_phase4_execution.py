@@ -51,3 +51,32 @@ def test_docker_argv_ends_with_image_and_command(monkeypatch, tmp_path):
     assert argv[image_index + 1:] == ["exampleuser", "--json", "ndjson", "--folderoutput", "/work/results"]
     # Options (network, proxy env, mounts) precede the image.
     assert argv.index("--network") < image_index
+
+
+def test_timeout_force_removes_the_named_container(monkeypatch, tmp_path):
+    """Readiness audit 2026-10-25: a timeout killed the ``docker run`` client but
+    left the adapter container running. The container is named, and a timeout
+    must force-remove exactly that container before the error is raised."""
+    import subprocess
+
+    import pytest
+
+    from aletheia.core.execution import DockerExecutionError
+
+    calls = []
+
+    def fake_run(argv, **kwargs):
+        calls.append(list(argv))
+        if argv[:2] == ["docker", "run"]:
+            raise subprocess.TimeoutExpired(argv, 1)
+        return type("CP", (), {"stdout": "", "stderr": "", "returncode": 0})()
+
+    monkeypatch.setattr("subprocess.run", fake_run)
+    with pytest.raises(DockerExecutionError, match="timed out after 1s"):
+        run_docker(image="aletheia/instaloader:4.15.3", command=["x"], workspace=tmp_path,
+                   timeout_seconds=1, proxy_url=None, network=False)
+
+    run_argv = calls[0]
+    name = run_argv[run_argv.index("--name") + 1]
+    assert name.startswith("aletheia-run-")
+    assert calls[1] == ["docker", "rm", "-f", name]

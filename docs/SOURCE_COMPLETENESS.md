@@ -168,3 +168,47 @@ queries over the public patents datasets).
   a source by itself.
 - Docs/state commits stay separate from code commits; each build step lands
   with its CI verification (Gate 5 evidence).
+
+## F. Current inventory reconciled from source (2026-10-25)
+
+> Generated from the adapter registry (`phase7_adapters()`) and `PROJECT_MANIFEST.json`. Sections A-E above are the historical owner-directive tracker and use older counts (83 of 111); this section is the current source of truth for counts.
+
+- Investigative adapters in the registry: **63**. The manifest lists 66 entries: these 63 plus 3 infrastructure/library entries (egress_proxy, rapidfuzz, reportlab).
+- Verification status of the 63 adapters: **63 verified-fixture, 0 other, 0 verified-live.** The two `verified-source-read` manifest entries (rapidfuzz, reportlab) are libraries, not adapters.
+- Fixture verification means parser behaviour against recorded fixtures. It is **not** evidence that the live upstream source responds today.
+- Network-required adapters: **56**, all wired through the per-adapter egress proxy. Local-only adapters (7): deepface, exiftool, insightface, libphonenumber, pybdshadow, shadowfinder, suncalc.
+- Adapters requiring an explicit authorization assertion: **48**: academic_search, code_search, corporate_registry, courtlistener, crypto_blockchain, crypttrace, dnsrecon, dnsx, email_auth, fierce, geolocation_image, github_identity, gleif, government_records_us, gravatar, h8mail, hibp, holehe, instaloader, ip_intelligence, leak_checkers, maigret, massdns, minecraft, opencorporates, opensanctions, overpass, patents_trademarks, pgp_keys, phoneinfoga, picimagesearch, reddit-api, researcher_ids, sanctions_enforcement_watchlists, search_engines, sec-edgar, social_profile, social_username, spiderfoot, ssl_tls, tiktok-hashtag-analysis, tracelines, transport_asset_registry, venom, weather, xposedornot, youtube-api, zehef.
+
+### Key / registration gates (`secret_env`)
+
+| Adapter | Required environment variable(s) |
+|---|---|
+| academic_search | OPENALEX_API_KEY, SEMANTIC_SCHOLAR_API_KEY, CORE_API_KEY, CROSSREF_MAILTO, UNPAYWALL_EMAIL |
+| code_search | DEBIAN_CODE_SEARCH_API_KEY |
+| corporate_registry | COMPANIES_HOUSE_API_KEY, NZBN_API_SUBSCRIPTION_KEY, KVK_API_KEY |
+| crypto_blockchain | BLOCKCHAIR_API_KEY, BLOCKCYPHER_API_TOKEN, ETHERSCAN_API_KEY, CHAINABUSE_API_KEY |
+| geolocation_image | MAPILLARY_ACCESS_TOKEN |
+| government_records_us | OCC_API_KEY, SAM_API_KEY, FOIA_API_KEY, LDA_API_KEY, NYC_OPEN_DATA_TOKEN |
+| gravatar | GRAVATAR_API_KEY |
+| hibp | HIBP_API_KEY |
+| ip_intelligence | IPINFO_TOKEN, IPGEOLOCATION_KEY, ABUSEIPDB_KEY, GREYNOISE_KEY, VIRUSTOTAL_KEY, URLHAUS_AUTH_KEY, THREATFOX_AUTH_KEY, MALWAREBAZAAR_AUTH_KEY, NETLAS_KEY, FULLHUNT_KEY, IPAPI_CO_KEY, PHISHTANK_APP_KEY |
+| leak_checkers | LEAKIX_API_KEY, GRAYHATWARFARE_TOKEN, BRON_VAULT_URL, BRON_VAULT_API_KEY |
+| opencorporates | OPENCORPORATES_API_TOKEN |
+| opensanctions | OPENSANCTIONS_API_KEY |
+| patents_trademarks | USPTO_ODP_API_KEY, USPTO_TSDR_API_KEY, EPO_OPS_CONSUMER_KEY, EPO_OPS_CONSUMER_SECRET |
+| picimagesearch | SAUCENAO_API_KEY |
+| reddit-api | REDDIT_CLIENT_ID, REDDIT_CLIENT_SECRET |
+| search_engines | MARGINALIA_API_KEY |
+| shodan | SHODAN_API_KEY |
+| spiderfoot | EMAILREP_API_KEY, HUNTER_API_KEY, PULSEDIVE_API_KEY, INTELX_API_KEY, C99_API_KEY, HIBP_API_KEY |
+| ssl_tls | SSLLABS_EMAIL |
+| youtube-api | YOUTUBE_API_KEY |
+
+These are the variables each adapter declares. Some are optional (for example polite-pool contact emails such as `CROSSREF_MAILTO`), and per-adapter behaviour when a variable is absent was not individually verified in the 2026-10-25 audit. No credentials were present in that audit environment, so keyed sources were not exercised.
+
+### Legal tiers
+
+- 1: 32 adapters
+- 2: 15 adapters
+- 3: 14 adapters
+- 4: 2 adapters

@@ -113,11 +113,21 @@ def test_detached_proxy_run_command_omits_host_port(tmp_path):
 # -- ProxySession lifecycle (injected runner) ----------------------------------
 
 
+def _strip_stale_cleanup(calls, session):
+    """start() first clears stale wiring (proxy container, then network); assert
+    that preamble and return the remaining calls for the original assertions."""
+    assert calls[0] == ["docker", "rm", "-f", session.proxy_container]
+    assert calls[1] == ["docker", "network", "rm", session.network]
+    return calls[2:]
+
+
+
 def test_session_starts_network_then_detached_proxy(tmp_path):
     calls, runner = _recorder()
     session = egress.ProxySession("ssl_tls", tmp_path / "egress", runner=runner)
 
     session.start()
+    calls = _strip_stale_cleanup(calls, session)
 
     assert calls[0] == ["docker", "network", "create", "--internal", "aletheia-egress-net-ssl-tls"]
     assert calls[1][:3] == ["docker", "run", "--rm"]
@@ -160,6 +170,7 @@ def test_session_fails_loudly_when_the_proxy_never_accepts(tmp_path):
     session = egress.ProxySession("search_engines", tmp_path / "egress", runner=runner)
     with pytest.raises(egress.DockerCommandError, match="did not accept"):
         session.start()
+    calls = _strip_stale_cleanup(calls, session)
     assert calls[3][:2] == ["docker", "exec"]
 
 
@@ -184,6 +195,7 @@ def test_session_forwards_operator_egress_limits(tmp_path):
     )
 
     session.start()
+    calls = _strip_stale_cleanup(calls, session)
 
     assert "ALETHEIA_EGRESS_RATE=20.0" in calls[1]
     assert "ALETHEIA_EGRESS_BURST=100.0" in calls[1]
@@ -203,6 +215,7 @@ def test_session_attaches_the_proxy_uplink(tmp_path):
     )
 
     session.start()
+    calls = _strip_stale_cleanup(calls, session)
 
     assert calls[2] == [
         "docker", "network", "connect", "aletheia-egress-uplink-scenario",
@@ -551,3 +564,56 @@ def test_cli_resume_passes_the_egress_limits_through(monkeypatch, tmp_path):
     )
     cli.main()
     assert (calls[0]["egress_rate"], calls[0]["egress_burst"]) == (1.0, 1.0)
+
+def test_egress_scenario_generates_tls_certificate_inside_container(monkeypatch, tmp_path):
+    """The scenario must not depend on an OpenSSL executable on the host."""
+    import importlib.util
+
+    path = Path(__file__).resolve().parents[1] / "ci" / "egress_scenario.py"
+    spec = importlib.util.spec_from_file_location("aletheia_egress_scenario_tls", path)
+    assert spec is not None and spec.loader is not None
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+
+    commands = []
+    monkeypatch.setattr(module.shutil, "which", lambda _name: None)
+
+    def fake_docker(argv, timeout=120):
+        commands.append(argv)
+        (tmp_path / "cert.pem").write_text("test certificate", encoding="ascii")
+        (tmp_path / "key.pem").write_text("test key", encoding="ascii")
+        return None
+
+    monkeypatch.setattr(module, "_docker_or_raise", fake_docker)
+
+    module._generate_tls_certificate(tmp_path)
+
+    assert commands and commands[0][0:4] == ["docker", "run", "--rm", "--network"]
+    assert commands[0][4] == "none"
+    assert "--entrypoint" in commands[0]
+    assert commands[0][commands[0].index("--entrypoint") + 1] == "/usr/bin/openssl"
+    assert module.PY_IMAGE in commands[0]
+    assert (tmp_path / "cert.pem").is_file()
+    assert (tmp_path / "key.pem").is_file()
+
+
+def test_session_start_clears_stale_wiring_before_creating(tmp_path):
+    """Readiness audit 2026-10-25: wiring left behind by an aborted run (a stale
+    internal network from a crashed or interrupted session) made the next run
+    die on ``docker network create ... already exists``. start() must remove any
+    leftover proxy container and network of the same name before creating them."""
+    from aletheia.core.egress import ProxySession
+
+    calls = []
+
+    def runner(argv):
+        calls.append(list(argv))
+        return type("CP", (), {"returncode": 0, "stdout": "", "stderr": ""})()
+
+    session = ProxySession(adapter="instaloader", log_dir=tmp_path, runner=runner)
+    session.start()
+
+    create_index = next(i for i, c in enumerate(calls) if c[:3] == ["docker", "network", "create"])
+    before = calls[:create_index]
+    assert ["docker", "rm", "-f", session.proxy_container] in before
+    assert any(c[:3] == ["docker", "network", "rm"] and session.network in c for c in before)

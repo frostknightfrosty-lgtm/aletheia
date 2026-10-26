@@ -120,6 +120,26 @@ def _docker_or_raise(argv: list[str], timeout: int = 120) -> subprocess.Complete
     return proc
 
 
+def _generate_tls_certificate(script_dir: Path) -> None:
+    """Create throwaway TLS material inside the pinned adapter image.
+
+    This keeps the scenario self-contained on Windows hosts that have Docker
+    but no host OpenSSL executable. The certificate is only used by the local
+    integration-test origin.
+    """
+    _docker_or_raise([
+        "docker", "run", "--rm", "--network", "none",
+        "-v", f"{script_dir}:/certs:rw",
+        "--entrypoint", "/usr/bin/openssl",
+        PY_IMAGE, "req", "-x509", "-newkey", "rsa:2048", "-nodes",
+        "-keyout", "/certs/key.pem", "-out", "/certs/cert.pem",
+        "-days", "1", "-subj", "/CN=uplink-origin",
+    ])
+    # The origin runs as uid 10001; OpenSSL's private key defaults to 0600.
+    os.chmod(script_dir / "cert.pem", 0o644)
+    os.chmod(script_dir / "key.pem", 0o644)
+
+
 def _client(script_dir: Path, network: str, url: str, *, proxy_url: str | None, timeout: float = 10.0,
             insecure: bool = False) -> str:
     """Run the generic client container and return its stdout."""
@@ -357,27 +377,12 @@ def main(argv: list[str] | None = None) -> int:
     # TLS material for the tunnel check: the handshake through the CONNECT
     # tunnel only completes when the proxy relays both directions (repair
     # after run 39125383530, where every CONNECT entry logged bytes=0).
-    if shutil.which("openssl") is None:
-        print("egress scenario requires the openssl CLI for the TLS tunnel check", file=sys.stderr)
+    try:
+        _generate_tls_certificate(script_dir)
+    except Exception as exc:  # noqa: BLE001 - surface scenario setup errors clearly
+        print(f"could not create the scenario TLS certificate in Docker: {exc}", file=sys.stderr)
         shutil.rmtree(work, ignore_errors=True)
         return 2
-    openssl = subprocess.run(
-        ["openssl", "req", "-x509", "-newkey", "rsa:2048", "-nodes",
-         "-keyout", str(script_dir / "key.pem"), "-out", str(script_dir / "cert.pem"),
-         "-days", "1", "-subj", "/CN=uplink-origin"],
-        capture_output=True, text=True,
-    )
-    if openssl.returncode != 0:
-        print("openssl failed to create the scenario certificate:\n" + openssl.stderr, file=sys.stderr)
-        shutil.rmtree(work, ignore_errors=True)
-        return 2
-    # The origins run as uid 10001 and OpenSSL writes private keys as 0600, so
-    # the key would be unreadable and the origin would die before it ever
-    # listens (run 39128092472: every origin request 502ed at the proxy and all
-    # three origin checks failed). The certificate is a throwaway local
-    # artifact, so widen the mode instead of running the origin as root.
-    os.chmod(script_dir / "cert.pem", 0o644)
-    os.chmod(script_dir / "key.pem", 0o644)
     # The proxy lifecycle goes through the same ProxySession the orchestrator
     # uses — network creation, the world-writable log dir and the uplink attach
     # included — so a regression there fails here instead of in a live run.

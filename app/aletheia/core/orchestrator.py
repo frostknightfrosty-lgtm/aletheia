@@ -136,7 +136,8 @@ class Orchestrator:
 
     def resume(self, run_id: UUID, *, authorization_assertion: str | None = None, timeout_seconds: int = 120,
                proxy_url: str | None = None, wire_egress: bool = True,
-               egress_rate: float = 1.0, egress_burst: float = 1.0) -> dict:
+               egress_rate: float = 1.0, egress_burst: float = 1.0,
+               continue_on_error: bool = False) -> dict:
         """Run the pending adapter/seed invocations, routing network egress through the proxy.
 
         ``wire_egress`` defaults to ``True``: an adapter whose descriptor declares
@@ -230,7 +231,13 @@ class Orchestrator:
                             [str(exc)],
                             f"aletheia resume --run-id {run_id}",
                         )
-                        raise
+                        if not continue_on_error:
+                            raise
+                        # Opt-in: the failure is checkpointed and listed in
+                        # ``failed`` exactly as above (the adapter's own error
+                        # outcome is already in the audit chain); keep going
+                        # so one hung adapter does not starve the rest.
+                        continue
                     # The proxy log records the adapter's egress; append it to the chain
                     # while the manifest anchor is still valid.
                     if session is not None:
@@ -273,7 +280,7 @@ class Orchestrator:
             manifest["completed"],
             ["Review benchmark leaderboard/UI/MCP surface; platform implementation checkpoint complete."],
             [str(self.checkpoints.manifest_path(run_id)), str(self.graph_store.root / str(run_id) / "graph.json")],
-            [],
+            [f"Adapter failed and still pending: {name}" for name in manifest.get("failed", [])],
             f"aletheia resume --run-id {run_id}",
         )
         return manifest

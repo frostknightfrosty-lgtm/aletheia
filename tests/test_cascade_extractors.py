@@ -38,6 +38,15 @@ def test_url_claim_yields_url_and_host_canonical():
     assert all(p.parent_finding_id == claim.finding_id for p in pivots)
 
 
+def test_platform_profile_urls_do_not_become_domain_seeds():
+    for entity_type, url in (
+        (EntityType.URL, "https://github.com/frost2233"),
+        (EntityType.URL, "https://www.tiktok.com/@frost2233"),
+        (EntityType.WEB_SEARCH_RESULT, "https://t.me/frost2233"),
+    ):
+        assert _pairs(_claim(entity_type, url)) == [(SeedType.URL, url)]
+
+
 def test_domain_claim_yields_domain_and_https_url():
     assert _pairs(_claim(EntityType.DOMAIN, "Example.COM.")) == [
         (SeedType.DOMAIN, "example.com"),

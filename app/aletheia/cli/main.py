@@ -25,6 +25,7 @@ def build_parser() -> argparse.ArgumentParser:
     inv.add_argument("--no-egress-proxy", action="store_true", help="run network adapters without the egress proxy (offline replays only)")
     inv.add_argument("--egress-rate", type=float, default=1.0, help="per-adapter egress proxy limit: sustained requests/second (default 1; the proxy answers 429 over the limit)")
     inv.add_argument("--egress-burst", type=float, default=1.0, help="per-adapter egress proxy limit: burst capacity (default 1)")
+    inv.add_argument("--continue-on-error", action="store_true", help="keep running the remaining adapters after one fails or times out (the failure is still checkpointed and listed as failed); default is fail-stop")
     inv.add_argument("--authorization-assertion", default=None, help="Explicit authorization statement required for target-adjacent or personal-identifier lookups")
     inv.add_argument("--filter-country", default=None, help="constraint filter: match recorded country/jurisdiction attributes (token match)")
     inv.add_argument("--filter-age-min", type=int, default=None, help="constraint filter: minimum age (compared where an age is computable)")
@@ -79,6 +80,7 @@ def build_parser() -> argparse.ArgumentParser:
     resume.add_argument("--no-egress-proxy", action="store_true", help="run network adapters without the egress proxy (offline replays only)")
     resume.add_argument("--egress-rate", type=float, default=1.0, help="per-adapter egress proxy limit: sustained requests/second (default 1; the proxy answers 429 over the limit)")
     resume.add_argument("--egress-burst", type=float, default=1.0, help="per-adapter egress proxy limit: burst capacity (default 1)")
+    resume.add_argument("--continue-on-error", action="store_true", help="keep running the remaining adapters after one fails or times out (the failure is still checkpointed and listed as failed); default is fail-stop")
     resume.add_argument("--authorization-assertion", default=None, help="Explicit authorization statement; stored with the run for exact resumability")
     verify_chain = sub.add_parser("verify-chain", help="verify a run's hash-chained audit log")
     verify_chain.add_argument("run_id", type=UUID)
@@ -347,7 +349,8 @@ def main() -> None:
         print(run_id)
         orch.resume(run_id, authorization_assertion=args.authorization_assertion, timeout_seconds=args.timeout,
                     proxy_url=args.proxy, wire_egress=not args.no_egress_proxy,
-                    egress_rate=args.egress_rate, egress_burst=args.egress_burst)
+                    egress_rate=args.egress_rate, egress_burst=args.egress_burst,
+                    continue_on_error=args.continue_on_error)
         print(f"completed: {run_id}")
     elif args.cmd == "ask":
         from aletheia.cascade.runner import fixture_observer, run_cascade
@@ -394,7 +397,8 @@ def main() -> None:
         orch.resume(UUID(args.run_id), authorization_assertion=args.authorization_assertion,
                     timeout_seconds=args.timeout, proxy_url=args.proxy,
                     wire_egress=not args.no_egress_proxy,
-                    egress_rate=args.egress_rate, egress_burst=args.egress_burst)
+                    egress_rate=args.egress_rate, egress_burst=args.egress_burst,
+                    continue_on_error=args.continue_on_error)
         print(f"resumed: {args.run_id}")
     elif args.cmd == "cascade":
         from aletheia.core.case_store import CaseStore

@@ -562,6 +562,9 @@ class ProxySession:
         adapter that fired in that window failed with "Connection refused"
         and no egress log at all (live run 39135219248, social_username).
         """
+        # Clear wiring left by an aborted or crashed earlier run (same
+        # deterministic names); stop() never raises and is a no-op when absent.
+        self.stop()
         self._run(create_network_command(self.network))
         self.log_dir.mkdir(parents=True, exist_ok=True)
         os.chmod(self.log_dir, 0o777)

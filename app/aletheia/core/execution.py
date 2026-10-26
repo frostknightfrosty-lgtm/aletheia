@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import os
 import subprocess
+import uuid
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Sequence
@@ -21,8 +22,12 @@ class ExecutionResult:
 def run_docker(*, image: str, command: Sequence[str], workspace: Path, timeout_seconds: int,
                proxy_url: str | None, network: bool, secret_env: Sequence[str] = (),
                network_name: str | None = None) -> ExecutionResult:
+    # Named so a timeout can remove exactly this container: killing the
+    # ``docker run`` client process does not stop the container it started.
+    container_name = f"aletheia-run-{uuid.uuid4().hex[:12]}"
     argv = [
         "docker", "run", "--rm",
+        "--name", container_name,
         "--read-only",
         "--tmpfs", "/tmp:rw,noexec,nosuid,size=64m",
         "-v", f"{workspace.resolve()}:/work:rw",
@@ -57,5 +62,10 @@ def run_docker(*, image: str, command: Sequence[str], workspace: Path, timeout_s
     except FileNotFoundError as exc:
         raise DockerExecutionError("Docker CLI is not installed") from exc
     except subprocess.TimeoutExpired as exc:
+        # Best effort: the timeout only killed the client, so remove the container.
+        try:
+            subprocess.run(["docker", "rm", "-f", container_name], capture_output=True, text=True, timeout=30)
+        except (OSError, subprocess.SubprocessError):
+            pass
         raise DockerExecutionError(f"container timed out after {timeout_seconds}s") from exc
     return ExecutionResult(completed.stdout, completed.stderr, completed.returncode)

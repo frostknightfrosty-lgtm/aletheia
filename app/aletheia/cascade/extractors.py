@@ -30,6 +30,7 @@ from typing import Any
 from urllib.parse import urlsplit
 
 from aletheia.cascade.claims import Claim
+from aletheia.cascade.evidence import SHARED_PLATFORM_HOSTS
 from aletheia.cascade.routing import BRIDGE_SEED_TYPES, TEXT_AUTODETECT_ENTITY_TYPES
 from aletheia.cascade.seeds import (
     canonicalize_seed,
@@ -82,10 +83,24 @@ def _coordinate(value: str) -> str | None:
     return f"{latitude},{longitude}"
 
 
+def _is_shared_platform_host(host: str) -> bool:
+    """Return whether a URL host is a shared platform, including subdomains.
+
+    A profile URL on a third-party platform is useful URL evidence, but its
+    host is not the investigated account's domain and must not trigger domain
+    infrastructure adapters.
+    """
+    normalized = host.casefold().rstrip(".")
+    return any(
+        normalized == platform or normalized.endswith(f".{platform}")
+        for platform in SHARED_PLATFORM_HOSTS
+    )
+
+
 def _url_rule(value: str, attributes: dict[str, Any]) -> _RuleResult:
     out: _RuleResult = [(SeedType.URL, value, "url claim yields itself")]
     host = urlsplit(value).hostname
-    if host:
+    if host and not _is_shared_platform_host(host):
         out.append((SeedType.DOMAIN, host, "url claim yields its host"))
     return out
 
@@ -241,7 +256,7 @@ def _web_search_rule(value: str, attributes: dict[str, Any]) -> _RuleResult:
     if is_url_like(value):
         out: _RuleResult = [(SeedType.URL, value, "search result yields its url")]
         host = urlsplit(value).hostname
-        if host:
+        if host and not _is_shared_platform_host(host):
             out.append((SeedType.DOMAIN, host, "search result url yields its host"))
         return out
     domain = find_domain_like(value)
