@@ -108,6 +108,11 @@ class InstaloaderAdapter(Phase5Adapter):
             if isinstance(profile_url, str):
                 findings.append(Finding(entity_type=EntityType.URL, value=profile_url, attributes={"platform": "instagram", "username": username}, provenance=_prov(self.descriptor, source_url=profile_url, confidence=0.93, raw=raw)))
                 findings.append(Finding(entity_type=EntityType.SOCIAL_ACCOUNT, value=profile_url, attributes={"platform": "instagram", **attrs}, provenance=_prov(self.descriptor, source_url=profile_url, confidence=0.92, raw=raw, notes=["Public-profile metadata only; no authentication was used."])))
+        # Readiness audit 2026-10-25: Instagram blocks unauthenticated lookups. The
+        # runner now fails fast with exit code 5 and the reason on stderr; record it
+        # as a skip so "blocked" is never mistaken for "searched and found nothing".
+        if exit_code == 5 and not stdout.strip():
+            findings.append(_credential_skip(self.descriptor, stderr))
         return _result(request, self.descriptor, started, findings, stdout, stderr, exit_code)
 
 

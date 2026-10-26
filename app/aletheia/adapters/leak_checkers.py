@@ -61,6 +61,7 @@ class LeakCheckResult(Finding):
         raw_hash: str | None = None,
         timestamp: str | None = None,
         provenance: Provenance | None = None,
+        entity_type: EntityType = EntityType.BREACH,
     ):
         attributes: dict[str, Any] = {"source": source}
         if record_type:
@@ -87,8 +88,11 @@ class LeakCheckResult(Finding):
                 notes=[f"Normalized from {source} sub-source"],
             )
 
+        # Only real leak-index hits are BREACH entities. Skip and error records pass
+        # EntityType.UNKNOWN so a source that was never queried is not reported as
+        # breach data (readiness audit 2026-10-25).
         super().__init__(
-            entity_type=EntityType.BREACH,
+            entity_type=entity_type,
             value=subject,
             attributes=attributes,
             provenance=provenance,
@@ -239,7 +243,7 @@ class LeakCheckersAdapter(Adapter):
             SeedType.PHONE,
             SeedType.NAME,
         ],
-        output_types=[EntityType.BREACH],
+        output_types=[EntityType.BREACH, EntityType.UNKNOWN],
         legal_notes=[
             "LeakIX is queried only through its documented GET /search endpoint with scope=leak, q, page=0, "
             "and the api-key header; its docs specify approximately one request per second. GrayhatWarfare "
@@ -350,6 +354,7 @@ class LeakCheckersAdapter(Adapter):
                     LeakCheckResult(
                         subject=f"{source_name}:skipped",
                         source=source_name,
+                        entity_type=EntityType.UNKNOWN,
                         details={"skipped": True, "reason": skip_reason},
                         raw_evidence={"skipped": True, "reason": skip_reason},
                         raw_hash=raw_hash,
@@ -368,6 +373,7 @@ class LeakCheckersAdapter(Adapter):
                     LeakCheckResult(
                         subject=f"{source_name}:error",
                         source=source_name,
+                        entity_type=EntityType.UNKNOWN,
                         details={"error": error, "http_status": http_status},
                         raw_evidence={"error": error, "http_status": http_status},
                         raw_hash=raw_hash,
