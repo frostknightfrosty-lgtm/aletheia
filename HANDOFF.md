@@ -1,8 +1,29 @@
 # Aletheia Handoff — project-wide readiness audit in progress
 
-Last updated: 2026-10-24T00:48:29Z
+Last updated: 2026-10-26T21:30:00Z
 
-## Current session state — authoritative
+## Latest state (2026-10-26/27) — read this first
+
+- Work lives in worktree `E:\aletheia-readiness-worktree`, branch `codex/readiness-3-6`. Implementation commit `888416b14d47d864434f8b348914f9b9d67d1afe` sits on top of `e01c01a`; a separate state commit follows it. **Nothing is pushed.** The primary checkout `E:\aletheia` and its 8 pre-existing user changes were not touched.
+- CI status is unchanged and unverified for these commits: GitHub Actions cannot start (spending limit). `last_ci_verified_commit` in `RESUME_STATE.json` is untouched. Everything below is LOCAL evidence.
+- Code changes in the implementation commit: shared social-platform URLs no longer produce domain seeds (`cascade/extractors.py`); timed-out adapter containers are named `aletheia-run-<hex>` and force-removed (`core/execution.py`); `ProxySession.start()` clears stale proxy resources (`core/egress.py`); opt-in `--continue-on-error` for `investigate` and `resume` (fail-stop stays the default); the egress scenario certificate is generated inside Docker; `docs/SOURCE_COMPLETENESS.md` section F; new and extended tests, none skipped, deleted or weakened.
+
+Local raw evidence lines, copied from `E:\aletheia-readiness-evidence`:
+
+- `pytest-final-full.log`: `1235 passed, 139 warnings in 510.72s (0:08:30)` (postgres, redis, neo4j, elasticsearch and minio live; SHA-256 D12711D2ED77C2AA850C9AF2BFA2A0450397C5F1E6EACCF9E91ADF5DC3B6D62C).
+- `parser-preflight.log`: `PARSER PREFLIGHT: PASS — 63/63 adapters have parser coverage`.
+- `storage-conformance.log`: `STORAGE CONFORMANCE: PASS — 6/6 backends conform` (`--require-all`).
+- egress scenario log (`.egress-run-2026-10-25.log`): `EGRESS SCENARIO: PASS — 9/9 checks passed`.
+- `capture.log` (97-case Docker capture): `DOCKER CAPTURE: PASS — 97/97 cases captured` (SHA-256 B450E09E125EAEAAADE224FE4E65E682B914F9340DCCF96F04299859739757D9).
+
+Live runs: three authorized runs, target `username:frost2233` only, data dir `E:\aletheia-readiness-evidence\data`, all audit chains valid and anchored. `d22ccf3d` (default 1 req/s) halted at instaloader and maigret saw 555/577 HTTP 429 from our own proxy; `1c3c991f` (5/s, burst 10) still had sherlock at 331/418 429s; `24450283` (20/s, burst 50, timeout 120, `--continue-on-error`) completed with 859 entries, and instaloader failed on a 120 s unauthenticated hang. Reddit and YouTube were partial because API keys were missing. The LLM dossier draft was wrong in several places and is NOT evidence; the deterministic `dossier.md` stays authoritative.
+
+Open items: instaloader unauthenticated hang; the `breach` entity type is used for skip records (misleading); 0 `verified-live` adapters; the five `aletheia-readiness-*` storage containers were not removed because the Docker engine was not running on 2026-10-27 (remove only those five when it is up; never prune or reset Docker); `C:` has about 3.6 GB free; `.superpowers/` and `docs/superpowers/` are untracked planning scratch and were deliberately not committed.
+
+Next action: when Actions is available, run Docker Verification on the branch head and copy lines from the downloaded artifact before changing any CI status. Do not claim 100% completion.
+
+
+## Prior session state (2026-10-24) — superseded by the section above where they differ
 
 - Primary checkout: E:/aletheia; branch main. Code/handoff commit verified by run 40045196861: f42edfe8f2f71fb164d8f62b73dcf50fe9d3e209; origin/main matched after the checkpoint push.
 - Docker Verification run [40045196861](https://github.com/frostknightfrosty-lgtm/aletheia/actions/runs/40045196861) completed successfully against commit f42edfe8f2f71fb164d8f62b73dcf50fe9d3e209 in 18m13s.

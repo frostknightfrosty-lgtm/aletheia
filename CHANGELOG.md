@@ -1,5 +1,16 @@
 # Changelog
 
+## 2026-10-26 - Local readiness audit (local evidence only; not CI)
+
+- Commit `888416b14d47d864434f8b348914f9b9d67d1afe` (branch `codex/readiness-3-6`, unpushed): shared social-platform URLs no longer produce domain seeds; timed-out adapter containers are force-removed; `ProxySession.start()` clears stale proxy resources; opt-in `--continue-on-error`; egress scenario certificate generated inside Docker; `docs/SOURCE_COMPLETENESS.md` section F; new and extended tests with none skipped, deleted or weakened. Fail-stop remains the orchestrator default.
+- Local raw evidence lines (no CI run exists for these commits):
+  - `pytest-final-full.log`: `1235 passed, 139 warnings in 510.72s (0:08:30)` (postgres, redis, neo4j, elasticsearch and minio live; SHA-256 D12711D2ED77C2AA850C9AF2BFA2A0450397C5F1E6EACCF9E91ADF5DC3B6D62C).
+  - `parser-preflight.log`: `PARSER PREFLIGHT: PASS — 63/63 adapters have parser coverage`.
+  - `storage-conformance.log`: `STORAGE CONFORMANCE: PASS — 6/6 backends conform` (`--require-all`).
+  - egress scenario log (`.egress-run-2026-10-25.log`): `EGRESS SCENARIO: PASS — 9/9 checks passed`.
+  - `capture.log` (97-case Docker capture): `DOCKER CAPTURE: PASS — 97/97 cases captured` (SHA-256 B450E09E125EAEAAADE224FE4E65E682B914F9340DCCF96F04299859739757D9).
+- Three authorized live runs against `username:frost2233` only; audit chains valid and anchored. The LLM dossier draft is not evidence. No `verification_status` changed; manifest inventory unchanged (0 verified-live).
+
 ## 2026-10-24 - Phase 19.2 dashboard runtime repair (CI-verified)
 
 - Restored the artifact-aware dossier generator after run `40025027735` failed two prompt assertions. The restored version supplies graph, resolution, and audit integrity context and retains injected client/model support used by tests.

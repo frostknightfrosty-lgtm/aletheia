@@ -1,9 +1,10 @@
 # Project Gates
 
-Last reviewed: 2026-10-24
+Last reviewed: 2026-10-27
 
 ## Current verification state
 
+- Local readiness audit 2026-10-26 (NOT CI; the CI state below is unchanged). Commit `888416b14d47d864434f8b348914f9b9d67d1afe` on branch `codex/readiness-3-6` is unpushed and has no CI run. Raw lines copied from local logs: `1235 passed, 139 warnings in 510.72s (0:08:30)`; `PARSER PREFLIGHT: PASS — 63/63 adapters have parser coverage`; `STORAGE CONFORMANCE: PASS — 6/6 backends conform`; `EGRESS SCENARIO: PASS — 9/9 checks passed`; `DOCKER CAPTURE: PASS — 97/97 cases captured`. Gate 5 still applies: promote nothing to CI-verified until a run starts, finishes and its artifact is read.
 - Latest verified commit: f42edfe8f2f71fb164d8f62b73dcf50fe9d3e209; Docker Verification run [40045196861](https://github.com/frostknightfrosty-lgtm/aletheia/actions/runs/40045196861) completed successfully.
 - Artifact lines copied from the downloaded run: PARSER PREFLIGHT: PASS — 63/63 adapters have parser coverage; 1223 passed in 55.56s; DOCKER CAPTURE: PASS — 97/97 cases captured; STORAGE CONFORMANCE: PASS — 6/6 backends conform.
 - pytest-summary.json: junit_total=1223, ok=true, skipped_in_ci=[]. results.json: 97 entries, all returncode 0; 88 stdout/stderr pairs plus 9 structured scenarios; SHA-256 A2C5BBB8EC12129968916E5C4633B416103982BCE3D1A833B6DCBB05970C4A97.
