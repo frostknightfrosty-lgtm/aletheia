@@ -1,10 +1,10 @@
 # Aletheia Handoff — project-wide readiness audit in progress
 
-Last updated: 2026-10-26T21:30:00Z
+Last updated: 2026-10-26T21:50:00Z
 
 ## Latest state (2026-10-26/27) — read this first
 
-- Work lives in worktree `E:\aletheia-readiness-worktree`, branch `codex/readiness-3-6`. Implementation commit `888416b14d47d864434f8b348914f9b9d67d1afe` sits on top of `e01c01a`; a separate state commit follows it. **Nothing is pushed.** The primary checkout `E:\aletheia` and its 8 pre-existing user changes were not touched.
+- Work lives in worktree `E:\aletheia-readiness-worktree`, branch `codex/readiness-3-6`. Implementation commit `888416b14d47d864434f8b348914f9b9d67d1afe` sits on top of `e01c01a`; state commit `1ea440e` and follow-up fix commit `44076bea0210470a60924bf642f89bd62c2446eb` follow it, and a second state commit records the follow-up. **Nothing is pushed.** The primary checkout `E:\aletheia` and its 8 pre-existing user changes were not touched.
 - CI status is unchanged and unverified for these commits: GitHub Actions cannot start (spending limit). `last_ci_verified_commit` in `RESUME_STATE.json` is untouched. Everything below is LOCAL evidence.
 - Code changes in the implementation commit: shared social-platform URLs no longer produce domain seeds (`cascade/extractors.py`); timed-out adapter containers are named `aletheia-run-<hex>` and force-removed (`core/execution.py`); `ProxySession.start()` clears stale proxy resources (`core/egress.py`); opt-in `--continue-on-error` for `investigate` and `resume` (fail-stop stays the default); the egress scenario certificate is generated inside Docker; `docs/SOURCE_COMPLETENESS.md` section F; new and extended tests, none skipped, deleted or weakened.
 
@@ -18,7 +18,17 @@ Local raw evidence lines, copied from `E:\aletheia-readiness-evidence`:
 
 Live runs: three authorized runs, target `username:frost2233` only, data dir `E:\aletheia-readiness-evidence\data`, all audit chains valid and anchored. `d22ccf3d` (default 1 req/s) halted at instaloader and maigret saw 555/577 HTTP 429 from our own proxy; `1c3c991f` (5/s, burst 10) still had sherlock at 331/418 429s; `24450283` (20/s, burst 50, timeout 120, `--continue-on-error`) completed with 859 entries, and instaloader failed on a 120 s unauthenticated hang. Reddit and YouTube were partial because API keys were missing. The LLM dossier draft was wrong in several places and is NOT evidence; the deterministic `dossier.md` stays authoritative.
 
-Open items: instaloader unauthenticated hang; the `breach` entity type is used for skip records (misleading); 0 `verified-live` adapters; the five `aletheia-readiness-*` storage containers were not removed because the Docker engine was not running on 2026-10-27 (remove only those five when it is up; never prune or reset Docker); `C:` has about 3.6 GB free; `.superpowers/` and `docs/superpowers/` are untracked planning scratch and were deliberately not committed.
+Follow-up fixes, 2026-10-27 (commit `44076bea0210470a60924bf642f89bd62c2446eb`): (1) `docker/instaloader/runner.py` now fails fast (one connection attempt, 20 s request timeout, 45 s overall deadline, a rate controller that raises instead of sleeping); a blocked unauthenticated lookup exits 5 with the reason on stderr and `InstaloaderAdapter` records it as a skip, while a missing profile exits 0 with empty stdout. (2) `leak_checkers` skip and error records are `EntityType.UNKNOWN`; only real hits stay `BREACH`. (3) 17 new tests in `tests/test_readiness_followups.py`; the 4 that cover the adapter changes fail against the previous code.
+
+Local evidence for the follow-ups (NOT CI), raw lines from `E:\aletheia-readiness-evidence`:
+
+- `pytest-followups-full.log`: `1247 passed, 5 skipped in 541.97s (0:09:01)` (Docker engine up; the storage services were not running, so the 5 storage-service tests skipped; SHA-256 B7DDDE5C84AB9BF3A79B2EAEC2BC9F9D4E55E4B1524CCCB2B2F649F6BE9C14C5).
+- `ci/check_parser_coverage.py` re-run after the change: `PARSER PREFLIGHT: PASS — 63/63 adapters have parser coverage` (console only; not saved to a file).
+- Real instaloader 4.15.3, one lookup of the owner's own target `frost2233`: `exit=5 elapsed=7.8s`, stdout empty, stderr `instagram blocked the unauthenticated profile lookup: ConnectionException: JSON Query to api/v1/users/web_profile_info/: 429 Too Many Requests when accessing https://www.instagram.com/api/v1/users/web_profile_info/?username=frost2233` (`instaloader-failfast.err`, SHA-256 970E72DFDF969CBD93FD701D8EEF29ABD7987A57CCDEB473F5569E0038220067). The previous runner hung until the 120 s timeout.
+
+Docker: the five `aletheia-readiness-*` containers were removed with `docker rm` (no volumes pruned, no prune or reset); `aletheia/instaloader:4.15.3` was rebuilt with the legacy builder (image `a18a92236564`; the previous image is kept as `aletheia/instaloader:pre-failfast-2026-10-27`, `469a497de4ed`); `--health` printed `ok`. Docker Desktop was started this session and is left running.
+
+Open items: 0 `verified-live` adapters. Instagram currently answers unauthenticated lookups with HTTP 429, so instaloader will be a recorded skip until an authorized authenticated path is chosen (not implemented; it would need credentials). CI cannot run (Actions spending limit). Other batch adapters' skip and error records were not re-audited for entity type. `C:` has about 6.7 GB free. `.superpowers/` and `docs/superpowers/` are untracked planning scratch and were deliberately not committed.
 
 Next action: when Actions is available, run Docker Verification on the branch head and copy lines from the downloaded artifact before changing any CI status. Do not claim 100% completion.
 

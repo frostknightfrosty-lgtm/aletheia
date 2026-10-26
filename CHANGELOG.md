@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-10-27 - Readiness follow-ups (local evidence only; not CI)
+
+- Commit `44076bea0210470a60924bf642f89bd62c2446eb` (branch `codex/readiness-3-6`, unpushed): the instaloader runner fails fast on a blocked unauthenticated lookup (exit 5 with the reason on stderr, 45 s deadline) and `InstaloaderAdapter` records it as a skip; `leak_checkers` skip and error records are `EntityType.UNKNOWN` instead of `breach`; 17 new tests, none skipped, deleted or weakened.
+- Local raw lines: `1247 passed, 5 skipped in 541.97s (0:09:01)` (`pytest-followups-full.log`; storage-service tests skipped); real instaloader 4.15.3 against the owner's own target returned `exit=5 elapsed=7.8s` instead of hanging to the 120 s timeout.
+- The five `aletheia-readiness-*` containers were removed and `aletheia/instaloader:4.15.3` was rebuilt. No `verification_status` changed (0 verified-live).
+
 ## 2026-10-26 - Local readiness audit (local evidence only; not CI)
 
 - Commit `888416b14d47d864434f8b348914f9b9d67d1afe` (branch `codex/readiness-3-6`, unpushed): shared social-platform URLs no longer produce domain seeds; timed-out adapter containers are force-removed; `ProxySession.start()` clears stale proxy resources; opt-in `--continue-on-error`; egress scenario certificate generated inside Docker; `docs/SOURCE_COMPLETENESS.md` section F; new and extended tests with none skipped, deleted or weakened. Fail-stop remains the orchestrator default.
