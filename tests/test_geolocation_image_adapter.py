@@ -43,7 +43,7 @@ def test_parse_synthetic_fixture_covers_every_source():
     )
     assert len(result.findings) == 12
     assert all(isinstance(finding, GeoEvidenceFinding) for finding in result.findings)
-    assert all(finding.entity_type == EntityType.GEO_EVIDENCE for finding in result.findings)
+    assert all(finding.entity_type == (EntityType.UNKNOWN if str(finding.value).endswith((":skipped", ":error")) else EntityType.GEO_EVIDENCE) for finding in result.findings)
     assert all(finding.provenance.source_url.startswith("https://") for finding in result.findings)
     assert {finding.attributes["source"] for finding in result.findings if finding.attributes.get("record_type")} == set(SUPPORTED_SUB_SOURCES)
 

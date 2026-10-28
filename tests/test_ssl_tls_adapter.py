@@ -664,7 +664,7 @@ def test_parse_success():
     assert "Error: HTTP 429: Too Many Requests" in errored.provenance.notes
 
     for finding in mixed_result.findings:
-        assert finding.entity_type == EntityType.TLS_OBSERVATION
+        assert finding.entity_type == (EntityType.UNKNOWN if str(finding.value).endswith((":skipped", ":error")) else EntityType.TLS_OBSERVATION)
     _assert_provenance_hash_invariant(mixed_result.findings)
 
 

@@ -105,14 +105,15 @@ class GeoEvidenceFinding(Finding):
             raw = json.dumps(raw_evidence or {}, sort_keys=True).encode()
             provenance = Provenance(
                 tool="geolocation_image",
-                source_url=source_url or _SOURCE_CITATIONS.get(source),
+                source_url=_SOURCE_CITATIONS.get(source),
                 confidence=0.80,
                 raw_evidence_sha256=hashlib.sha256(raw).hexdigest(),
                 adapter_version="1.0",
                 notes=[f"Normalized from {source} sub-source"],
             )
         super().__init__(
-            entity_type=EntityType.GEO_EVIDENCE,
+            # Skip/error markers are not domain records (readiness audit 2026-10-25).
+            entity_type=EntityType.UNKNOWN if str(subject).endswith((":skipped", ":error")) else EntityType.GEO_EVIDENCE,
             value=subject,
             attributes=attributes,
             provenance=provenance,

@@ -469,7 +469,7 @@ def test_parse_success():
 
     for finding in result.findings:
         assert isinstance(finding, CryptoBlockchainFinding)
-        assert finding.entity_type == EntityType.BLOCKCHAIN_INTEL_RECORD
+        assert finding.entity_type == (EntityType.UNKNOWN if str(finding.value).endswith((":skipped", ":error")) else EntityType.BLOCKCHAIN_INTEL_RECORD)
         assert finding.provenance.tool == "crypto_blockchain"
         assert finding.provenance.source_url == f"sub-source:{finding.attributes['source']}"
         assert finding.provenance.confidence == 0.80
@@ -527,7 +527,7 @@ def test_parse_success():
     assert "Error: HTTP 503: Service Unavailable" in error_finding.provenance.notes
 
     for finding in mixed_result.findings:
-        assert finding.entity_type == EntityType.BLOCKCHAIN_INTEL_RECORD
+        assert finding.entity_type == (EntityType.UNKNOWN if str(finding.value).endswith((":skipped", ":error")) else EntityType.BLOCKCHAIN_INTEL_RECORD)
     _assert_provenance_hash_invariant(mixed_result.findings)
 
 

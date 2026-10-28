@@ -315,7 +315,7 @@ def test_parse_success():
 
     for finding in result.findings:
         assert isinstance(finding, CorporateRegistryFinding)
-        assert finding.entity_type == EntityType.COMPANY_REGISTRY_RECORD
+        assert finding.entity_type == (EntityType.UNKNOWN if str(finding.value).endswith((":skipped", ":error")) else EntityType.COMPANY_REGISTRY_RECORD)
         assert finding.provenance.tool == "corporate_registry"
         assert finding.provenance.source_url == f"sub-source:{finding.attributes['source']}"
         assert finding.provenance.confidence == 0.80

@@ -91,7 +91,8 @@ class EmailAuthFinding(Finding):
 
         # Pass subject as value to the parent Finding model
         super().__init__(
-            entity_type=EntityType.EMAIL_AUTH_RECORD,
+            # Skip/error markers are not domain records (readiness audit 2026-10-25).
+            entity_type=EntityType.UNKNOWN if str(subject).endswith((":skipped", ":error")) else EntityType.EMAIL_AUTH_RECORD,
             value=subject,
             attributes=attributes,
             provenance=provenance,

@@ -413,7 +413,7 @@ def test_parse_success():
     assert "Error: HTTP 503: Service Unavailable" in error_finding.provenance.notes
 
     for finding in mixed_result.findings:
-        assert finding.entity_type == EntityType.SANCTION
+        assert finding.entity_type == (EntityType.UNKNOWN if str(finding.value).endswith((":skipped", ":error")) else EntityType.SANCTION)
     _assert_provenance_hash_invariant(mixed_result.findings)
 
 

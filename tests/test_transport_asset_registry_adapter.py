@@ -54,7 +54,7 @@ def test_parse_synthetic_fixture_covers_supported_and_dropped_sources():
     )
     assert len(result.findings) == 6
     assert all(isinstance(finding, TransportAssetFinding) for finding in result.findings)
-    assert all(finding.entity_type == EntityType.TRANSPORT_ASSET_RECORD for finding in result.findings)
+    assert all(finding.entity_type == (EntityType.UNKNOWN if str(finding.value).endswith((":skipped", ":error")) else EntityType.TRANSPORT_ASSET_RECORD) for finding in result.findings)
     assert all(finding.provenance.source_url.startswith("https://") for finding in result.findings)
     faa = next(f for f in result.findings if f.attributes["source"] == "faa-aircraft-registration")
     assert faa.registration == "N123AB"

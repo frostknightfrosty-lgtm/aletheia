@@ -100,7 +100,8 @@ class SslTlsFinding(Finding):
 
         # Pass subject as value to the parent Finding model
         super().__init__(
-            entity_type=EntityType.TLS_OBSERVATION,
+            # Skip/error markers are not domain records (readiness audit 2026-10-25).
+            entity_type=EntityType.UNKNOWN if str(subject).endswith((":skipped", ":error")) else EntityType.TLS_OBSERVATION,
             value=subject,
             attributes=attributes,
             provenance=provenance,
