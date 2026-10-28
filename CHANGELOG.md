@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-10-28 - Skip/error marker types for batch adapters; CI still blocked by billing
+
+- Commit `073052ea11bbe34945ee8f99a8e6e603cad34bf7`: `<source>:skipped` and `<source>:error` markers from 12 batch adapters are `EntityType.UNKNOWN` instead of the adapter's domain type; real records keep theirs. Latent `NameError` in `GeoEvidenceFinding` fallback provenance fixed. 36 new test cases; 11 existing parse tests updated with the same strictness (none skipped, deleted or loosened). Adapter descriptors unchanged on purpose.
+- Local raw lines: `1210 passed, 5 skipped, 11 warnings in 12.56s` (`pytest-markers-no-docker.log`; Docker integration file excluded); parser preflight `PASS — 63/63`.
+- CI: run 40731687008 on `8b09e7e` did not start ("The job was not started because recent account payments have failed or your spending limit needs to be increased."). No CI status changed; no `verification_status` changed (0 verified-live).
+
 ## 2026-10-27 - Readiness follow-ups (local evidence only; not CI)
 
 - Commit `44076bea0210470a60924bf642f89bd62c2446eb` (branch `codex/readiness-3-6`, unpushed): the instaloader runner fails fast on a blocked unauthenticated lookup (exit 5 with the reason on stderr, 45 s deadline) and `InstaloaderAdapter` records it as a skip; `leak_checkers` skip and error records are `EntityType.UNKNOWN` instead of `breach`; 17 new tests, none skipped, deleted or weakened.

@@ -1,11 +1,11 @@
 # Aletheia Handoff — project-wide readiness audit in progress
 
-Last updated: 2026-10-26T21:50:00Z
+Last updated: 2026-10-28T22:40:00Z
 
 ## Latest state (2026-10-26/27) — read this first
 
-- Work lives in worktree `E:\aletheia-readiness-worktree`, branch `codex/readiness-3-6`. Implementation commit `888416b14d47d864434f8b348914f9b9d67d1afe` sits on top of `e01c01a`; state commit `1ea440e` and follow-up fix commit `44076bea0210470a60924bf642f89bd62c2446eb` follow it, and a second state commit records the follow-up. **Nothing is pushed.** The primary checkout `E:\aletheia` and its 8 pre-existing user changes were not touched.
-- CI status is unchanged and unverified for these commits: GitHub Actions cannot start (spending limit). `last_ci_verified_commit` in `RESUME_STATE.json` is untouched. Everything below is LOCAL evidence.
+- Work lives in worktree `E:\aletheia-readiness-worktree`, branch `codex/readiness-3-6`. Implementation commit `888416b14d47d864434f8b348914f9b9d67d1afe` sits on top of `e01c01a`; state commit `1ea440e` and follow-up fix commit `44076bea0210470a60924bf642f89bd62c2446eb` follow it, and a second state commit records the follow-up. The branch `codex/readiness-3-6` is on origin (found pushed on 2026-10-28 by the owner or a concurrent session; remote head then `8b09e7e`); `main` is untouched. The primary checkout `E:\aletheia` and its 8 pre-existing user changes were not touched.
+- CI status is unchanged and unverified for these commits: GitHub Actions cannot start (billing/spending limit). Latest CI attempt: run 40731687008 (`workflow_dispatch` on `8b09e7e`, 2026-10-28T17:01Z) concluded `failure` after 2 s with `runner_id` 0 and 0 steps; the job annotation reads: "The job was not started because recent account payments have failed or your spending limit needs to be increased." It is the billing block again, not a test failure, and only the repository owner can fix it (GitHub Billing & plans: payment method or spending limit). `last_ci_verified_commit` in `RESUME_STATE.json` is untouched. Everything below is LOCAL evidence.
 - Code changes in the implementation commit: shared social-platform URLs no longer produce domain seeds (`cascade/extractors.py`); timed-out adapter containers are named `aletheia-run-<hex>` and force-removed (`core/execution.py`); `ProxySession.start()` clears stale proxy resources (`core/egress.py`); opt-in `--continue-on-error` for `investigate` and `resume` (fail-stop stays the default); the egress scenario certificate is generated inside Docker; `docs/SOURCE_COMPLETENESS.md` section F; new and extended tests, none skipped, deleted or weakened.
 
 Local raw evidence lines, copied from `E:\aletheia-readiness-evidence`:
@@ -28,9 +28,19 @@ Local evidence for the follow-ups (NOT CI), raw lines from `E:\aletheia-readines
 
 Docker: the five `aletheia-readiness-*` containers were removed with `docker rm` (no volumes pruned, no prune or reset); `aletheia/instaloader:4.15.3` was rebuilt with the legacy builder (image `a18a92236564`; the previous image is kept as `aletheia/instaloader:pre-failfast-2026-10-27`, `469a497de4ed`); `--health` printed `ok`. Docker Desktop was started this session and is left running.
 
-Open items: 0 `verified-live` adapters. Instagram currently answers unauthenticated lookups with HTTP 429, so instaloader will be a recorded skip until an authorized authenticated path is chosen (not implemented; it would need credentials). CI cannot run (Actions spending limit). Other batch adapters' skip and error records were not re-audited for entity type. `C:` has about 6.7 GB free. `.superpowers/` and `docs/superpowers/` are untracked planning scratch and were deliberately not committed.
+Marker types for 12 batch adapters, 2026-10-28 (commit `073052ea11bbe34945ee8f99a8e6e603cad34bf7`): `<source>:skipped` and `<source>:error` markers are `EntityType.UNKNOWN`; real records keep their domain type (academic_search, code_search, corporate_registry, crypto_blockchain, email_auth, geolocation_image, government_records_us, patents_trademarks, sanctions_enforcement_watchlists, search_engines, ssl_tls, transport_asset_registry). The one-line change in each adapter was found uncommitted in this worktree (written 20:03 by a concurrent session; the OpenAI Codex app was running). It was reviewed, completed and verified here: new `tests/test_skip_record_entity_types.py` (36 cases); 11 existing parse tests now assert UNKNOWN for markers and the exact domain type for everything else (same strictness, none skipped, deleted or loosened); a latent `NameError` in `GeoEvidenceFinding`'s fallback provenance (undefined `source_url`) was fixed. Descriptors are intentionally unchanged: `cascade/routing.py` builds its graph from `descriptor.output_types` and existing tests pin those lists exactly.
 
-Next action: when Actions is available, run Docker Verification on the branch head and copy lines from the downloaded artifact before changing any CI status. Do not claim 100% completion.
+Local evidence (NOT CI), raw lines from `E:\aletheia-readiness-evidence`:
+
+- `pytest-markers-no-docker.log`: `1210 passed, 5 skipped, 11 warnings in 12.56s` (`tests/test_docker_integration.py` excluded; storage-service tests skipped; SHA-256 3A57A3A29E23B0F7C028F55EB8EAE32C54978E6CFE8BA102FB1D9FD19A3E8F5A).
+- `pytest-markers-no-docker-run1-transient-failure.log`: `1 failed, 1209 passed, 5 skipped, 10 warnings in 13.09s`; the failure was `test_bron_vault_selftest_exercises_loopback_stub` (code not touched here), seen while Docker Desktop was shutting down; it then passed 6/6 in isolation and the selftest reported `ok`, and the full rerun above is clean.
+- `parser-preflight-markers.log`: `PARSER PREFLIGHT: PASS — 63/63 adapters have parser coverage` (SHA-256 158FE589098CC8FD4298510EB1A32F0C7FC167A5C95D288872444BF56D08F177).
+
+Docker Desktop was stopped again (`docker desktop stop`) because Windows commit headroom fell to 2.2 GB while it started; `tests/test_docker_integration.py` has not been re-run since `44076be` (last Docker-inclusive full run: `1247 passed, 5 skipped in 541.97s (0:09:01)`).
+
+Open items: 0 `verified-live` adapters. Instagram currently answers unauthenticated lookups with HTTP 429, so instaloader will be a recorded skip until an authorized authenticated path is chosen (not implemented; it would need credentials). CI cannot run until the owner fixes GitHub billing. `tests/test_docker_integration.py` needs a re-run when memory allows. `C:` has about 6.7 GB free. `.superpowers/` and `docs/superpowers/` are untracked planning scratch and were deliberately not committed.
+
+Next action: the repository owner fixes GitHub Billing & plans; then dispatch `Aletheia Docker Verification` on the head of `codex/readiness-3-6`, download its artifact and copy its lines before changing any CI field. Re-run `tests/test_docker_integration.py` locally when memory allows. Do not claim 100% completion.
 
 
 ## Prior session state (2026-10-24) — superseded by the section above where they differ
